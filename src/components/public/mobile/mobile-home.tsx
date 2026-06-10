@@ -8,8 +8,8 @@ import { HeroSearch } from "../hero-search";
 import { DestinationCard } from "../destination-card";
 import { MobileResidenceCard, MobilePackCard } from "./mobile-cards";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { cn, initials } from "@/lib/utils";
-import type { ResidenceCardData } from "@/lib/queries";
+import { cn, initials, slugify } from "@/lib/utils";
+import { getResidencesByCity, type ResidenceCardData } from "@/lib/queries";
 
 type Destination = React.ComponentProps<typeof DestinationCard>["destination"];
 type Pack = React.ComponentProps<typeof MobilePackCard>["pack"];
@@ -31,9 +31,9 @@ interface MobileHomeProps {
 }
 
 const TABS = [
-  { label: "Residences", href: "/residences", icon: HomeIcon },
-  { label: "Packs", href: "/packs", icon: Compass, badge: "Populaire" },
-  { label: "Business", href: "/business", icon: Briefcase },
+  { label: "Residences", href: "/residences", icon: HomeIcon, color: "text-brand-600" },
+  { label: "Packs", href: "/packs", icon: Compass, color: "text-gold-600", badge: "Populaire" },
+  { label: "Business", href: "/business", icon: Briefcase, color: "text-info" },
 ];
 
 const TRUST = [
@@ -58,7 +58,8 @@ function SectionHead({ title, subtitle, href }: { title: string; subtitle?: stri
   );
 }
 
-export function MobileHome({ residences, destinations, packs, reviews, stats, favorites }: MobileHomeProps) {
+export async function MobileHome({ residences, destinations, packs, reviews, stats, favorites }: MobileHomeProps) {
+  const cityGroups = (await getResidencesByCity(3, 8)).filter((g) => g.residences.length > 0);
   return (
     <div className="md:hidden">
       {/* Recherche collante facon application */}
@@ -80,7 +81,7 @@ export function MobileHome({ residences, destinations, packs, reviews, stats, fa
               )}
             >
               <span className="relative">
-                <t.icon className={cn("h-[26px] w-[26px]", active ? "text-brand-600" : "text-muted")} strokeWidth={1.6} />
+                <t.icon className={cn("h-[26px] w-[26px]", t.color)} strokeWidth={1.7} />
                 {t.badge && (
                   <span className="absolute -right-5 -top-1.5 rounded-md bg-brand-600 px-1 py-px text-[8px] font-bold uppercase tracking-wide text-white shadow-soft">
                     {t.badge}
@@ -94,19 +95,36 @@ export function MobileHome({ residences, destinations, packs, reviews, stats, fa
         })}
       </div>
 
-      {/* Residences populaires */}
-      {residences.length > 0 && (
-        <section className="pt-5">
-          <SectionHead title="Residences populaires" subtitle="Les mieux notees, verifiees KoraStay" href="/residences" />
-          <div className="no-scrollbar -mx-0 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1">
-            {residences.map((r, i) => (
-              <div key={r.id} className="w-[64vw] max-w-[255px] shrink-0 snap-start">
-                <MobileResidenceCard residence={r} favorited={favorites.residences.has(r.id)} priority={i < 2} />
+      {/* Residences regroupees par ville (facon Airbnb mobile) */}
+      {cityGroups.length > 0
+        ? cityGroups.map((group, gi) => (
+            <section key={group.city} className={gi === 0 ? "pt-5" : "pt-7"}>
+              <SectionHead
+                title={`Residences a ${group.city}`}
+                subtitle={`${group.count} logement${group.count > 1 ? "s" : ""} verifie${group.count > 1 ? "s" : ""}`}
+                href={`/residences?city=${slugify(group.city)}`}
+              />
+              <div className="no-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1">
+                {group.residences.map((r, i) => (
+                  <div key={r.id} className="w-[64vw] max-w-[255px] shrink-0 snap-start">
+                    <MobileResidenceCard residence={r} favorited={favorites.residences.has(r.id)} priority={gi === 0 && i < 2} />
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </section>
-      )}
+            </section>
+          ))
+        : residences.length > 0 && (
+            <section className="pt-5">
+              <SectionHead title="Residences populaires" subtitle="Les mieux notees, verifiees KoraStay" href="/residences" />
+              <div className="no-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1">
+                {residences.map((r, i) => (
+                  <div key={r.id} className="w-[64vw] max-w-[255px] shrink-0 snap-start">
+                    <MobileResidenceCard residence={r} favorited={favorites.residences.has(r.id)} priority={i < 2} />
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
       {/* Destinations */}
       {destinations.length > 0 && (

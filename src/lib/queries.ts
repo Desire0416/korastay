@@ -40,6 +40,29 @@ export async function getFeaturedResidences(limit = 6) {
   });
 }
 
+// Residences regroupees par ville (sections facon "Logements a {ville}" Airbnb mobile).
+export async function getResidencesByCity(maxCities = 3, perCity = 8) {
+  const grouped = await prisma.residence.groupBy({
+    by: ["city"],
+    where: { status: "PUBLISHED" },
+    _count: { city: true },
+    orderBy: { _count: { city: "desc" } },
+    take: maxCities,
+  });
+  return Promise.all(
+    grouped.map(async (g) => ({
+      city: g.city,
+      count: g._count.city,
+      residences: await prisma.residence.findMany({
+        where: { status: "PUBLISHED", city: g.city },
+        select: residenceCardSelect,
+        orderBy: [{ ratingAverage: "desc" }, { ratingCount: "desc" }],
+        take: perCity,
+      }),
+    }))
+  );
+}
+
 export interface ResidenceFilters {
   city?: string;
   type?: string;
