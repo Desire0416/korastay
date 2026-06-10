@@ -27,15 +27,15 @@ export function KpiCard({ label, value, icon: Icon, hint, trend, tone = "brand",
 
   const content = (
     <>
-      <div className="flex items-start justify-between">
-        <p className="text-sm font-medium text-muted">{label}</p>
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-[13px] font-medium text-muted md:text-sm">{label}</p>
         {Icon && (
-          <span className={cn("flex h-10 w-10 items-center justify-center rounded-2xl transition-transform", TONES[tone], interactive && "group-hover:scale-105")}>
-            <Icon className="h-5 w-5" />
+          <span className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-transform md:h-10 md:w-10 md:rounded-2xl", TONES[tone], interactive && "group-hover:scale-105")}>
+            <Icon className="h-[18px] w-[18px] md:h-5 md:w-5" />
           </span>
         )}
       </div>
-      <p className="mt-3 font-display text-3xl font-semibold tracking-tight text-foreground">{value}</p>
+      <p className="mt-2 font-display text-[26px] font-semibold leading-none tracking-tight text-foreground md:mt-3 md:text-3xl md:leading-tight">{value}</p>
       <div className="mt-1 flex items-center gap-2">
         {trend && (
           <span className={cn("flex items-center gap-0.5 text-xs font-semibold", trend.up ? "text-success" : "text-danger")}>
@@ -51,7 +51,7 @@ export function KpiCard({ label, value, icon: Icon, hint, trend, tone = "brand",
     </>
   );
 
-  const base = "relative rounded-3xl border border-border bg-surface p-5 shadow-soft";
+  const base = "relative rounded-3xl border border-border bg-surface p-4 shadow-soft md:p-5";
 
   if (href) {
     return (

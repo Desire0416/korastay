@@ -68,7 +68,25 @@ export default async function AdminReservationsPage({ searchParams }: { searchPa
       {reservations.length === 0 ? (
         <EmptyState icon={CalendarCheck} title="Aucune reservation" description="Aucun resultat pour ces criteres." />
       ) : (
-      <div className="overflow-hidden rounded-3xl border border-border bg-surface shadow-soft">
+      <>
+      {/* Mobile : liste de cartes */}
+      <div className="space-y-2.5 md:hidden">
+        {reservations.map((r) => (
+          <Link key={r.id} href={`/admin/reservations/${r.id}`} className="block rounded-2xl border border-border bg-surface p-3.5 shadow-soft active:bg-surface-soft">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[13px] font-semibold text-brand-600">{r.reference}</span>
+              <StatusBadge status={r.status} map={reservationStatusMeta} size="sm" />
+            </div>
+            <p className="mt-1 truncate text-[14px] font-medium text-foreground">{r.residence?.name ?? r.pack?.name}</p>
+            <div className="mt-1 flex items-center justify-between gap-2 text-[12px] text-muted">
+              <span className="truncate">{r.traveler.firstName} {r.traveler.lastName} · {formatDateShort(r.startDate)}</span>
+              <span className="shrink-0 font-bold text-foreground">{formatPrice(r.totalAmount)}</span>
+            </div>
+          </Link>
+        ))}
+      </div>
+      {/* Desktop : tableau */}
+      <div className="hidden overflow-hidden rounded-3xl border border-border bg-surface shadow-soft md:block">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[700px] text-sm">
             <thead className="border-b border-border bg-surface-soft/50 text-left text-xs uppercase text-muted">
@@ -96,6 +114,7 @@ export default async function AdminReservationsPage({ searchParams }: { searchPa
           </table>
         </div>
       </div>
+      </>
       )}
     </div>
   );

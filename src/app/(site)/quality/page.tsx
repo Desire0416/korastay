@@ -37,7 +37,7 @@ export default function QualityPage() {
           <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-sm font-semibold text-brand-700">
             <ShieldCheck className="h-3.5 w-3.5" /> Charte qualite
           </span>
-          <h1 className="mx-auto mt-5 max-w-2xl font-display text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
+          <h1 className="mx-auto mt-5 max-w-2xl font-display text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">
             La confiance, verifiee a chaque sejour
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-muted">

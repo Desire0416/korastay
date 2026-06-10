@@ -58,24 +58,29 @@ export function MobileNavSheet({ user, locale, dict }: { user: SessionUser | nul
       </SheetTrigger>
       <SheetContent side="right" className="flex flex-col p-0">
         <SheetTitle className="sr-only">Menu de navigation</SheetTitle>
-        <div className="border-b border-border p-5">
+        <div className="border-b border-border px-4 py-3.5">
           <Logo />
         </div>
 
-        <div className="flex-1 overflow-y-auto p-3">
+        <div className="flex-1 overflow-y-auto p-2.5">
           {user && (
-            <div className="mb-3 flex items-center gap-3 rounded-2xl bg-surface-soft p-3">
-              <Avatar className="h-11 w-11">
+            <Link
+              href={isAdmin ? "/admin" : roleNav ? roleNav[0].href : "/account"}
+              onClick={() => setOpen(false)}
+              className="mb-2 flex items-center gap-2.5 rounded-2xl bg-surface-soft p-2.5 transition-colors active:bg-border"
+            >
+              <Avatar className="h-9 w-9">
                 {user.avatarUrl && <AvatarImage src={user.avatarUrl} alt="" />}
-                <AvatarFallback>{initials(user.firstName, user.lastName)}</AvatarFallback>
+                <AvatarFallback className="text-xs">{initials(user.firstName, user.lastName)}</AvatarFallback>
               </Avatar>
-              <div className="min-w-0">
-                <p className="truncate font-bold text-foreground">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[14px] font-semibold text-foreground">
                   {user.firstName} {user.lastName}
                 </p>
-                <p className="truncate text-xs text-muted">{user.email}</p>
+                <p className="truncate text-[11px] text-muted">{user.email}</p>
               </div>
-            </div>
+              <ChevronRight className="h-4 w-4 shrink-0 text-muted" />
+            </Link>
           )}
 
           <nav className="space-y-0.5">
@@ -83,7 +88,7 @@ export function MobileNavSheet({ user, locale, dict }: { user: SessionUser | nul
               <SheetClose key={item.href} asChild>
                 <Link
                   href={item.href}
-                  className="flex items-center justify-between rounded-2xl px-3 py-3 text-[15px] font-semibold text-foreground transition-colors hover:bg-surface-soft"
+                  className="flex items-center justify-between rounded-xl px-3 py-2.5 text-[14px] font-semibold text-foreground transition-colors hover:bg-surface-soft"
                 >
                   {navLabel(dict, item.href, item.label)}
                   <ChevronRight className="h-4 w-4 text-muted" />
@@ -108,7 +113,7 @@ export function MobileNavSheet({ user, locale, dict }: { user: SessionUser | nul
                       <SheetClose key={item.href} asChild>
                         <Link
                           href={item.href}
-                          className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-[15px] font-medium text-foreground transition-colors hover:bg-surface-soft"
+                          className="flex items-center gap-3 rounded-xl px-3 py-2 text-[14px] font-medium text-foreground transition-colors hover:bg-surface-soft"
                         >
                           <Icon name={item.icon} className="h-4 w-4 text-muted" />
                           {item.label}
@@ -132,7 +137,7 @@ export function MobileNavSheet({ user, locale, dict }: { user: SessionUser | nul
                   <SheetClose key={item.href} asChild>
                     <Link
                       href={item.href}
-                      className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-[15px] font-medium text-foreground transition-colors hover:bg-surface-soft"
+                      className="flex items-center gap-3 rounded-xl px-3 py-2 text-[14px] font-medium text-foreground transition-colors hover:bg-surface-soft"
                     >
                       <Icon name={item.icon} className="h-4 w-4 text-muted" />
                       {item.label}

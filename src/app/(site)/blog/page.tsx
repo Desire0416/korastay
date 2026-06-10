@@ -16,11 +16,11 @@ export default async function BlogPage() {
   return (
     <div>
       <section className="gradient-hero">
-        <div className="container-page py-12 text-center md:py-16">
+        <div className="container-page py-9 text-center md:py-16">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-sm font-semibold text-brand-700">
             <Newspaper className="h-3.5 w-3.5" /> Le blog KoraStay
           </span>
-          <h1 className="mx-auto mt-5 max-w-2xl font-display text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
+          <h1 className="mx-auto mt-5 max-w-2xl font-display text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">
             Inspirations & conseils de voyage
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-muted">

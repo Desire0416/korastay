@@ -63,7 +63,22 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
       {users.length === 0 ? (
         <EmptyState icon={Users} title="Aucun utilisateur" description="Aucun resultat pour ces criteres." />
       ) : (
-      <div className="overflow-hidden rounded-3xl border border-border bg-surface shadow-soft">
+      <>
+      {/* Mobile : liste de cartes */}
+      <div className="space-y-2.5 md:hidden">
+        {users.map((u) => (
+          <Link key={u.id} href={`/admin/users/${u.id}`} className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-3 shadow-soft active:bg-surface-soft">
+            <Avatar className="h-10 w-10 shrink-0"><AvatarFallback className="text-xs">{initials(u.firstName, u.lastName)}</AvatarFallback></Avatar>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[14px] font-semibold text-foreground">{u.firstName} {u.lastName}</p>
+              <p className="truncate text-[12px] text-muted">{u.email}</p>
+            </div>
+            <Badge tone={userRoleMeta[u.role]?.tone}>{userRoleMeta[u.role]?.label}</Badge>
+          </Link>
+        ))}
+      </div>
+      {/* Desktop : tableau */}
+      <div className="hidden overflow-hidden rounded-3xl border border-border bg-surface shadow-soft md:block">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[600px] text-sm">
             <thead className="border-b border-border bg-surface-soft/50 text-left text-xs uppercase text-muted">
@@ -95,6 +110,7 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
           </table>
         </div>
       </div>
+      </>
       )}
     </div>
   );
