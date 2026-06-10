@@ -1,0 +1,204 @@
+"use client";
+
+import * as React from "react";
+import Link from "next/link";
+import { Menu, ChevronRight, LogOut, Shield } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetTitle,
+  SheetClose,
+} from "@/components/ui/sheet";
+import { Logo } from "@/components/brand/logo";
+import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
+import {
+  PUBLIC_NAV,
+  ACCOUNT_NAV,
+  OWNER_NAV,
+  PARTNER_NAV,
+  BUSINESS_NAV,
+  ADMIN_NAV,
+} from "@/lib/navigation";
+import { logoutAction } from "@/server/actions/auth";
+import { setLocale } from "@/server/actions/i18n";
+import { initials, cn } from "@/lib/utils";
+import { navLabel, LOCALES, LOCALE_LABELS, type Locale, type Dictionary } from "@/lib/i18n";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import type { SessionUser } from "@/lib/auth";
+
+const ROLE_NAV: Record<string, typeof ACCOUNT_NAV> = {
+  TRAVELER: ACCOUNT_NAV,
+  OWNER: OWNER_NAV,
+  PARTNER: PARTNER_NAV,
+  BUSINESS: BUSINESS_NAV,
+};
+
+export function MobileNavSheet({ user, locale, dict }: { user: SessionUser | null; locale: Locale; dict: Dictionary }) {
+  const [open, setOpen] = React.useState(false);
+  const [, startLang] = React.useTransition();
+  const roleNav = user ? ROLE_NAV[user.role] : null;
+  const isAdmin = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
+
+  function chooseLang(next: Locale) {
+    if (next === locale) return;
+    startLang(async () => { await setLocale(next); });
+  }
+
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <button
+          aria-label="Ouvrir le menu"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-surface text-foreground shadow-soft md:hidden"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+      </SheetTrigger>
+      <SheetContent side="right" className="flex flex-col p-0">
+        <SheetTitle className="sr-only">Menu de navigation</SheetTitle>
+        <div className="border-b border-border p-5">
+          <Logo />
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-3">
+          {user && (
+            <div className="mb-3 flex items-center gap-3 rounded-2xl bg-surface-soft p-3">
+              <Avatar className="h-11 w-11">
+                {user.avatarUrl && <AvatarImage src={user.avatarUrl} alt="" />}
+                <AvatarFallback>{initials(user.firstName, user.lastName)}</AvatarFallback>
+              </Avatar>
+              <div className="min-w-0">
+                <p className="truncate font-bold text-foreground">
+                  {user.firstName} {user.lastName}
+                </p>
+                <p className="truncate text-xs text-muted">{user.email}</p>
+              </div>
+            </div>
+          )}
+
+          <nav className="space-y-0.5">
+            {PUBLIC_NAV.map((item) => (
+              <SheetClose key={item.href} asChild>
+                <Link
+                  href={item.href}
+                  className="flex items-center justify-between rounded-2xl px-3 py-3 text-[15px] font-semibold text-foreground transition-colors hover:bg-surface-soft"
+                >
+                  {navLabel(dict, item.href, item.label)}
+                  <ChevronRight className="h-4 w-4 text-muted" />
+                </Link>
+              </SheetClose>
+            ))}
+          </nav>
+
+          {/* Espace administrateur : menu de gestion complet (groupe) */}
+          {isAdmin && (
+            <>
+              <p className="flex items-center gap-1.5 px-3 pb-1 pt-4 text-xs font-bold uppercase tracking-wide text-danger">
+                <Shield className="h-3.5 w-3.5" /> Administration
+              </p>
+              {ADMIN_NAV.map((group) => (
+                <div key={group.group} className="mt-2">
+                  <p className="px-3 pb-1 text-2xs font-bold uppercase tracking-wider text-muted">
+                    {group.group}
+                  </p>
+                  <nav className="space-y-0.5">
+                    {group.items.map((item) => (
+                      <SheetClose key={item.href} asChild>
+                        <Link
+                          href={item.href}
+                          className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-[15px] font-medium text-foreground transition-colors hover:bg-surface-soft"
+                        >
+                          <Icon name={item.icon} className="h-4 w-4 text-muted" />
+                          {item.label}
+                        </Link>
+                      </SheetClose>
+                    ))}
+                  </nav>
+                </div>
+              ))}
+            </>
+          )}
+
+          {/* Autres roles connectes : leur espace dedie */}
+          {!isAdmin && roleNav && (
+            <>
+              <p className="px-3 pb-1 pt-4 text-xs font-bold uppercase tracking-wide text-muted">
+                Mon espace
+              </p>
+              <nav className="space-y-0.5">
+                {roleNav.map((item) => (
+                  <SheetClose key={item.href} asChild>
+                    <Link
+                      href={item.href}
+                      className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-[15px] font-medium text-foreground transition-colors hover:bg-surface-soft"
+                    >
+                      <Icon name={item.icon} className="h-4 w-4 text-muted" />
+                      {item.label}
+                    </Link>
+                  </SheetClose>
+                ))}
+              </nav>
+            </>
+          )}
+        </div>
+
+        <div className="border-t border-border p-4">
+          {/* Selecteur de langue */}
+          <div className="mb-3 flex items-center gap-1 rounded-2xl bg-surface-soft p-1">
+            {LOCALES.map((l) => (
+              <button
+                key={l}
+                onClick={() => chooseLang(l)}
+                className={cn(
+                  "flex-1 rounded-xl py-2 text-sm font-semibold transition-colors",
+                  l === locale ? "bg-surface text-foreground shadow-soft" : "text-muted hover:text-foreground"
+                )}
+              >
+                {LOCALE_LABELS[l]}
+              </button>
+            ))}
+          </div>
+
+          {user ? (
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                setOpen(false);
+                React.startTransition(() => {
+                  void logoutAction();
+                });
+              }}
+            >
+              <LogOut className="h-4 w-4" />
+              {dict.header.logout}
+            </Button>
+          ) : (
+            <div className="grid grid-cols-2 gap-2">
+              <SheetClose asChild>
+                <Button asChild variant="outline">
+                  <Link href="/login">{dict.header.login}</Link>
+                </Button>
+              </SheetClose>
+              <SheetClose asChild>
+                <Button asChild>
+                  <Link href="/register">{dict.header.register}</Link>
+                </Button>
+              </SheetClose>
+            </div>
+          )}
+          <SheetClose asChild>
+            <Link
+              href="/devenir-proprietaire"
+              className="mt-3 block text-center text-sm font-semibold text-brand-600"
+            >
+              {dict.header.becomeHost} &rarr;
+            </Link>
+          </SheetClose>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}

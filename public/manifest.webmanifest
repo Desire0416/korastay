@@ -1,0 +1,19 @@
+{
+  "name": "KoraStay",
+  "short_name": "KoraStay",
+  "description": "Reservez des residences verifiees et vivez des sejours d'exception en Afrique de l'Ouest.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F8F5EF",
+  "theme_color": "#0F6B4F",
+  "lang": "fr",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

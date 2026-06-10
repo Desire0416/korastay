@@ -1,0 +1,34 @@
+import { requireRole } from "@/lib/auth";
+import { getSettingsMap } from "@/lib/settings";
+import { isMockPayments } from "@/lib/payments";
+import { PageHeader } from "@/components/dashboard/page-header";
+import { SettingsForm } from "@/components/dashboard/settings-form";
+import { Badge } from "@/components/ui/badge";
+
+export const metadata = { title: "Parametres - Admin" };
+
+export default async function AdminSettingsPage() {
+  await requireRole(["ADMIN", "SUPER_ADMIN"]);
+  const settings = await getSettingsMap();
+  const feePercent = Math.round(parseFloat(settings.service_fee_rate) * 1000) / 10;
+
+  return (
+    <div className="mx-auto max-w-3xl">
+      <PageHeader title="Parametres" description="Configuration de la plateforme." />
+
+      <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-surface-soft/50 p-4 text-sm">
+        <span className="font-semibold text-foreground">Etat technique :</span>
+        <Badge tone={isMockPayments() ? "warning" : "success"}>Paiement : {isMockPayments() ? "mode demo (mock)" : process.env.PAYMENT_PROVIDER}</Badge>
+        <Badge tone={process.env.RESEND_API_KEY ? "success" : "warning"}>Email : {process.env.RESEND_API_KEY ? "actif" : "console (dev)"}</Badge>
+        <Badge tone="neutral">Upload : {process.env.UPLOAD_PROVIDER ?? "local"}</Badge>
+      </div>
+
+      <SettingsForm
+        feePercent={Number.isFinite(feePercent) ? feePercent : 7}
+        contactEmail={settings.contact_email}
+        contactPhone={settings.contact_phone}
+        announcement={settings.announcement}
+      />
+    </div>
+  );
+}

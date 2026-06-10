@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "Bash(git --version)",
+      "Bash(docker --version)",
+      "Bash(psql --version)",
+      "Bash(pg_ctl --version)",
+      "Bash(winget install *)",
+      "Bash(echo \"WINGET_EXIT=$?\")",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code} in %{time_total}s\\\\n\" --max-time 90 http://localhost:3000/)",
+      "Bash(curl -s --max-time 60 http://localhost:3000/)",
+      "Bash(curl -s -o /dev/null -w \"status=%{http_code} redirect=%{redirect_url}\\\\n\" \"http://localhost:3000/account\")",
+      "Bash(curl -s -o /dev/null -w \"home status=%{http_code}\\\\n\" \"http://localhost:3000/\")",
+      "Bash(curl -s -o /dev/null -w \"login page status=%{http_code}\\\\n\" \"http://localhost:3000/login\")",
+      "Bash(curl -s -o /dev/null -w \"packs status=%{http_code}\\\\n\" \"http://localhost:3000/packs\")",
+      "Bash(curl -s -o /dev/null -w \"business status=%{http_code}\\\\n\" \"http://localhost:3000/business\")",
+      "Bash(curl -s -o /dev/null -w \"status=%{http_code} redirect=%{redirect_url}\\\\n\" --max-time 8 \"http://localhost:3000/account\")"
+    ]
+  }
+}

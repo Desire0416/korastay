@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hors ligne - KoraStay</title>
+  <style>
+    :root { --brand: #0F6B4F; --gold: #F2A23A; --ink: #12343B; --cream: #F8F5EF; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--cream); color: var(--ink); min-height: 100dvh;
+      display: flex; align-items: center; justify-content: center; padding: 24px;
+    }
+    .card {
+      max-width: 420px; width: 100%; text-align: center;
+      background: #fff; border: 1px solid #ece7dd; border-radius: 28px;
+      padding: 40px 28px; box-shadow: 0 12px 40px rgba(18, 52, 59, 0.08);
+    }
+    .logo {
+      width: 64px; height: 64px; border-radius: 18px; margin: 0 auto 20px;
+      background: var(--brand); display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 30px; font-weight: 800;
+    }
+    h1 { font-size: 22px; margin-bottom: 10px; }
+    p { color: #5b6b6e; line-height: 1.6; font-size: 15px; margin-bottom: 24px; }
+    button {
+      background: var(--brand); color: #fff; border: 0; cursor: pointer;
+      font-size: 15px; font-weight: 600; padding: 13px 28px; border-radius: 999px;
+      transition: background .2s;
+    }
+    button:hover { background: #0c5740; }
+    .hint { margin-top: 18px; font-size: 13px; color: #9aa5a7; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">K</div>
+    <h1>Vous etes hors ligne</h1>
+    <p>Impossible de joindre KoraStay pour le moment. Verifiez votre connexion internet&nbsp;: vos pages deja consultees restent accessibles.</p>
+    <button onclick="location.reload()">Reessayer</button>
+    <div class="hint">KoraStay - Sejours verifies en Afrique de l'Ouest</div>
+  </div>
+  <script>
+    // Recharge automatiquement des que la connexion revient.
+    window.addEventListener("online", function () { location.reload(); });
+  </script>
+</body>
+</html>

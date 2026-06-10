@@ -1,0 +1,778 @@
+// ============================================================
+// KoraStay - Schema Prisma
+// ------------------------------------------------------------
+// Base : SQLite en developpement (zero configuration).
+// Portabilite : pour passer a PostgreSQL/Neon, remplacer
+//   provider = "sqlite" par provider = "postgresql" et
+//   convertir les champs de statut (String) en enums natifs.
+//
+// Conventions SQLite :
+//   - Pas d'enums natifs  -> String + constantes typees (src/lib/enums.ts)
+//   - Pas de type Json    -> String contenant du JSON serialise
+//   - Montants en F CFA    -> Int (le XOF n'a pas de sous-unite decimale)
+//   - Listes (langues...)  -> String contenant un tableau JSON
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ------------------------------------------------------------
+// Utilisateurs & authentification
+// ------------------------------------------------------------
+
+model User {
+  id              String    @id @default(cuid())
+  firstName       String
+  lastName        String
+  email           String    @unique
+  phone           String?
+  passwordHash    String
+  role            String    @default("TRAVELER") // UserRole
+  status          String    @default("PENDING_EMAIL_VERIFICATION") // AccountStatus
+  emailVerifiedAt DateTime?
+  avatarUrl       String?
+  bio             String?
+  city            String?
+  country         String?   @default("Cote d'Ivoire")
+  lastLoginAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  sessions               Session[]
+  emailTokens            EmailVerificationToken[]
+  passwordResetTokens    PasswordResetToken[]
+  reservations           Reservation[]
+  residences             Residence[]
+  partnerProfile         PartnerProfile?
+  businessMemberships    BusinessMember[]
+  favorites              Favorite[]
+  reviews                Review[]
+  messages               Message[]
+  notifications          Notification[]
+  conversationParticipations ConversationParticipant[]
+  auditLogs              AuditLog[]
+  processedRefunds       Refund[]
+  availabilityBlocks     ResidenceAvailabilityBlock[]
+  blogPosts              BlogPost[]
+
+  @@index([role])
+  @@index([status])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userAgent String?
+  ipAddress String?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model EmailVerificationToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+// ------------------------------------------------------------
+// Destinations / villes
+// ------------------------------------------------------------
+
+model Destination {
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  country      String   @default("Cote d'Ivoire")
+  region       String?
+  description  String?
+  heroImageUrl String?
+  isActive     Boolean  @default(true)
+  priority     Int      @default(0)
+  latitude     Float?
+  longitude    Float?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  residences Residence[]
+  packs      Pack[]
+
+  @@index([slug])
+  @@index([isActive])
+}
+
+// ------------------------------------------------------------
+// Residences
+// ------------------------------------------------------------
+
+model Residence {
+  id                     String    @id @default(cuid())
+  ownerId                String
+  owner                  User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  cityId                 String?
+  destination            Destination? @relation(fields: [cityId], references: [id])
+  slug                   String    @unique
+  name                   String
+  type                   String    @default("STUDIO") // ResidenceType
+  shortDescription       String?
+  description            String
+  country                String    @default("Cote d'Ivoire")
+  city                   String
+  district               String?
+  address                String?
+  latitude               Float?
+  longitude              Float?
+  capacity               Int       @default(2)
+  bedrooms               Int       @default(1)
+  beds                   Int       @default(1)
+  bathrooms              Int       @default(1)
+  surfaceArea            Int?
+  pricePerNight          Int
+  weekendPrice           Int?
+  weeklyPrice            Int?
+  monthlyPrice           Int?
+  cleaningFee            Int       @default(0)
+  depositAmount          Int       @default(0)
+  currency               String    @default("XOF")
+  status                 String    @default("DRAFT") // ResidenceStatus
+  verificationStatus     String    @default("DRAFT") // VerificationStatus
+  qualityLevel           String?   // QualityLevel
+  isVerified             Boolean   @default(false)
+  badgeLabel             String?
+  checkInTime            String    @default("14:00")
+  checkOutTime           String    @default("11:00")
+  houseRules             String?
+  cancellationPolicyType String    @default("STANDARD")
+  ratingAverage          Float     @default(0)
+  ratingCount            Int       @default(0)
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+  publishedAt            DateTime?
+
+  images             ResidenceImage[]
+  amenities          ResidenceAmenity[]
+  availabilityBlocks ResidenceAvailabilityBlock[]
+  reservations       Reservation[]
+  favorites          Favorite[]
+  reviews            Review[]
+
+  @@index([cityId])
+  @@index([status])
+  @@index([slug])
+  @@index([ownerId])
+}
+
+model ResidenceImage {
+  id          String    @id @default(cuid())
+  residenceId String
+  residence   Residence @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  url         String
+  altText     String?
+  sortOrder   Int       @default(0)
+  isCover     Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+
+  @@index([residenceId])
+}
+
+model Amenity {
+  id       String  @id @default(cuid())
+  name     String
+  slug     String  @unique
+  icon     String?
+  category String?
+  isActive Boolean @default(true)
+
+  residences ResidenceAmenity[]
+}
+
+model ResidenceAmenity {
+  id          String    @id @default(cuid())
+  residenceId String
+  residence   Residence @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  amenityId   String
+  amenity     Amenity   @relation(fields: [amenityId], references: [id], onDelete: Cascade)
+  details     String?
+
+  @@unique([residenceId, amenityId])
+  @@index([residenceId])
+}
+
+model ResidenceAvailabilityBlock {
+  id          String    @id @default(cuid())
+  residenceId String
+  residence   Residence @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  startDate   DateTime
+  endDate     DateTime
+  reason      String?
+  createdById String?
+  createdBy   User?     @relation(fields: [createdById], references: [id])
+  createdAt   DateTime  @default(now())
+
+  @@index([residenceId])
+}
+
+// ------------------------------------------------------------
+// Reservations, paiements, remboursements
+// ------------------------------------------------------------
+
+model Reservation {
+  id                String       @id @default(cuid())
+  reference         String       @unique
+  type              String       @default("RESIDENCE") // ReservationType
+  status            String       @default("DRAFT") // ReservationStatus
+  travelerId        String
+  traveler          User         @relation(fields: [travelerId], references: [id], onDelete: Cascade)
+  residenceId       String?
+  residence         Residence?   @relation(fields: [residenceId], references: [id])
+  packId            String?
+  pack              Pack?        @relation(fields: [packId], references: [id])
+  businessRequestId String?
+  businessRequest   BusinessRequest? @relation(fields: [businessRequestId], references: [id])
+  startDate         DateTime
+  endDate           DateTime
+  nights            Int          @default(1)
+  adults            Int          @default(1)
+  children          Int          @default(0)
+  guestName         String
+  guestEmail        String
+  guestPhone        String?
+  subtotalAmount    Int          @default(0)
+  serviceFeeAmount  Int          @default(0)
+  cleaningFeeAmount Int          @default(0)
+  totalAmount       Int          @default(0)
+  currency          String       @default("XOF")
+  notes             String?
+  expiresAt         DateTime?
+  confirmedAt       DateTime?
+  cancelledAt       DateTime?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  payments       Payment[]
+  refunds        Refund[]
+  review         Review?
+  conversations  Conversation[]
+  partnerMissions PartnerMission[]
+
+  @@index([travelerId])
+  @@index([residenceId])
+  @@index([packId])
+  @@index([status])
+  @@index([startDate, endDate])
+}
+
+model Payment {
+  id                String      @id @default(cuid())
+  reservationId     String
+  reservation       Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  method            String      @default("MOCK") // PaymentMethod
+  status            String      @default("PENDING") // PaymentStatus
+  amount            Int
+  currency          String      @default("XOF")
+  provider          String      @default("mock")
+  providerReference String?
+  checkoutUrl       String?
+  paidAt            DateTime?
+  failedAt          DateTime?
+  metadata          String?     // JSON serialise
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  refunds Refund[]
+
+  @@index([reservationId])
+  @@index([status])
+}
+
+model Refund {
+  id            String      @id @default(cuid())
+  paymentId     String
+  payment       Payment     @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  reservationId String
+  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  amount        Int
+  reason        String?
+  status        String      @default("PENDING") // PaymentStatus subset
+  processedById String?
+  processedBy   User?       @relation(fields: [processedById], references: [id])
+  processedAt   DateTime?
+  createdAt     DateTime    @default(now())
+
+  @@index([reservationId])
+}
+
+// ------------------------------------------------------------
+// Packs touristiques
+// ------------------------------------------------------------
+
+model Pack {
+  id                      String   @id @default(cuid())
+  destinationId           String?
+  destination             Destination? @relation(fields: [destinationId], references: [id])
+  slug                    String   @unique
+  name                    String
+  subtitle                String?
+  description             String
+  durationDays            Int      @default(2)
+  durationNights          Int      @default(1)
+  basePersons             Int      @default(2)
+  maxPersons              Int      @default(4)
+  price                   Int
+  extraPersonPrice        Int      @default(0)
+  currency                String   @default("XOF")
+  status                  String   @default("PUBLISHED") // ResidenceStatus subset
+  availabilityText        String?
+  meetingPoint            String?
+  startTime               String?
+  physicalLevel           String?
+  clothingRecommendations String?
+  documentsToBring        String?
+  includedText            String?
+  notIncludedText         String?
+  cancellationPolicy      String?
+  heroImageUrl            String?
+  ratingAverage           Float    @default(0)
+  ratingCount             Int      @default(0)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  images       PackImage[]
+  includedItems PackIncludedItem[]
+  programDays  PackProgramDay[]
+  reservations Reservation[]
+  favorites    Favorite[]
+  reviews      Review[]
+  partnerMissions PartnerMission[]
+
+  @@index([destinationId])
+  @@index([slug])
+  @@index([status])
+}
+
+model PackImage {
+  id        String  @id @default(cuid())
+  packId    String
+  pack      Pack    @relation(fields: [packId], references: [id], onDelete: Cascade)
+  url       String
+  altText   String?
+  sortOrder Int     @default(0)
+  isCover   Boolean @default(false)
+
+  @@index([packId])
+}
+
+model PackIncludedItem {
+  id        String  @id @default(cuid())
+  packId    String
+  pack      Pack    @relation(fields: [packId], references: [id], onDelete: Cascade)
+  label     String
+  details   String?
+  included  Boolean @default(true)
+  sortOrder Int     @default(0)
+
+  @@index([packId])
+}
+
+model PackProgramDay {
+  id          String  @id @default(cuid())
+  packId      String
+  pack        Pack    @relation(fields: [packId], references: [id], onDelete: Cascade)
+  dayNumber   Int
+  title       String
+  description String?
+  sortOrder   Int     @default(0)
+
+  activities PackProgramActivity[]
+
+  @@index([packId])
+}
+
+model PackProgramActivity {
+  id          String         @id @default(cuid())
+  dayId       String
+  day         PackProgramDay @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  timeLabel   String?
+  title       String
+  description String?
+  sortOrder   Int            @default(0)
+
+  @@index([dayId])
+}
+
+// ------------------------------------------------------------
+// Partenaires
+// ------------------------------------------------------------
+
+model PartnerProfile {
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type               String   @default("OTHER") // PartnerType
+  businessName       String
+  description        String?
+  city               String?
+  zonesCovered       String?  // tableau JSON
+  phone              String?
+  whatsapp           String?
+  email              String?
+  languages          String?  // tableau JSON
+  documents          String?  // JSON serialise
+  verificationStatus String   @default("PENDING_REVIEW") // VerificationStatus
+  ratingAverage      Float    @default(0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  services PartnerService[]
+  missions PartnerMission[]
+
+  @@index([type])
+  @@index([verificationStatus])
+}
+
+model PartnerService {
+  id               String   @id @default(cuid())
+  partnerProfileId String
+  partnerProfile   PartnerProfile @relation(fields: [partnerProfileId], references: [id], onDelete: Cascade)
+  title            String
+  description      String?
+  city             String?
+  priceFrom        Int?
+  currency         String   @default("XOF")
+  duration         String?
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([partnerProfileId])
+}
+
+model PartnerMission {
+  id               String   @id @default(cuid())
+  partnerProfileId String
+  partnerProfile   PartnerProfile @relation(fields: [partnerProfileId], references: [id], onDelete: Cascade)
+  reservationId    String?
+  reservation      Reservation? @relation(fields: [reservationId], references: [id])
+  packId           String?
+  pack             Pack?    @relation(fields: [packId], references: [id])
+  title            String
+  description      String?
+  city             String?
+  scheduledAt      DateTime?
+  status           String   @default("PROPOSED") // MissionStatus
+  amount           Int      @default(0)
+  currency         String   @default("XOF")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([partnerProfileId])
+  @@index([status])
+}
+
+// ------------------------------------------------------------
+// Favoris & avis
+// ------------------------------------------------------------
+
+model Favorite {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  residenceId String?
+  residence   Residence? @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  packId      String?
+  pack        Pack?    @relation(fields: [packId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, residenceId])
+  @@unique([userId, packId])
+  @@index([userId])
+}
+
+model Review {
+  id                  String      @id @default(cuid())
+  authorId            String
+  author              User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  reservationId       String?     @unique
+  reservation         Reservation? @relation(fields: [reservationId], references: [id])
+  residenceId         String?
+  residence           Residence?  @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  packId              String?
+  pack                Pack?       @relation(fields: [packId], references: [id], onDelete: Cascade)
+  rating              Int         @default(5)
+  cleanlinessRating   Int?
+  locationRating      Int?
+  valueRating         Int?
+  communicationRating Int?
+  comment             String?
+  status              String      @default("PUBLISHED") // ReviewStatus
+  ownerReply          String?
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  @@index([residenceId])
+  @@index([packId])
+  @@index([authorId])
+}
+
+// ------------------------------------------------------------
+// Business
+// ------------------------------------------------------------
+
+model BusinessAccount {
+  id               String   @id @default(cuid())
+  name             String
+  organizationType String?
+  sector           String?
+  contactName      String?
+  email            String?
+  phone            String?
+  city             String?
+  country          String?  @default("Cote d'Ivoire")
+  status           String   @default("ACTIVE")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  members  BusinessMember[]
+  requests BusinessRequest[]
+}
+
+model BusinessMember {
+  id                String   @id @default(cuid())
+  businessAccountId String
+  businessAccount   BusinessAccount @relation(fields: [businessAccountId], references: [id], onDelete: Cascade)
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role              String   @default("MEMBER")
+  createdAt         DateTime @default(now())
+
+  @@unique([businessAccountId, userId])
+}
+
+model BusinessRequest {
+  id                String   @id @default(cuid())
+  businessAccountId String?
+  businessAccount   BusinessAccount? @relation(fields: [businessAccountId], references: [id])
+  organizationName  String
+  organizationType  String?
+  sector            String?
+  contactName       String
+  email             String
+  phone             String?
+  city              String?
+  country           String?  @default("Cote d'Ivoire")
+  needType          String?
+  missionLocation   String?
+  teamSize          Int?
+  startDate         DateTime?
+  endDate           DateTime?
+  budget            Int?
+  notes             String?
+  status            String   @default("NEW") // BusinessRequestStatus
+  quoteAmount       Int?
+  quoteMessage      String?
+  quotedAt          DateTime?
+  acceptedAt        DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  reservations  Reservation[]
+  conversations Conversation[]
+
+  @@index([status])
+}
+
+// ------------------------------------------------------------
+// Reglages plateforme (cle/valeur)
+// ------------------------------------------------------------
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+// ------------------------------------------------------------
+// Pack personnalise (panier compose par le voyageur)
+// ------------------------------------------------------------
+model CustomPackRequest {
+  id             String   @id @default(cuid())
+  reference      String   @unique
+  userId         String?
+  destinationId  String?
+  cityName       String
+  contactName    String
+  email          String
+  phone          String?
+  startDate      DateTime?
+  persons        Int      @default(2)
+  notes          String?
+  estimatedTotal Int      @default(0)
+  status         String   @default("NEW") // NEW, IN_REVIEW, QUOTED, CONFIRMED, CANCELLED
+  quoteAmount    Int?
+  quoteMessage   String?
+  reservationId  String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  items CustomPackItem[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model CustomPackItem {
+  id               String @id @default(cuid())
+  requestId        String
+  request          CustomPackRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  partnerServiceId String?
+  partnerProfileId String?
+  partnerType      String?
+  label            String
+  partnerName      String?
+  priceFrom        Int    @default(0)
+
+  @@index([requestId])
+}
+
+// ------------------------------------------------------------
+// Messagerie & notifications
+// ------------------------------------------------------------
+
+model Conversation {
+  id                String   @id @default(cuid())
+  contextType       String   @default("GENERAL") // MessageContextType
+  reservationId     String?
+  reservation       Reservation? @relation(fields: [reservationId], references: [id])
+  businessRequestId String?
+  businessRequest   BusinessRequest? @relation(fields: [businessRequestId], references: [id])
+  subject           String?
+  createdById       String?
+  lastMessageAt     DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  messages     Message[]
+  participants ConversationParticipant[]
+
+  @@index([reservationId])
+  @@index([lastMessageAt])
+}
+
+model ConversationParticipant {
+  id             String   @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roleLabel      String?  // ex: "Voyageur", "Hote", "Assistance", "Guide"
+  lastReadAt     DateTime?
+  createdAt      DateTime @default(now())
+
+  @@unique([conversationId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id             String   @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  body           String
+  isInternal     Boolean  @default(false)
+  attachmentUrl  String?
+  attachmentName String?
+  attachmentType String?
+  readAt         DateTime?
+  createdAt      DateTime @default(now())
+
+  @@index([conversationId])
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  body      String?
+  type      String    @default("GENERAL")
+  url       String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([readAt])
+}
+
+// ------------------------------------------------------------
+// Contenu & audit
+// ------------------------------------------------------------
+
+model ContentPage {
+  id             String   @id @default(cuid())
+  slug           String   @unique
+  title          String
+  body           String
+  seoTitle       String?
+  seoDescription String?
+  isPublished    Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model BlogPost {
+  id            String    @id @default(cuid())
+  slug          String    @unique
+  title         String
+  excerpt       String?
+  body          String
+  coverImageUrl String?
+  authorId      String?
+  author        User?     @relation(fields: [authorId], references: [id])
+  isPublished   Boolean   @default(false)
+  publishedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actor      User?    @relation(fields: [actorId], references: [id])
+  action     String
+  entityType String?
+  entityId   String?
+  metadata   String?  // JSON serialise
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  @@index([actorId])
+  @@index([entityType])
+}
