@@ -58,7 +58,6 @@ export const FOOTER_NAV: { title: string; links: NavItem[] }[] = [
 // Onglets de la bottom navigation mobile (public / voyageur)
 export const MOBILE_TABS: NavItem[] = [
   { label: "Explorer", href: "/", icon: "Search" },
-  { label: "Packs", href: "/packs", icon: "Compass" },
   { label: "Favoris", href: "/account/favorites", icon: "Heart" },
   { label: "Sejours", href: "/account/bookings", icon: "CalendarCheck" },
   { label: "Profil", href: "/account", icon: "User" },
