@@ -94,10 +94,11 @@ export function SmartImage({
   const p = PALETTES[h % PALETTES.length];
   const variant = Math.floor(h / 7) % 4;
   const gradId = `g${h % 100000}`;
-  // Les images locales (uploads) s'affichent toujours ; les images distantes
-  // (http) sont affichees seulement si NEXT_PUBLIC_USE_REMOTE_IMAGES=true.
+  // Les uploads (chemin local /uploads ou Vercel Blob) s'affichent toujours ;
+  // les autres images distantes (http) seulement si NEXT_PUBLIC_USE_REMOTE_IMAGES=true.
   const isLocal = !!src && src.startsWith("/");
-  const showImg = !!src && (isLocal || USE_REMOTE);
+  const isBlob = !!src && src.includes(".blob.vercel-storage.com");
+  const showImg = !!src && (isLocal || isBlob || USE_REMOTE);
 
   return (
     <div className={cn("relative h-full w-full overflow-hidden bg-surface-soft", className)}>

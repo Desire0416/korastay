@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import crypto from "crypto";
+import { put } from "@vercel/blob";
 import { getCurrentUser } from "@/lib/auth";
 
 const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
@@ -42,17 +43,31 @@ export async function POST(req: NextRequest) {
 
   const ext = EXT_BY_TYPE[file.type] ?? "bin";
   const name = `${crypto.randomBytes(12).toString("hex")}.${ext}`;
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
 
+  // --- Stockage objet (Vercel Blob) si configure (production) ---
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    try {
+      const blob = await put(`uploads/${name}`, file, {
+        access: "public",
+        contentType: file.type,
+        token: process.env.BLOB_READ_WRITE_TOKEN,
+      });
+      return NextResponse.json({ url: blob.url, name: file.name, type: file.type, size: file.size });
+    } catch {
+      return NextResponse.json({ error: "Echec de l'envoi du fichier (stockage)." }, { status: 502 });
+    }
+  }
+
+  // --- Repli disque local (developpement) ---
+  const uploadDir = path.join(process.cwd(), "public", "uploads");
   try {
     await mkdir(uploadDir, { recursive: true });
     const buffer = Buffer.from(await file.arrayBuffer());
     await writeFile(path.join(uploadDir, name), buffer);
   } catch {
-    // Systeme de fichiers en lecture seule (ex: Vercel serverless).
-    // L'upload local n'est pas disponible : echec propre cote client.
+    // Systeme de fichiers en lecture seule (ex: Vercel sans Blob configure).
     return NextResponse.json(
-      { error: "Envoi de fichier indisponible sur cet hebergement. Configurez un stockage (Vercel Blob / S3)." },
+      { error: "Envoi de fichier indisponible : configurez Vercel Blob (BLOB_READ_WRITE_TOKEN)." },
       { status: 503 }
     );
   }

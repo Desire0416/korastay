@@ -16,7 +16,11 @@
       "Bash(curl -s -o /dev/null -w \"login page status=%{http_code}\\\\n\" \"http://localhost:3000/login\")",
       "Bash(curl -s -o /dev/null -w \"packs status=%{http_code}\\\\n\" \"http://localhost:3000/packs\")",
       "Bash(curl -s -o /dev/null -w \"business status=%{http_code}\\\\n\" \"http://localhost:3000/business\")",
-      "Bash(curl -s -o /dev/null -w \"status=%{http_code} redirect=%{redirect_url}\\\\n\" --max-time 8 \"http://localhost:3000/account\")"
+      "Bash(curl -s -o /dev/null -w \"status=%{http_code} redirect=%{redirect_url}\\\\n\" --max-time 8 \"http://localhost:3000/account\")",
+      "WebFetch(domain:korastay-q1632yo94-desire0416s-projects.vercel.app)",
+      "WebFetch(domain:korastay.vercel.app)",
+      "WebFetch(domain:korastay-git-main-desire0416s-projects.vercel.app)",
+      "PowerShell(Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep -Milliseconds 500; $env:PATH = \"$env:PATH;C:\\\\Program Files\\\\nodejs\"; npm install @vercel/blob 2>&1 | Select-Object -Last 12; \"EXIT=$LASTEXITCODE\")"
     ]
   }
 }
