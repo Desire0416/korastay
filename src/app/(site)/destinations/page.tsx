@@ -12,19 +12,19 @@ export default async function DestinationsPage() {
   return (
     <div>
       <section className="gradient-hero">
-        <div className="container-page py-12 text-center md:py-16">
-          <h1 className="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
+        <div className="container-page py-9 text-center md:py-16">
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">
             Nos destinations
           </h1>
-          <p className="mx-auto mt-4 max-w-xl text-muted">
+          <p className="mx-auto mt-3 max-w-xl text-sm text-muted md:text-base">
             Des montagnes de Man aux plages d'Assinie, explorez la richesse de
             l'Afrique de l'Ouest avec des sejours verifies.
           </p>
         </div>
       </section>
 
-      <div className="container-page py-10">
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+      <div className="container-page py-7 md:py-10">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-4">
           {destinations.map((d) => (
             <DestinationCard key={d.slug} destination={d} size="lg" />
           ))}

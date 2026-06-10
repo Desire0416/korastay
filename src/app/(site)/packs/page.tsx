@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { Compass, Sparkles, Wand2, ArrowRight } from "lucide-react";
+import { Sparkles, Wand2, ArrowRight } from "lucide-react";
 import { getPacks, getAllDestinations } from "@/lib/queries";
 import { getUserFavoriteIds } from "@/server/actions/favorites";
 import { PackCard } from "@/components/public/pack-card";
+import { MobilePackCard } from "@/components/public/mobile/mobile-cards";
 import { cn } from "@/lib/utils";
 
 export const metadata = {
@@ -29,14 +30,14 @@ export default async function PacksPage({ searchParams }: { searchParams: Promis
     <div>
       {/* Hero */}
       <section className="gradient-hero">
-        <div className="container-page py-12 text-center md:py-16">
+        <div className="container-page py-9 text-center md:py-16">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-gold-200 bg-gold-50 px-3 py-1 text-sm font-semibold text-gold-700">
             <Sparkles className="h-3.5 w-3.5" /> KoraStay Decouverte
           </span>
-          <h1 className="mx-auto mt-5 max-w-2xl font-display text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
+          <h1 className="mx-auto mt-4 max-w-2xl font-display text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">
             Des sejours clE en main, sans rien organiser
           </h1>
-          <p className="mx-auto mt-4 max-w-xl text-muted">
+          <p className="mx-auto mt-3 max-w-xl text-sm text-muted md:text-base">
             Hebergement verifie, transport en ville et guide local certifie : il ne vous reste qu'a profiter.
           </p>
         </div>
@@ -55,8 +56,27 @@ export default async function PacksPage({ searchParams }: { searchParams: Promis
           ))}
         </div>
 
-        {/* Grille packs */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Grille packs - mobile (compact 2 colonnes) */}
+        <div className="md:hidden">
+          <div className="grid grid-cols-2 gap-3">
+            {packs.map((p) => (
+              <MobilePackCard key={p.id} pack={p} favorited={favorites.packs.has(p.id)} />
+            ))}
+          </div>
+          <Link href="/packs/custom" className="mt-4 flex items-center gap-3 rounded-3xl border-2 border-dashed border-brand-300 bg-brand-50/40 p-4 active:scale-[0.99]">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-500 text-white">
+              <Wand2 className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <h3 className="text-[15px] font-bold text-brand-900">Pack personnalise</h3>
+              <p className="text-[12px] text-brand-800/80">Composez votre sejour sur mesure.</p>
+            </div>
+            <ArrowRight className="h-5 w-5 shrink-0 text-brand-600" />
+          </Link>
+        </div>
+
+        {/* Grille packs - desktop (inchangee) */}
+        <div className="hidden gap-5 md:grid md:grid-cols-2 lg:grid-cols-3">
           {packs.map((p) => (
             <PackCard key={p.id} pack={p} favorited={favorites.packs.has(p.id)} />
           ))}

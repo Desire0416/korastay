@@ -4,6 +4,7 @@ import { SearchX, ChevronLeft, ChevronRight } from "lucide-react";
 import { getResidences, getAllDestinations } from "@/lib/queries";
 import { getUserFavoriteIds } from "@/server/actions/favorites";
 import { ResidenceCard } from "@/components/public/residence-card";
+import { MobileResidenceCard } from "@/components/public/mobile/mobile-cards";
 import { ResidenceFilters } from "@/components/public/residence-filters";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
@@ -62,12 +63,12 @@ export default async function ResidencesPage({
   }
 
   return (
-    <div className="container-page py-8">
-      <div className="mb-6">
-        <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground">
+    <div className="container-page py-5 md:py-8">
+      <div className="mb-4 md:mb-6">
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
           {cityName ? `Residences a ${cityName}` : "Residences verifiees"}
         </h1>
-        <p className="mt-1 text-muted">
+        <p className="mt-1 text-sm text-muted md:text-base">
           {total} logement{total > 1 ? "s" : ""} disponible{total > 1 ? "s" : ""}
           {cityName ? "" : " en Cote d'Ivoire"}
         </p>
@@ -94,16 +95,30 @@ export default async function ResidencesPage({
           }
         />
       ) : (
-        <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {items.map((r, i) => (
-            <ResidenceCard
-              key={r.id}
-              residence={r}
-              favorited={favorites.residences.has(r.id)}
-              priority={i < 4}
-            />
-          ))}
-        </div>
+        <>
+          {/* Mobile : grille compacte 2 colonnes (app) */}
+          <div className="grid grid-cols-2 gap-x-3 gap-y-5 md:hidden">
+            {items.map((r, i) => (
+              <MobileResidenceCard
+                key={r.id}
+                residence={r}
+                favorited={favorites.residences.has(r.id)}
+                priority={i < 4}
+              />
+            ))}
+          </div>
+          {/* Desktop : grille existante (inchangee) */}
+          <div className="hidden gap-x-5 gap-y-8 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {items.map((r, i) => (
+              <ResidenceCard
+                key={r.id}
+                residence={r}
+                favorited={favorites.residences.has(r.id)}
+                priority={i < 4}
+              />
+            ))}
+          </div>
+        </>
       )}
 
       {/* Pagination */}
