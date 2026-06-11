@@ -27,12 +27,13 @@ export function BookingWidget(props: BookingWidgetProps) {
   const [range, setRange] = React.useState<DateRange>({ start: null, end: null });
   const [adults, setAdults] = React.useState(2);
   const [children, setChildren] = React.useState(0);
+  const [cleaning, setCleaning] = React.useState(false);
 
   const hasRange = range.start && range.end;
   const price = hasRange
     ? computeResidencePrice({
         pricePerNight: props.pricePerNight,
-        cleaningFee: props.cleaningFee,
+        cleaningFee: cleaning ? props.cleaningFee : 0,
         startDate: range.start!,
         endDate: range.end!,
       })
@@ -45,9 +46,25 @@ export function BookingWidget(props: BookingWidgetProps) {
       checkout: range.end!.toISOString().slice(0, 10),
       adults: String(adults),
       children: String(children),
+      cleaning: cleaning ? "1" : "0",
     });
     router.push(`/residences/${props.slug}/reserver?${params.toString()}`);
   }
+
+  const cleaningToggle = props.cleaningFee > 0 && (
+    <label className="flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-border px-4 py-3 text-sm">
+      <span className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          checked={cleaning}
+          onChange={(e) => setCleaning(e.target.checked)}
+          className="h-5 w-5 rounded border-border text-brand-500 focus:ring-brand-400"
+        />
+        <span className="font-medium text-foreground">Ajouter le menage</span>
+      </span>
+      <span className="font-semibold text-foreground">+{formatPrice(props.cleaningFee)}</span>
+    </label>
+  );
 
   const guestsLabel = `${adults + children} voyageur${adults + children > 1 ? "s" : ""}`;
   const datesLabel = hasRange
@@ -132,6 +149,7 @@ export function BookingWidget(props: BookingWidgetProps) {
             </PopoverContent>
           </Popover>
           {guestPopover}
+          {cleaningToggle}
         </div>
 
         <Button onClick={reserve} disabled={!hasRange} size="lg" className="mt-4 w-full">
@@ -175,6 +193,7 @@ export function BookingWidget(props: BookingWidgetProps) {
                   <Stepper label="Adultes" value={adults} onChange={setAdults} min={1} max={props.maxCapacity} />
                   <Stepper label="Enfants" hint="Moins de 12 ans" value={children} onChange={setChildren} max={props.maxCapacity} />
                 </div>
+                {cleaningToggle}
                 {price && <div className="rounded-3xl bg-surface-soft p-4">{priceRows}</div>}
               </div>
               <DrawerClose asChild>

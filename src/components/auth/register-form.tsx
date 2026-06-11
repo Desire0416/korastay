@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
-import { AlertCircle, CheckCircle2, MailCheck } from "lucide-react";
+import { AlertCircle, MailCheck } from "lucide-react";
 import { registerAction, type ActionState } from "@/server/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,11 +20,14 @@ export function RegisterForm() {
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-brand-50 text-brand-600">
           <MailCheck className="h-8 w-8" />
         </div>
-        <h1 className="mt-5 text-2xl font-bold text-foreground">Compte cree !</h1>
+        <h1 className="mt-5 text-2xl font-bold text-foreground">Confirmez votre email</h1>
         <p className="mt-2 text-muted">{state.message}</p>
+        <div className="mt-5 rounded-2xl border border-dashed border-border bg-surface-soft/40 p-4 text-sm text-muted">
+          Pensez a verifier vos <strong>spams</strong>. Le lien de confirmation est valable 24h.
+        </div>
         <div className="mt-7 flex flex-col gap-3">
-          <Button asChild size="lg"><Link href="/account">Acceder a mon espace</Link></Button>
-          <Button asChild variant="outline"><Link href="/residences">Explorer les residences</Link></Button>
+          <Button asChild size="lg"><Link href="/login">Aller a la connexion</Link></Button>
+          <Button asChild variant="outline"><Link href="/">Retour a l&apos;accueil</Link></Button>
         </div>
       </div>
     );

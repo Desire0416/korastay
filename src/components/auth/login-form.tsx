@@ -52,12 +52,6 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
           Creer un compte
         </Link>
       </p>
-
-      <div className="mt-8 rounded-2xl border border-dashed border-border bg-surface-soft/40 p-4 text-xs text-muted">
-        <p className="font-bold text-foreground">Comptes de demonstration</p>
-        <p className="mt-1">traveler@korastay.com - owner@korastay.com - admin@korastay.com</p>
-        <p>Mot de passe : <span className="font-mono font-semibold">Password123!</span></p>
-      </div>
     </div>
   );
 }

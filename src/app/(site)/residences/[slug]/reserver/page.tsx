@@ -32,6 +32,7 @@ export default async function ReserverPage({
   const checkout = str(sp.checkout);
   const adults = Number(str(sp.adults) ?? 2);
   const children = Number(str(sp.children) ?? 0);
+  const cleaning = str(sp.cleaning) === "1";
 
   const backUrl = `/residences/${slug}/reserver?checkin=${checkin}&checkout=${checkout}&adults=${adults}&children=${children}`;
   const user = await getCurrentUser();
@@ -46,7 +47,7 @@ export default async function ReserverPage({
   const settings = await getPaymentSettings();
   const price = computeResidencePrice({
     pricePerNight: residence.pricePerNight,
-    cleaningFee: residence.cleaningFee,
+    cleaningFee: cleaning ? residence.cleaningFee : 0,
     startDate: checkin,
     endDate: checkout,
     serviceFeeRate: settings.serviceFeePercent / 100,
@@ -96,6 +97,7 @@ export default async function ReserverPage({
               checkout: checkout!,
               adults: String(adults),
               children: String(children),
+              cleaning: cleaning ? "1" : "0",
             }}
             defaultName={`${user.firstName} ${user.lastName}`}
             defaultEmail={user.email}

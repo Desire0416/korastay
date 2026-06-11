@@ -51,6 +51,7 @@ const residenceSchema = z.object({
   guestName: z.string().min(2, "Nom requis"),
   guestEmail: z.string().email("Email invalide"),
   guestPhone: z.string().optional(),
+  cleaning: z.string().optional(), // "1" si le voyageur ajoute le menage
   method: z.string().optional(),
   acceptTerms: z.string().optional(),
 });
@@ -85,9 +86,11 @@ export async function createResidenceReservation(
   }
 
   const settings = await getPaymentSettings();
+  // Le menage est optionnel : facture uniquement si le voyageur l'a choisi.
+  const includeCleaning = data.cleaning === "1";
   const price = computeResidencePrice({
     pricePerNight: residence.pricePerNight,
-    cleaningFee: residence.cleaningFee,
+    cleaningFee: includeCleaning ? residence.cleaningFee : 0,
     startDate, endDate,
     serviceFeeRate: settings.serviceFeePercent / 100,
     serviceFeeMin: settings.serviceFeeMin,

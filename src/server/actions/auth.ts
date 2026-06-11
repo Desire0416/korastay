@@ -102,17 +102,17 @@ export async function registerAction(
     data: {
       userId: user.id,
       title: "Bienvenue sur KoraStay",
-      body: "Votre compte a ete cree. Confirmez votre email pour profiter de toutes les fonctionnalites.",
+      body: "Votre compte a ete cree. Confirmez votre email pour activer votre compte.",
       type: "WELCOME",
     },
   });
 
-  // Connexion immediate (compte utilisable, email a confirmer)
-  await createSession(user.id);
+  // Pas de connexion immediate : le compte reste inactif tant que l'email
+  // n'est pas confirme (cf. loginAction qui bloque PENDING_EMAIL_VERIFICATION).
   return {
     ok: true,
     message:
-      "Compte cree. Un email de confirmation vous a ete envoye (consultez la console serveur en developpement).",
+      "Votre compte a ete cree. Un email de confirmation vient de vous etre envoye : cliquez sur le lien pour activer votre compte avant de vous connecter.",
   };
 }
 
@@ -142,6 +142,13 @@ export async function loginAction(
   if (!user || !(await verifyPassword(parsed.data.password, user.passwordHash))) {
     return { ok: false, error: "Email ou mot de passe incorrect." };
   }
+  if (user.status === "PENDING_EMAIL_VERIFICATION") {
+    return {
+      ok: false,
+      error: "Votre compte n'est pas encore active. Confirmez votre email (verifiez vos spams) pour vous connecter.",
+      values: { email: parsed.data.email },
+    };
+  }
   if (user.status === "SUSPENDED" || user.status === "DISABLED") {
     return { ok: false, error: "Ce compte est suspendu. Contactez l'assistance." };
   }
@@ -161,6 +168,35 @@ export async function loginAction(
 export async function logoutAction() {
   await destroySession();
   redirect("/");
+}
+
+// Renvoi de l'email de confirmation (si le compte est encore inactif).
+export async function resendVerificationAction(
+  _prev: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const email = String(formData.get("email") ?? "").toLowerCase();
+  if (!email.includes("@")) return { ok: false, error: "Email invalide." };
+
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (user && user.status === "PENDING_EMAIL_VERIFICATION") {
+    const token = crypto.randomBytes(32).toString("hex");
+    await prisma.emailVerificationToken.create({
+      data: { userId: user.id, token, expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) },
+    });
+    const verifyUrl = `${APP_URL}/verify-email?token=${token}`;
+    await sendEmail({
+      to: user.email,
+      subject: "Confirmez votre compte KoraStay",
+      html: emailLayout(
+        "Confirmez votre adresse email",
+        `<p>Voici un nouveau lien pour activer votre compte KoraStay.</p>${emailButton(verifyUrl, "Confirmer mon email")}<p style="font-size:13px;color:#5F6B66;">Ou copiez ce lien : ${verifyUrl}</p>`
+      ),
+      text: `Confirmez votre compte : ${verifyUrl}`,
+    });
+  }
+  // Reponse identique que le compte existe/soit deja actif ou non (securite).
+  return { ok: true, message: "Si votre compte est en attente, un nouvel email de confirmation vient d'etre envoye." };
 }
 
 // ------------------------------------------------------------
