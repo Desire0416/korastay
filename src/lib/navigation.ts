@@ -99,6 +99,27 @@ export const PARTNER_NAV: NavItem[] = [
   { label: "Messages", href: "/partner/messages", icon: "MessageCircle" },
 ];
 
+// Menu partenaire adapte au metier (restaurant -> menu, chauffeur -> vehicule...).
+export function partnerNavFor(type?: string | null): NavItem[] {
+  const nav: NavItem[] = [{ label: "Tableau de bord", href: "/partner", icon: "LayoutDashboard" }];
+  if (type === "RESTAURANT") {
+    nav.push({ label: "Mon menu", href: "/partner/menu", icon: "CookingPot" });
+  } else if (type === "TRANSPORT") {
+    nav.push({ label: "Mon vehicule", href: "/partner/vehicle", icon: "Car" });
+    nav.push({ label: "Mes trajets", href: "/partner/services", icon: "Tags" });
+  } else {
+    nav.push({ label: "Mes services", href: "/partner/services", icon: "Tags" });
+  }
+  nav.push(
+    { label: "Missions", href: "/partner/missions", icon: "Briefcase" },
+    { label: "Calendrier", href: "/partner/calendar", icon: "Calendar" },
+    { label: "Revenus", href: "/partner/revenues", icon: "Wallet" },
+    { label: "Messages", href: "/partner/messages", icon: "MessageCircle" },
+    { label: "Profil", href: "/partner/profile", icon: "User" },
+  );
+  return nav;
+}
+
 export const BUSINESS_NAV: NavItem[] = [
   { label: "Tableau de bord", href: "/business/dashboard", icon: "LayoutDashboard" },
   { label: "Mes demandes", href: "/business/requests", icon: "FileText" },

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Tags, Briefcase, Wallet, CheckCircle2, Clock, Plus, ArrowRight } from "lucide-react";
+import { Tags, Briefcase, Wallet, CheckCircle2, Clock, Plus, ArrowRight, CookingPot, Car } from "lucide-react";
 import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -11,14 +11,18 @@ import { formatPrice, formatDate } from "@/lib/utils";
 
 export const metadata = { title: "Tableau de bord partenaire" };
 
-export default async function PartnerDashboard() {
+type SP = Record<string, string | string[] | undefined>;
+
+export default async function PartnerDashboard({ searchParams }: { searchParams: Promise<SP> }) {
   const user = await requireRole(["PARTNER", "ADMIN", "SUPER_ADMIN"]);
+  const sp = await searchParams;
+  const justOnboarded = sp.onboarded === "1";
   const profile = await prisma.partnerProfile.findUnique({
     where: { userId: user.id },
     include: {
       services: true,
       missions: { orderBy: { createdAt: "desc" }, take: 5 },
-      _count: { select: { services: true, missions: true } },
+      _count: { select: { services: true, missions: true, menuItems: true } },
     },
   });
 
@@ -55,6 +59,15 @@ export default async function PartnerDashboard() {
         actions={<StatusBadge status={profile.verificationStatus} map={verificationStatusMeta} />}
       />
 
+      {justOnboarded && (
+        <div className="mb-6 flex items-start gap-3 rounded-2xl border border-success/30 bg-emerald-50 p-4">
+          <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-success" />
+          <p className="text-sm text-emerald-700">
+            <span className="font-bold">Configuration terminee !</span> Bienvenue dans votre espace. Completez votre offre pour recevoir des missions.
+          </p>
+        </div>
+      )}
+
       {profile.verificationStatus === "PENDING_REVIEW" && (
         <div className="mb-6 flex items-center gap-3 rounded-2xl border border-gold-200 bg-gold-50 p-4">
           <Clock className="h-5 w-5 text-gold-600" />
@@ -66,8 +79,36 @@ export default async function PartnerDashboard() {
         <span className="font-semibold">Espace {partnerTypeMeta[profile.type]?.label.toLowerCase()} :</span> {hint.tip}
       </div>
 
+      {/* Bloc specialise par metier */}
+      {profile.type === "RESTAURANT" && (
+        <Link href="/partner/menu" className="mb-6 flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-4 shadow-soft hover:border-brand-300">
+          <span className="flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-50 text-brand-600"><CookingPot className="h-5 w-5" /></span>
+            <span>
+              <span className="block font-bold text-foreground">Mon menu</span>
+              <span className="block text-sm text-muted">{profile._count.menuItems} plat{profile._count.menuItems > 1 ? "s" : ""} en ligne</span>
+            </span>
+          </span>
+          <ArrowRight className="h-5 w-5 text-muted" />
+        </Link>
+      )}
+      {profile.type === "TRANSPORT" && (
+        <Link href="/partner/vehicle" className="mb-6 flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-4 shadow-soft hover:border-brand-300">
+          <span className="flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-50 text-brand-600"><Car className="h-5 w-5" /></span>
+            <span>
+              <span className="block font-bold text-foreground">Mon vehicule</span>
+              <span className="block text-sm text-muted">{profile.vehicleType ? `${profile.vehicleType}${profile.vehicleSeats ? ` · ${profile.vehicleSeats} places` : ""}` : "A renseigner"}</span>
+            </span>
+          </span>
+          <ArrowRight className="h-5 w-5 text-muted" />
+        </Link>
+      )}
+
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <KpiCard label="Services" value={profile._count.services} icon={Tags} tone="brand" href="/partner/services" />
+        {profile.type === "RESTAURANT"
+          ? <KpiCard label="Plats" value={profile._count.menuItems} icon={CookingPot} tone="brand" href="/partner/menu" />
+          : <KpiCard label="Services" value={profile._count.services} icon={Tags} tone="brand" href="/partner/services" />}
         <KpiCard label="Missions" value={profile._count.missions} icon={Briefcase} tone="info" href="/partner/missions" />
         <KpiCard label="A traiter" value={pendingMissions} icon={Clock} tone="gold" href="/partner/missions?status=PROPOSED" />
         <KpiCard label="Revenus" value={formatPrice(revenue)} icon={Wallet} tone="success" href="/partner/revenues" />

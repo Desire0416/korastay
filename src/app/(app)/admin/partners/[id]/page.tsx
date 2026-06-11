@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft, Mail, Phone, MapPin, Globe } from "lucide-react";
+import { ChevronLeft, Mail, Phone, MapPin, Globe, FileText, Car, CookingPot, CheckCircle2 } from "lucide-react";
 import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { setPartnerStatus } from "@/server/actions/admin";
@@ -16,9 +16,15 @@ export default async function AdminPartnerDetail({ params }: { params: Promise<{
   const { id } = await params;
   const partner = await prisma.partnerProfile.findUnique({
     where: { id },
-    include: { user: { select: { firstName: true, lastName: true, email: true, phone: true } }, services: true },
+    include: {
+      user: { select: { firstName: true, lastName: true, email: true, phone: true } },
+      services: true,
+      _count: { select: { menuItems: true } },
+    },
   });
   if (!partner) notFound();
+  const isDriver = partner.type === "TRANSPORT";
+  const isRestaurant = partner.type === "RESTAURANT";
 
   const languages = parseJsonArray(partner.languages);
   const zones = parseJsonArray(partner.zonesCovered);
@@ -51,6 +57,38 @@ export default async function AdminPartnerDetail({ params }: { params: Promise<{
             {zones.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-2">
                 {zones.map((z) => <span key={z} className="rounded-full bg-surface-soft px-3 py-1 text-xs font-medium text-foreground">{z}</span>)}
+              </div>
+            )}
+          </div>
+
+          {/* Justificatifs & configuration (onboarding) */}
+          <div className="rounded-3xl border border-border bg-surface p-5 shadow-soft">
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="font-bold text-foreground">Justificatifs &amp; configuration</h3>
+              {partner.onboardingCompletedAt ? (
+                <Badge tone="success"><CheckCircle2 className="mr-1 h-3.5 w-3.5" /> Configure</Badge>
+              ) : (
+                <Badge tone="warning">En attente</Badge>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {partner.idDocumentUrl ? (
+                <a href={partner.idDocumentUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm font-semibold text-brand-600 hover:bg-surface-soft"><FileText className="h-4 w-4" /> Piece d&apos;identite</a>
+              ) : <span className="text-sm text-muted">Piece d&apos;identite non fournie.</span>}
+              {isDriver && partner.drivingLicenseUrl && (
+                <a href={partner.drivingLicenseUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm font-semibold text-brand-600 hover:bg-surface-soft"><FileText className="h-4 w-4" /> Permis de conduire</a>
+              )}
+            </div>
+            {isDriver && partner.vehicleType && (
+              <div className="mt-3 flex items-center gap-2 rounded-2xl bg-surface-soft px-4 py-3 text-sm text-foreground">
+                <Car className="h-4 w-4 text-muted" />
+                {partner.vehicleType}{partner.vehicleBrand ? ` · ${partner.vehicleBrand}` : ""}{partner.vehiclePlate ? ` · ${partner.vehiclePlate}` : ""}{partner.vehicleSeats ? ` · ${partner.vehicleSeats} places` : ""}
+              </div>
+            )}
+            {isRestaurant && (
+              <div className="mt-3 flex items-center gap-2 rounded-2xl bg-surface-soft px-4 py-3 text-sm text-foreground">
+                <CookingPot className="h-4 w-4 text-muted" />
+                {partner.cuisineType ? `${partner.cuisineType} · ` : ""}{partner._count.menuItems} plat{partner._count.menuItems > 1 ? "s" : ""} au menu
               </div>
             )}
           </div>

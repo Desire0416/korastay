@@ -536,15 +536,50 @@ model PartnerProfile {
   documents          String?  // JSON serialise
   verificationStatus String   @default("PENDING_REVIEW") // VerificationStatus
   ratingAverage      Float    @default(0)
+
+  // Onboarding obligatoire (apres verification, avant acces au dashboard)
+  onboardingCompletedAt DateTime?
+  idDocumentUrl         String?  // piece d'identite (pj)
+  coverImageUrl         String?  // visuel de l'espace
+
+  // Specifique chauffeur (TRANSPORT)
+  drivingLicenseUrl  String?
+  vehicleType        String?  // berline, SUV, minibus, van...
+  vehicleBrand       String?
+  vehiclePlate       String?
+  vehicleSeats       Int?
+
+  // Specifique restaurant
+  cuisineType        String?
+
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
-  services PartnerService[]
-  missions PartnerMission[]
+  services  PartnerService[]
+  missions  PartnerMission[]
+  menuItems PartnerMenuItem[]
   guidedReservations Reservation[] @relation("GuidedReservations")
 
   @@index([type])
   @@index([verificationStatus])
+}
+
+// Plat / formule d'un partenaire restaurant (menu avec image + prix).
+model PartnerMenuItem {
+  id               String   @id @default(cuid())
+  partnerProfileId String
+  partnerProfile   PartnerProfile @relation(fields: [partnerProfileId], references: [id], onDelete: Cascade)
+  name             String
+  description      String?
+  price            Int      @default(0)
+  category         String?  // Entrees, Plats, Desserts, Boissons...
+  imageUrl         String?
+  isAvailable      Boolean  @default(true)
+  sortOrder        Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([partnerProfileId])
 }
 
 model PartnerService {
