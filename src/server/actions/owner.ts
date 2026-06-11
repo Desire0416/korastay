@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { requireRole, type SessionUser } from "@/lib/auth";
 import { slugify } from "@/lib/utils";
 
-export type OwnerResult = { ok: boolean; error?: string; message?: string; id?: string };
+export type OwnerResult = { ok: boolean; error?: string; message?: string; id?: string; values?: Record<string, string> };
 
 const residenceSchema = z.object({
   name: z.string().min(3, "Nom requis"),
@@ -53,7 +53,7 @@ export async function createResidence(_prev: OwnerResult, formData: FormData): P
 
   const parsed = residenceSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) {
-    return { ok: false, error: parsed.error.issues[0]?.message ?? "Formulaire invalide." };
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Formulaire invalide.", values: Object.fromEntries(formData) as Record<string, string> };
   }
   const d = parsed.data;
   const amenityIds = formData.getAll("amenities").map(String);

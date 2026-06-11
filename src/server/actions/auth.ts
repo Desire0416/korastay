@@ -18,6 +18,7 @@ export type ActionState = {
   error?: string;
   fieldErrors?: Record<string, string>;
   message?: string;
+  values?: Record<string, string>;
 };
 
 const APP_URL = process.env.APP_URL ?? "http://localhost:3000";
@@ -37,20 +38,22 @@ export async function registerAction(
   _prev: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  const parsed = registerSchema.safeParse({
-    firstName: formData.get("firstName"),
-    lastName: formData.get("lastName"),
-    email: formData.get("email"),
-    phone: formData.get("phone"),
-    password: formData.get("password"),
-  });
+  // Valeurs ressaisies (sauf mot de passe) pour les conserver en cas d'erreur.
+  const values = {
+    firstName: String(formData.get("firstName") ?? ""),
+    lastName: String(formData.get("lastName") ?? ""),
+    email: String(formData.get("email") ?? ""),
+    phone: String(formData.get("phone") ?? ""),
+  };
+
+  const parsed = registerSchema.safeParse({ ...values, password: formData.get("password") });
 
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
     parsed.error.issues.forEach((i) => {
       fieldErrors[i.path[0] as string] = i.message;
     });
-    return { ok: false, fieldErrors, error: "Veuillez corriger les champs." };
+    return { ok: false, fieldErrors, error: "Veuillez corriger les champs.", values };
   }
 
   const data = parsed.data;
@@ -58,7 +61,7 @@ export async function registerAction(
     where: { email: data.email.toLowerCase() },
   });
   if (existing) {
-    return { ok: false, error: "Un compte existe deja avec cet email." };
+    return { ok: false, error: "Un compte existe deja avec cet email.", values };
   }
 
   const passwordHash = await hashPassword(data.password);

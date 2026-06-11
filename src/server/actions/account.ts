@@ -23,9 +23,11 @@ export async function updateProfile(_prev: FormResult, formData: FormData): Prom
   const parsed = schema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message };
 
-  // N'accepte que les photos hebergees localement (uploadees via /api/upload)
+  // Accepte les photos uploadees via /api/upload : chemin local (/uploads/...)
+  // ou URL Vercel Blob (...blob.vercel-storage.com). Vide => retire l'avatar.
   const avatar = parsed.data.avatarUrl?.trim();
-  const safeAvatar = avatar && avatar.startsWith("/uploads/") ? avatar : avatar === "" ? null : undefined;
+  const isUploaded = !!avatar && (avatar.startsWith("/uploads/") || avatar.includes(".blob.vercel-storage.com"));
+  const safeAvatar = isUploaded ? avatar : avatar === "" ? null : undefined;
 
   await prisma.user.update({
     where: { id: user.id },

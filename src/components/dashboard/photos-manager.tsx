@@ -15,7 +15,27 @@ export function PhotosManager({ residenceId, images }: { residenceId: string; im
   const router = useRouter();
   const [uploading, setUploading] = React.useState(false);
   const [pending, start] = React.useTransition();
+  const [busyId, setBusyId] = React.useState<string | null>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
+
+  function removeImage(id: string) {
+    setBusyId(id);
+    start(async () => {
+      const r = await deleteResidenceImage(id);
+      if (r.ok) { toast.success("Photo supprimee."); router.refresh(); }
+      else toast.error(r.error ?? "Erreur");
+      setBusyId(null);
+    });
+  }
+  function makeCover(id: string) {
+    setBusyId(id);
+    start(async () => {
+      await setCoverImage(id);
+      toast.success("Photo de couverture mise a jour.");
+      router.refresh();
+      setBusyId(null);
+    });
+  }
 
   async function onFiles(files: FileList | null) {
     if (!files || files.length === 0) return;
@@ -54,8 +74,13 @@ export function PhotosManager({ residenceId, images }: { residenceId: string; im
       {images.length > 0 && (
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {images.map((img) => (
-            <div key={img.id} className="group relative overflow-hidden rounded-2xl border border-border">
+            <div key={img.id} className={cn("group relative overflow-hidden rounded-2xl border border-border transition-opacity", busyId === img.id && "opacity-60")}>
               <div className="aspect-[4/3]"><SmartImage src={img.url} alt="" seed={img.id} /></div>
+              {busyId === img.id && (
+                <div className="absolute inset-0 z-10 flex items-center justify-center bg-ink/45 backdrop-blur-[1px]">
+                  <Loader2 className="h-6 w-6 animate-spin text-white" />
+                </div>
+              )}
               {img.isCover && (
                 <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-brand-500 px-2 py-0.5 text-2xs font-semibold text-white">
                   <Star className="h-3 w-3 fill-white" /> Couverture
@@ -64,20 +89,20 @@ export function PhotosManager({ residenceId, images }: { residenceId: string; im
               <div className="absolute inset-x-0 bottom-0 flex justify-between gap-1 bg-gradient-to-t from-ink/70 to-transparent p-2 opacity-0 transition-opacity group-hover:opacity-100">
                 {!img.isCover && (
                   <button
-                    onClick={() => start(async () => { await setCoverImage(img.id); router.refresh(); })}
+                    onClick={() => makeCover(img.id)}
                     disabled={pending}
-                    className="rounded-full bg-white/90 px-2 py-1 text-2xs font-semibold text-ink hover:bg-white"
+                    className="rounded-full bg-white/90 px-2 py-1 text-2xs font-semibold text-ink hover:bg-white disabled:opacity-50"
                   >
                     Definir couverture
                   </button>
                 )}
                 <button
-                  onClick={() => start(async () => { const r = await deleteResidenceImage(img.id); if (r.ok) router.refresh(); else toast.error(r.error ?? "Erreur"); })}
+                  onClick={() => removeImage(img.id)}
                   disabled={pending}
-                  className="ml-auto flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-danger hover:bg-white"
+                  className="ml-auto flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-danger hover:bg-white disabled:opacity-50"
                   aria-label="Supprimer"
                 >
-                  <Trash2 className="h-3.5 w-3.5" />
+                  {busyId === img.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
                 </button>
               </div>
             </div>

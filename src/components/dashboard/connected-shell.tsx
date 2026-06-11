@@ -3,10 +3,11 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, Bell, PanelLeftClose, PanelLeft, ExternalLink } from "lucide-react";
+import { Menu, PanelLeftClose, PanelLeft, ExternalLink } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { Icon } from "@/components/ui/icon";
 import { UserMenu } from "@/components/public/user-menu";
+import { NotificationBell } from "./notification-bell";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import type { NavItem } from "@/lib/navigation";
@@ -146,18 +147,7 @@ export function ConnectedShell({
             >
               <ExternalLink className="h-4 w-4" /> Site public
             </Link>
-            <Link
-              href={notifLinkForRole(user.role)}
-              aria-label="Notifications"
-              className="relative flex h-10 w-10 items-center justify-center rounded-full border border-border bg-surface text-foreground transition-colors hover:bg-surface-soft"
-            >
-              <Bell className="h-5 w-5" />
-              {notifCount > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1 text-2xs font-bold text-white">
-                  {notifCount > 9 ? "9+" : notifCount}
-                </span>
-              )}
-            </Link>
+            <NotificationBell initialUnread={notifCount} allHref={notifLinkForRole(user.role)} />
             <UserMenu user={user} />
           </div>
         </header>

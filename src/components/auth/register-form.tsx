@@ -38,17 +38,17 @@ export function RegisterForm() {
       <form action={action} className="mt-7 space-y-4">
         <div className="grid grid-cols-2 gap-3">
           <Field label="Prenom" htmlFor="firstName" required error={state.fieldErrors?.firstName}>
-            <Input id="firstName" name="firstName" placeholder="Marc" required />
+            <Input id="firstName" name="firstName" placeholder="Marc" required defaultValue={state.values?.firstName ?? ""} />
           </Field>
           <Field label="Nom" htmlFor="lastName" required error={state.fieldErrors?.lastName}>
-            <Input id="lastName" name="lastName" placeholder="Yao" required />
+            <Input id="lastName" name="lastName" placeholder="Yao" required defaultValue={state.values?.lastName ?? ""} />
           </Field>
         </div>
         <Field label="Email" htmlFor="email" required error={state.fieldErrors?.email}>
-          <Input id="email" name="email" type="email" placeholder="vous@email.com" required autoComplete="email" />
+          <Input id="email" name="email" type="email" placeholder="vous@email.com" required autoComplete="email" defaultValue={state.values?.email ?? ""} />
         </Field>
         <Field label="Telephone" htmlFor="phone" hint="Optionnel" error={state.fieldErrors?.phone}>
-          <Input id="phone" name="phone" placeholder="+225 07 ..." autoComplete="tel" />
+          <Input id="phone" name="phone" placeholder="+225 07 ..." autoComplete="tel" defaultValue={state.values?.phone ?? ""} />
         </Field>
         <Field label="Mot de passe" htmlFor="password" required hint="8 caracteres minimum" error={state.fieldErrors?.password}>
           <Input id="password" name="password" type="password" placeholder="********" required autoComplete="new-password" />
