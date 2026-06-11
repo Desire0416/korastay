@@ -6,6 +6,8 @@ import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { PackEditor } from "@/components/dashboard/pack-editor";
 import { DeletePackButton } from "@/components/dashboard/delete-pack-button";
+import { PhotosManager } from "@/components/dashboard/photos-manager";
+import { addPackImage, deletePackImage, setPackCoverImage } from "@/server/actions/admin";
 
 export const metadata = { title: "Modifier le pack" };
 
@@ -16,6 +18,7 @@ export default async function EditPackPage({ params }: { params: Promise<{ id: s
     prisma.pack.findUnique({
       where: { id },
       include: {
+        images: { orderBy: { sortOrder: "asc" } },
         includedItems: { orderBy: { sortOrder: "asc" } },
         programDays: { orderBy: { sortOrder: "asc" }, include: { activities: { orderBy: { sortOrder: "asc" } } } },
       },
@@ -41,6 +44,18 @@ export default async function EditPackPage({ params }: { params: Promise<{ id: s
           </div>
         }
       />
+      <section className="mb-6 rounded-3xl border border-border bg-surface p-5 shadow-soft">
+        <h2 className="mb-1 font-bold text-foreground">Photos du pack</h2>
+        <p className="mb-4 text-sm text-muted">Importez des photos (la premiere sert de couverture).</p>
+        <PhotosManager
+          entityId={pack.id}
+          images={pack.images}
+          onAdd={addPackImage}
+          onDelete={deletePackImage}
+          onSetCover={setPackCoverImage}
+        />
+      </section>
+
       <PackEditor
         destinations={destinations}
         packId={pack.id}

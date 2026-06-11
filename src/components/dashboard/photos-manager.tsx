@@ -10,8 +10,23 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 interface Image { id: string; url: string; isCover: boolean }
+type ImgResult = { ok: boolean; error?: string };
 
-export function PhotosManager({ residenceId, images }: { residenceId: string; images: Image[] }) {
+interface PhotosManagerProps {
+  entityId: string;
+  images: Image[];
+  onAdd?: (entityId: string, url: string) => Promise<ImgResult>;
+  onDelete?: (imageId: string) => Promise<ImgResult>;
+  onSetCover?: (imageId: string) => Promise<ImgResult>;
+}
+
+export function PhotosManager({
+  entityId,
+  images,
+  onAdd = addResidenceImage,
+  onDelete = deleteResidenceImage,
+  onSetCover = setCoverImage,
+}: PhotosManagerProps) {
   const router = useRouter();
   const [uploading, setUploading] = React.useState(false);
   const [pending, start] = React.useTransition();
@@ -21,7 +36,7 @@ export function PhotosManager({ residenceId, images }: { residenceId: string; im
   function removeImage(id: string) {
     setBusyId(id);
     start(async () => {
-      const r = await deleteResidenceImage(id);
+      const r = await onDelete(id);
       if (r.ok) { toast.success("Photo supprimee."); router.refresh(); }
       else toast.error(r.error ?? "Erreur");
       setBusyId(null);
@@ -30,7 +45,7 @@ export function PhotosManager({ residenceId, images }: { residenceId: string; im
   function makeCover(id: string) {
     setBusyId(id);
     start(async () => {
-      await setCoverImage(id);
+      await onSetCover(id);
       toast.success("Photo de couverture mise a jour.");
       router.refresh();
       setBusyId(null);
@@ -47,7 +62,7 @@ export function PhotosManager({ residenceId, images }: { residenceId: string; im
         const res = await fetch("/api/upload", { method: "POST", body: fd });
         const data = await res.json();
         if (!res.ok) { toast.error(data.error ?? "Echec de l'upload."); continue; }
-        await addResidenceImage(residenceId, data.url);
+        await onAdd(entityId, data.url);
       }
       toast.success("Photos ajoutees.");
       router.refresh();

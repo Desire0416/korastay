@@ -23,7 +23,7 @@ export default async function AdminResidencePhotosPage({ params }: { params: Pro
         <ChevronLeft className="h-4 w-4" /> Retour a la residence
       </Link>
       <PageHeader title="Photos" description={residence.name} />
-      <PhotosManager residenceId={id} images={residence.images} />
+      <PhotosManager entityId={id} images={residence.images} />
     </div>
   );
 }

@@ -19,7 +19,7 @@ export default async function ResidencePhotosPage({ params }: { params: Promise<
         description="Ajoutez au moins 5 photos de qualite. La photo de couverture est mise en avant."
         breadcrumbs={[{ label: "Mes residences", href: "/owner/residences" }, { label: residence.name, href: `/owner/residences/${id}` }, { label: "Photos" }]}
       />
-      <PhotosManager residenceId={id} images={residence.images} />
+      <PhotosManager entityId={id} images={residence.images} />
     </div>
   );
 }

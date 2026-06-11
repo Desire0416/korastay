@@ -206,3 +206,39 @@ export async function updateContentPage(id: string, _prev: AdminResult, formData
   revalidatePath("/admin/content/pages");
   return { ok: true, message: "Page mise a jour." };
 }
+
+// ------------------------------------------------------------
+// Images des packs (import par l'admin, comme les residences)
+// ------------------------------------------------------------
+export async function addPackImage(packId: string, url: string): Promise<AdminResult> {
+  await requireRole(["ADMIN", "SUPER_ADMIN"]);
+  const count = await prisma.packImage.count({ where: { packId } });
+  await prisma.packImage.create({ data: { packId, url, sortOrder: count, isCover: count === 0 } });
+  revalidatePath(`/admin/packs/${packId}/edit`);
+  return { ok: true };
+}
+
+export async function deletePackImage(imageId: string): Promise<AdminResult> {
+  await requireRole(["ADMIN", "SUPER_ADMIN"]);
+  const img = await prisma.packImage.findUnique({ where: { id: imageId } });
+  if (!img) return { ok: false, error: "Image introuvable." };
+  await prisma.packImage.delete({ where: { id: imageId } });
+  if (img.isCover) {
+    const next = await prisma.packImage.findFirst({ where: { packId: img.packId }, orderBy: { sortOrder: "asc" } });
+    if (next) await prisma.packImage.update({ where: { id: next.id }, data: { isCover: true } });
+  }
+  revalidatePath(`/admin/packs/${img.packId}/edit`);
+  return { ok: true };
+}
+
+export async function setPackCoverImage(imageId: string): Promise<AdminResult> {
+  await requireRole(["ADMIN", "SUPER_ADMIN"]);
+  const img = await prisma.packImage.findUnique({ where: { id: imageId } });
+  if (!img) return { ok: false, error: "Image introuvable." };
+  await prisma.$transaction([
+    prisma.packImage.updateMany({ where: { packId: img.packId }, data: { isCover: false } }),
+    prisma.packImage.update({ where: { id: imageId }, data: { isCover: true } }),
+  ]);
+  revalidatePath(`/admin/packs/${img.packId}/edit`);
+  return { ok: true };
+}
