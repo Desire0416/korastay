@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ContactButton } from "@/components/messaging/contact-button";
+import { ApproveReservationButtons } from "@/components/dashboard/approve-reservation-buttons";
 import { reservationStatusMeta, paymentStatusMeta } from "@/lib/enums";
 import { formatPrice, formatDate } from "@/lib/utils";
 
@@ -28,6 +29,17 @@ export default async function OwnerBookingDetail({ params }: { params: Promise<{
         title={reservation.reference}
         actions={<StatusBadge status={reservation.status} map={reservationStatusMeta} />}
       />
+
+      {reservation.status === "PENDING_APPROVAL" && (
+        <div className="mb-5 rounded-3xl border border-gold-200 bg-gold-50/60 p-5 shadow-soft">
+          <p className="mb-1 font-bold text-gold-800">Demande a valider</p>
+          <p className="mb-4 text-sm text-gold-800/80">
+            Le voyageur attend votre validation. Il reglera ensuite un acompte de <strong>{formatPrice(reservation.depositAmount)}</strong>.
+            Sans reponse a temps, la demande est annulee automatiquement.
+          </p>
+          <ApproveReservationButtons reservationId={reservation.id} />
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <Card title="Sejour">

@@ -80,6 +80,7 @@ export type ReservationType =
 
 export const ReservationStatus = {
   DRAFT: "DRAFT",
+  PENDING_APPROVAL: "PENDING_APPROVAL",
   PENDING_PAYMENT: "PENDING_PAYMENT",
   CONFIRMED: "CONFIRMED",
   CHECKED_IN: "CHECKED_IN",
@@ -170,7 +171,8 @@ type LabelMap = Record<string, { label: string; tone: BadgeTone }>;
 
 export const reservationStatusMeta: LabelMap = {
   DRAFT: { label: "Brouillon", tone: "neutral" },
-  PENDING_PAYMENT: { label: "Paiement en attente", tone: "warning" },
+  PENDING_APPROVAL: { label: "En attente de validation", tone: "warning" },
+  PENDING_PAYMENT: { label: "A payer (acompte)", tone: "warning" },
   CONFIRMED: { label: "Confirmee", tone: "success" },
   CHECKED_IN: { label: "Sejour en cours", tone: "info" },
   COMPLETED: { label: "Terminee", tone: "brand" },

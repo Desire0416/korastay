@@ -5,11 +5,15 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
-import { computeResidencePrice, computePackPrice, estimateResidenceRefund, estimatePackRefund } from "@/lib/pricing";
-import { generateReference, nightsBetween } from "@/lib/utils";
+import { isStaff } from "@/lib/messaging";
+import {
+  computeResidencePrice, computePackPrice, computeDeposit,
+  estimateResidenceRefund, estimatePackRefund,
+} from "@/lib/pricing";
+import { generateReference, nightsBetween, formatPrice } from "@/lib/utils";
 import { getPaymentProvider } from "@/lib/payments";
 import { sendEmail, emailLayout } from "@/lib/email";
-import { PAYMENT_HOLD_MINUTES } from "@/lib/constants";
+import { RESIDENCE_VALIDATION_HOURS, PACK_VALIDATION_DAYS } from "@/lib/constants";
 import { getServiceFeeRate } from "@/lib/settings";
 
 export type ReservationResult = {
@@ -18,6 +22,23 @@ export type ReservationResult = {
   reservationId?: string;
 };
 
+const HOUR = 60 * 60 * 1000;
+const DAY = 24 * HOUR;
+
+async function notifyAdmins(title: string, body: string, url: string) {
+  const admins = await prisma.user.findMany({
+    where: { role: { in: ["ADMIN", "SUPER_ADMIN", "SUPPORT"] } },
+    select: { id: true },
+  });
+  if (admins.length === 0) return;
+  await prisma.notification.createMany({
+    data: admins.map((a) => ({ userId: a.id, title, body, type: "RESERVATION_REQUEST", url })),
+  });
+}
+
+// ============================================================
+// 1. Demande de reservation RESIDENCE (en attente de validation)
+// ============================================================
 const residenceSchema = z.object({
   residenceId: z.string().min(1),
   checkin: z.string().min(8),
@@ -27,7 +48,7 @@ const residenceSchema = z.object({
   guestName: z.string().min(2, "Nom requis"),
   guestEmail: z.string().email("Email invalide"),
   guestPhone: z.string().optional(),
-  method: z.string().min(1),
+  method: z.string().optional(),
   acceptTerms: z.string().optional(),
 });
 
@@ -55,9 +76,7 @@ export async function createResidenceReservation(
     return { ok: false, error: "Les dates passees ne sont pas reservables." };
   }
 
-  const residence = await prisma.residence.findUnique({
-    where: { id: data.residenceId },
-  });
+  const residence = await prisma.residence.findUnique({ where: { id: data.residenceId } });
   if (!residence || residence.status !== "PUBLISHED") {
     return { ok: false, error: "Residence indisponible." };
   }
@@ -66,31 +85,25 @@ export async function createResidenceReservation(
   const price = computeResidencePrice({
     pricePerNight: residence.pricePerNight,
     cleaningFee: residence.cleaningFee,
-    startDate,
-    endDate,
-    serviceFeeRate,
+    startDate, endDate, serviceFeeRate,
   });
+  const deposit = computeDeposit({ type: "RESIDENCE", nights, total: price.total, pricePerNight: residence.pricePerNight });
 
   let reservationId: string;
   try {
     reservationId = await prisma.$transaction(async (tx) => {
-      // Anti-double reservation : verifie les chevauchements
       const overlap = await tx.reservation.findFirst({
         where: {
           residenceId: residence.id,
-          status: { in: ["CONFIRMED", "CHECKED_IN", "PENDING_PAYMENT"] },
+          status: { in: ["CONFIRMED", "CHECKED_IN", "PENDING_PAYMENT", "PENDING_APPROVAL"] },
           startDate: { lt: endDate },
           endDate: { gt: startDate },
         },
       });
-      if (overlap) throw new Error("Ces dates viennent d'etre reservees. Choisissez d'autres dates.");
+      if (overlap) throw new Error("Ces dates viennent d'etre demandees. Choisissez d'autres dates.");
 
       const block = await tx.residenceAvailabilityBlock.findFirst({
-        where: {
-          residenceId: residence.id,
-          startDate: { lt: endDate },
-          endDate: { gt: startDate },
-        },
+        where: { residenceId: residence.id, startDate: { lt: endDate }, endDate: { gt: startDate } },
       });
       if (block) throw new Error("Ces dates sont bloquees par le proprietaire.");
 
@@ -98,50 +111,57 @@ export async function createResidenceReservation(
         data: {
           reference: generateReference("KS"),
           type: "RESIDENCE",
-          status: "PENDING_PAYMENT",
+          status: "PENDING_APPROVAL",
           travelerId: user.id,
           residenceId: residence.id,
-          startDate,
-          endDate,
-          nights,
-          adults: data.adults,
-          children: data.children,
-          guestName: data.guestName,
-          guestEmail: data.guestEmail,
-          guestPhone: data.guestPhone || null,
+          startDate, endDate, nights,
+          adults: data.adults, children: data.children,
+          guestName: data.guestName, guestEmail: data.guestEmail, guestPhone: data.guestPhone || null,
           subtotalAmount: price.subtotal,
           serviceFeeAmount: price.serviceFee,
           cleaningFeeAmount: price.cleaningFee,
           totalAmount: price.total,
-          expiresAt: new Date(Date.now() + PAYMENT_HOLD_MINUTES * 60 * 1000),
+          depositAmount: deposit,
+          expiresAt: new Date(Date.now() + RESIDENCE_VALIDATION_HOURS * HOUR),
         },
       });
-
-      await tx.payment.create({
-        data: {
-          reservationId: reservation.id,
-          method: data.method,
-          status: "PENDING",
-          amount: price.total,
-          provider: getPaymentProvider().name,
-        },
-      });
-
       return reservation.id;
     });
   } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : "Erreur lors de la reservation." };
+    return { ok: false, error: err instanceof Error ? err.message : "Erreur lors de la demande." };
   }
 
-  // Traitement du paiement (provider mock = confirme immediatement)
-  await processPayment(reservationId);
+  // Notifications : proprietaire + admins
+  await prisma.notification.create({
+    data: {
+      userId: residence.ownerId,
+      title: "Nouvelle demande de reservation",
+      body: `${data.guestName} souhaite reserver ${residence.name}. A valider sous ${RESIDENCE_VALIDATION_HOURS}h.`,
+      type: "RESERVATION_REQUEST",
+      url: "/owner/bookings",
+    },
+  });
+  await notifyAdmins(
+    "Demande de reservation residence",
+    `${residence.name} - ${data.guestName}. Validation sous ${RESIDENCE_VALIDATION_HOURS}h.`,
+    "/admin/reservations"
+  );
+  await sendEmail({
+    to: data.guestEmail,
+    subject: "Demande de reservation recue - KoraStay",
+    html: emailLayout(
+      "Votre demande a bien ete recue",
+      `<p>Bonjour ${data.guestName},</p><p>Votre demande pour <strong>${residence.name}</strong> est en attente de validation par l'hote. Vous serez notifie sous ${RESIDENCE_VALIDATION_HOURS}h pour proceder au paiement de l'acompte.</p>`
+    ),
+    text: `Demande de reservation recue pour ${residence.name}.`,
+  });
 
-  redirect(`/account/bookings/${reservationId}?confirmed=1`);
+  redirect(`/account/bookings/${reservationId}?requested=1`);
 }
 
-// ------------------------------------------------------------
-// Pack
-// ------------------------------------------------------------
+// ============================================================
+// 2. Demande de reservation PACK (en attente de validation)
+// ============================================================
 const packSchema = z.object({
   packId: z.string().min(1),
   startDate: z.string().min(8),
@@ -149,7 +169,7 @@ const packSchema = z.object({
   guestName: z.string().min(2, "Nom requis"),
   guestEmail: z.string().email("Email invalide"),
   guestPhone: z.string().optional(),
-  method: z.string().min(1),
+  method: z.string().optional(),
   acceptTerms: z.string().optional(),
 });
 
@@ -170,15 +190,13 @@ export async function createPackReservation(
   }
 
   const pack = await prisma.pack.findUnique({ where: { id: data.packId } });
-  if (!pack || pack.status !== "PUBLISHED") {
-    return { ok: false, error: "Pack indisponible." };
-  }
+  if (!pack || pack.status !== "PUBLISHED") return { ok: false, error: "Pack indisponible." };
   if (data.persons > pack.maxPersons) {
     return { ok: false, error: `Ce pack accueille au maximum ${pack.maxPersons} personnes.` };
   }
 
   const startDate = new Date(data.startDate);
-  const endDate = new Date(startDate.getTime() + pack.durationNights * 24 * 60 * 60 * 1000);
+  const endDate = new Date(startDate.getTime() + pack.durationNights * DAY);
   const price = computePackPrice({
     basePrice: pack.price,
     basePersons: pack.basePersons,
@@ -186,54 +204,170 @@ export async function createPackReservation(
     persons: data.persons,
     serviceFeeRate: await getServiceFeeRate(),
   });
+  const deposit = computeDeposit({ type: "PACK", nights: pack.durationNights, total: price.total });
 
   const reservation = await prisma.reservation.create({
     data: {
       reference: generateReference("KP"),
       type: "PACK",
-      status: "PENDING_PAYMENT",
+      status: "PENDING_APPROVAL",
       travelerId: user.id,
       packId: pack.id,
-      startDate,
-      endDate,
-      nights: pack.durationNights,
-      adults: data.persons,
-      children: 0,
-      guestName: data.guestName,
-      guestEmail: data.guestEmail,
-      guestPhone: data.guestPhone || null,
+      startDate, endDate, nights: pack.durationNights,
+      adults: data.persons, children: 0,
+      guestName: data.guestName, guestEmail: data.guestEmail, guestPhone: data.guestPhone || null,
       subtotalAmount: price.subtotal + price.extras,
       serviceFeeAmount: price.serviceFee,
       totalAmount: price.total,
-      expiresAt: new Date(Date.now() + PAYMENT_HOLD_MINUTES * 60 * 1000),
-      payments: {
-        create: { method: data.method, status: "PENDING", amount: price.total, provider: getPaymentProvider().name },
-      },
+      depositAmount: deposit,
+      expiresAt: new Date(Date.now() + PACK_VALIDATION_DAYS * DAY),
     },
   });
 
-  await processPayment(reservation.id);
-  redirect(`/account/bookings/${reservation.id}?confirmed=1`);
+  await notifyAdmins(
+    "Demande de reservation pack",
+    `${pack.name} - ${data.guestName}. Validation sous ${PACK_VALIDATION_DAYS} jours.`,
+    "/admin/reservations"
+  );
+  await sendEmail({
+    to: data.guestEmail,
+    subject: "Demande de pack recue - KoraStay",
+    html: emailLayout(
+      "Votre demande de pack a bien ete recue",
+      `<p>Bonjour ${data.guestName},</p><p>Votre demande pour le pack <strong>${pack.name}</strong> est en cours de validation par notre equipe. Vous serez notifie sous ${PACK_VALIDATION_DAYS} jours pour le paiement de l'acompte.</p>`
+    ),
+    text: `Demande de pack recue pour ${pack.name}.`,
+  });
+
+  redirect(`/account/bookings/${reservation.id}?requested=1`);
 }
 
-// ------------------------------------------------------------
-// Traitement paiement (mock / provider)
-// ------------------------------------------------------------
-async function processPayment(reservationId: string) {
+// ============================================================
+// 3. Validation (hote / admin)
+// ============================================================
+export async function approveReservation(reservationId: string): Promise<ReservationResult> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, error: "Non autorise." };
+
   const reservation = await prisma.reservation.findUnique({
     where: { id: reservationId },
-    include: { payments: { orderBy: { createdAt: "desc" }, take: 1 }, residence: true, pack: true },
+    include: { residence: { select: { ownerId: true, name: true } }, pack: { select: { name: true } } },
   });
-  if (!reservation) return;
-  const payment = reservation.payments[0];
-  if (!payment) return;
+  if (!reservation) return { ok: false, error: "Reservation introuvable." };
+
+  const isOwner = reservation.residence?.ownerId === user.id;
+  if (!isOwner && !isStaff(user.role)) return { ok: false, error: "Acces refuse." };
+  if (reservation.status !== "PENDING_APPROVAL") {
+    return { ok: false, error: "Cette demande n'est plus en attente de validation." };
+  }
+
+  await prisma.$transaction([
+    prisma.reservation.update({
+      where: { id: reservationId },
+      data: { status: "PENDING_PAYMENT", approvedAt: new Date(), approvedById: user.id, expiresAt: null },
+    }),
+    prisma.notification.create({
+      data: {
+        userId: reservation.travelerId,
+        title: "Reservation validee",
+        body: `Votre demande ${reservation.reference} est validee. Payez l'acompte de ${formatPrice(reservation.depositAmount)} pour confirmer.`,
+        type: "RESERVATION_APPROVED",
+        url: `/account/bookings/${reservationId}`,
+      },
+    }),
+  ]);
+
+  await sendEmail({
+    to: reservation.guestEmail,
+    subject: `Demande validee - ${reservation.reference}`,
+    html: emailLayout(
+      "Votre demande est validee",
+      `<p>Bonjour ${reservation.guestName},</p><p>Bonne nouvelle ! Votre demande <strong>${reservation.reference}</strong> est validee. Reglez l'acompte de <strong>${formatPrice(reservation.depositAmount)}</strong> pour confirmer votre reservation.</p>`
+    ),
+    text: `Demande ${reservation.reference} validee. Acompte : ${formatPrice(reservation.depositAmount)}.`,
+  });
+
+  ["/owner/bookings", "/admin/reservations"].forEach((p) => revalidatePath(p));
+  revalidatePath(`/account/bookings/${reservationId}`);
+  return { ok: true, reservationId };
+}
+
+export async function rejectReservation(reservationId: string): Promise<ReservationResult> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, error: "Non autorise." };
+
+  const reservation = await prisma.reservation.findUnique({
+    where: { id: reservationId },
+    include: { residence: { select: { ownerId: true } } },
+  });
+  if (!reservation) return { ok: false, error: "Reservation introuvable." };
+
+  const isOwner = reservation.residence?.ownerId === user.id;
+  if (!isOwner && !isStaff(user.role)) return { ok: false, error: "Acces refuse." };
+  if (reservation.status !== "PENDING_APPROVAL") {
+    return { ok: false, error: "Cette demande n'est plus en attente." };
+  }
+
+  await prisma.$transaction([
+    prisma.reservation.update({
+      where: { id: reservationId },
+      data: { status: "CANCELLED", cancelledAt: new Date() },
+    }),
+    prisma.notification.create({
+      data: {
+        userId: reservation.travelerId,
+        title: "Demande declinee",
+        body: `Votre demande ${reservation.reference} n'a pas pu etre validee. Aucun montant ne vous a ete debite.`,
+        type: "RESERVATION_CANCELLED",
+        url: `/account/bookings/${reservationId}`,
+      },
+    }),
+  ]);
+
+  ["/owner/bookings", "/admin/reservations"].forEach((p) => revalidatePath(p));
+  revalidatePath(`/account/bookings/${reservationId}`);
+  return { ok: true, reservationId };
+}
+
+// ============================================================
+// 4. Paiement de l'acompte par le voyageur -> CONFIRMEE
+// ============================================================
+export async function payReservationDeposit(
+  reservationId: string,
+  method: string
+): Promise<ReservationResult> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, error: "Non autorise." };
+
+  const reservation = await prisma.reservation.findUnique({
+    where: { id: reservationId },
+    include: { residence: true, pack: true },
+  });
+  if (!reservation || reservation.travelerId !== user.id) {
+    return { ok: false, error: "Reservation introuvable." };
+  }
+  if (reservation.status !== "PENDING_PAYMENT") {
+    return { ok: false, error: "Cette reservation n'est pas en attente de paiement." };
+  }
+
+  const amount = reservation.depositAmount > 0 ? reservation.depositAmount : reservation.totalAmount;
+
+  const payment = await prisma.payment.create({
+    data: {
+      reservationId,
+      method: method || "MOCK",
+      status: "PENDING",
+      amount,
+      provider: getPaymentProvider().name,
+    },
+  });
 
   const provider = getPaymentProvider();
   const intent = await provider.createIntent({
     reservationId,
     reference: reservation.reference,
-    amount: payment.amount,
-    currency: payment.currency,
+    amount,
+    currency: reservation.currency,
     method: payment.method,
     customerEmail: reservation.guestEmail,
     customerName: reservation.guestName,
@@ -241,68 +375,93 @@ async function processPayment(reservationId: string) {
   });
   const confirmation = await provider.confirm(intent.providerReference);
 
-  if (confirmation.status === "PAID") {
-    await prisma.$transaction([
-      prisma.payment.update({
-        where: { id: payment.id },
-        data: { status: "PAID", paidAt: new Date(), providerReference: intent.providerReference },
-      }),
-      prisma.reservation.update({
-        where: { id: reservationId },
-        data: { status: "CONFIRMED", confirmedAt: new Date(), expiresAt: null },
-      }),
-    ]);
+  if (confirmation.status !== "PAID") {
+    await prisma.payment.update({ where: { id: payment.id }, data: { status: "FAILED" } });
+    return { ok: false, error: "Le paiement de l'acompte a echoue. Reessayez." };
+  }
 
-    // Notifications
-    const label = reservation.residence?.name ?? reservation.pack?.name ?? "votre sejour";
+  await prisma.$transaction([
+    prisma.payment.update({
+      where: { id: payment.id },
+      data: { status: "PAID", paidAt: new Date(), providerReference: intent.providerReference },
+    }),
+    prisma.reservation.update({
+      where: { id: reservationId },
+      data: { status: "CONFIRMED", confirmedAt: new Date(), expiresAt: null },
+    }),
+  ]);
+
+  // Notifications de confirmation
+  const label = reservation.residence?.name ?? reservation.pack?.name ?? "votre sejour";
+  await prisma.notification.create({
+    data: {
+      userId: reservation.travelerId,
+      title: "Reservation confirmee",
+      body: `Votre reservation ${reservation.reference} pour ${label} est confirmee. Recu disponible.`,
+      type: "RESERVATION_CONFIRMED",
+      url: `/account/bookings/${reservationId}`,
+    },
+  });
+  if (reservation.residence) {
     await prisma.notification.create({
       data: {
-        userId: reservation.travelerId,
+        userId: reservation.residence.ownerId,
         title: "Reservation confirmee",
-        body: `Votre reservation ${reservation.reference} pour ${label} est confirmee.`,
-        type: "RESERVATION_CONFIRMED",
-        url: `/account/bookings/${reservationId}`,
+        body: `${reservation.guestName} a confirme sa reservation a ${reservation.residence.name} (${reservation.reference}).`,
+        type: "OWNER_BOOKING",
+        url: "/owner/bookings",
       },
     });
-    if (reservation.residence) {
-      const owner = await prisma.residence.findUnique({
-        where: { id: reservation.residence.id },
-        select: { ownerId: true },
-      });
-      if (owner) {
-        await prisma.notification.create({
-          data: {
-            userId: owner.ownerId,
-            title: "Nouvelle reservation",
-            body: `Nouvelle reservation confirmee a ${reservation.residence.name} (${reservation.reference}).`,
-            type: "OWNER_BOOKING",
-            url: `/owner/bookings`,
-          },
-        });
-      }
-    }
-    await sendEmail({
-      to: reservation.guestEmail,
-      subject: `Reservation confirmee - ${reservation.reference}`,
-      html: emailLayout(
-        "Votre reservation est confirmee",
-        `<p>Bonjour ${reservation.guestName},</p><p>Votre reservation <strong>${reservation.reference}</strong> pour ${label} est confirmee.</p>`
-      ),
-      text: `Reservation ${reservation.reference} confirmee.`,
-    });
-
-    // Mise en relation automatique des partenaires pour les packs
-    if (reservation.packId) {
-      await autoProposePartnersForPack(reservation.packId, reservationId, reservation.startDate);
-    }
   }
+  await sendEmail({
+    to: reservation.guestEmail,
+    subject: `Reservation confirmee - ${reservation.reference}`,
+    html: emailLayout(
+      "Votre reservation est confirmee",
+      `<p>Bonjour ${reservation.guestName},</p><p>Votre reservation <strong>${reservation.reference}</strong> pour ${label} est confirmee. Acompte regle : ${formatPrice(amount)}. Le solde sera regle sur place.</p>`
+    ),
+    text: `Reservation ${reservation.reference} confirmee.`,
+  });
+
+  if (reservation.packId) {
+    await autoProposePartnersForPack(reservation.packId, reservationId, reservation.startDate);
+  }
+
   revalidatePath("/account/bookings");
+  redirect(`/account/bookings/${reservationId}?confirmed=1`);
 }
 
-/**
- * Propose automatiquement les guides et transporteurs verifies de la ville
- * du pack en creant des missions a l'etat PROPOSED.
- */
+// ============================================================
+// 5. Expiration automatique des demandes non validees
+// ============================================================
+export async function expireStaleReservations(): Promise<number> {
+  const stale = await prisma.reservation.findMany({
+    where: { status: "PENDING_APPROVAL", expiresAt: { lt: new Date() } },
+    select: { id: true, travelerId: true, reference: true },
+  });
+  if (stale.length === 0) return 0;
+
+  await prisma.$transaction([
+    prisma.reservation.updateMany({
+      where: { id: { in: stale.map((r) => r.id) } },
+      data: { status: "CANCELLED", cancelledAt: new Date() },
+    }),
+    prisma.notification.createMany({
+      data: stale.map((r) => ({
+        userId: r.travelerId,
+        title: "Demande expiree",
+        body: `Votre demande ${r.reference} a expire sans validation et a ete annulee automatiquement.`,
+        type: "RESERVATION_CANCELLED",
+        url: "/account/bookings",
+      })),
+    }),
+  ]);
+  return stale.length;
+}
+
+// ------------------------------------------------------------
+// Proposition automatique des partenaires (packs confirmes)
+// ------------------------------------------------------------
 async function autoProposePartnersForPack(packId: string, reservationId: string, scheduledAt: Date) {
   const pack = await prisma.pack.findUnique({
     where: { id: packId },
@@ -313,7 +472,7 @@ async function autoProposePartnersForPack(packId: string, reservationId: string,
 
   const partners = await prisma.partnerProfile.findMany({
     where: { verificationStatus: "VERIFIED", type: { in: ["GUIDE", "TRANSPORT"] }, city: { equals: city } },
-    select: { id: true, type: true, businessName: true, userId: true },
+    select: { id: true, type: true, userId: true },
   });
 
   for (const partner of partners) {
@@ -362,7 +521,7 @@ export async function cancelReservation(reservationId: string): Promise<Reservat
   if (!reservation || reservation.travelerId !== user.id) {
     return { ok: false, error: "Reservation introuvable." };
   }
-  if (!["CONFIRMED", "PENDING_PAYMENT"].includes(reservation.status)) {
+  if (!["CONFIRMED", "PENDING_PAYMENT", "PENDING_APPROVAL"].includes(reservation.status)) {
     return { ok: false, error: "Cette reservation ne peut pas etre annulee." };
   }
 
@@ -383,7 +542,7 @@ export async function cancelReservation(reservationId: string): Promise<Reservat
         data: {
           paymentId: reservation.payments[0].id,
           reservationId,
-          amount: estimate.refundableAmount,
+          amount: Math.min(estimate.refundableAmount, reservation.payments[0].amount),
           reason: "Annulation voyageur",
           status: "PENDING",
         },
@@ -393,7 +552,7 @@ export async function cancelReservation(reservationId: string): Promise<Reservat
       data: {
         userId: user.id,
         title: "Reservation annulee",
-        body: `Votre reservation ${reservation.reference} a ete annulee. ${estimate.label}.`,
+        body: `Votre reservation ${reservation.reference} a ete annulee.${hasPaid ? " " + estimate.label + "." : ""}`,
         type: "RESERVATION_CANCELLED",
         url: `/account/bookings/${reservationId}`,
       },

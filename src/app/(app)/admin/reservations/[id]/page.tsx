@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { adminSetReservationStatus } from "@/server/actions/admin";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { AdminActions } from "@/components/dashboard/admin-actions";
+import { ApproveReservationButtons } from "@/components/dashboard/approve-reservation-buttons";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { reservationStatusMeta, paymentStatusMeta } from "@/lib/enums";
 import { formatPrice, formatDate } from "@/lib/utils";
@@ -38,6 +39,16 @@ export default async function AdminReservationDetail({ params }: { params: Promi
         <ChevronLeft className="h-4 w-4" /> Reservations
       </Link>
       <PageHeader title={reservation.reference} actions={<StatusBadge status={reservation.status} map={reservationStatusMeta} />} />
+
+      {reservation.status === "PENDING_APPROVAL" && (
+        <div className="mb-5 rounded-3xl border border-gold-200 bg-gold-50/60 p-5 shadow-soft">
+          <p className="mb-1 font-bold text-gold-800">Demande en attente de validation</p>
+          <p className="mb-4 text-sm text-gold-800/80">
+            Validez pour autoriser le voyageur a payer l'acompte de <strong>{formatPrice(reservation.depositAmount)}</strong>, ou declinez la demande.
+          </p>
+          <ApproveReservationButtons reservationId={reservation.id} />
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_300px]">
         <div className="space-y-5">

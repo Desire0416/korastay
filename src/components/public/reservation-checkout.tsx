@@ -19,6 +19,8 @@ interface ReservationCheckoutProps {
   defaultEmail: string;
   defaultPhone: string;
   isMock?: boolean;
+  depositLabel?: string;
+  validationLabel?: string;
 }
 
 export function ReservationCheckout({
@@ -28,6 +30,8 @@ export function ReservationCheckout({
   defaultEmail,
   defaultPhone,
   isMock,
+  depositLabel,
+  validationLabel = "24h",
 }: ReservationCheckoutProps) {
   const [state, formAction, pending] = useActionState<ReservationResult, FormData>(
     action,
@@ -58,18 +62,20 @@ export function ReservationCheckout({
         </div>
       </section>
 
-      {/* Paiement */}
+      {/* Validation & acompte */}
       <section>
-        <h2 className="mb-4 text-lg font-bold text-foreground">Mode de paiement</h2>
+        <h2 className="mb-2 text-lg font-bold text-foreground">Validation de votre demande</h2>
+        <div className="mb-4 flex items-start gap-2 rounded-2xl bg-brand-50/70 px-4 py-3 text-sm text-brand-800">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-brand-600" />
+          <span>
+            Aucun montant n'est debite maintenant. Votre demande est validee sous <strong>{validationLabel}</strong>,
+            puis vous reglez un <strong>acompte{depositLabel ? ` de ${depositLabel}` : ""}</strong> pour confirmer. Le solde se regle sur place.
+          </span>
+        </div>
         {isMock && (
-          <div className="mb-4 flex items-start gap-2 rounded-2xl bg-gold-50 px-4 py-3 text-sm text-gold-700">
-            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-            <span>
-              <strong>Mode demonstration :</strong> le paiement est simule. Aucun montant
-              reel ne sera debite. La reservation sera confirmee immediatement.
-            </span>
-          </div>
+          <p className="mb-4 text-xs text-muted">Mode demonstration : le paiement de l'acompte est simule.</p>
         )}
+        <p className="mb-3 text-sm font-semibold text-foreground">Moyen de paiement prefere (pour l'acompte)</p>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {PAYMENT_METHOD_OPTIONS.map((opt) => (
             <button
@@ -113,7 +119,7 @@ export function ReservationCheckout({
 
       <Button type="submit" size="lg" loading={pending} className="w-full">
         <Lock className="h-4 w-4" />
-        Confirmer et payer
+        Envoyer ma demande de reservation
       </Button>
     </form>
   );

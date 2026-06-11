@@ -93,7 +93,7 @@ export function ConnectedShell({
       {/* Sidebar desktop */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-border bg-surface transition-all duration-300 lg:flex",
+          "fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-border bg-surface transition-all duration-300 lg:flex print:!hidden",
           collapsed ? "w-[76px]" : "w-64"
         )}
       >
@@ -112,9 +112,9 @@ export function ConnectedShell({
       </aside>
 
       {/* Zone principale */}
-      <div className={cn("flex min-h-dvh flex-col transition-all duration-300", collapsed ? "lg:pl-[76px]" : "lg:pl-64")}>
+      <div className={cn("flex min-h-dvh flex-col transition-all duration-300 print:!pl-0", collapsed ? "lg:pl-[76px]" : "lg:pl-64")}>
         {/* Topbar */}
-        <header className="sticky top-0 z-20 flex h-[var(--header-h)] items-center justify-between gap-3 border-b border-border bg-background/90 px-4 backdrop-blur lg:px-6">
+        <header className="sticky top-0 z-20 flex h-[var(--header-h)] items-center justify-between gap-3 border-b border-border bg-background/90 px-4 backdrop-blur lg:px-6 print:hidden">
           <div className="flex items-center gap-3">
             {/* Menu mobile */}
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -163,10 +163,10 @@ export function ConnectedShell({
         </header>
 
         {/* Contenu */}
-        <main className="flex-1 px-4 py-6 pb-24 lg:px-6 lg:pb-8">{children}</main>
+        <main className="flex-1 px-4 py-6 pb-24 lg:px-6 lg:pb-8 print:p-0">{children}</main>
 
         {/* Tabs mobile */}
-        <nav className="safe-bottom fixed inset-x-0 bottom-0 z-20 border-t border-border bg-surface/95 backdrop-blur lg:hidden">
+        <nav className="safe-bottom fixed inset-x-0 bottom-0 z-20 border-t border-border bg-surface/95 backdrop-blur lg:hidden print:hidden">
           <ul className="flex h-[var(--bottom-nav-h)] items-stretch justify-around">
             {mobileTabs.map((tab) => {
               const active = isActive(tab.href);

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ChevronLeft, Users, CalendarDays, Clock, ShieldCheck } from "lucide-react";
 import { getPackBySlug } from "@/lib/queries";
 import { getCurrentUser } from "@/lib/auth";
-import { computePackPrice } from "@/lib/pricing";
+import { computePackPrice, computeDeposit } from "@/lib/pricing";
 import { isMockPayments } from "@/lib/payments";
 import { createPackReservation } from "@/server/actions/reservations";
 import { ReservationCheckout } from "@/components/public/reservation-checkout";
@@ -54,6 +54,8 @@ export default async function PackReserverPage({
           <ReservationCheckout
             action={createPackReservation}
             isMock={isMockPayments()}
+            validationLabel="7 jours"
+            depositLabel={formatPrice(computeDeposit({ type: "PACK", nights: pack.durationNights, total: price.total }))}
             hidden={{ packId: pack.id, startDate: startDate!, persons: String(persons) }}
             defaultName={`${user.firstName} ${user.lastName}`}
             defaultEmail={user.email}

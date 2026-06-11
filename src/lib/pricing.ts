@@ -96,6 +96,25 @@ export function estimateResidenceRefund(
   };
 }
 
+// ------------------------------------------------------------
+// Acompte a payer apres validation de la demande
+// Residence : prix d'une nuitee ; si sejour d'1 nuit -> moitie du total.
+// Pack : moitie du total.
+// ------------------------------------------------------------
+export function computeDeposit(input: {
+  type: "RESIDENCE" | "PACK" | string;
+  nights: number;
+  total: number;
+  pricePerNight?: number;
+}): number {
+  if (input.type === "RESIDENCE") {
+    if (input.nights <= 1 || !input.pricePerNight) return Math.round(input.total / 2);
+    return Math.min(input.pricePerNight, input.total);
+  }
+  // Pack (et autres) : moitie du total
+  return Math.round(input.total / 2);
+}
+
 export function estimatePackRefund(
   total: number,
   serviceFee: number,

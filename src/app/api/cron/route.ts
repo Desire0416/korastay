@@ -15,7 +15,22 @@ export async function GET(req: NextRequest) {
   }
 
   const now = new Date();
-  const result = { expiredReleased: 0, autoCompleted: 0, checkinReminders: 0, reviewInvites: 0 };
+  const result = { approvalExpired: 0, expiredReleased: 0, autoCompleted: 0, checkinReminders: 0, reviewInvites: 0 };
+
+  // 0) Annuler les demandes non validees dans le delai (24h residence / 7j pack)
+  const staleApproval = await prisma.reservation.findMany({
+    where: { status: "PENDING_APPROVAL", expiresAt: { lt: now } },
+    select: { id: true, travelerId: true, reference: true },
+  });
+  for (const r of staleApproval) {
+    await prisma.$transaction([
+      prisma.reservation.update({ where: { id: r.id }, data: { status: "CANCELLED", cancelledAt: now } }),
+      prisma.notification.create({
+        data: { userId: r.travelerId, title: "Demande expiree", body: `Votre demande ${r.reference} a expire sans validation et a ete annulee.`, type: "RESERVATION_CANCELLED", url: "/account/bookings" },
+      }),
+    ]);
+    result.approvalExpired++;
+  }
 
   // 1) Liberer les reservations en attente de paiement expirees
   const expired = await prisma.reservation.findMany({

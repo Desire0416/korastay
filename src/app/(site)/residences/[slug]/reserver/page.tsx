@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ChevronLeft, Users, CalendarDays, ShieldCheck } from "lucide-react";
 import { getResidenceBySlug } from "@/lib/queries";
 import { getCurrentUser } from "@/lib/auth";
-import { computeResidencePrice } from "@/lib/pricing";
+import { computeResidencePrice, computeDeposit } from "@/lib/pricing";
 import { isMockPayments } from "@/lib/payments";
 import { createResidenceReservation } from "@/server/actions/reservations";
 import { ReservationCheckout } from "@/components/public/reservation-checkout";
@@ -64,6 +64,8 @@ export default async function ReserverPage({
           <ReservationCheckout
             action={createResidenceReservation}
             isMock={isMockPayments()}
+            validationLabel="24h"
+            depositLabel={formatPrice(computeDeposit({ type: "RESIDENCE", nights: price.nights, total: price.total, pricePerNight: residence.pricePerNight }))}
             hidden={{
               residenceId: residence.id,
               checkin: checkin!,

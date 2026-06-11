@@ -18,6 +18,11 @@ export const SERVICE_FEE_RATE = 0.07;
 // Duree du verrouillage des dates pendant le paiement (minutes)
 export const PAYMENT_HOLD_MINUTES = 15;
 
+// Delais de validation des demandes de reservation par l'hote/admin.
+// Au-dela, la demande est automatiquement annulee.
+export const RESIDENCE_VALIDATION_HOURS = 24;
+export const PACK_VALIDATION_DAYS = 7;
+
 // Session
 export const SESSION_COOKIE = "korastay_session";
 export const SESSION_DURATION_DAYS = 30;

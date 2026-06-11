@@ -269,9 +269,12 @@ model Reservation {
   serviceFeeAmount  Int          @default(0)
   cleaningFeeAmount Int          @default(0)
   totalAmount       Int          @default(0)
+  depositAmount     Int          @default(0) // acompte a payer apres validation
   currency          String       @default("XOF")
   notes             String?
-  expiresAt         DateTime?
+  expiresAt         DateTime?    // echeance de validation (24h residence / 7j pack)
+  approvedAt        DateTime?    // validation par hote/admin
+  approvedById      String?      // id de l'hote ou admin qui a valide
   confirmedAt       DateTime?
   cancelledAt       DateTime?
   createdAt         DateTime     @default(now())

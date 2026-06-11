@@ -2,12 +2,14 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
   CheckCircle2, CalendarDays, Users, MapPin, ChevronLeft, Receipt,
-  ShieldCheck, Phone, Star, Package, Ticket,
+  ShieldCheck, Phone, Star, Package, Ticket, Clock, Send,
 } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { getReservationDetail } from "@/lib/account-queries";
 import { estimateResidenceRefund, estimatePackRefund } from "@/lib/pricing";
 import { CancelReservationButton } from "@/components/dashboard/cancel-reservation-button";
+import { ValidationCountdown } from "@/components/dashboard/validation-countdown";
+import { PayDepositButton } from "@/components/dashboard/pay-deposit-button";
 import { ContactButton } from "@/components/messaging/contact-button";
 import { SmartImage } from "@/components/ui/smart-image";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -31,6 +33,7 @@ export default async function BookingDetailPage({
   if (!reservation) notFound();
 
   const justConfirmed = sp.confirmed === "1";
+  const justRequested = sp.requested === "1";
   const isPack = reservation.type === "PACK";
   const title = reservation.residence?.name ?? reservation.pack?.name ?? "Reservation";
   const image = reservation.residence?.images[0]?.url ?? reservation.pack?.images[0]?.url;
@@ -41,8 +44,9 @@ export default async function BookingDetailPage({
     ? estimatePackRefund(reservation.totalAmount, reservation.serviceFeeAmount, reservation.startDate)
     : estimateResidenceRefund(reservation.totalAmount, reservation.serviceFeeAmount, reservation.startDate);
 
-  const canCancel = ["CONFIRMED", "PENDING_PAYMENT"].includes(reservation.status);
+  const canCancel = ["CONFIRMED", "PENDING_PAYMENT", "PENDING_APPROVAL"].includes(reservation.status);
   const canReview = reservation.status === "COMPLETED" && !reservation.review;
+  const hasReceipt = ["CONFIRMED", "CHECKED_IN", "COMPLETED"].includes(reservation.status);
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -56,7 +60,19 @@ export default async function BookingDetailPage({
           <div>
             <p className="font-bold text-success">Reservation confirmee !</p>
             <p className="text-sm text-emerald-700/80">
-              Un email de confirmation vous a ete envoye. Votre bon de reservation est disponible ci-dessous.
+              Un email de confirmation vous a ete envoye. Votre recu KoraStay est disponible ci-dessous.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {justRequested && reservation.status === "PENDING_APPROVAL" && (
+        <div className="mb-6 flex items-start gap-3 rounded-3xl border border-gold-200 bg-gold-50 p-5">
+          <Send className="mt-0.5 h-6 w-6 shrink-0 text-gold-600" />
+          <div>
+            <p className="font-bold text-gold-800">Demande envoyee !</p>
+            <p className="text-sm text-gold-700/80">
+              Votre demande est en attente de validation. Vous serez notifie des qu'elle sera acceptee pour regler l'acompte.
             </p>
           </div>
         </div>
@@ -86,6 +102,37 @@ export default async function BookingDetailPage({
         </div>
       </div>
 
+      {/* En attente de validation : compte a rebours */}
+      {reservation.status === "PENDING_APPROVAL" && reservation.expiresAt && (
+        <div className="mt-6 rounded-3xl border border-gold-200 bg-gold-50/50 p-5 shadow-soft">
+          <p className="mb-1.5 flex items-center gap-2 font-bold text-gold-800">
+            <Clock className="h-5 w-5" /> En attente de validation
+          </p>
+          <p className="mb-4 text-sm text-gold-800/80">
+            Votre demande a ete transmise {isPack ? "a l'equipe KoraStay" : "a l'hote et a KoraStay"}.
+            Une fois validee, vous reglerez un acompte de <strong>{formatPrice(reservation.depositAmount)}</strong> pour confirmer.
+          </p>
+          <ValidationCountdown
+            deadline={reservation.expiresAt.toISOString()}
+            startedAt={reservation.createdAt.toISOString()}
+          />
+        </div>
+      )}
+
+      {/* Validee : paiement de l'acompte */}
+      {reservation.status === "PENDING_PAYMENT" && (
+        <div className="mt-6 rounded-3xl border border-brand-200 bg-brand-50/50 p-5 shadow-soft">
+          <p className="mb-1 flex items-center gap-2 font-bold text-brand-800">
+            <CheckCircle2 className="h-5 w-5" /> Demande validee !
+          </p>
+          <p className="mb-4 text-sm text-brand-800/80">
+            Reglez l'acompte de <strong>{formatPrice(reservation.depositAmount)}</strong> pour confirmer votre reservation.
+            Le solde ({formatPrice(reservation.totalAmount - reservation.depositAmount)}) sera regle sur place.
+          </p>
+          <PayDepositButton reservationId={reservation.id} amountLabel={formatPrice(reservation.depositAmount)} />
+        </div>
+      )}
+
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
         {/* Detail paiement */}
         <div className="space-y-6">
@@ -100,6 +147,18 @@ export default async function BookingDetailPage({
               <div className="flex justify-between border-t border-border pt-3 text-base font-extrabold text-foreground">
                 <span>Total</span><span>{formatPrice(reservation.totalAmount)}</span>
               </div>
+              {reservation.depositAmount > 0 && reservation.status !== "PENDING_APPROVAL" && (
+                <div className="mt-1 space-y-1 rounded-2xl bg-brand-50/60 px-3 py-2.5">
+                  <div className="flex justify-between text-brand-800">
+                    <span className="font-semibold">Acompte {hasReceipt ? "regle" : "a regler"}</span>
+                    <span className="font-bold">{formatPrice(reservation.depositAmount)}</span>
+                  </div>
+                  <div className="flex justify-between text-muted">
+                    <span>Solde a regler sur place</span>
+                    <span>{formatPrice(reservation.totalAmount - reservation.depositAmount)}</span>
+                  </div>
+                </div>
+              )}
             </div>
             {payment && (
               <div className="mt-4 flex items-center justify-between rounded-2xl bg-surface-soft px-4 py-3">
@@ -162,6 +221,14 @@ export default async function BookingDetailPage({
                 </Button>
               </div>
             </div>
+          )}
+
+          {hasReceipt && (
+            <Button asChild variant="outline" className="w-full">
+              <Link href={`/account/bookings/${reservation.id}/recu`} target="_blank">
+                <Receipt className="h-4 w-4" /> Recu KoraStay
+              </Link>
+            </Button>
           )}
 
           {canReview && (
