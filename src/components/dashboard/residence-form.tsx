@@ -16,6 +16,7 @@ interface ResidenceDefaults {
   name?: string; type?: string; city?: string; district?: string; address?: string;
   description?: string; capacity?: number; bedrooms?: number; beds?: number;
   bathrooms?: number; pricePerNight?: number; cleaningFee?: number; depositAmount?: number;
+  cautionEnabled?: boolean; cautionJustification?: string; isHighDemand?: boolean;
   checkInTime?: string; checkOutTime?: string; houseRules?: string;
 }
 
@@ -125,9 +126,30 @@ export function ResidenceForm({
         <Field label="Frais de menage" htmlFor="cleaningFee">
           <Input id="cleaningFee" name="cleaningFee" type="number" min={0} step={500} defaultValue={dv.cleaningFee ?? 0} placeholder="5000" />
         </Field>
-        <Field label="Caution" htmlFor="depositAmount">
+        <Field label="Montant de la caution" htmlFor="depositAmount">
           <Input id="depositAmount" name="depositAmount" type="number" min={0} step={1000} defaultValue={dv.depositAmount ?? 0} placeholder="30000" />
         </Field>
+      </Section>
+
+      {/* Caution & demande */}
+      <Section title="Caution & demande">
+        <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border p-3.5 sm:col-span-2">
+          <input type="checkbox" name="cautionEnabled" value="1" defaultChecked={dv.cautionEnabled ?? false} className="mt-0.5 h-5 w-5 rounded border-border text-brand-500 focus:ring-brand-400" />
+          <span>
+            <span className="block text-sm font-semibold text-foreground">Exiger une caution (depot de garantie)</span>
+            <span className="block text-xs text-muted">Le montant ci-dessus pourra etre bloque puis restitue au depart.</span>
+          </span>
+        </label>
+        <Field label="Justification de la caution" htmlFor="cautionJustification" className="sm:col-span-2" hint="Affichee au voyageur (ex: objets de valeur, equipements fragiles).">
+          <Input id="cautionJustification" name="cautionJustification" defaultValue={dv.cautionJustification ?? ""} placeholder="Ex: protection des equipements" />
+        </Field>
+        <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border p-3.5 sm:col-span-2">
+          <input type="checkbox" name="isHighDemand" value="1" defaultChecked={dv.isHighDemand ?? false} className="mt-0.5 h-5 w-5 rounded border-border text-brand-500 focus:ring-brand-400" />
+          <span>
+            <span className="block text-sm font-semibold text-foreground">Residence a forte demande</span>
+            <span className="block text-xs text-muted">Paiement de 100% exige a la reservation (selon les regles de paiement).</span>
+          </span>
+        </label>
       </Section>
 
       {/* Horaires */}

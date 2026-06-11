@@ -45,6 +45,8 @@ export default async function AdminEditResidencePage({ params }: { params: Promi
             bedrooms: residence.bedrooms, beds: residence.beds, bathrooms: residence.bathrooms,
             pricePerNight: residence.pricePerNight, cleaningFee: residence.cleaningFee,
             depositAmount: residence.depositAmount, checkInTime: residence.checkInTime,
+            cautionEnabled: residence.cautionEnabled, cautionJustification: residence.cautionJustification ?? "",
+            isHighDemand: residence.isHighDemand,
             checkOutTime: residence.checkOutTime, houseRules: residence.houseRules ?? "",
           }}
           submitLabel="Enregistrer les modifications"

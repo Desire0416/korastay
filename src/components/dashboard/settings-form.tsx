@@ -1,7 +1,9 @@
 "use client";
 
 import { useActionState, useEffect } from "react";
+import Link from "next/link";
 import { toast } from "sonner";
+import { CreditCard, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,13 +11,12 @@ import { Field } from "@/components/ui/field";
 import { saveSettings, type SettingsResult } from "@/server/actions/settings";
 
 interface Props {
-  feePercent: number;
   contactEmail: string;
   contactPhone: string;
   announcement: string;
 }
 
-export function SettingsForm({ feePercent, contactEmail, contactPhone, announcement }: Props) {
+export function SettingsForm({ contactEmail, contactPhone, announcement }: Props) {
   const [state, action, pending] = useActionState<SettingsResult, FormData>(saveSettings, { ok: false });
 
   useEffect(() => {
@@ -25,12 +26,16 @@ export function SettingsForm({ feePercent, contactEmail, contactPhone, announcem
 
   return (
     <form action={action} className="space-y-6">
-      <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
-        <h2 className="mb-4 font-bold text-foreground">Tarification</h2>
-        <Field label="Frais de service KoraStay (%)" htmlFor="feePercent" hint="Applique au sous-total de chaque reservation. Defaut : 7%.">
-          <Input id="feePercent" name="feePercent" type="number" min={0} max={30} step="0.5" defaultValue={feePercent} className="max-w-40" />
-        </Field>
-      </div>
+      <Link href="/admin/settings/payments" className="flex items-center justify-between rounded-3xl border border-border bg-surface p-5 shadow-soft transition-colors hover:border-brand-300">
+        <span className="flex items-center gap-3">
+          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-50 text-brand-600"><CreditCard className="h-5 w-5" /></span>
+          <span>
+            <span className="block font-bold text-foreground">Regles de paiement</span>
+            <span className="block text-sm text-muted">Moyens actives, frais de service, acomptes, caution, reversements.</span>
+          </span>
+        </span>
+        <ChevronRight className="h-5 w-5 text-muted" />
+      </Link>
 
       <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
         <h2 className="mb-4 font-bold text-foreground">Contact affiche</h2>

@@ -5,7 +5,7 @@ import {
   Handshake, ScrollText, Wifi, Snowflake, CookingPot, Droplets, Car, Tv,
   Coffee, Sparkles, Trees, ShieldCheck, Zap, Waves, WashingMachine, Laptop,
   ArrowUpDown, Download, Settings, Wand2, Newspaper, Trash2, Languages,
-  HelpCircle, type LucideIcon,
+  Banknote, HelpCircle, type LucideIcon,
 } from "lucide-react";
 
 const ICONS: Record<string, LucideIcon> = {
@@ -14,7 +14,7 @@ const ICONS: Record<string, LucideIcon> = {
   FileText, Users, Receipt, Building2, CreditCard, RotateCcw, MapPin,
   Handshake, ScrollText, Wifi, Snowflake, CookingPot, Droplets, Car, Tv,
   Coffee, Sparkles, Trees, ShieldCheck, Zap, Waves, WashingMachine, Laptop,
-  ArrowUpDown, Download, Settings, Wand2, Newspaper, Trash2, Languages,
+  ArrowUpDown, Download, Settings, Wand2, Newspaper, Trash2, Languages, Banknote,
 };
 
 export function getIcon(name?: string | null): LucideIcon {

@@ -4,6 +4,7 @@ import { ChevronLeft, Mail, Phone, MapPin, Calendar } from "lucide-react";
 import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { setUserStatus, setUserRole } from "@/server/actions/admin";
+import { setOwnerPayoutTier } from "@/server/actions/payments-admin";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { AdminActions } from "@/components/dashboard/admin-actions";
 import { Badge } from "@/components/ui/badge";
@@ -63,6 +64,22 @@ export default async function AdminUserDetail({ params }: { params: Promise<{ id
       <div className="mt-5 rounded-3xl border border-border bg-surface p-5 shadow-soft">
         <h2 className="mb-3 font-bold text-foreground">Actions</h2>
         <AdminActions actions={statusActions} />
+
+        {user.role === "OWNER" && (
+          <div className="mt-5 border-t border-border pt-5">
+            <p className="mb-1 text-sm font-semibold text-foreground">Fiabilite des reversements</p>
+            <p className="mb-2 text-xs text-muted">
+              Actuel : <Badge tone={user.payoutTier === "RELIABLE" ? "success" : "neutral"}>{user.payoutTier === "RELIABLE" ? "Fiable (100% au check-in)" : "Nouveau (70% / 30%)"}</Badge>
+            </p>
+            <AdminActions
+              actions={[
+                user.payoutTier === "RELIABLE"
+                  ? { label: "Repasser en nouveau", fn: setOwnerPayoutTier.bind(null, id, "NEW"), variant: "soft" as const }
+                  : { label: "Marquer comme fiable", fn: setOwnerPayoutTier.bind(null, id, "RELIABLE"), variant: "primary" as const },
+              ]}
+            />
+          </div>
+        )}
 
         {isSuperAdmin && (
           <div className="mt-5 border-t border-border pt-5">

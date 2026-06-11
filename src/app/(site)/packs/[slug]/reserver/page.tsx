@@ -3,8 +3,10 @@ import Link from "next/link";
 import { ChevronLeft, Users, CalendarDays, Clock, ShieldCheck } from "lucide-react";
 import { getPackBySlug } from "@/lib/queries";
 import { getCurrentUser } from "@/lib/auth";
-import { computePackPrice, computeDeposit } from "@/lib/pricing";
+import { computePackPrice } from "@/lib/pricing";
+import { getPaymentSettings, buildFinance, enabledPaymentMethods } from "@/lib/payment-rules";
 import { isMockPayments } from "@/lib/payments";
+import { paymentMethodMeta } from "@/lib/enums";
 import { createPackReservation } from "@/server/actions/reservations";
 import { ReservationCheckout } from "@/components/public/reservation-checkout";
 import { SmartImage } from "@/components/ui/smart-image";
@@ -35,12 +37,23 @@ export default async function PackReserverPage({
   if (!pack || pack.status !== "PUBLISHED") notFound();
   if (!startDate) redirect(`/packs/${slug}`);
 
+  const settings = await getPaymentSettings();
   const price = computePackPrice({
     basePrice: pack.price,
     basePersons: pack.basePersons,
     extraPersonPrice: pack.extraPersonPrice,
     persons,
+    serviceFeeRate: settings.serviceFeePercent / 100,
+    serviceFeeMin: settings.serviceFeeMin,
+    serviceFeeMax: settings.serviceFeeMax,
   });
+  // Packs : 100% a la reservation.
+  const finance = buildFinance({ subtotal: price.subtotal + price.extras, serviceFee: price.serviceFee, policy: settings.packPolicy });
+  const methods = enabledPaymentMethods(settings).map((v) => ({
+    value: v,
+    label: paymentMethodMeta[v]?.label ?? v,
+    hint: paymentMethodMeta[v]?.hint,
+  }));
 
   return (
     <div className="container-page py-8">
@@ -55,7 +68,9 @@ export default async function PackReserverPage({
             action={createPackReservation}
             isMock={isMockPayments()}
             validationLabel="7 jours"
-            depositLabel={formatPrice(computeDeposit({ type: "PACK", nights: pack.durationNights, total: price.total }))}
+            depositLabel={`${formatPrice(finance.depositDue)} (100%)`}
+            methods={methods}
+            koraStayNote={settings.payViaKoraStayNote}
             hidden={{ packId: pack.id, startDate: startDate!, persons: String(persons) }}
             defaultName={`${user.firstName} ${user.lastName}`}
             defaultEmail={user.email}
@@ -82,11 +97,14 @@ export default async function PackReserverPage({
             <div className="mt-5 space-y-2.5 border-t border-border pt-5 text-sm">
               <div className="flex justify-between text-muted"><span>Pack ({pack.basePersons} pers.)</span><span className="text-foreground">{formatPrice(pack.price)}</span></div>
               {price.extras > 0 && <div className="flex justify-between text-muted"><span>Personnes supp.</span><span className="text-foreground">{formatPrice(price.extras)}</span></div>}
-              <div className="flex justify-between text-muted"><span>Frais de service</span><span className="text-foreground">{formatPrice(price.serviceFee)}</span></div>
-              <div className="flex justify-between border-t border-border pt-3 text-lg font-extrabold text-foreground"><span>Total</span><span>{formatPrice(price.total)}</span></div>
+              <div className="flex justify-between text-muted"><span>Frais de service KoraStay</span><span className="text-foreground">{formatPrice(finance.serviceFee)}</span></div>
+              <div className="flex justify-between border-t border-border pt-3 text-lg font-extrabold text-foreground"><span>Total</span><span>{formatPrice(finance.total)}</span></div>
+              <div className="mt-1 rounded-2xl bg-brand-50/60 px-3 py-2.5 text-sm">
+                <div className="flex justify-between font-semibold text-brand-800"><span>A payer maintenant (100%)</span><span>{formatPrice(finance.depositDue)}</span></div>
+              </div>
             </div>
             <p className="mt-4 flex items-center gap-1.5 text-xs text-muted">
-              <ShieldCheck className="h-4 w-4 text-brand-500" /> Partenaires locaux certifies KoraStay
+              <ShieldCheck className="h-4 w-4 text-brand-500" /> Paiement securise via KoraStay - Partenaires certifies
             </p>
           </div>
         </aside>

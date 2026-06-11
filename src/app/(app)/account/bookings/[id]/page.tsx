@@ -7,6 +7,7 @@ import {
 import { requireUser } from "@/lib/auth";
 import { getReservationDetail } from "@/lib/account-queries";
 import { estimateResidenceRefund, estimatePackRefund } from "@/lib/pricing";
+import { getPaymentSettings, enabledPaymentMethods } from "@/lib/payment-rules";
 import { CancelReservationButton } from "@/components/dashboard/cancel-reservation-button";
 import { ValidationCountdown } from "@/components/dashboard/validation-countdown";
 import { PayDepositButton } from "@/components/dashboard/pay-deposit-button";
@@ -14,7 +15,7 @@ import { ContactButton } from "@/components/messaging/contact-button";
 import { SmartImage } from "@/components/ui/smart-image";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
-import { reservationStatusMeta, paymentStatusMeta } from "@/lib/enums";
+import { reservationStatusMeta, paymentStatusMeta, cautionStatusMeta, paymentMethodMeta } from "@/lib/enums";
 import { formatPrice, formatDate } from "@/lib/utils";
 
 type SP = Record<string, string | string[] | undefined>;
@@ -34,6 +35,10 @@ export default async function BookingDetailPage({
 
   const justConfirmed = sp.confirmed === "1";
   const justRequested = sp.requested === "1";
+  const pendingValidation = sp.pending_validation === "1";
+  const paySettings = await getPaymentSettings();
+  const payMethods = enabledPaymentMethods(paySettings).map((v) => ({ value: v, label: paymentMethodMeta[v]?.label ?? v }));
+  const hasPendingPayment = reservation.payments.some((p) => p.status === "PENDING");
   const isPack = reservation.type === "PACK";
   const isActivity = reservation.type === "ACTIVITY";
   const title = reservation.residence?.name ?? reservation.pack?.name ?? reservation.activity?.name ?? "Reservation";
@@ -75,6 +80,18 @@ export default async function BookingDetailPage({
             <p className="font-bold text-gold-800">Demande envoyee !</p>
             <p className="text-sm text-gold-700/80">
               Votre demande est en attente de validation. Vous serez notifie des qu'elle sera acceptee pour regler l'acompte.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {(pendingValidation || (hasPendingPayment && reservation.status === "PENDING_PAYMENT")) && (
+        <div className="mb-6 flex items-start gap-3 rounded-3xl border border-sky-200 bg-sky-50 p-5">
+          <Clock className="mt-0.5 h-6 w-6 shrink-0 text-info" />
+          <div>
+            <p className="font-bold text-info">Paiement en cours de verification</p>
+            <p className="text-sm text-sky-700/80">
+              Votre reglement nous a ete signale. Il sera confirme des sa validation par l'equipe KoraStay - vous recevrez une notification.
             </p>
           </div>
         </div>
@@ -123,16 +140,20 @@ export default async function BookingDetailPage({
       )}
 
       {/* Validee : paiement de l'acompte */}
-      {reservation.status === "PENDING_PAYMENT" && (
+      {reservation.status === "PENDING_PAYMENT" && !hasPendingPayment && (
         <div className="mt-6 rounded-3xl border border-brand-200 bg-brand-50/50 p-5 shadow-soft">
           <p className="mb-1 flex items-center gap-2 font-bold text-brand-800">
             <CheckCircle2 className="h-5 w-5" /> Demande validee !
           </p>
           <p className="mb-4 text-sm text-brand-800/80">
-            Reglez l'acompte de <strong>{formatPrice(reservation.depositAmount)}</strong> pour confirmer votre reservation.
-            Le solde ({formatPrice(reservation.totalAmount - reservation.depositAmount)}) sera regle sur place.
+            Reglez <strong>{formatPrice(reservation.depositAmount)}</strong> ({reservation.paymentPolicy === "FULL" ? "100% du sejour" : "acompte"}) pour confirmer votre reservation.
+            {reservation.balanceDueAmount > 0 && ` Le solde (${formatPrice(reservation.balanceDueAmount)}) sera regle avant ou au check-in.`}
           </p>
-          <PayDepositButton reservationId={reservation.id} amountLabel={formatPrice(reservation.depositAmount)} />
+          <PayDepositButton
+            reservationId={reservation.id}
+            amountLabel={formatPrice(reservation.depositAmount)}
+            methods={payMethods}
+          />
         </div>
       )}
 
@@ -144,21 +165,29 @@ export default async function BookingDetailPage({
               <Receipt className="h-5 w-5 text-brand-600" /> Detail du paiement
             </h2>
             <div className="space-y-2.5 text-sm">
-              <Row label="Sous-total" value={formatPrice(reservation.subtotalAmount)} />
+              <Row label="Prix du sejour" value={formatPrice(reservation.subtotalAmount)} />
               {reservation.cleaningFeeAmount > 0 && <Row label="Frais de menage" value={formatPrice(reservation.cleaningFeeAmount)} />}
-              <Row label="Frais de service" value={formatPrice(reservation.serviceFeeAmount)} />
+              <Row label="Frais de service KoraStay" value={formatPrice(reservation.serviceFeeAmount)} />
               <div className="flex justify-between border-t border-border pt-3 text-base font-extrabold text-foreground">
-                <span>Total</span><span>{formatPrice(reservation.totalAmount)}</span>
+                <span>Total du sejour</span><span>{formatPrice(reservation.totalAmount)}</span>
               </div>
+              {reservation.cautionAmount > 0 && (
+                <div className="flex items-center justify-between rounded-xl bg-surface-soft px-3 py-2 text-foreground">
+                  <span className="flex items-center gap-1.5">Caution (depot de garantie)
+                    <StatusBadge status={reservation.cautionStatus} map={cautionStatusMeta} size="sm" />
+                  </span>
+                  <span className="font-semibold">{formatPrice(reservation.cautionAmount)}</span>
+                </div>
+              )}
               {reservation.depositAmount > 0 && reservation.status !== "PENDING_APPROVAL" && (
                 <div className="mt-1 space-y-1 rounded-2xl bg-brand-50/60 px-3 py-2.5">
                   <div className="flex justify-between text-brand-800">
-                    <span className="font-semibold">Acompte {hasReceipt ? "regle" : "a regler"}</span>
-                    <span className="font-bold">{formatPrice(reservation.depositAmount)}</span>
+                    <span className="font-semibold">Montant {hasReceipt ? "regle" : "a payer maintenant"}</span>
+                    <span className="font-bold">{formatPrice(hasReceipt ? reservation.amountPaid : reservation.depositAmount)}</span>
                   </div>
                   <div className="flex justify-between text-muted">
-                    <span>Solde a regler sur place</span>
-                    <span>{formatPrice(reservation.totalAmount - reservation.depositAmount)}</span>
+                    <span>Solde restant</span>
+                    <span>{formatPrice(reservation.balanceDueAmount)}</span>
                   </div>
                 </div>
               )}
@@ -174,6 +203,10 @@ export default async function BookingDetailPage({
                 Remboursement de {formatPrice(reservation.refunds[0].amount)} en cours de traitement.
               </div>
             )}
+            <p className="mt-4 flex items-start gap-2 rounded-2xl bg-emerald-50/70 px-4 py-3 text-xs text-emerald-800">
+              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-success" />
+              {paySettings.payViaKoraStayNote}
+            </p>
           </section>
 
           {/* Programme pack */}

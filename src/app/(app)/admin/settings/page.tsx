@@ -10,7 +10,6 @@ export const metadata = { title: "Parametres - Admin" };
 export default async function AdminSettingsPage() {
   await requireRole(["ADMIN", "SUPER_ADMIN"]);
   const settings = await getSettingsMap();
-  const feePercent = Math.round(parseFloat(settings.service_fee_rate) * 1000) / 10;
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -24,7 +23,6 @@ export default async function AdminSettingsPage() {
       </div>
 
       <SettingsForm
-        feePercent={Number.isFinite(feePercent) ? feePercent : 7}
         contactEmail={settings.contact_email}
         contactPhone={settings.contact_phone}
         announcement={settings.announcement}

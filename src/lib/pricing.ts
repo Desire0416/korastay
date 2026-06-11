@@ -8,6 +8,8 @@ export interface ResidencePriceInput {
   endDate: Date | string;
   extraServices?: number;
   serviceFeeRate?: number;
+  serviceFeeMin?: number;
+  serviceFeeMax?: number;
 }
 
 export interface PriceBreakdown {
@@ -19,12 +21,30 @@ export interface PriceBreakdown {
   total: number;
 }
 
+// Frais de service = pourcentage du sous-total, borne (optionnellement) entre
+// un plancher et un plafond en F CFA. Sans bornes -> simple pourcentage.
+export function clampServiceFee(
+  subtotal: number,
+  rate = SERVICE_FEE_RATE,
+  min = 0,
+  max = Number.MAX_SAFE_INTEGER
+): number {
+  if (subtotal <= 0) return 0;
+  const raw = Math.round(subtotal * rate);
+  return Math.min(Math.max(raw, min), max);
+}
+
 export function computeResidencePrice(input: ResidencePriceInput): PriceBreakdown {
   const nights = nightsBetween(input.startDate, input.endDate);
   const subtotal = nights * input.pricePerNight;
   const cleaningFee = input.cleaningFee ?? 0;
   const extras = input.extraServices ?? 0;
-  const serviceFee = Math.round(subtotal * (input.serviceFeeRate ?? SERVICE_FEE_RATE));
+  const serviceFee = clampServiceFee(
+    subtotal,
+    input.serviceFeeRate ?? SERVICE_FEE_RATE,
+    input.serviceFeeMin ?? 0,
+    input.serviceFeeMax ?? Number.MAX_SAFE_INTEGER
+  );
   const total = subtotal + cleaningFee + serviceFee + extras;
   return { nights, subtotal, cleaningFee, serviceFee, extras, total };
 }
@@ -35,13 +55,20 @@ export interface PackPriceInput {
   extraPersonPrice: number;
   persons: number;
   serviceFeeRate?: number;
+  serviceFeeMin?: number;
+  serviceFeeMax?: number;
 }
 
 export function computePackPrice(input: PackPriceInput): PriceBreakdown {
   const extraPersons = Math.max(0, input.persons - input.basePersons);
   const extras = extraPersons * input.extraPersonPrice;
   const subtotal = input.basePrice + extras;
-  const serviceFee = Math.round(subtotal * (input.serviceFeeRate ?? SERVICE_FEE_RATE));
+  const serviceFee = clampServiceFee(
+    subtotal,
+    input.serviceFeeRate ?? SERVICE_FEE_RATE,
+    input.serviceFeeMin ?? 0,
+    input.serviceFeeMax ?? Number.MAX_SAFE_INTEGER
+  );
   const total = subtotal + serviceFee;
   return {
     nights: 0,

@@ -13,10 +13,7 @@ async function setKey(key: string, value: string) {
 export async function saveSettings(_prev: SettingsResult, formData: FormData): Promise<SettingsResult> {
   const admin = await requireRole(["ADMIN", "SUPER_ADMIN"]);
 
-  const feePercent = Number(formData.get("feePercent"));
-  if (Number.isFinite(feePercent) && feePercent >= 0 && feePercent <= 30) {
-    await setKey("service_fee_rate", String(feePercent / 100));
-  }
+  // Les frais de service sont desormais geres dans /admin/settings/payments.
   await setKey("contact_email", String(formData.get("contact_email") ?? "").trim());
   await setKey("contact_phone", String(formData.get("contact_phone") ?? "").trim());
   await setKey("announcement", String(formData.get("announcement") ?? "").trim());

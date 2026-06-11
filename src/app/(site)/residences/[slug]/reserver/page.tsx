@@ -3,8 +3,10 @@ import Link from "next/link";
 import { ChevronLeft, Users, CalendarDays, ShieldCheck } from "lucide-react";
 import { getResidenceBySlug } from "@/lib/queries";
 import { getCurrentUser } from "@/lib/auth";
-import { computeResidencePrice, computeDeposit } from "@/lib/pricing";
+import { computeResidencePrice } from "@/lib/pricing";
+import { getPaymentSettings, resolveResidencePolicy, buildFinance, enabledPaymentMethods } from "@/lib/payment-rules";
 import { isMockPayments } from "@/lib/payments";
+import { paymentMethodMeta } from "@/lib/enums";
 import { createResidenceReservation } from "@/server/actions/reservations";
 import { ReservationCheckout } from "@/components/public/reservation-checkout";
 import { SmartImage } from "@/components/ui/smart-image";
@@ -41,12 +43,30 @@ export default async function ReserverPage({
     redirect(`/residences/${slug}`);
   }
 
+  const settings = await getPaymentSettings();
   const price = computeResidencePrice({
     pricePerNight: residence.pricePerNight,
     cleaningFee: residence.cleaningFee,
     startDate: checkin,
     endDate: checkout,
+    serviceFeeRate: settings.serviceFeePercent / 100,
+    serviceFeeMin: settings.serviceFeeMin,
+    serviceFeeMax: settings.serviceFeeMax,
   });
+  const policy = resolveResidencePolicy(residence, price.nights, settings);
+  const finance = buildFinance({
+    subtotal: price.subtotal,
+    cleaningFee: price.cleaningFee,
+    serviceFee: price.serviceFee,
+    policy,
+    cautionEnabled: residence.cautionEnabled,
+    cautionAmount: residence.depositAmount,
+  });
+  const methods = enabledPaymentMethods(settings).map((v) => ({
+    value: v,
+    label: paymentMethodMeta[v]?.label ?? v,
+    hint: paymentMethodMeta[v]?.hint,
+  }));
 
   return (
     <div className="container-page py-8">
@@ -65,7 +85,11 @@ export default async function ReserverPage({
             action={createResidenceReservation}
             isMock={isMockPayments()}
             validationLabel="24h"
-            depositLabel={formatPrice(computeDeposit({ type: "RESIDENCE", nights: price.nights, total: price.total, pricePerNight: residence.pricePerNight }))}
+            depositLabel={formatPrice(finance.depositDue)}
+            balanceLabel={finance.balanceDue > 0 ? formatPrice(finance.balanceDue) : undefined}
+            cautionLabel={finance.cautionAmount > 0 ? formatPrice(finance.cautionAmount) : undefined}
+            methods={methods}
+            koraStayNote={settings.payViaKoraStayNote}
             hidden={{
               residenceId: residence.id,
               checkin: checkin!,
@@ -116,18 +140,36 @@ export default async function ReserverPage({
                 </div>
               )}
               <div className="flex justify-between text-muted">
-                <span>Frais de service</span>
-                <span className="text-foreground">{formatPrice(price.serviceFee)}</span>
+                <span>Frais de service KoraStay</span>
+                <span className="text-foreground">{formatPrice(finance.serviceFee)}</span>
               </div>
               <div className="flex justify-between border-t border-border pt-3 text-lg font-extrabold text-foreground">
                 <span>Total</span>
-                <span>{formatPrice(price.total)}</span>
+                <span>{formatPrice(finance.total)}</span>
+              </div>
+              <div className="mt-1 space-y-1 rounded-2xl bg-brand-50/60 px-3 py-2.5 text-sm">
+                <div className="flex justify-between font-semibold text-brand-800">
+                  <span>A payer maintenant{policy === "FULL" ? " (100%)" : " (acompte)"}</span>
+                  <span>{formatPrice(finance.depositDue)}</span>
+                </div>
+                {finance.balanceDue > 0 && (
+                  <div className="flex justify-between text-muted">
+                    <span>Solde restant</span>
+                    <span>{formatPrice(finance.balanceDue)}</span>
+                  </div>
+                )}
+                {finance.cautionAmount > 0 && (
+                  <div className="flex justify-between text-muted">
+                    <span>Caution eventuelle</span>
+                    <span>{formatPrice(finance.cautionAmount)}</span>
+                  </div>
+                )}
               </div>
             </div>
 
             <p className="mt-4 flex items-center gap-1.5 text-xs text-muted">
               <ShieldCheck className="h-4 w-4 text-brand-500" />
-              Paiement securise - Annulation selon conditions
+              Paiement securise via KoraStay - Annulation selon conditions
             </p>
           </div>
         </aside>

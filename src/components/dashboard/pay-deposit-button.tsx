@@ -6,14 +6,23 @@ import { toast } from "sonner";
 import { payReservationDeposit } from "@/server/actions/reservations";
 import { Button } from "@/components/ui/button";
 
-const METHODS = [
-  { value: "ORANGE_MONEY", label: "Orange Money" },
+const FALLBACK_METHODS = [
   { value: "WAVE", label: "Wave" },
+  { value: "ORANGE_MONEY", label: "Orange Money" },
   { value: "CARD", label: "Carte bancaire" },
 ];
 
-export function PayDepositButton({ reservationId, amountLabel }: { reservationId: string; amountLabel: string }) {
-  const [method, setMethod] = React.useState("ORANGE_MONEY");
+export function PayDepositButton({
+  reservationId,
+  amountLabel,
+  methods,
+}: {
+  reservationId: string;
+  amountLabel: string;
+  methods?: { value: string; label: string }[];
+}) {
+  const options = methods && methods.length > 0 ? methods : FALLBACK_METHODS;
+  const [method, setMethod] = React.useState(options[0].value);
   const [pending, start] = React.useTransition();
 
   function pay() {
@@ -33,7 +42,7 @@ export function PayDepositButton({ reservationId, amountLabel }: { reservationId
           onChange={(e) => setMethod(e.target.value)}
           className="h-11 w-full rounded-2xl border border-border bg-surface px-3 text-sm font-medium focus-visible:border-brand-400 focus-visible:outline-none"
         >
-          {METHODS.map((m) => (
+          {options.map((m) => (
             <option key={m.value} value={m.value}>{m.label}</option>
           ))}
         </select>

@@ -7,14 +7,17 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { isStaff } from "@/lib/messaging";
 import {
-  computeResidencePrice, computePackPrice, computeDeposit,
+  computeResidencePrice, computePackPrice,
   estimateResidenceRefund, estimatePackRefund,
 } from "@/lib/pricing";
+import {
+  getPaymentSettings, computeServiceFee, resolveResidencePolicy, buildFinance,
+} from "@/lib/payment-rules";
+import { finalizeReservationPayment } from "@/lib/reservation-finalize";
 import { generateReference, nightsBetween, formatPrice } from "@/lib/utils";
-import { getPaymentProvider } from "@/lib/payments";
+import { getPaymentProviderForMethod } from "@/lib/payments";
 import { sendEmail, emailLayout } from "@/lib/email";
 import { RESIDENCE_VALIDATION_HOURS, PACK_VALIDATION_DAYS } from "@/lib/constants";
-import { getServiceFeeRate } from "@/lib/settings";
 
 export type ReservationResult = {
   ok: boolean;
@@ -81,13 +84,24 @@ export async function createResidenceReservation(
     return { ok: false, error: "Residence indisponible." };
   }
 
-  const serviceFeeRate = await getServiceFeeRate();
+  const settings = await getPaymentSettings();
   const price = computeResidencePrice({
     pricePerNight: residence.pricePerNight,
     cleaningFee: residence.cleaningFee,
-    startDate, endDate, serviceFeeRate,
+    startDate, endDate,
+    serviceFeeRate: settings.serviceFeePercent / 100,
+    serviceFeeMin: settings.serviceFeeMin,
+    serviceFeeMax: settings.serviceFeeMax,
   });
-  const deposit = computeDeposit({ type: "RESIDENCE", nights, total: price.total, pricePerNight: residence.pricePerNight });
+  const policy = resolveResidencePolicy(residence, nights, settings);
+  const finance = buildFinance({
+    subtotal: price.subtotal,
+    cleaningFee: price.cleaningFee,
+    serviceFee: price.serviceFee,
+    policy,
+    cautionEnabled: residence.cautionEnabled,
+    cautionAmount: residence.depositAmount,
+  });
 
   let reservationId: string;
   try {
@@ -120,8 +134,12 @@ export async function createResidenceReservation(
           subtotalAmount: price.subtotal,
           serviceFeeAmount: price.serviceFee,
           cleaningFeeAmount: price.cleaningFee,
-          totalAmount: price.total,
-          depositAmount: deposit,
+          totalAmount: finance.total,
+          depositAmount: finance.depositDue,
+          balanceDueAmount: finance.balanceDue,
+          paymentPolicy: finance.policy,
+          cautionAmount: finance.cautionAmount,
+          cautionStatus: finance.cautionAmount > 0 ? "REQUIRED" : "NONE",
           expiresAt: new Date(Date.now() + RESIDENCE_VALIDATION_HOURS * HOUR),
         },
       });
@@ -197,14 +215,22 @@ export async function createPackReservation(
 
   const startDate = new Date(data.startDate);
   const endDate = new Date(startDate.getTime() + pack.durationNights * DAY);
+  const settings = await getPaymentSettings();
   const price = computePackPrice({
     basePrice: pack.price,
     basePersons: pack.basePersons,
     extraPersonPrice: pack.extraPersonPrice,
     persons: data.persons,
-    serviceFeeRate: await getServiceFeeRate(),
+    serviceFeeRate: settings.serviceFeePercent / 100,
+    serviceFeeMin: settings.serviceFeeMin,
+    serviceFeeMax: settings.serviceFeeMax,
   });
-  const deposit = computeDeposit({ type: "PACK", nights: pack.durationNights, total: price.total });
+  // Packs : toujours 100% a la reservation.
+  const finance = buildFinance({
+    subtotal: price.subtotal + price.extras,
+    serviceFee: price.serviceFee,
+    policy: settings.packPolicy,
+  });
 
   const reservation = await prisma.reservation.create({
     data: {
@@ -218,8 +244,10 @@ export async function createPackReservation(
       guestName: data.guestName, guestEmail: data.guestEmail, guestPhone: data.guestPhone || null,
       subtotalAmount: price.subtotal + price.extras,
       serviceFeeAmount: price.serviceFee,
-      totalAmount: price.total,
-      depositAmount: deposit,
+      totalAmount: finance.total,
+      depositAmount: finance.depositDue,
+      balanceDueAmount: finance.balanceDue,
+      paymentPolicy: finance.policy,
       expiresAt: new Date(Date.now() + PACK_VALIDATION_DAYS * DAY),
     },
   });
@@ -281,11 +309,10 @@ export async function createActivityReservation(
   });
   if (!guide) return { ok: false, error: "Guide invalide. Veuillez en choisir un autre." };
 
-  const serviceFeeRate = await getServiceFeeRate();
+  const settings = await getPaymentSettings();
   const subtotal = activity.pricePerPerson * data.persons;
-  const serviceFee = Math.round(subtotal * serviceFeeRate);
-  const total = subtotal + serviceFee;
-  const deposit = computeDeposit({ type: "ACTIVITY", nights: 0, total });
+  const serviceFee = computeServiceFee(subtotal, settings);
+  const finance = buildFinance({ subtotal, serviceFee, policy: settings.activityPolicy });
 
   const startDate = new Date(data.date);
   const endDate = new Date(startDate.getTime() + activity.durationHours * HOUR);
@@ -303,8 +330,10 @@ export async function createActivityReservation(
       guestName: data.guestName, guestEmail: data.guestEmail, guestPhone: data.guestPhone || null,
       subtotalAmount: subtotal,
       serviceFeeAmount: serviceFee,
-      totalAmount: total,
-      depositAmount: deposit,
+      totalAmount: finance.total,
+      depositAmount: finance.depositDue,
+      balanceDueAmount: finance.balanceDue,
+      paymentPolicy: finance.policy,
       expiresAt: new Date(Date.now() + RESIDENCE_VALIDATION_HOURS * HOUR),
     },
   });
@@ -424,7 +453,9 @@ export async function rejectReservation(reservationId: string): Promise<Reservat
 }
 
 // ============================================================
-// 4. Paiement de l'acompte par le voyageur -> CONFIRMEE
+// 4. Paiement de l'acompte par le voyageur
+//    - Mobile money / carte / demo : confirme immediatement -> CONFIRMEE
+//    - Virement / validation manuelle : reste en attente d'un admin
 // ============================================================
 export async function payReservationDeposit(
   reservationId: string,
@@ -435,7 +466,11 @@ export async function payReservationDeposit(
 
   const reservation = await prisma.reservation.findUnique({
     where: { id: reservationId },
-    include: { residence: true, pack: true, activity: true },
+    select: {
+      id: true, travelerId: true, status: true, reference: true,
+      depositAmount: true, totalAmount: true, currency: true,
+      guestEmail: true, guestName: true,
+    },
   });
   if (!reservation || reservation.travelerId !== user.id) {
     return { ok: false, error: "Reservation introuvable." };
@@ -445,18 +480,12 @@ export async function payReservationDeposit(
   }
 
   const amount = reservation.depositAmount > 0 ? reservation.depositAmount : reservation.totalAmount;
+  const provider = getPaymentProviderForMethod(method);
 
   const payment = await prisma.payment.create({
-    data: {
-      reservationId,
-      method: method || "MOCK",
-      status: "PENDING",
-      amount,
-      provider: getPaymentProvider().name,
-    },
+    data: { reservationId, method: method || "MOCK", status: "PENDING", amount, provider: provider.name },
   });
 
-  const provider = getPaymentProvider();
   const intent = await provider.createIntent({
     reservationId,
     reference: reservation.reference,
@@ -469,94 +498,37 @@ export async function payReservationDeposit(
   });
   const confirmation = await provider.confirm(intent.providerReference);
 
-  if (confirmation.status !== "PAID") {
-    await prisma.payment.update({ where: { id: payment.id }, data: { status: "FAILED" } });
-    return { ok: false, error: "Le paiement de l'acompte a echoue. Reessayez." };
-  }
-
-  await prisma.$transaction([
-    prisma.payment.update({
-      where: { id: payment.id },
-      data: { status: "PAID", paidAt: new Date(), providerReference: intent.providerReference },
-    }),
-    prisma.reservation.update({
-      where: { id: reservationId },
-      data: { status: "CONFIRMED", confirmedAt: new Date(), expiresAt: null },
-    }),
-  ]);
-
-  // Notifications de confirmation
-  const label = reservation.residence?.name ?? reservation.pack?.name ?? "votre sejour";
-  await prisma.notification.create({
-    data: {
-      userId: reservation.travelerId,
-      title: "Reservation confirmee",
-      body: `Votre reservation ${reservation.reference} pour ${label} est confirmee. Recu disponible.`,
-      type: "RESERVATION_CONFIRMED",
-      url: `/account/bookings/${reservationId}`,
-    },
+  await prisma.payment.update({
+    where: { id: payment.id },
+    data: { providerReference: intent.providerReference, checkoutUrl: intent.checkoutUrl },
   });
-  if (reservation.residence) {
+
+  // Paiement differe (virement / validation manuelle) : on attend l'admin.
+  if (confirmation.status !== "PAID") {
+    await notifyAdmins(
+      "Paiement a valider",
+      `${reservation.guestName} a declare un paiement (${method}) de ${formatPrice(amount)} pour ${reservation.reference}. A valider.`,
+      `/admin/reservations/${reservationId}`
+    );
     await prisma.notification.create({
       data: {
-        userId: reservation.residence.ownerId,
-        title: "Reservation confirmee",
-        body: `${reservation.guestName} a confirme sa reservation a ${reservation.residence.name} (${reservation.reference}).`,
-        type: "OWNER_BOOKING",
-        url: "/owner/bookings",
+        userId: reservation.travelerId,
+        title: "Paiement en cours de verification",
+        body: `Votre paiement pour ${reservation.reference} sera confirme des sa validation par KoraStay.`,
+        type: "PAYMENT_PENDING",
+        url: `/account/bookings/${reservationId}`,
       },
     });
+    revalidatePath(`/account/bookings/${reservationId}`);
+    redirect(`/account/bookings/${reservationId}?pending_validation=1`);
   }
-  await sendEmail({
-    to: reservation.guestEmail,
-    subject: `Reservation confirmee - ${reservation.reference}`,
-    html: emailLayout(
-      "Votre reservation est confirmee",
-      `<p>Bonjour ${reservation.guestName},</p><p>Votre reservation <strong>${reservation.reference}</strong> pour ${label} est confirmee. Acompte regle : ${formatPrice(amount)}. Le solde sera regle sur place.</p>`
-    ),
-    text: `Reservation ${reservation.reference} confirmee.`,
+
+  // Paiement immediat confirme.
+  await prisma.payment.update({
+    where: { id: payment.id },
+    data: { status: "PAID", paidAt: new Date() },
   });
-
-  if (reservation.packId) {
-    await autoProposePartnersForPack(reservation.packId, reservationId, reservation.startDate);
-  }
-
-  // Activite : creer la mission pour le guide choisi
-  if (reservation.activityId && reservation.guideProfileId && reservation.activity) {
-    const guide = await prisma.partnerProfile.findUnique({
-      where: { id: reservation.guideProfileId },
-      select: { id: true, userId: true, city: true },
-    });
-    if (guide) {
-      const exists = await prisma.partnerMission.findFirst({
-        where: { partnerProfileId: guide.id, reservationId },
-        select: { id: true },
-      });
-      if (!exists) {
-        await prisma.partnerMission.create({
-          data: {
-            partnerProfileId: guide.id,
-            reservationId,
-            title: `Guide - ${reservation.activity.name}`,
-            description: `Accompagnement de l'activite "${reservation.activity.name}" pour ${reservation.guestName}.`,
-            city: guide.city,
-            scheduledAt: reservation.startDate,
-            status: "PROPOSED",
-            amount: 0,
-          },
-        });
-        await prisma.notification.create({
-          data: {
-            userId: guide.userId,
-            title: "Mission confirmee",
-            body: `La reservation de l'activite "${reservation.activity.name}" est confirmee.`,
-            type: "PARTNER_MISSION",
-            url: "/partner/missions",
-          },
-        });
-      }
-    }
-  }
+  await finalizeReservationPayment(reservationId, amount);
 
   revalidatePath("/account/bookings");
   redirect(`/account/bookings/${reservationId}?confirmed=1`);
@@ -588,54 +560,6 @@ export async function expireStaleReservations(): Promise<number> {
     }),
   ]);
   return stale.length;
-}
-
-// ------------------------------------------------------------
-// Proposition automatique des partenaires (packs confirmes)
-// ------------------------------------------------------------
-async function autoProposePartnersForPack(packId: string, reservationId: string, scheduledAt: Date) {
-  const pack = await prisma.pack.findUnique({
-    where: { id: packId },
-    include: { destination: { select: { name: true } } },
-  });
-  const city = pack?.destination?.name;
-  if (!pack || !city) return;
-
-  const partners = await prisma.partnerProfile.findMany({
-    where: { verificationStatus: "VERIFIED", type: { in: ["GUIDE", "TRANSPORT"] }, city: { equals: city } },
-    select: { id: true, type: true, userId: true },
-  });
-
-  for (const partner of partners) {
-    const existing = await prisma.partnerMission.findFirst({
-      where: { partnerProfileId: partner.id, reservationId },
-      select: { id: true },
-    });
-    if (existing) continue;
-
-    await prisma.partnerMission.create({
-      data: {
-        partnerProfileId: partner.id,
-        reservationId,
-        packId,
-        title: partner.type === "GUIDE" ? `Guide - ${pack.name}` : `Transport - ${pack.name}`,
-        description: `Mission proposee automatiquement pour le pack ${pack.name} a ${city}.`,
-        city,
-        scheduledAt,
-        status: "PROPOSED",
-        amount: 0,
-      },
-    });
-    await prisma.notification.create({
-      data: {
-        userId: partner.userId,
-        title: "Nouvelle mission proposee",
-        body: `Une mission "${pack.name}" a ${city} vous est proposee.`,
-        type: "PARTNER_MISSION",
-        url: "/partner/missions",
-      },
-    });
-  }
 }
 
 // ------------------------------------------------------------

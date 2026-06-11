@@ -12,6 +12,12 @@ import type { ReservationResult } from "@/server/actions/reservations";
 
 type Action = (prev: ReservationResult, formData: FormData) => Promise<ReservationResult>;
 
+interface MethodOption {
+  value: string;
+  label: string;
+  hint?: string;
+}
+
 interface ReservationCheckoutProps {
   action: Action;
   hidden: Record<string, string>;
@@ -20,7 +26,11 @@ interface ReservationCheckoutProps {
   defaultPhone: string;
   isMock?: boolean;
   depositLabel?: string;
+  balanceLabel?: string;
+  cautionLabel?: string;
   validationLabel?: string;
+  methods?: MethodOption[];
+  koraStayNote?: string;
 }
 
 export function ReservationCheckout({
@@ -31,13 +41,18 @@ export function ReservationCheckout({
   defaultPhone,
   isMock,
   depositLabel,
+  balanceLabel,
+  cautionLabel,
   validationLabel = "24h",
+  methods,
+  koraStayNote,
 }: ReservationCheckoutProps) {
   const [state, formAction, pending] = useActionState<ReservationResult, FormData>(
     action,
     { ok: false }
   );
-  const [method, setMethod] = React.useState(PAYMENT_METHOD_OPTIONS[0].value);
+  const methodOptions = methods && methods.length > 0 ? methods : PAYMENT_METHOD_OPTIONS;
+  const [method, setMethod] = React.useState(methodOptions[0].value);
 
   return (
     <form action={formAction} className="space-y-7">
@@ -69,15 +84,23 @@ export function ReservationCheckout({
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-brand-600" />
           <span>
             Aucun montant n'est debite maintenant. Votre demande est validee sous <strong>{validationLabel}</strong>,
-            puis vous reglez un <strong>acompte{depositLabel ? ` de ${depositLabel}` : ""}</strong> pour confirmer. Le solde se regle sur place.
+            puis vous reglez <strong>{depositLabel ? depositLabel : "l'acompte"}</strong> pour confirmer.
+            {balanceLabel ? ` Solde restant : ${balanceLabel}.` : ""}
+            {cautionLabel ? ` Une caution de ${cautionLabel} pourra etre demandee.` : ""}
           </span>
         </div>
+        {koraStayNote && (
+          <p className="mb-4 flex items-start gap-2 rounded-2xl bg-emerald-50/70 px-4 py-3 text-xs text-emerald-800">
+            <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-success" />
+            {koraStayNote}
+          </p>
+        )}
         {isMock && (
           <p className="mb-4 text-xs text-muted">Mode demonstration : le paiement de l'acompte est simule.</p>
         )}
         <p className="mb-3 text-sm font-semibold text-foreground">Moyen de paiement prefere (pour l'acompte)</p>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {PAYMENT_METHOD_OPTIONS.map((opt) => (
+          {methodOptions.map((opt) => (
             <button
               key={opt.value}
               type="button"

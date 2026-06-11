@@ -15,7 +15,18 @@ export async function getSettingsMap(): Promise<Record<string, string>> {
   return map;
 }
 
+// Taux de frais de service (fraction). Source : payment_settings (nouveau),
+// repli sur l'ancienne cle service_fee_rate puis sur la constante.
 export async function getServiceFeeRate(): Promise<number> {
+  const pay = await prisma.setting.findUnique({ where: { key: "payment_settings" } });
+  if (pay) {
+    try {
+      const pct = JSON.parse(pay.value)?.serviceFeePercent;
+      if (typeof pct === "number" && pct >= 0 && pct <= 30) return pct / 100;
+    } catch {
+      /* ignore */
+    }
+  }
   const s = await prisma.setting.findUnique({ where: { key: "service_fee_rate" } });
   const v = s ? parseFloat(s.value) : NaN;
   return Number.isFinite(v) && v >= 0 && v < 1 ? v : SERVICE_FEE_RATE;

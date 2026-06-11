@@ -91,12 +91,27 @@ export function getPaymentProvider(): PaymentProvider {
   }
 }
 
+// Le moyen de paiement choisi par le voyageur peut imposer le mode de traitement :
+// virement / validation manuelle -> reste en attente (l'admin valide a la main),
+// quel que soit le provider configure. Les autres suivent le provider global.
+export function getPaymentProviderForMethod(method: string): PaymentProvider {
+  const m = (method || "").toUpperCase();
+  if (m === PaymentMethod.MANUAL || m === PaymentMethod.BANK_TRANSFER) {
+    return new ManualPaymentProvider();
+  }
+  return getPaymentProvider();
+}
+
 export const isMockPayments = () =>
   (process.env.PAYMENT_PROVIDER ?? "mock").toLowerCase() === "mock";
 
+// Liste de reference (libelles dans enums.paymentMethodMeta).
 export const PAYMENT_METHOD_OPTIONS = [
-  { value: PaymentMethod.ORANGE_MONEY, label: "Orange Money", hint: "Cote d'Ivoire" },
   { value: PaymentMethod.WAVE, label: "Wave", hint: "Sans frais" },
-  { value: PaymentMethod.MTN_MOMO, label: "MTN MoMo", hint: "Bientot" },
+  { value: PaymentMethod.ORANGE_MONEY, label: "Orange Money", hint: "Cote d'Ivoire" },
+  { value: PaymentMethod.MTN_MOMO, label: "MTN MoMo", hint: "Mobile Money" },
+  { value: PaymentMethod.MOOV_MONEY, label: "Moov Money", hint: "Mobile Money" },
   { value: PaymentMethod.CARD, label: "Carte bancaire", hint: "Visa / Mastercard" },
+  { value: PaymentMethod.BANK_TRANSFER, label: "Virement bancaire", hint: "Validation manuelle" },
+  { value: PaymentMethod.MANUAL, label: "Validation manuelle (admin)", hint: "Hors ligne" },
 ];

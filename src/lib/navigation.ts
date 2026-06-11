@@ -114,6 +114,7 @@ export const ADMIN_NAV: { group: string; items: NavItem[] }[] = [
       { label: "Tableau de bord", href: "/admin", icon: "LayoutDashboard" },
       { label: "Reservations", href: "/admin/reservations", icon: "CalendarCheck" },
       { label: "Paiements", href: "/admin/payments", icon: "CreditCard" },
+      { label: "Reversements", href: "/admin/payouts", icon: "Banknote" },
       { label: "Remboursements", href: "/admin/refunds", icon: "RotateCcw" },
     ],
   },

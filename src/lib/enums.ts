@@ -83,6 +83,8 @@ export const ReservationStatus = {
   DRAFT: "DRAFT",
   PENDING_APPROVAL: "PENDING_APPROVAL",
   PENDING_PAYMENT: "PENDING_PAYMENT",
+  PARTIALLY_PAID: "PARTIALLY_PAID",
+  PAID: "PAID",
   CONFIRMED: "CONFIRMED",
   CHECKED_IN: "CHECKED_IN",
   COMPLETED: "COMPLETED",
@@ -90,6 +92,7 @@ export const ReservationStatus = {
   CANCELLED: "CANCELLED",
   NO_SHOW: "NO_SHOW",
   DISPUTED: "DISPUTED",
+  REFUNDED: "REFUNDED",
 } as const;
 export type ReservationStatus =
   (typeof ReservationStatus)[keyof typeof ReservationStatus];
@@ -107,9 +110,10 @@ export const PaymentStatus = {
 export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus];
 
 export const PaymentMethod = {
-  ORANGE_MONEY: "ORANGE_MONEY",
   WAVE: "WAVE",
+  ORANGE_MONEY: "ORANGE_MONEY",
   MTN_MOMO: "MTN_MOMO",
+  MOOV_MONEY: "MOOV_MONEY",
   CARD: "CARD",
   BANK_TRANSFER: "BANK_TRANSFER",
   CASH: "CASH",
@@ -117,6 +121,22 @@ export const PaymentMethod = {
   MOCK: "MOCK",
 } as const;
 export type PaymentMethod = (typeof PaymentMethod)[keyof typeof PaymentMethod];
+
+// Libelles + indices des moyens de paiement (source unique)
+export const paymentMethodMeta: Record<
+  string,
+  { label: string; hint?: string }
+> = {
+  WAVE: { label: "Wave", hint: "Sans frais" },
+  ORANGE_MONEY: { label: "Orange Money", hint: "Cote d'Ivoire" },
+  MTN_MOMO: { label: "MTN MoMo", hint: "Mobile Money" },
+  MOOV_MONEY: { label: "Moov Money", hint: "Mobile Money" },
+  CARD: { label: "Carte bancaire", hint: "Visa / Mastercard" },
+  BANK_TRANSFER: { label: "Virement bancaire", hint: "Validation manuelle" },
+  CASH: { label: "Especes", hint: "A l'agence" },
+  MANUAL: { label: "Validation manuelle (admin)", hint: "Hors ligne" },
+  MOCK: { label: "Demo", hint: "Simulation" },
+};
 
 export const ReviewStatus = {
   PUBLISHED: "PUBLISHED",
@@ -174,6 +194,8 @@ export const reservationStatusMeta: LabelMap = {
   DRAFT: { label: "Brouillon", tone: "neutral" },
   PENDING_APPROVAL: { label: "En attente de validation", tone: "warning" },
   PENDING_PAYMENT: { label: "A payer (acompte)", tone: "warning" },
+  PARTIALLY_PAID: { label: "Acompte regle", tone: "info" },
+  PAID: { label: "Integralement payee", tone: "success" },
   CONFIRMED: { label: "Confirmee", tone: "success" },
   CHECKED_IN: { label: "Sejour en cours", tone: "info" },
   COMPLETED: { label: "Terminee", tone: "brand" },
@@ -181,7 +203,37 @@ export const reservationStatusMeta: LabelMap = {
   CANCELLED: { label: "Annulee", tone: "danger" },
   NO_SHOW: { label: "No-show", tone: "danger" },
   DISPUTED: { label: "Litige", tone: "danger" },
+  REFUNDED: { label: "Remboursee", tone: "info" },
 };
+
+export const payoutStatusMeta: LabelMap = {
+  SCHEDULED: { label: "Planifie", tone: "warning" },
+  RELEASED: { label: "Verse", tone: "success" },
+  BLOCKED: { label: "Bloque (litige)", tone: "danger" },
+  CANCELLED: { label: "Annule", tone: "neutral" },
+};
+
+export const cautionStatusMeta: LabelMap = {
+  NONE: { label: "Sans caution", tone: "neutral" },
+  REQUIRED: { label: "Caution requise", tone: "warning" },
+  HELD: { label: "Caution bloquee", tone: "info" },
+  RELEASED: { label: "Caution restituee", tone: "success" },
+  RETAINED: { label: "Caution retenue", tone: "danger" },
+};
+
+export const PayoutStatus = {
+  SCHEDULED: "SCHEDULED",
+  RELEASED: "RELEASED",
+  BLOCKED: "BLOCKED",
+  CANCELLED: "CANCELLED",
+} as const;
+export type PayoutStatus = (typeof PayoutStatus)[keyof typeof PayoutStatus];
+
+export const PayoutTier = {
+  NEW: "NEW",
+  RELIABLE: "RELIABLE",
+} as const;
+export type PayoutTier = (typeof PayoutTier)[keyof typeof PayoutTier];
 
 export const paymentStatusMeta: LabelMap = {
   PENDING: { label: "En attente", tone: "warning" },

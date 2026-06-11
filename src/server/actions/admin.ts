@@ -154,16 +154,50 @@ export async function moderateReview(id: string, status: string): Promise<AdminR
 // ------------------------------------------------------------
 export async function adminSetReservationStatus(id: string, status: string): Promise<AdminResult> {
   const admin = await requireRole(["ADMIN", "SUPER_ADMIN"]);
-  const reservation = await prisma.reservation.findUnique({ where: { id } });
+  const reservation = await prisma.reservation.findUnique({
+    where: { id },
+    include: { payments: { where: { status: "PAID" }, select: { id: true }, take: 1 } },
+  });
   if (!reservation) return { ok: false, error: "Introuvable." };
+
+  // Regle : une reservation ne passe a CONFIRMED que si un paiement est valide.
+  if (status === "CONFIRMED" && reservation.payments.length === 0) {
+    return { ok: false, error: "Aucun paiement valide. Utilisez \"Valider un paiement\" pour confirmer." };
+  }
+
   await prisma.reservation.update({
     where: { id },
-    data: { status, confirmedAt: status === "CONFIRMED" ? new Date() : reservation.confirmedAt, cancelledAt: status === "CANCELLED" ? new Date() : reservation.cancelledAt },
+    data: {
+      status,
+      confirmedAt: status === "CONFIRMED" ? new Date() : reservation.confirmedAt,
+      cancelledAt: status === "CANCELLED" ? new Date() : reservation.cancelledAt,
+      // Caution restituee automatiquement a la cloture du sejour.
+      ...(status === "COMPLETED" && reservation.cautionStatus === "HELD" ? { cautionStatus: "RELEASED" } : {}),
+    },
   });
+
+  // Reversements hote : liberation / blocage selon l'etape du sejour.
+  if (status === "CHECKED_IN") {
+    await prisma.payout.updateMany({
+      where: { reservationId: id, trigger: "CHECK_IN", status: "SCHEDULED" },
+      data: { status: "RELEASED", releasedAt: new Date(), releasedById: admin.id },
+    });
+  } else if (status === "COMPLETED") {
+    await prisma.payout.updateMany({
+      where: { reservationId: id, status: "SCHEDULED" },
+      data: { status: "RELEASED", releasedAt: new Date(), releasedById: admin.id },
+    });
+  } else if (status === "DISPUTED") {
+    await prisma.payout.updateMany({ where: { reservationId: id, status: "SCHEDULED" }, data: { status: "BLOCKED" } });
+  } else if (status === "CANCELLED") {
+    await prisma.payout.updateMany({ where: { reservationId: id, status: "SCHEDULED" }, data: { status: "CANCELLED" } });
+  }
+
   await notify(reservation.travelerId, "Mise a jour de reservation", `Votre reservation ${reservation.reference} a ete mise a jour.`, `/account/bookings/${id}`);
   await audit(admin.id, "RESERVATION_STATUS", "Reservation", id, { status });
   revalidatePath("/admin/reservations");
   revalidatePath(`/admin/reservations/${id}`);
+  revalidatePath("/admin/payouts");
   return { ok: true, message: "Reservation mise a jour." };
 }
 
@@ -172,9 +206,11 @@ export async function processRefund(refundId: string): Promise<AdminResult> {
   const refund = await prisma.refund.findUnique({ where: { id: refundId }, include: { reservation: true, payment: true } });
   if (!refund) return { ok: false, error: "Introuvable." };
 
+  const fullyRefunded = refund.amount >= refund.payment.amount;
   await prisma.$transaction([
     prisma.refund.update({ where: { id: refundId }, data: { status: "PAID", processedById: admin.id, processedAt: new Date() } }),
-    prisma.payment.update({ where: { id: refund.paymentId }, data: { status: refund.amount >= refund.payment.amount ? "REFUNDED" : "PARTIALLY_REFUNDED" } }),
+    prisma.payment.update({ where: { id: refund.paymentId }, data: { status: fullyRefunded ? "REFUNDED" : "PARTIALLY_REFUNDED" } }),
+    ...(fullyRefunded ? [prisma.reservation.update({ where: { id: refund.reservationId }, data: { status: "REFUNDED" } })] : []),
   ]);
   await notify(refund.reservation.travelerId, "Remboursement traite", `Votre remboursement pour ${refund.reservation.reference} a ete traite.`, `/account/bookings/${refund.reservationId}`);
   await audit(admin.id, "REFUND_PROCESSED", "Refund", refundId, { amount: refund.amount });
