@@ -35,9 +35,11 @@ export default async function BookingDetailPage({
   const justConfirmed = sp.confirmed === "1";
   const justRequested = sp.requested === "1";
   const isPack = reservation.type === "PACK";
-  const title = reservation.residence?.name ?? reservation.pack?.name ?? "Reservation";
-  const image = reservation.residence?.images[0]?.url ?? reservation.pack?.images[0]?.url;
-  const seed = reservation.residence?.slug ?? reservation.pack?.slug ?? reservation.id;
+  const isActivity = reservation.type === "ACTIVITY";
+  const title = reservation.residence?.name ?? reservation.pack?.name ?? reservation.activity?.name ?? "Reservation";
+  const image = reservation.residence?.images[0]?.url ?? reservation.pack?.images[0]?.url ?? reservation.activity?.images[0]?.url;
+  const seed = reservation.residence?.slug ?? reservation.pack?.slug ?? reservation.activity?.slug ?? reservation.id;
+  const placeLabel = reservation.residence?.city ?? reservation.pack?.destination?.name ?? reservation.activity?.city;
   const payment = reservation.payments[0];
 
   const refund = isPack
@@ -86,8 +88,9 @@ export default async function BookingDetailPage({
           <div className="absolute bottom-0 left-0 right-0 flex items-end justify-between gap-3 p-5 text-white">
             <div>
               <p className="flex items-center gap-1.5 text-sm text-white/80">
-                {isPack ? <Package className="h-4 w-4" /> : <MapPin className="h-4 w-4" />}
-                {reservation.residence?.city ?? reservation.pack?.destination?.name}
+                {isPack || isActivity ? <Package className="h-4 w-4" /> : <MapPin className="h-4 w-4" />}
+                {placeLabel}
+                {isActivity && reservation.guideProfile ? ` · Guide : ${reservation.guideProfile.businessName}` : ""}
               </p>
               <h1 className="text-xl font-bold sm:text-2xl">{title}</h1>
             </div>

@@ -23,6 +23,8 @@ export async function getReservationDetail(userId: string, id: string) {
     include: {
       residence: { include: { images: { take: 1, orderBy: { sortOrder: "asc" } }, owner: { select: { id: true, firstName: true, phone: true } } } },
       pack: { include: { images: { take: 1 }, destination: true, programDays: { include: { activities: true }, orderBy: { sortOrder: "asc" } } } },
+      activity: { include: { images: { take: 1, orderBy: { sortOrder: "asc" } } } },
+      guideProfile: { select: { businessName: true, user: { select: { firstName: true, lastName: true } } } },
       payments: { orderBy: { createdAt: "desc" } },
       refunds: true,
       review: true,

@@ -243,6 +243,100 @@ export async function createPackReservation(
 }
 
 // ============================================================
+// 2bis. Demande de reservation ACTIVITE (guide obligatoire)
+// ============================================================
+const activitySchema = z.object({
+  activityId: z.string().min(1),
+  guideProfileId: z.string().min(1, "Veuillez choisir un guide."),
+  date: z.string().min(8),
+  persons: z.coerce.number().int().min(1),
+  guestName: z.string().min(2, "Nom requis"),
+  guestEmail: z.string().email("Email invalide"),
+  guestPhone: z.string().optional(),
+  method: z.string().optional(),
+  acceptTerms: z.string().optional(),
+});
+
+export async function createActivityReservation(
+  _prev: ReservationResult,
+  formData: FormData
+): Promise<ReservationResult> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, error: "Veuillez vous connecter pour reserver." };
+
+  const parsed = activitySchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Formulaire invalide." };
+  const data = parsed.data;
+  if (!data.acceptTerms) return { ok: false, error: "Vous devez accepter les conditions." };
+
+  const activity = await prisma.activity.findUnique({ where: { id: data.activityId } });
+  if (!activity || activity.status !== "PUBLISHED") return { ok: false, error: "Activite indisponible." };
+  if (data.persons > activity.maxPersons) {
+    return { ok: false, error: `Cette activite accueille au maximum ${activity.maxPersons} personnes.` };
+  }
+
+  const guide = await prisma.partnerProfile.findFirst({
+    where: { id: data.guideProfileId, type: "GUIDE", verificationStatus: "VERIFIED" },
+    select: { id: true, userId: true, businessName: true },
+  });
+  if (!guide) return { ok: false, error: "Guide invalide. Veuillez en choisir un autre." };
+
+  const serviceFeeRate = await getServiceFeeRate();
+  const subtotal = activity.pricePerPerson * data.persons;
+  const serviceFee = Math.round(subtotal * serviceFeeRate);
+  const total = subtotal + serviceFee;
+  const deposit = computeDeposit({ type: "ACTIVITY", nights: 0, total });
+
+  const startDate = new Date(data.date);
+  const endDate = new Date(startDate.getTime() + activity.durationHours * HOUR);
+
+  const reservation = await prisma.reservation.create({
+    data: {
+      reference: generateReference("KA"),
+      type: "ACTIVITY",
+      status: "PENDING_APPROVAL",
+      travelerId: user.id,
+      activityId: activity.id,
+      guideProfileId: guide.id,
+      startDate, endDate, nights: 0,
+      adults: data.persons, children: 0,
+      guestName: data.guestName, guestEmail: data.guestEmail, guestPhone: data.guestPhone || null,
+      subtotalAmount: subtotal,
+      serviceFeeAmount: serviceFee,
+      totalAmount: total,
+      depositAmount: deposit,
+      expiresAt: new Date(Date.now() + RESIDENCE_VALIDATION_HOURS * HOUR),
+    },
+  });
+
+  await prisma.notification.create({
+    data: {
+      userId: guide.userId,
+      title: "Demande d'accompagnement",
+      body: `${data.guestName} souhaite reserver l'activite "${activity.name}" avec vous.`,
+      type: "PARTNER_MISSION",
+      url: "/partner/missions",
+    },
+  });
+  await notifyAdmins(
+    "Demande de reservation activite",
+    `${activity.name} - ${data.guestName} (guide: ${guide.businessName}). Validation sous ${RESIDENCE_VALIDATION_HOURS}h.`,
+    "/admin/reservations"
+  );
+  await sendEmail({
+    to: data.guestEmail,
+    subject: "Demande d'activite recue - KoraStay",
+    html: emailLayout(
+      "Votre demande d'activite a bien ete recue",
+      `<p>Bonjour ${data.guestName},</p><p>Votre demande pour <strong>${activity.name}</strong> avec un guide est en attente de validation. Vous serez notifie pour le paiement de l'acompte.</p>`
+    ),
+    text: `Demande d'activite recue pour ${activity.name}.`,
+  });
+
+  redirect(`/account/bookings/${reservation.id}?requested=1`);
+}
+
+// ============================================================
 // 3. Validation (hote / admin)
 // ============================================================
 export async function approveReservation(reservationId: string): Promise<ReservationResult> {
@@ -341,7 +435,7 @@ export async function payReservationDeposit(
 
   const reservation = await prisma.reservation.findUnique({
     where: { id: reservationId },
-    include: { residence: true, pack: true },
+    include: { residence: true, pack: true, activity: true },
   });
   if (!reservation || reservation.travelerId !== user.id) {
     return { ok: false, error: "Reservation introuvable." };
@@ -425,6 +519,43 @@ export async function payReservationDeposit(
 
   if (reservation.packId) {
     await autoProposePartnersForPack(reservation.packId, reservationId, reservation.startDate);
+  }
+
+  // Activite : creer la mission pour le guide choisi
+  if (reservation.activityId && reservation.guideProfileId && reservation.activity) {
+    const guide = await prisma.partnerProfile.findUnique({
+      where: { id: reservation.guideProfileId },
+      select: { id: true, userId: true, city: true },
+    });
+    if (guide) {
+      const exists = await prisma.partnerMission.findFirst({
+        where: { partnerProfileId: guide.id, reservationId },
+        select: { id: true },
+      });
+      if (!exists) {
+        await prisma.partnerMission.create({
+          data: {
+            partnerProfileId: guide.id,
+            reservationId,
+            title: `Guide - ${reservation.activity.name}`,
+            description: `Accompagnement de l'activite "${reservation.activity.name}" pour ${reservation.guestName}.`,
+            city: guide.city,
+            scheduledAt: reservation.startDate,
+            status: "PROPOSED",
+            amount: 0,
+          },
+        });
+        await prisma.notification.create({
+          data: {
+            userId: guide.userId,
+            title: "Mission confirmee",
+            body: `La reservation de l'activite "${reservation.activity.name}" est confirmee.`,
+            type: "PARTNER_MISSION",
+            url: "/partner/missions",
+          },
+        });
+      }
+    }
   }
 
   revalidatePath("/account/bookings");

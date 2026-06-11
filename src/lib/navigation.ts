@@ -12,6 +12,7 @@ export interface NavItem {
 export const PUBLIC_NAV: NavItem[] = [
   { label: "Residences", href: "/residences" },
   { label: "Packs Decouverte", href: "/packs" },
+  { label: "Activites", href: "/activites" },
   { label: "Destinations", href: "/destinations" },
   { label: "Business", href: "/business" },
 ];
@@ -22,6 +23,7 @@ export const FOOTER_NAV: { title: string; links: NavItem[] }[] = [
     links: [
       { label: "Residences verifiees", href: "/residences" },
       { label: "Packs Decouverte", href: "/packs" },
+      { label: "Activites", href: "/activites" },
       { label: "Destinations", href: "/destinations" },
       { label: "Pack personnalise", href: "/packs/custom" },
     ],
@@ -120,6 +122,7 @@ export const ADMIN_NAV: { group: string; items: NavItem[] }[] = [
     items: [
       { label: "Residences", href: "/admin/residences", icon: "Home" },
       { label: "Packs", href: "/admin/packs", icon: "Compass" },
+      { label: "Activites", href: "/admin/activities", icon: "Sparkles" },
       { label: "Packs perso", href: "/admin/custom-packs", icon: "Wand2" },
       { label: "Destinations", href: "/admin/destinations", icon: "MapPin" },
       { label: "Avis", href: "/admin/reviews", icon: "Star" },

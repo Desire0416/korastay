@@ -124,9 +124,56 @@ model Destination {
 
   residences Residence[]
   packs      Pack[]
+  activities Activity[]
 
   @@index([slug])
   @@index([isActive])
+}
+
+// ------------------------------------------------------------
+// Activites touristiques (excursions, visites, experiences...)
+// ------------------------------------------------------------
+model Activity {
+  id               String  @id @default(cuid())
+  slug             String  @unique
+  name             String
+  category         String  @default("EXCURSION") // ActivityCategory
+  shortDescription String?
+  description      String
+  city             String
+  destinationId    String?
+  destination      Destination? @relation(fields: [destinationId], references: [id])
+  durationHours    Int     @default(2)
+  pricePerPerson   Int     @default(0)
+  minPersons       Int     @default(1)
+  maxPersons       Int     @default(12)
+  difficulty       String? // facile / modere / sportif
+  included         String?
+  meetingPoint     String?
+  status           String  @default("PUBLISHED") // ResidenceStatus subset
+  isVerified       Boolean @default(true)
+  ratingAverage    Float   @default(0)
+  ratingCount      Int     @default(0)
+  images           ActivityImage[]
+  reservations     Reservation[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([slug])
+  @@index([city])
+  @@index([status])
+}
+
+model ActivityImage {
+  id         String  @id @default(cuid())
+  activityId String
+  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  url        String
+  altText    String?
+  sortOrder  Int     @default(0)
+  isCover    Boolean @default(false)
+
+  @@index([activityId])
 }
 
 // ------------------------------------------------------------
@@ -255,6 +302,10 @@ model Reservation {
   residence         Residence?   @relation(fields: [residenceId], references: [id])
   packId            String?
   pack              Pack?        @relation(fields: [packId], references: [id])
+  activityId        String?
+  activity          Activity?    @relation(fields: [activityId], references: [id])
+  guideProfileId    String?
+  guideProfile      PartnerProfile? @relation("GuidedReservations", fields: [guideProfileId], references: [id])
   businessRequestId String?
   businessRequest   BusinessRequest? @relation(fields: [businessRequestId], references: [id])
   startDate         DateTime
@@ -456,6 +507,7 @@ model PartnerProfile {
 
   services PartnerService[]
   missions PartnerMission[]
+  guidedReservations Reservation[] @relation("GuidedReservations")
 
   @@index([type])
   @@index([verificationStatus])

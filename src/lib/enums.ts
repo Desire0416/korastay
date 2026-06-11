@@ -73,6 +73,7 @@ export const ReservationType = {
   RESIDENCE: "RESIDENCE",
   PACK: "PACK",
   CUSTOM_PACK: "CUSTOM_PACK",
+  ACTIVITY: "ACTIVITY",
   BUSINESS: "BUSINESS",
 } as const;
 export type ReservationType =
@@ -246,6 +247,15 @@ export const residenceTypeMeta: Record<
   T2: { label: "Appartement T2", capacity: "2-3 personnes" },
   T3: { label: "Appartement T3", capacity: "4-5 personnes" },
   VILLA: { label: "Villa / Maison", capacity: "6+ personnes" },
+};
+
+export const activityCategoryMeta: Record<string, { label: string }> = {
+  EXCURSION: { label: "Excursion" },
+  VISITE: { label: "Visite de site" },
+  CULTURE: { label: "Experience culturelle" },
+  NATURE: { label: "Sortie nature" },
+  AVENTURE: { label: "Aventure" },
+  GASTRONOMIE: { label: "Gastronomie" },
 };
 
 export const partnerTypeMeta: Record<

@@ -48,6 +48,7 @@ export interface Dictionary {
 const NAV_EN: Record<string, string> = {
   "/residences": "Stays",
   "/packs": "Discovery packs",
+  "/activites": "Activities",
   "/destinations": "Destinations",
   "/business": "Business",
   "/packs/custom": "Custom pack",
