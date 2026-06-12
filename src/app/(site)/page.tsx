@@ -7,6 +7,7 @@ import { HeroSearch } from "@/components/public/hero-search";
 import { ResidenceCard } from "@/components/public/residence-card";
 import { PackCard } from "@/components/public/pack-card";
 import { DestinationCard } from "@/components/public/destination-card";
+import { PlatformStats } from "@/components/public/platform-stats";
 import { SectionHeading } from "@/components/public/section-heading";
 import { Reveal } from "@/components/ui/reveal";
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,7 @@ import {
 } from "@/components/ui/accordion";
 import {
   getFeaturedResidences, getPopularDestinations, getPacks,
-  getRecentReviews, getPlatformStats,
+  getRecentReviews, getPlatformStats, getCommunityStats,
 } from "@/lib/queries";
 import { getUserFavoriteIds } from "@/server/actions/favorites";
 import { getI18n } from "@/lib/i18n.server";
@@ -45,13 +46,14 @@ const FAQ = [
 ];
 
 export default async function HomePage() {
-  const [residences, destinations, packs, reviews, stats, favorites, { dict }] =
+  const [residences, destinations, packs, reviews, stats, community, favorites, { dict }] =
     await Promise.all([
       getFeaturedResidences(6),
       getPopularDestinations(6),
       getPacks(),
       getRecentReviews(3),
       getPlatformStats(),
+      getCommunityStats().catch(() => null),
       getUserFavoriteIds(),
       getI18n(),
     ]);
@@ -65,6 +67,7 @@ export default async function HomePage() {
         packs={packs}
         reviews={reviews}
         stats={stats}
+        community={community}
         favorites={favorites}
       />
 
@@ -140,6 +143,9 @@ export default async function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* ===== KORASTAY EN CHIFFRES (masquable par l'admin) ===== */}
+      {community && <PlatformStats community={community} offer={stats} />}
 
       {/* ===== DESTINATIONS ===== */}
       <section className="container-page py-10">

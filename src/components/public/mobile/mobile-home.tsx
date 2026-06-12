@@ -5,14 +5,16 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   ArrowRight, ArrowUpRight, Home as HomeIcon, Compass, Briefcase,
-  ShieldCheck, Smartphone, Headset, Star, Quote, Check, type LucideIcon,
+  ShieldCheck, Smartphone, Headset, Star, Quote, Check,
+  Eye, Users, KeyRound, Handshake, BedDouble, type LucideIcon,
 } from "lucide-react";
 import { HeroSearch } from "../hero-search";
 import { DestinationCard } from "../destination-card";
 import { MobileResidenceCard, MobilePackCard } from "./mobile-cards";
+import { CountUp } from "../count-up";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn, initials } from "@/lib/utils";
-import type { ResidenceCardData } from "@/lib/queries";
+import type { ResidenceCardData, CommunityStats } from "@/lib/queries";
 
 type Destination = React.ComponentProps<typeof DestinationCard>["destination"];
 type Pack = React.ComponentProps<typeof MobilePackCard>["pack"];
@@ -30,6 +32,7 @@ interface MobileHomeProps {
   packs: Pack[];
   reviews: Review[];
   stats: { residences: number; destinations: number; packs: number };
+  community: CommunityStats | null;
   favorites: { residences: Set<string>; packs: Set<string> };
 }
 
@@ -69,8 +72,20 @@ function SectionHead({ title, subtitle, href }: { title: string; subtitle?: stri
   );
 }
 
-export function MobileHome({ residences, destinations, packs, reviews, stats, favorites }: MobileHomeProps) {
+export function MobileHome({ residences, destinations, packs, reviews, stats, community, favorites }: MobileHomeProps) {
   const [tab, setTab] = React.useState<TabKey>("residences");
+
+  // Tuiles de stats (affichees seulement si l'admin a active la section).
+  const communityTiles = community
+    ? [
+        { value: community.visits, icon: Eye, label: "Visites" },
+        { value: community.travelers, icon: Users, label: "Voyageurs" },
+        { value: community.owners, icon: KeyRound, label: "Propriétaires" },
+        { value: community.guides, icon: Compass, label: "Guides" },
+        { value: community.partners, icon: Handshake, label: "Partenaires" },
+        { value: stats.residences, icon: BedDouble, label: "Locations" },
+      ]
+    : [];
 
   return (
     <div className="md:hidden">
@@ -211,21 +226,26 @@ export function MobileHome({ residences, destinations, packs, reviews, stats, fa
             </section>
           )}
 
-          {/* Stats + FAQ */}
+          {/* KoraStay en chiffres (masquable par l'admin) + FAQ */}
           <section className="px-5 pb-4 pt-8">
-            <div className="grid grid-cols-3 gap-2 text-center">
-              {[
-                { v: `${stats.residences}+`, l: "Locations" },
-                { v: stats.destinations, l: "Destinations" },
-                { v: `${stats.packs}+`, l: "Packs" },
-              ].map((s) => (
-                <div key={s.l} className="rounded-2xl border border-border bg-surface py-3">
-                  <p className="font-display text-xl font-semibold text-foreground">{s.v}</p>
-                  <p className="text-[11px] text-muted">{s.l}</p>
+            {community && (
+              <>
+                <h2 className="mb-3 px-1 text-[16px] font-bold text-foreground">KoraStay en chiffres</h2>
+                <div className="mb-4 grid grid-cols-3 gap-2.5 text-center">
+                  {communityTiles.map((s) => (
+                    <div key={s.label} className="rounded-2xl border border-border bg-surface py-3">
+                      <s.icon className="mx-auto h-4 w-4 text-brand-600" />
+                      <CountUp
+                        value={s.value}
+                        className="mt-1 block font-display text-lg font-semibold tabular-nums text-foreground"
+                      />
+                      <p className="text-[10.5px] leading-tight text-muted">{s.label}</p>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-            <Link href="/faq" className="mt-4 flex items-center justify-between rounded-2xl border border-border bg-surface px-4 py-3 text-[14px] font-semibold text-foreground active:bg-surface-soft">
+              </>
+            )}
+            <Link href="/faq" className="flex items-center justify-between rounded-2xl border border-border bg-surface px-4 py-3 text-[14px] font-semibold text-foreground active:bg-surface-soft">
               Questions frequentes
               <ArrowRight className="h-4 w-4 text-muted" />
             </Link>

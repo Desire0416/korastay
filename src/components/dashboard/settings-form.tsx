@@ -3,7 +3,7 @@
 import { useActionState, useEffect } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { CreditCard, ChevronRight } from "lucide-react";
+import { CreditCard, ChevronRight, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,9 +14,10 @@ interface Props {
   contactEmail: string;
   contactPhone: string;
   announcement: string;
+  statsVisible: boolean;
 }
 
-export function SettingsForm({ contactEmail, contactPhone, announcement }: Props) {
+export function SettingsForm({ contactEmail, contactPhone, announcement, statsVisible }: Props) {
   const [state, action, pending] = useActionState<SettingsResult, FormData>(saveSettings, { ok: false });
 
   useEffect(() => {
@@ -36,6 +37,31 @@ export function SettingsForm({ contactEmail, contactPhone, announcement }: Props
         </span>
         <ChevronRight className="h-5 w-5 text-muted" />
       </Link>
+
+      <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2 className="flex items-center gap-2 font-bold text-foreground">
+              <BarChart3 className="h-4 w-4 text-brand-600" /> Statistiques publiques
+            </h2>
+            <p className="mt-1 max-w-md text-sm text-muted">
+              Affiche la section « KoraStay en chiffres » (visites, comptes, offre) sur la page d&apos;accueil.
+              Laissez masqué tant que les chiffres sont faibles, puis activez-la au moment opportun.
+            </p>
+            <p className="mt-2 text-xs font-semibold">
+              Actuellement :{" "}
+              <span className={statsVisible ? "text-success" : "text-muted"}>
+                {statsVisible ? "affichée sur l'accueil" : "masquée"}
+              </span>
+            </p>
+          </div>
+          <label className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center" title="Afficher la section sur l'accueil">
+            <input type="checkbox" name="community_stats_visible" value="1" defaultChecked={statsVisible} className="peer sr-only" />
+            <span className="h-6 w-11 rounded-full bg-border transition-colors peer-checked:bg-brand-500" />
+            <span className="pointer-events-none absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform peer-checked:translate-x-5" />
+          </label>
+        </div>
+      </div>
 
       <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
         <h2 className="mb-4 font-bold text-foreground">Contact affiche</h2>

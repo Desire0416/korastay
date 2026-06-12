@@ -6,6 +6,8 @@ export const SETTING_DEFAULTS: Record<string, string> = {
   contact_email: CONTACT_EMAIL,
   contact_phone: CONTACT_PHONE,
   announcement: "",
+  // Section publique "KoraStay en chiffres" : masquee par defaut (chiffres faibles).
+  community_stats_visible: "false",
 };
 
 export async function getSettingsMap(): Promise<Record<string, string>> {

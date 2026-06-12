@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { prisma } from "./prisma";
 import { PAGE_SIZE } from "./constants";
 import type { Prisma } from "@prisma/client";
@@ -263,3 +264,57 @@ export async function getPlatformStats() {
   ]);
   return { residences, destinations, packs };
 }
+
+// ------------------------------------------------------------
+// Statistiques communaute (compteur public) : nombre de visites
+// de la plateforme + comptes crees par type. Mis en cache 2 min
+// pour ne pas multiplier les requetes a chaque chargement.
+// ------------------------------------------------------------
+export type CommunityStats = {
+  visits: number;
+  travelers: number;
+  owners: number;
+  guides: number;
+  partners: number;
+};
+
+// Compteur public "communaute" : nombre de visites + comptes crees par type.
+// L'admin peut masquer la section (reglage community_stats_visible) tant que
+// les chiffres sont faibles -> on renvoie alors null et on n'execute AUCUNE
+// requete de comptage. Mis en cache 2 min ; tag "community-stats" revalide par
+// la page admin lors du basculement de l'interrupteur.
+export const getCommunityStats = unstable_cache(
+  async (): Promise<CommunityStats | null> => {
+    const visible = await prisma.setting.findUnique({
+      where: { key: "community_stats_visible" },
+    });
+    if (visible?.value !== "true") return null; // masque par defaut
+
+    const [usersByRole, partnersByType, visitsRow] = await Promise.all([
+      // Un seul groupBy couvre tous les roles (on exclut les comptes non confirmes).
+      prisma.user.groupBy({
+        by: ["role"],
+        _count: { _all: true },
+        where: { status: { not: "PENDING_EMAIL_VERIFICATION" } },
+      }),
+      // Repartition des partenaires par metier (guide / transport / resto...).
+      prisma.partnerProfile.groupBy({ by: ["type"], _count: { _all: true } }),
+      prisma.setting.findUnique({ where: { key: "visits_total" } }),
+    ]);
+
+    const roleCount = (role: string) =>
+      usersByRole.find((u) => u.role === role)?._count._all ?? 0;
+    const guides = partnersByType.find((p) => p.type === "GUIDE")?._count._all ?? 0;
+    const partnersTotal = partnersByType.reduce((sum, p) => sum + p._count._all, 0);
+
+    return {
+      visits: Number(visitsRow?.value ?? 0),
+      travelers: roleCount("TRAVELER"),
+      owners: roleCount("OWNER"),
+      guides,
+      partners: partnersTotal - guides, // autres partenaires (resto, transport, activites...)
+    };
+  },
+  ["community-stats-v3"],
+  { revalidate: 120, tags: ["community-stats"] },
+);

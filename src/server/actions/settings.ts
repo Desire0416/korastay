@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
 
@@ -18,8 +18,14 @@ export async function saveSettings(_prev: SettingsResult, formData: FormData): P
   await setKey("contact_phone", String(formData.get("contact_phone") ?? "").trim());
   await setKey("announcement", String(formData.get("announcement") ?? "").trim());
 
+  // Affichage (ou non) de la section publique "KoraStay en chiffres".
+  await setKey("community_stats_visible", formData.get("community_stats_visible") ? "true" : "false");
+
   await prisma.auditLog.create({ data: { actorId: admin.id, action: "SETTINGS_UPDATED", entityType: "Setting", entityId: "global" } });
   revalidatePath("/admin/settings");
   revalidatePath("/admin");
+  // Reflete immediatement le basculement sur l'accueil public.
+  revalidateTag("community-stats");
+  revalidatePath("/");
   return { ok: true, message: "Paramètres enregistrés." };
 }

@@ -26,6 +26,7 @@ export default async function AdminSettingsPage() {
         contactEmail={settings.contact_email}
         contactPhone={settings.contact_phone}
         announcement={settings.announcement}
+        statsVisible={settings.community_stats_visible === "true"}
       />
     </div>
   );
