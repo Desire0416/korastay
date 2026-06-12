@@ -1,11 +1,22 @@
+import Link from "next/link";
 import {
-  Handshake, Compass, Car, UtensilsCrossed, Camera, TrendingUp, ShieldCheck, Wallet,
+  Handshake, Compass, Car, UtensilsCrossed, Camera, TrendingUp, ShieldCheck, Wallet, ArrowRight,
 } from "lucide-react";
-import { LeadForm } from "@/components/public/lead-form";
-import { submitPartnerApplication } from "@/server/actions/leads";
+import { getCurrentUser } from "@/lib/auth";
+import { becomePartnerAction } from "@/server/actions/auth";
+import { RegisterForm } from "@/components/auth/register-form";
+import { Button } from "@/components/ui/button";
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
+
+const PARTNER_OPTIONS = [
+  { value: "GUIDE", label: "Guide touristique" },
+  { value: "TRANSPORT", label: "Chauffeur / Transport" },
+  { value: "RESTAURANT", label: "Restaurant" },
+  { value: "ACTIVITY", label: "Activité / expérience" },
+  { value: "OTHER", label: "Autre prestataire" },
+];
 
 export const metadata = {
   title: "Devenir partenaire",
@@ -31,7 +42,11 @@ const FAQ = [
   { q: "Quels documents fournir ?", a: "Une pièce d'identité, vos justificatifs d'activité et quelques photos de vos prestations." },
 ];
 
-export default function PartnersPage() {
+export default async function PartnersPage() {
+  const user = await getCurrentUser();
+  const isPartner = user?.role === "PARTNER";
+  const isStaff = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
+
   return (
     <div>
       <section className="gradient-hero">
@@ -87,26 +102,64 @@ export default function PartnersPage() {
           </div>
 
           <div className="rounded-4xl border border-border bg-surface p-6 shadow-card sm:p-8">
-            <h2 className="text-xl font-bold text-foreground">Devenir partenaire</h2>
-            <p className="mb-5 mt-1 text-sm text-muted">Inscription gratuite, validation sous 48h.</p>
-            <LeadForm
-              action={submitPartnerApplication}
-              submitLabel="Envoyer ma candidature"
-              fields={[
-                { name: "businessName", label: "Nom / Enseigne", required: true, full: true, placeholder: "Votre activité" },
-                { name: "type", label: "Type de partenaire", type: "select", required: true, placeholder: "Choisir", options: [
-                  { value: "GUIDE", label: "Guide touristique" },
-                  { value: "TRANSPORT", label: "Transporteur" },
-                  { value: "RESTAURANT", label: "Restaurant" },
-                  { value: "ACTIVITY", label: "Activite / experience" },
-                  { value: "OTHER", label: "Autre" },
-                ] },
-                { name: "city", label: "Ville", required: true, placeholder: "Daloa" },
-                { name: "email", label: "Email", type: "email", required: true, placeholder: "vous@email.com" },
-                { name: "phone", label: "Téléphone", type: "tel", required: true, placeholder: "+225 ..." },
-                { name: "message", label: "Présentez votre activité", type: "textarea", placeholder: "Vos services, votre expérience..." },
-              ]}
-            />
+            {!user ? (
+              // Visiteur sans compte : la candidature EST la creation du compte partenaire.
+              <RegisterForm
+                defaultType="PARTNER"
+                lockType
+                title="Créer mon compte partenaire"
+                subtitle="Choisissez votre métier et créez votre compte. Notre équipe valide votre profil sous 48h."
+              />
+            ) : isPartner ? (
+              <div className="py-4 text-center">
+                <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-50 text-brand-600">
+                  <Handshake className="h-7 w-7" />
+                </span>
+                <h2 className="mt-4 text-xl font-bold text-foreground">Votre espace partenaire</h2>
+                <p className="mx-auto mt-1.5 max-w-sm text-sm text-muted">
+                  Retrouvez vos missions, vos services et vos revenus dans votre espace.
+                </p>
+                <Button asChild size="lg" className="mt-5">
+                  <Link href="/partner">Accéder à mon espace <ArrowRight className="h-4 w-4" /></Link>
+                </Button>
+              </div>
+            ) : isStaff ? (
+              <div className="py-4 text-center">
+                <h2 className="text-xl font-bold text-foreground">Gestion des partenaires</h2>
+                <p className="mx-auto mt-1.5 max-w-sm text-sm text-muted">Vérifiez et gérez les partenaires depuis l'administration.</p>
+                <Button asChild size="lg" className="mt-5"><Link href="/admin/partners">Ouvrir l'administration <ArrowRight className="h-4 w-4" /></Link></Button>
+              </div>
+            ) : (
+              // Compte existant (voyageur, etc.) : on active l'espace partenaire avec le metier choisi.
+              <div className="py-2">
+                <h2 className="text-xl font-bold text-foreground">Activez votre espace partenaire</h2>
+                <p className="mb-5 mt-1.5 text-sm text-muted">
+                  Bonjour {user.firstName}, choisissez votre métier : votre compte deviendra un compte <strong>partenaire</strong>.
+                </p>
+                <form action={becomePartnerAction} className="space-y-4">
+                  <div>
+                    <label htmlFor="partnerType" className="mb-1.5 block text-sm font-semibold text-foreground">
+                      Type de partenaire
+                    </label>
+                    <select
+                      id="partnerType"
+                      name="partnerType"
+                      required
+                      defaultValue=""
+                      className="h-12 w-full rounded-2xl border border-border bg-surface px-4 text-[15px] text-foreground focus-visible:border-brand-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-100"
+                    >
+                      <option value="" disabled>Choisir votre activité</option>
+                      {PARTNER_OPTIONS.map((o) => (
+                        <option key={o.value} value={o.value}>{o.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <Button type="submit" size="lg" className="w-full">
+                    Activer mon espace partenaire <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </form>
+              </div>
+            )}
           </div>
         </div>
       </section>

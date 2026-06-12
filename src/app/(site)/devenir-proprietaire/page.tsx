@@ -1,10 +1,13 @@
+import Link from "next/link";
 import { Home, TrendingUp, ShieldCheck, Calendar, Wallet, BadgeCheck, ArrowRight } from "lucide-react";
-import { LeadForm } from "@/components/public/lead-form";
-import { submitOwnerApplication } from "@/server/actions/leads";
+import { getCurrentUser } from "@/lib/auth";
+import { becomeOwnerAction } from "@/server/actions/auth";
+import { RegisterForm } from "@/components/auth/register-form";
+import { Button } from "@/components/ui/button";
 
 export const metadata = {
   title: "Devenir propriétaire",
-  description: "Publiez votre résidence meublée sur KoraStay, gérez votre calendrier et augmentez votre taux d'occupation.",
+  description: "Créez votre compte propriétaire sur KoraStay, publiez votre résidence meublée et gérez votre calendrier.",
 };
 
 const STEPS = [
@@ -21,7 +24,10 @@ const BENEFITS = [
   { icon: ShieldCheck, title: "Voyageurs vérifiés", text: "Des réservations payées et securisees par KoraStay." },
 ];
 
-export default function OwnerLandingPage() {
+export default async function OwnerLandingPage() {
+  const user = await getCurrentUser();
+  const isOwner = user?.role === "OWNER" || user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
+
   return (
     <div>
       <section className="gradient-hero">
@@ -47,20 +53,46 @@ export default function OwnerLandingPage() {
           </div>
 
           <div className="rounded-4xl border border-border bg-surface p-6 shadow-card sm:p-8">
-            <h2 className="text-xl font-bold text-foreground">Rejoindre le réseau</h2>
-            <p className="mb-5 mt-1 text-sm text-muted">Notre équipe vous recontacte sous 48h.</p>
-            <LeadForm
-              action={submitOwnerApplication}
-              submitLabel="Envoyer ma demande"
-              fields={[
-                { name: "name", label: "Nom complet", required: true, full: true, placeholder: "Votre nom" },
-                { name: "email", label: "Email", type: "email", required: true, placeholder: "vous@email.com" },
-                { name: "phone", label: "Téléphone", type: "tel", required: true, placeholder: "+225 ..." },
-                { name: "city", label: "Ville du bien", required: true, placeholder: "Daloa" },
-                { name: "residenceCount", label: "Nombre de biens", type: "number", placeholder: "1" },
-                { name: "message", label: "Decrivez votre bien", type: "textarea", placeholder: "Type, capacité, équipements..." },
-              ]}
-            />
+            {!user ? (
+              // Visiteur sans compte : la demande EST la creation du compte proprietaire.
+              <RegisterForm
+                defaultType="OWNER"
+                lockType
+                title="Créer mon compte propriétaire"
+                subtitle="Devenir propriétaire commence ici : créez votre compte, puis publiez vos logements."
+              />
+            ) : isOwner ? (
+              // Deja proprietaire : acces direct a l'espace.
+              <div className="py-4 text-center">
+                <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-50 text-brand-600">
+                  <Home className="h-7 w-7" />
+                </span>
+                <h2 className="mt-4 text-xl font-bold text-foreground">Votre espace est prêt</h2>
+                <p className="mx-auto mt-1.5 max-w-sm text-sm text-muted">
+                  Gérez vos résidences, votre calendrier et vos revenus depuis votre espace propriétaire.
+                </p>
+                <Button asChild size="lg" className="mt-5">
+                  <Link href="/owner">Accéder à mon espace <ArrowRight className="h-4 w-4" /></Link>
+                </Button>
+              </div>
+            ) : (
+              // Compte existant (voyageur, etc.) : on active l'espace proprietaire.
+              <div className="py-2">
+                <h2 className="text-xl font-bold text-foreground">Activez votre espace propriétaire</h2>
+                <p className="mb-5 mt-1.5 text-sm text-muted">
+                  Bonjour {user.firstName}, votre compte deviendra un compte <strong>propriétaire</strong> :
+                  vous pourrez publier vos logements et recevoir des réservations. Vous gardez le même identifiant.
+                </p>
+                <form action={becomeOwnerAction}>
+                  <Button type="submit" size="lg" className="w-full">
+                    Activer mon espace propriétaire <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </form>
+                <p className="mt-3 text-center text-xs text-muted">
+                  Vous publierez vos biens ensuite ; chaque résidence est vérifiée avant mise en ligne.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </section>

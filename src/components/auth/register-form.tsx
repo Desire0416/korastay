@@ -1,18 +1,42 @@
 "use client";
 
-import { useActionState } from "react";
+import { useState, useActionState } from "react";
 import Link from "next/link";
-import { AlertCircle, MailCheck } from "lucide-react";
+import { AlertCircle, MailCheck, Compass, Home, Handshake } from "lucide-react";
 import { registerAction, type ActionState } from "@/server/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field } from "@/components/ui/field";
+import { cn } from "@/lib/utils";
 
-export function RegisterForm() {
-  const [state, action, pending] = useActionState<ActionState, FormData>(
-    registerAction,
-    { ok: false }
-  );
+type AccountType = "TRAVELER" | "OWNER" | "PARTNER";
+
+const ACCOUNT_OPTIONS: { value: AccountType; label: string; desc: string; icon: typeof Compass }[] = [
+  { value: "TRAVELER", label: "Voyageur", desc: "Réserver des séjours", icon: Compass },
+  { value: "OWNER", label: "Propriétaire", desc: "Publier mes logements", icon: Home },
+  { value: "PARTNER", label: "Partenaire", desc: "Guide, resto, transport…", icon: Handshake },
+];
+
+const PARTNER_OPTIONS = [
+  { value: "GUIDE", label: "Guide touristique" },
+  { value: "TRANSPORT", label: "Chauffeur / Transport" },
+  { value: "RESTAURANT", label: "Restaurant" },
+  { value: "ACTIVITY", label: "Activité / expérience" },
+  { value: "OTHER", label: "Autre prestataire" },
+];
+
+interface Props {
+  /** Type pré-sélectionné (utilisé sur /devenir-proprietaire et /partners). */
+  defaultType?: AccountType;
+  /** Verrouille le type (masque le choix à 3 options) — le sous-type partenaire reste visible. */
+  lockType?: boolean;
+  title?: string;
+  subtitle?: string;
+}
+
+export function RegisterForm({ defaultType = "TRAVELER", lockType = false, title, subtitle }: Props) {
+  const [state, action, pending] = useActionState<ActionState, FormData>(registerAction, { ok: false });
+  const [accountType, setAccountType] = useState<AccountType>(defaultType);
 
   if (state.ok) {
     return (
@@ -35,10 +59,66 @@ export function RegisterForm() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-foreground">Créer votre compte</h1>
-      <p className="mt-1.5 text-muted">Rejoignez KoraStay en quelques secondes.</p>
+      <h1 className="text-2xl font-bold text-foreground">{title ?? "Créer votre compte"}</h1>
+      <p className="mt-1.5 text-muted">{subtitle ?? "Rejoignez KoraStay en quelques secondes."}</p>
 
       <form action={action} className="mt-7 space-y-4">
+        {/* Choix du type de compte */}
+        {!lockType ? (
+          <div>
+            <p className="mb-2 text-sm font-semibold text-foreground">Je crée un compte en tant que</p>
+            <div className="grid grid-cols-3 gap-2">
+              {ACCOUNT_OPTIONS.map((opt) => {
+                const active = accountType === opt.value;
+                const Icon = opt.icon;
+                return (
+                  <label
+                    key={opt.value}
+                    className={cn(
+                      "cursor-pointer rounded-2xl border p-3 text-center transition-all",
+                      active
+                        ? "border-brand-500 bg-brand-50 ring-1 ring-brand-500"
+                        : "border-border hover:border-brand-300",
+                    )}
+                  >
+                    <input
+                      type="radio"
+                      name="accountType"
+                      value={opt.value}
+                      checked={active}
+                      onChange={() => setAccountType(opt.value)}
+                      className="sr-only"
+                    />
+                    <Icon className={cn("mx-auto h-5 w-5", active ? "text-brand-600" : "text-muted")} />
+                    <span className="mt-1.5 block text-xs font-bold text-foreground">{opt.label}</span>
+                    <span className="mt-0.5 block text-[10px] leading-tight text-muted">{opt.desc}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          <input type="hidden" name="accountType" value={accountType} />
+        )}
+
+        {/* Sous-type partenaire (métier) */}
+        {accountType === "PARTNER" && (
+          <Field label="Type de partenaire" htmlFor="partnerType" required error={state.fieldErrors?.partnerType}>
+            <select
+              id="partnerType"
+              name="partnerType"
+              required
+              defaultValue={state.values?.partnerType ?? ""}
+              className="h-12 w-full rounded-2xl border border-border bg-surface px-4 text-[15px] text-foreground focus-visible:border-brand-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-100"
+            >
+              <option value="" disabled>Choisir votre activité</option>
+              {PARTNER_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+          </Field>
+        )}
+
         <div className="grid grid-cols-2 gap-3">
           <Field label="Prenom" htmlFor="firstName" required error={state.fieldErrors?.firstName}>
             <Input id="firstName" name="firstName" placeholder="Marc" required defaultValue={state.values?.firstName ?? ""} />

@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import {
@@ -8,9 +9,11 @@ import {
   verifyPassword,
   createSession,
   destroySession,
+  getCurrentUser,
   homeForRole,
 } from "@/lib/auth";
 import { sendEmail, emailLayout, emailButton } from "@/lib/email";
+import { partnerTypeMeta } from "@/lib/enums";
 import crypto from "crypto";
 
 export type ActionState = {
@@ -26,13 +29,25 @@ const APP_URL = process.env.APP_URL ?? "http://localhost:3000";
 // ------------------------------------------------------------
 // Inscription
 // ------------------------------------------------------------
-const registerSchema = z.object({
-  firstName: z.string().min(2, "Prenom requis"),
-  lastName: z.string().min(2, "Nom requis"),
-  email: z.string().email("Email invalide"),
-  phone: z.string().min(6, "Téléphone requis").optional().or(z.literal("")),
-  password: z.string().min(8, "8 caractères minimum"),
-});
+// Types de compte choisis directement a l'inscription.
+const ACCOUNT_TYPES = ["TRAVELER", "OWNER", "PARTNER"] as const;
+const PARTNER_TYPES = ["GUIDE", "TRANSPORT", "RESTAURANT", "ACTIVITY", "OTHER"] as const;
+
+const registerSchema = z
+  .object({
+    firstName: z.string().min(2, "Prenom requis"),
+    lastName: z.string().min(2, "Nom requis"),
+    email: z.string().email("Email invalide"),
+    phone: z.string().min(6, "Téléphone requis").optional().or(z.literal("")),
+    password: z.string().min(8, "8 caractères minimum"),
+    accountType: z.enum(ACCOUNT_TYPES).default("TRAVELER"),
+    partnerType: z.enum(PARTNER_TYPES).optional(),
+  })
+  // Si l'on s'inscrit comme partenaire, le metier (type) est obligatoire.
+  .refine((d) => d.accountType !== "PARTNER" || !!d.partnerType, {
+    message: "Choisissez votre type de partenaire",
+    path: ["partnerType"],
+  });
 
 export async function registerAction(
   _prev: ActionState,
@@ -44,9 +59,15 @@ export async function registerAction(
     lastName: String(formData.get("lastName") ?? ""),
     email: String(formData.get("email") ?? ""),
     phone: String(formData.get("phone") ?? ""),
+    accountType: String(formData.get("accountType") ?? "TRAVELER"),
+    partnerType: String(formData.get("partnerType") ?? ""),
   };
 
-  const parsed = registerSchema.safeParse({ ...values, password: formData.get("password") });
+  const parsed = registerSchema.safeParse({
+    ...values,
+    password: formData.get("password"),
+    partnerType: values.partnerType || undefined,
+  });
 
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
@@ -72,10 +93,45 @@ export async function registerAction(
       email: data.email.toLowerCase(),
       phone: data.phone || null,
       passwordHash,
-      role: "TRAVELER",
+      // Le type choisi a l'inscription devient le role du compte.
+      role: data.accountType,
       status: "PENDING_EMAIL_VERIFICATION",
     },
   });
+
+  // Inscription partenaire : on cree d'emblee le profil avec le metier choisi.
+  // Il reste a verifier par un admin (verificationStatus PENDING_REVIEW par
+  // defaut) avant que le partenaire puisse finaliser son onboarding.
+  if (data.accountType === "PARTNER" && data.partnerType) {
+    await prisma.partnerProfile.create({
+      data: {
+        userId: user.id,
+        type: data.partnerType,
+        businessName: `${data.firstName} ${data.lastName}`,
+      },
+    });
+
+    // On previent les administrateurs qu'un partenaire attend une verification.
+    try {
+      const admins = await prisma.user.findMany({
+        where: { role: { in: ["ADMIN", "SUPER_ADMIN"] } },
+        select: { id: true },
+      });
+      if (admins.length > 0) {
+        await prisma.notification.createMany({
+          data: admins.map((a) => ({
+            userId: a.id,
+            title: "Nouveau partenaire à vérifier",
+            body: `${data.firstName} ${data.lastName} (${partnerTypeMeta[data.partnerType!]?.label ?? "partenaire"}) a créé un compte. Vérifiez son profil.`,
+            type: "PARTNER_SIGNUP",
+            url: "/admin/partners",
+          })),
+        });
+      }
+    } catch {
+      // notification best-effort : ne bloque jamais l'inscription
+    }
+  }
 
   // Token de verification
   const token = crypto.randomBytes(32).toString("hex");
@@ -114,6 +170,46 @@ export async function registerAction(
     message:
       "Votre compte a ete créé. Un email de confirmation vient de vous être envoyé : cliquez sur le lien pour activer votre compte avant de vous connecter.",
   };
+}
+
+// ------------------------------------------------------------
+// Devenir proprietaire / partenaire depuis un compte DEJA connecte.
+// (Les visiteurs sans compte passent par registerAction : la demande de
+// devenir proprietaire/partenaire EST la creation du compte correspondant.)
+// ------------------------------------------------------------
+export async function becomeOwnerAction(): Promise<void> {
+  const user = await getCurrentUser();
+  if (!user) redirect("/register?type=OWNER");
+  if (user.role === "OWNER" || user.role === "ADMIN" || user.role === "SUPER_ADMIN") {
+    redirect("/owner");
+  }
+  await prisma.user.update({ where: { id: user.id }, data: { role: "OWNER" } });
+  revalidatePath("/", "layout");
+  redirect("/owner");
+}
+
+export async function becomePartnerAction(formData: FormData): Promise<void> {
+  const user = await getCurrentUser();
+  if (!user) redirect("/register?type=PARTNER");
+  if (user.role === "PARTNER") redirect("/partner");
+
+  const partnerType = String(formData.get("partnerType") ?? "");
+  if (!PARTNER_TYPES.includes(partnerType as (typeof PARTNER_TYPES)[number])) {
+    redirect("/partners?error=type");
+  }
+
+  await prisma.user.update({ where: { id: user.id }, data: { role: "PARTNER" } });
+  await prisma.partnerProfile.upsert({
+    where: { userId: user.id },
+    create: {
+      userId: user.id,
+      type: partnerType,
+      businessName: `${user.firstName} ${user.lastName}`,
+    },
+    update: { type: partnerType },
+  });
+  revalidatePath("/", "layout");
+  redirect("/partner-onboarding");
 }
 
 // ------------------------------------------------------------

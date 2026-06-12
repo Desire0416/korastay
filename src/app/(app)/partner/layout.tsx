@@ -13,8 +13,10 @@ export default async function PartnerLayout({ children }: { children: React.Reac
     select: { type: true, verificationStatus: true, onboardingCompletedAt: true },
   });
 
-  // Apres verification, la configuration est obligatoire avant le dashboard.
-  if (profile && profile.verificationStatus === "VERIFIED" && !profile.onboardingCompletedAt) {
+  // Tout partenaire pas encore onboarde est dirige vers l'onboarding, qui
+  // affiche l'etat adequat : "en cours de validation" tant que l'admin n'a pas
+  // verifie le profil, puis le formulaire de configuration une fois verifie.
+  if (profile && !profile.onboardingCompletedAt) {
     redirect("/partner-onboarding");
   }
 
