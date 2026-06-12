@@ -39,11 +39,11 @@ export default async function AdminDashboard() {
       )}
 
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <KpiCard label="Reservations (mois)" value={stats.bookingsMonth} icon={CalendarCheck} tone="brand" href="/admin/reservations" />
+        <KpiCard label="Réservations (mois)" value={stats.bookingsMonth} icon={CalendarCheck} tone="brand" href="/admin/reservations" />
         <KpiCard label="Revenus encaisses" value={formatPrice(stats.revenue)} icon={Wallet} tone="success" href="/admin/payments?status=PAID" />
-        <KpiCard label="Paiements confirmes" value={stats.paidPaymentsCount} icon={CreditCard} tone="info" href="/admin/payments?status=PAID" />
-        <KpiCard label="Residences publiees" value={stats.publishedResidences} icon={Home} tone="brand" href="/admin/residences?status=PUBLISHED" />
-        <KpiCard label="Residences en attente" value={stats.pendingResidences} icon={Clock} tone="gold" href="/admin/residences?status=PENDING_VALIDATION" />
+        <KpiCard label="Paiements confirmés" value={stats.paidPaymentsCount} icon={CreditCard} tone="info" href="/admin/payments?status=PAID" />
+        <KpiCard label="Résidences publiees" value={stats.publishedResidences} icon={Home} tone="brand" href="/admin/residences?status=PUBLISHED" />
+        <KpiCard label="Résidences en attente" value={stats.pendingResidences} icon={Clock} tone="gold" href="/admin/residences?status=PENDING_VALIDATION" />
         <KpiCard label="Utilisateurs" value={stats.users} icon={Users} tone="info" href="/admin/users" />
         <KpiCard label="Partenaires en attente" value={stats.pendingPartners} icon={Handshake} tone="gold" href="/admin/partners?status=PENDING_REVIEW" />
         <KpiCard label="Demandes business" value={stats.businessRequests} icon={Briefcase} tone="brand" href="/admin/business" />
@@ -52,7 +52,7 @@ export default async function AdminDashboard() {
       {/* Graphiques mensuels */}
       <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
-          <h2 className="mb-4 font-bold text-foreground">Reservations par mois</h2>
+          <h2 className="mb-4 font-bold text-foreground">Réservations par mois</h2>
           <MonthlyBars data={monthly.map((m) => ({ label: m.label, value: m.count }))} />
         </div>
         <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
@@ -64,8 +64,8 @@ export default async function AdminDashboard() {
       {/* Top residences / packs */}
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
-          <h2 className="mb-4 font-bold text-foreground">Top residences</h2>
-          {top.topResidences.length === 0 ? <p className="text-sm text-muted">Aucune donnee.</p> : (
+          <h2 className="mb-4 font-bold text-foreground">Top résidences</h2>
+          {top.topResidences.length === 0 ? <p className="text-sm text-muted">Aucune donnée.</p> : (
             <ul className="space-y-2">
               {top.topResidences.map((r, i) => (
                 <li key={i} className="flex items-center justify-between gap-2 text-sm">
@@ -78,7 +78,7 @@ export default async function AdminDashboard() {
         </div>
         <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
           <h2 className="mb-4 font-bold text-foreground">Top packs</h2>
-          {top.topPacks.length === 0 ? <p className="text-sm text-muted">Aucune donnee.</p> : (
+          {top.topPacks.length === 0 ? <p className="text-sm text-muted">Aucune donnée.</p> : (
             <ul className="space-y-2">
               {top.topPacks.map((p, i) => (
                 <li key={i} className="flex items-center justify-between gap-2 text-sm">
@@ -94,9 +94,9 @@ export default async function AdminDashboard() {
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Repartition par ville */}
         <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
-          <h2 className="mb-4 font-bold text-foreground">Reservations par ville</h2>
+          <h2 className="mb-4 font-bold text-foreground">Réservations par ville</h2>
           {byCity.length === 0 ? (
-            <p className="text-sm text-muted">Aucune donnee.</p>
+            <p className="text-sm text-muted">Aucune donnée.</p>
           ) : (
             <div className="space-y-3">
               {byCity.slice(0, 8).map((c) => (
@@ -117,7 +117,7 @@ export default async function AdminDashboard() {
         {/* Reservations recentes */}
         <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-bold text-foreground">Reservations recentes</h2>
+            <h2 className="font-bold text-foreground">Réservations récentes</h2>
             <Link href="/admin/reservations" className="flex items-center gap-1 text-sm font-semibold text-brand-600">Tout voir <ArrowRight className="h-4 w-4" /></Link>
           </div>
           <div className="space-y-2">

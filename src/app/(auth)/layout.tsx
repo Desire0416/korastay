@@ -22,17 +22,17 @@ export default function AuthLayout({
         <Logo variant="light" />
         <div className="relative">
           <h1 className="font-display text-4xl font-semibold leading-tight">
-            Reservez votre sejour,<br />vivez l'Afrique de l'Ouest.
+            Réservez votre séjour,<br />vivez l'Afrique de l'Ouest.
           </h1>
           <p className="mt-4 max-w-md text-white/80">
-            Des residences verifiees, des packs touristiques accompagnes et des
+            Des résidences vérifiées, des packs touristiques accompagnes et des
             partenaires locaux de confiance.
           </p>
           <div className="mt-8 space-y-3">
             {[
-              { icon: ShieldCheck, text: "Residences controlees par KoraStay" },
-              { icon: Star, text: "Avis verifies de voyageurs reels" },
-              { icon: MapPinned, text: "Assistance locale a chaque etape" },
+              { icon: ShieldCheck, text: "Résidences contrôlées par KoraStay" },
+              { icon: Star, text: "Avis vérifiés de voyageurs reels" },
+              { icon: MapPinned, text: "Assistance locale a chaque étape" },
             ].map((f) => (
               <div key={f.text} className="flex items-center gap-3 text-white/90">
                 <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/15">

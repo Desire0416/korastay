@@ -27,7 +27,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
   const staff = isStaff(user.role);
   const isParticipant = convo.participants.some((p) => p.userId === user.id);
-  if (!isParticipant && !staff) return NextResponse.json({ error: "Acces refuse." }, { status: 403 });
+  if (!isParticipant && !staff) return NextResponse.json({ error: "Accès refuse." }, { status: 403 });
 
   // Marque comme lue (best-effort)
   if (isParticipant) {

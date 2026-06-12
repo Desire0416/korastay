@@ -21,7 +21,7 @@ export default async function AdminCustomPacksPage() {
     <div className="mx-auto max-w-4xl">
       <PageHeader title="Packs personnalises" description="Les paniers composes par les voyageurs." />
       {requests.length === 0 ? (
-        <EmptyState icon={Wand2} title="Aucun pack personnalise" description="Les packs composes par les voyageurs apparaitront ici." />
+        <EmptyState icon={Wand2} title="Aucun pack personnalisé" description="Les packs composes par les voyageurs apparaitront ici." />
       ) : (
         <div className="space-y-3">
           {requests.map((r) => (

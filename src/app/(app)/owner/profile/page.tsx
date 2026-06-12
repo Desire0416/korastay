@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { ProfileForm } from "@/components/dashboard/profile-form";
 import { PasswordForm } from "@/components/dashboard/password-form";
 
-export const metadata = { title: "Mon profil proprietaire" };
+export const metadata = { title: "Mon profil propriétaire" };
 
 export default async function OwnerProfilePage() {
   const sessionUser = await requireRole(["OWNER", "ADMIN", "SUPER_ADMIN"]);
@@ -13,7 +13,7 @@ export default async function OwnerProfilePage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <PageHeader title="Mon profil" description="Gerez vos informations et votre securite." />
+      <PageHeader title="Mon profil" description="Gérez vos informations et votre sécurité." />
       <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
         <h2 className="mb-4 font-bold text-foreground">Informations</h2>
         <ProfileForm defaults={{ firstName: user.firstName, lastName: user.lastName, email: user.email, phone: user.phone ?? "", city: user.city ?? "", country: user.country ?? "", bio: user.bio ?? "", avatarUrl: user.avatarUrl }} />

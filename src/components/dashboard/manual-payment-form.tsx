@@ -36,10 +36,10 @@ export function ManualPaymentForm({
       <input type="hidden" name="reservationId" value={reservationId} />
       <div className="flex items-start gap-2 rounded-xl bg-gold-50 px-3 py-2 text-xs text-gold-800">
         <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-        Une capture d&apos;ecran ne vaut pas paiement : ne validez qu&apos;un encaissement reellement recu.
+        Une capture d&apos;écran ne vaut pas paiement : ne validez qu&apos;un encaissement reellement reçu.
       </div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <Field label="Montant recu (F CFA)" htmlFor="amount" required>
+        <Field label="Montant reçu (F CFA)" htmlFor="amount" required>
           <Input id="amount" name="amount" type="number" min={1} step="100" defaultValue={defaultAmount} required />
         </Field>
         <Field label="Moyen de paiement" htmlFor="method">
@@ -49,7 +49,7 @@ export function ManualPaymentForm({
             ))}
           </select>
         </Field>
-        <Field label="Reference transaction" htmlFor="reference">
+        <Field label="Référence transaction" htmlFor="reference">
           <Input id="reference" name="reference" placeholder="Ex: WAVE-123456" />
         </Field>
         <Field label="Date du paiement" htmlFor="paidAt">
@@ -57,7 +57,7 @@ export function ManualPaymentForm({
         </Field>
       </div>
       <Field label="Commentaire admin" htmlFor="comment">
-        <Textarea id="comment" name="comment" rows={2} placeholder="Contexte, justificatif recu..." />
+        <Textarea id="comment" name="comment" rows={2} placeholder="Contexte, justificatif reçu..." />
       </Field>
       <Button type="submit" loading={pending} className="w-full">
         <CheckCircle2 className="h-4 w-4" /> Valider le paiement

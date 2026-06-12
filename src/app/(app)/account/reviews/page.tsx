@@ -35,7 +35,7 @@ export default async function ReviewsPage({ searchParams }: { searchParams: Prom
 
   return (
     <div className="mx-auto max-w-4xl">
-      <PageHeader title="Mes avis" description="Partagez votre experience apres chaque sejour." />
+      <PageHeader title="Mes avis" description="Partagez votre expérience après chaque séjour." />
 
       {/* A evaluer */}
       {reviewable.length > 0 && (
@@ -43,7 +43,7 @@ export default async function ReviewsPage({ searchParams }: { searchParams: Prom
           <h2 className="mb-3 text-lg font-bold text-foreground">A evaluer ({reviewable.length})</h2>
           <div className="space-y-3">
             {reviewable.map((r) => {
-              const title = r.residence?.name ?? r.pack?.name ?? "Sejour";
+              const title = r.residence?.name ?? r.pack?.name ?? "Séjour";
               return (
                 <div key={r.id} className="flex items-center gap-4 rounded-3xl border border-border bg-surface p-4 shadow-soft">
                   <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl">
@@ -51,7 +51,7 @@ export default async function ReviewsPage({ searchParams }: { searchParams: Prom
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="font-bold text-foreground">{title}</p>
-                    <p className="text-sm text-muted">Sejour termine le {formatDate(r.endDate)}</p>
+                    <p className="text-sm text-muted">Séjour terminé le {formatDate(r.endDate)}</p>
                   </div>
                   <WriteReviewButton reservationId={r.id} label={title} />
                 </div>
@@ -63,12 +63,12 @@ export default async function ReviewsPage({ searchParams }: { searchParams: Prom
 
       {/* Avis publies */}
       <section>
-        <h2 className="mb-3 text-lg font-bold text-foreground">Avis publies ({allReviews.length})</h2>
+        <h2 className="mb-3 text-lg font-bold text-foreground">Avis publiés ({allReviews.length})</h2>
 
         {allReviews.length > 0 && (
           <FilterBar
             fields={[
-              { type: "search", name: "q", placeholder: "Residence, pack, commentaire..." },
+              { type: "search", name: "q", placeholder: "Résidence, pack, commentaire..." },
               { type: "select", name: "rating", label: "Toutes les notes", options: [5, 4, 3, 2, 1].map((n) => ({ value: String(n), label: `${n} etoile${n > 1 ? "s" : ""}` })) },
             ]}
           />
@@ -77,11 +77,11 @@ export default async function ReviewsPage({ searchParams }: { searchParams: Prom
         {allReviews.length === 0 ? (
           <EmptyState
             icon={Star}
-            title="Aucun avis publie"
-            description="Apres un sejour, partagez votre experience pour aider les autres voyageurs."
+            title="Aucun avis publié"
+            description="Après un séjour, partagez votre expérience pour aider les autres voyageurs."
           />
         ) : reviews.length === 0 ? (
-          <EmptyState icon={Star} title="Aucun resultat" description="Aucun avis ne correspond a ces criteres." />
+          <EmptyState icon={Star} title="Aucun resultat" description="Aucun avis ne correspond a ces critères." />
         ) : (
           <div className="space-y-3">
             {reviews.map((review) => (
@@ -93,10 +93,10 @@ export default async function ReviewsPage({ searchParams }: { searchParams: Prom
                   <RatingStars value={review.rating} showValue={false} size="sm" />
                 </div>
                 {review.comment && <p className="mt-2 text-sm text-foreground/90">{review.comment}</p>}
-                <p className="mt-2 text-xs text-muted">Publie le {formatDate(review.createdAt)}</p>
+                <p className="mt-2 text-xs text-muted">Publié le {formatDate(review.createdAt)}</p>
                 {review.ownerReply && (
                   <div className="mt-3 rounded-2xl bg-surface-soft p-3 text-sm">
-                    <p className="font-semibold text-foreground">Reponse de l'hote</p>
+                    <p className="font-semibold text-foreground">Réponse de l'hôte</p>
                     <p className="text-muted">{review.ownerReply}</p>
                   </div>
                 )}

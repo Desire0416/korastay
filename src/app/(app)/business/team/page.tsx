@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Users } from "lucide-react";
 import { initials } from "@/lib/utils";
 
-export const metadata = { title: "Equipe business" };
+export const metadata = { title: "Équipe business" };
 
 export default async function BusinessTeamPage() {
   const user = await requireRole(["BUSINESS", "ADMIN", "SUPER_ADMIN"]);
@@ -19,9 +19,9 @@ export default async function BusinessTeamPage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <PageHeader title="Mon equipe" description="Les membres de votre organisation." />
+      <PageHeader title="Mon équipe" description="Les membres de votre organisation." />
       {members.length === 0 ? (
-        <EmptyState icon={Users} title="Aucune equipe" description="Votre compte n'est pas encore rattache a une organisation." />
+        <EmptyState icon={Users} title="Aucune équipe" description="Votre compte n'est pas encore rattache a une organisation." />
       ) : (
         <div className="space-y-2">
           {members.map((m) => (

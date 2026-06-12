@@ -23,7 +23,7 @@ export default async function OwnerBookingDetail({ params }: { params: Promise<{
   return (
     <div className="mx-auto max-w-3xl">
       <Link href="/owner/bookings" className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-muted hover:text-foreground">
-        <ChevronLeft className="h-4 w-4" /> Reservations
+        <ChevronLeft className="h-4 w-4" /> Réservations
       </Link>
       <PageHeader
         title={reservation.reference}
@@ -35,14 +35,14 @@ export default async function OwnerBookingDetail({ params }: { params: Promise<{
           <p className="mb-1 font-bold text-gold-800">Demande a valider</p>
           <p className="mb-4 text-sm text-gold-800/80">
             Le voyageur attend votre validation. Il reglera ensuite un acompte de <strong>{formatPrice(reservation.depositAmount)}</strong>.
-            Sans reponse a temps, la demande est annulee automatiquement.
+            Sans réponse a temps, la demande est annulée automatiquement.
           </p>
           <ApproveReservationButtons reservationId={reservation.id} />
         </div>
       )}
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-        <Card title="Sejour">
+        <Card title="Séjour">
           <Line icon={CalendarDays} text={`${formatDate(reservation.startDate)} - ${formatDate(reservation.endDate)}`} />
           <Line icon={Users} text={`${reservation.adults + reservation.children} voyageur(s) - ${reservation.nights} nuit(s)`} />
           <p className="mt-2 text-sm text-muted">{reservation.residence?.name} - {reservation.residence?.city}</p>
@@ -55,7 +55,7 @@ export default async function OwnerBookingDetail({ params }: { params: Promise<{
             <ContactButton
               otherUserId={reservation.travelerId}
               reservationId={reservation.id}
-              subject={`Reservation ${reservation.reference}`}
+              subject={`Réservation ${reservation.reference}`}
               basePath="/owner/messages"
               label="Contacter le voyageur"
               variant="primary"
@@ -66,10 +66,10 @@ export default async function OwnerBookingDetail({ params }: { params: Promise<{
         <Card title="Paiement" className="sm:col-span-2">
           <div className="space-y-2 text-sm">
             <Row label="Sous-total (votre part)" value={formatPrice(reservation.subtotalAmount)} />
-            {reservation.cleaningFeeAmount > 0 && <Row label="Frais de menage" value={formatPrice(reservation.cleaningFeeAmount)} />}
+            {reservation.cleaningFeeAmount > 0 && <Row label="Frais de ménage" value={formatPrice(reservation.cleaningFeeAmount)} />}
             <Row label="Frais de service KoraStay" value={formatPrice(reservation.serviceFeeAmount)} />
             <div className="flex justify-between border-t border-border pt-2 font-bold text-foreground">
-              <span>Total paye par le voyageur</span><span>{formatPrice(reservation.totalAmount)}</span>
+              <span>Total payé par le voyageur</span><span>{formatPrice(reservation.totalAmount)}</span>
             </div>
           </div>
           {payment && (

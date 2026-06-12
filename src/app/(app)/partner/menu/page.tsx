@@ -21,7 +21,7 @@ export default async function PartnerMenuPage() {
     <div className="mx-auto max-w-4xl">
       <PageHeader
         title="Mon menu"
-        description="Presentez vos plats et formules avec photo et prix. Les voyageurs les verront sur votre espace."
+        description="Présentez vos plats et formules avec photo et prix. Les voyageurs les verront sur votre espace."
       />
       <MenuManager items={profile.menuItems} />
     </div>

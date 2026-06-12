@@ -21,7 +21,7 @@ export default async function AdminAuditPage() {
     <div className="mx-auto max-w-4xl">
       <PageHeader title="Journal d'audit" description="Historique des actions sensibles." />
       {logs.length === 0 ? (
-        <EmptyState icon={ScrollText} title="Aucune action enregistree" description="Les actions administratives sensibles seront journalisees ici." />
+        <EmptyState icon={ScrollText} title="Aucune action enregistrée" description="Les actions administratives sensibles seront journalisees ici." />
       ) : (
         <div className="space-y-2">
           {logs.map((log) => (
@@ -29,7 +29,7 @@ export default async function AdminAuditPage() {
               <Avatar className="h-9 w-9"><AvatarFallback className="text-xs">{log.actor ? initials(log.actor.firstName, log.actor.lastName) : "S"}</AvatarFallback></Avatar>
               <div className="min-w-0 flex-1">
                 <p className="text-sm text-foreground">
-                  <span className="font-semibold">{log.actor ? `${log.actor.firstName} ${log.actor.lastName}` : "Systeme"}</span>{" "}
+                  <span className="font-semibold">{log.actor ? `${log.actor.firstName} ${log.actor.lastName}` : "Système"}</span>{" "}
                   <Badge tone="neutral" size="sm">{log.action}</Badge>{" "}
                   {log.entityType && <span className="text-muted">{log.entityType}</span>}
                 </p>

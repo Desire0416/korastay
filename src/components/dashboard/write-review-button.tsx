@@ -56,12 +56,12 @@ export function WriteReviewButton({ reservationId, label }: { reservationId: str
           <input type="hidden" name="reservationId" value={reservationId} />
           <div className="space-y-3 rounded-2xl border border-border p-4">
             <StarRow name="rating" label="Note globale" />
-            <StarRow name="cleanlinessRating" label="Proprete" />
+            <StarRow name="cleanlinessRating" label="Propreté" />
             <StarRow name="locationRating" label="Emplacement" />
             <StarRow name="valueRating" label="Qualite / prix" />
             <StarRow name="communicationRating" label="Communication" />
           </div>
-          <Textarea name="comment" placeholder="Partagez votre experience (facultatif)..." rows={4} />
+          <Textarea name="comment" placeholder="Partagez votre expérience (facultatif)..." rows={4} />
           <Button type="submit" size="lg" loading={pending} className="w-full">Publier mon avis</Button>
         </form>
       </DrawerContent>

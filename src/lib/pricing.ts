@@ -104,7 +104,7 @@ export function estimateResidenceRefund(
       refundableAmount: refundableBase,
       refundRate: 1,
       serviceFeeRefunded: false,
-      label: "Remboursement integral de la nuitee (hors frais de service)",
+      label: "Remboursement intégral de la nuitée (hors frais de service)",
     };
   }
   if (hours >= 24) {
@@ -112,14 +112,14 @@ export function estimateResidenceRefund(
       refundableAmount: Math.round(refundableBase * 0.5),
       refundRate: 0.5,
       serviceFeeRefunded: false,
-      label: "Remboursement de 50% de la nuitee (hors frais de service)",
+      label: "Remboursement de 50% de la nuitée (hors frais de service)",
     };
   }
   return {
     refundableAmount: 0,
     refundRate: 0,
     serviceFeeRefunded: false,
-    label: "Aucun remboursement (moins de 24h avant l'arrivee)",
+    label: "Aucun remboursement (moins de 24h avant l'arrivée)",
   };
 }
 
@@ -156,7 +156,7 @@ export function estimatePackRefund(
       refundableAmount: refundableBase,
       refundRate: 1,
       serviceFeeRefunded: false,
-      label: "Remboursement integral du pack (hors frais de service)",
+      label: "Remboursement intégral du pack (hors frais de service)",
     };
   }
   if (days >= 3) {
@@ -171,6 +171,6 @@ export function estimatePackRefund(
     refundableAmount: 0,
     refundRate: 0,
     serviceFeeRefunded: false,
-    label: "Aucun remboursement (moins de 3 jours avant le depart)",
+    label: "Aucun remboursement (moins de 3 jours avant le départ)",
   };
 }

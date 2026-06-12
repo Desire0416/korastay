@@ -13,7 +13,7 @@ import { SmartImage } from "@/components/ui/smart-image";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { formatPrice, formatDate, nightsBetween } from "@/lib/utils";
 
-export const metadata = { title: "Finaliser la reservation" };
+export const metadata = { title: "Finaliser la réservation" };
 
 type SP = Record<string, string | string[] | undefined>;
 const str = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
@@ -72,11 +72,11 @@ export default async function ReserverPage({
   return (
     <div className="container-page py-8">
       <Link href={`/residences/${slug}`} className="mb-5 inline-flex items-center gap-1 text-sm font-semibold text-muted hover:text-foreground">
-        <ChevronLeft className="h-4 w-4" /> Retour a la residence
+        <ChevronLeft className="h-4 w-4" /> Retour a la résidence
       </Link>
 
       <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground">
-        Finaliser votre reservation
+        Finaliser votre réservation
       </h1>
 
       <div className="mt-7 grid grid-cols-1 gap-10 lg:grid-cols-[1fr_400px]">
@@ -137,7 +137,7 @@ export default async function ReserverPage({
               </div>
               {price.cleaningFee > 0 && (
                 <div className="flex justify-between text-muted">
-                  <span>Frais de menage</span>
+                  <span>Frais de ménage</span>
                   <span className="text-foreground">{formatPrice(price.cleaningFee)}</span>
                 </div>
               )}
@@ -162,7 +162,7 @@ export default async function ReserverPage({
                 )}
                 {finance.cautionAmount > 0 && (
                   <div className="flex justify-between text-muted">
-                    <span>Caution eventuelle</span>
+                    <span>Caution éventuelle</span>
                     <span>{formatPrice(finance.cautionAmount)}</span>
                   </div>
                 )}
@@ -171,7 +171,7 @@ export default async function ReserverPage({
 
             <p className="mt-4 flex items-center gap-1.5 text-xs text-muted">
               <ShieldCheck className="h-4 w-4 text-brand-500" />
-              Paiement securise via KoraStay - Annulation selon conditions
+              Paiement sécurisé via KoraStay - Annulation selon conditions
             </p>
           </div>
         </aside>

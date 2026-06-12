@@ -164,7 +164,7 @@ export function Calendar({
       <div className="relative mb-1 flex items-center justify-between">
         <button
           type="button"
-          aria-label="Mois precedent"
+          aria-label="Mois précédent"
           disabled={!canGoBack}
           onClick={() => setCursor(addMonths(cursor, -1))}
           className="flex h-9 w-9 items-center justify-center rounded-full text-foreground transition-colors hover:bg-surface-soft disabled:opacity-30"

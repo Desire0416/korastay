@@ -108,7 +108,7 @@ export const isMockPayments = () =>
 // Liste de reference (libelles dans enums.paymentMethodMeta).
 export const PAYMENT_METHOD_OPTIONS = [
   { value: PaymentMethod.WAVE, label: "Wave", hint: "Sans frais" },
-  { value: PaymentMethod.ORANGE_MONEY, label: "Orange Money", hint: "Cote d'Ivoire" },
+  { value: PaymentMethod.ORANGE_MONEY, label: "Orange Money", hint: "Côte d'Ivoire" },
   { value: PaymentMethod.MTN_MOMO, label: "MTN MoMo", hint: "Mobile Money" },
   { value: PaymentMethod.MOOV_MONEY, label: "Moov Money", hint: "Mobile Money" },
   { value: PaymentMethod.CARD, label: "Carte bancaire", hint: "Visa / Mastercard" },

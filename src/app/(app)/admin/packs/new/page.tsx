@@ -28,7 +28,7 @@ export default async function NewPackPage({ searchParams }: { searchParams: Prom
       prefill = {
         name: `Pack ${req.city ?? "personnalise"} - ${req.contactName}`,
         destinationId: dest?.id ?? null,
-        description: `Pack personnalise demande par ${req.contactName}. ${req.notes ?? ""}`.trim(),
+        description: `Pack personnalisé demande par ${req.contactName}. ${req.notes ?? ""}`.trim(),
         basePersons: req.teamSize && req.teamSize > 0 ? req.teamSize : 2,
         price: req.quoteAmount ?? req.budget ?? 100000,
         subtitle: req.needType ?? "Sur mesure",
@@ -41,7 +41,7 @@ export default async function NewPackPage({ searchParams }: { searchParams: Prom
       <Link href={fromId ? `/admin/business/${fromId}` : "/admin/packs"} className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-muted hover:text-foreground">
         <ChevronLeft className="h-4 w-4" /> Retour
       </Link>
-      <PageHeader title="Nouveau pack" description={prefill ? "Pre-rempli depuis une demande de pack personnalise." : "Creez un pack touristique complet."} />
+      <PageHeader title="Nouveau pack" description={prefill ? "Pre-rempli depuis une demande de pack personnalisé." : "Créez un pack touristique complet."} />
       <PackEditor
         destinations={destinations}
         defaults={{
@@ -52,12 +52,12 @@ export default async function NewPackPage({ searchParams }: { searchParams: Prom
           meetingPoint: "", startTime: "08:00", physicalLevel: "", clothingRecommendations: "",
           documentsToBring: "", cancellationPolicy: "",
           includedItems: [
-            { label: "Hebergement", details: "", included: true },
+            { label: "Hébergement", details: "", included: true },
             { label: "Petit dejeuner", details: "", included: true },
             { label: "Transport aller-retour", details: "", included: false },
           ],
           programDays: [
-            { title: "Arrivee & decouverte", description: "", activities: [{ timeLabel: "Matin", title: "Arrivee et installation", description: "" }] },
+            { title: "Arrivée & découverte", description: "", activities: [{ timeLabel: "Matin", title: "Arrivée et installation", description: "" }] },
           ],
         }}
       />

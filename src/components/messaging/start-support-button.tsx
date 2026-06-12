@@ -21,7 +21,7 @@ export function StartSupportButton({ label = "Contacter l'assistance" }: { label
       </DrawerTrigger>
       <DrawerContent className="px-5 pb-7">
         <DrawerTitle className="px-1 pt-5 text-xl font-bold">Contacter l'assistance KoraStay</DrawerTitle>
-        <p className="px-1 text-sm text-muted">Notre equipe vous repond rapidement.</p>
+        <p className="px-1 text-sm text-muted">Notre équipe vous répond rapidement.</p>
         <form action={action} className="mt-5 space-y-4 px-1">
           <Field label="Sujet" htmlFor="subject" required>
             <Input id="subject" name="subject" placeholder="Objet de votre demande" required />

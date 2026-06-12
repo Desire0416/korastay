@@ -43,8 +43,8 @@ export function DestinationForm({ id, defaults = {} }: DestinationFormProps) {
       fd.append("file", file);
       const res = await fetch("/api/upload", { method: "POST", body: fd });
       const data = await res.json();
-      if (res.ok && data.url) { setImage(data.url); toast.success("Image prete."); }
-      else toast.error(data.error ?? "Echec de l'upload.");
+      if (res.ok && data.url) { setImage(data.url); toast.success("Image prête."); }
+      else toast.error(data.error ?? "Échec de l'upload.");
     } finally {
       setUploading(false);
       if (fileRef.current) fileRef.current.value = "";
@@ -69,7 +69,7 @@ export function DestinationForm({ id, defaults = {} }: DestinationFormProps) {
         toast.error("Lieu introuvable. Saisissez les coordonnees manuellement.");
       }
     } catch {
-      toast.error("Geolocalisation indisponible pour le moment.");
+      toast.error("Géolocalisation indisponible pour le moment.");
     } finally {
       setLocating(false);
     }
@@ -83,13 +83,13 @@ export function DestinationForm({ id, defaults = {} }: DestinationFormProps) {
         <Field label="Nom de la ville" htmlFor="name" required>
           <Input id="name" name="name" defaultValue={defaults.name} placeholder="Daloa" required />
         </Field>
-        <Field label="Region" htmlFor="region">
+        <Field label="Région" htmlFor="region">
           <Input id="region" name="region" defaultValue={defaults.region} placeholder="Haut-Sassandra" />
         </Field>
         <Field label="Pays" htmlFor="country">
-          <Input id="country" name="country" defaultValue={defaults.country ?? "Cote d'Ivoire"} />
+          <Input id="country" name="country" defaultValue={defaults.country ?? "Côte d'Ivoire"} />
         </Field>
-        <Field label="Priorite d'affichage" htmlFor="priority" hint="Plus petit = affiche en premier">
+        <Field label="Priorité d'affichage" htmlFor="priority" hint="Plus petit = affiche en premier">
           <Input id="priority" name="priority" type="number" min={0} defaultValue={defaults.priority ?? 5} />
         </Field>
       </div>
@@ -133,7 +133,7 @@ export function DestinationForm({ id, defaults = {} }: DestinationFormProps) {
       </Field>
 
       <Field label="Description" htmlFor="description">
-        <Textarea id="description" name="description" defaultValue={defaults.description} rows={4} placeholder="Presentez la destination..." />
+        <Textarea id="description" name="description" defaultValue={defaults.description} rows={4} placeholder="Présentez la destination..." />
       </Field>
 
       <label className="flex items-center gap-2 text-sm font-medium text-foreground">
@@ -147,7 +147,7 @@ export function DestinationForm({ id, defaults = {} }: DestinationFormProps) {
         </div>
       )}
 
-      <Button type="submit" size="lg" loading={pending}>{id ? "Enregistrer" : "Creer la destination"}</Button>
+      <Button type="submit" size="lg" loading={pending}>{id ? "Enregistrer" : "Créer la destination"}</Button>
     </form>
   );
 }

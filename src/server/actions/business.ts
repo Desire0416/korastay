@@ -23,7 +23,7 @@ export async function acceptBusinessQuote(requestId: string): Promise<BusinessRe
   // Le client doit etre rattache a la demande (par email ou compte)
   const membership = await prisma.businessMember.findFirst({ where: { userId: user.id } });
   const isOwn = req.email === user.email || (membership && req.businessAccountId === membership.businessAccountId);
-  if (!isOwn && user.role === "BUSINESS") return { ok: false, error: "Acces refuse." };
+  if (!isOwn && user.role === "BUSINESS") return { ok: false, error: "Accès refuse." };
   if (req.status !== "QUOTED") return { ok: false, error: "Aucun devis a accepter." };
 
   await prisma.businessRequest.update({ where: { id: requestId }, data: { status: "CONFIRMED", acceptedAt: new Date() } });
@@ -37,7 +37,7 @@ export async function acceptBusinessQuote(requestId: string): Promise<BusinessRe
   }
   revalidatePath("/business/requests");
   revalidatePath(`/business/requests/${requestId}`);
-  return { ok: true, message: "Devis accepte ! Notre equipe finalise votre reservation." };
+  return { ok: true, message: "Devis accepte ! Notre équipe finalisé votre réservation." };
 }
 
 export async function createMyBusinessRequest(_prev: BusinessResult, formData: FormData): Promise<BusinessResult> {

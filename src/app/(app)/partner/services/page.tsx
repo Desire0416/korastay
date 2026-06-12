@@ -52,7 +52,7 @@ export default async function PartnerServicesPage({ searchParams }: { searchPara
       )}
 
       {!profile || profile.services.length === 0 ? (
-        <EmptyState icon={Tags} title={hasFilters ? "Aucun resultat" : "Aucun service"} description={hasFilters ? "Aucun service ne correspond a ces criteres." : "Ajoutez vos prestations pour recevoir des missions."} action={hasFilters ? undefined : <Button asChild><Link href="/partner/services/new"><Plus className="h-4 w-4" /> Ajouter un service</Link></Button>} />
+        <EmptyState icon={Tags} title={hasFilters ? "Aucun resultat" : "Aucun service"} description={hasFilters ? "Aucun service ne correspond a ces critères." : "Ajoutez vos prestations pour recevoir des missions."} action={hasFilters ? undefined : <Button asChild><Link href="/partner/services/new"><Plus className="h-4 w-4" /> Ajouter un service</Link></Button>} />
       ) : (
         <div className="space-y-3">
           {profile.services.map((s) => (
@@ -65,7 +65,7 @@ export default async function PartnerServicesPage({ searchParams }: { searchPara
                 {s.description && <p className="text-sm text-muted">{s.description}</p>}
                 <p className="mt-1 text-sm text-muted">{s.city} {s.priceFrom ? `- des ${formatPrice(s.priceFrom)}` : ""} {s.duration ? `- ${s.duration}` : ""}</p>
               </div>
-              <AdminActions actions={[{ label: s.isActive ? "Desactiver" : "Activer", fn: toggleService.bind(null, s.id), variant: "outline" }]} />
+              <AdminActions actions={[{ label: s.isActive ? "Désactiver" : "Activer", fn: toggleService.bind(null, s.id), variant: "outline" }]} />
             </div>
           ))}
         </div>

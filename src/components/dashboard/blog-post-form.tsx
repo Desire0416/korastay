@@ -34,8 +34,8 @@ export function BlogPostForm({ id, defaults = {} }: Props) {
       fd.append("file", file);
       const res = await fetch("/api/upload", { method: "POST", body: fd });
       const data = await res.json();
-      if (res.ok && data.url) { setCover(data.url); toast.success("Image prete."); }
-      else toast.error(data.error ?? "Echec.");
+      if (res.ok && data.url) { setCover(data.url); toast.success("Image prête."); }
+      else toast.error(data.error ?? "Échec.");
     } finally {
       setUploading(false);
     }
@@ -63,7 +63,7 @@ export function BlogPostForm({ id, defaults = {} }: Props) {
       </Field>
 
       <Field label="Resume / chapeau" htmlFor="excerpt">
-        <Textarea id="excerpt" name="excerpt" defaultValue={defaults.excerpt} rows={2} placeholder="Court resume affiche dans la liste..." />
+        <Textarea id="excerpt" name="excerpt" defaultValue={defaults.excerpt} rows={2} placeholder="Court résumé affiche dans la liste..." />
       </Field>
 
       <Field label="Contenu" htmlFor="body" required hint="Separez les paragraphes par une ligne vide.">
@@ -77,7 +77,7 @@ export function BlogPostForm({ id, defaults = {} }: Props) {
 
       {state.error && <div className="flex items-center gap-2 rounded-2xl bg-red-50 px-4 py-3 text-sm text-danger"><AlertCircle className="h-4 w-4" /> {state.error}</div>}
 
-      <Button type="submit" size="lg" loading={pending}>{id ? "Enregistrer" : "Creer l'article"}</Button>
+      <Button type="submit" size="lg" loading={pending}>{id ? "Enregistrer" : "Créer l'article"}</Button>
     </form>
   );
 }

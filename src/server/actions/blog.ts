@@ -12,7 +12,7 @@ export type BlogResult = { ok: boolean; error?: string; message?: string };
 const schema = z.object({
   title: z.string().min(3, "Titre requis"),
   excerpt: z.string().optional(),
-  body: z.string().min(20, "Contenu trop court (20 caracteres min)"),
+  body: z.string().min(20, "Contenu trop court (20 caractères min)"),
   coverImageUrl: z.string().optional(),
   isPublished: z.string().optional(),
 });
@@ -72,7 +72,7 @@ export async function toggleBlogPublish(id: string): Promise<BlogResult> {
   await prisma.blogPost.update({ where: { id }, data: { isPublished: next, publishedAt: next ? post.publishedAt ?? new Date() : post.publishedAt } });
   revalidatePath("/admin/content/blog");
   revalidatePath("/blog");
-  return { ok: true, message: next ? "Article publie." : "Article depublie." };
+  return { ok: true, message: next ? "Article publié." : "Article dépublié." };
 }
 
 export async function deleteBlogPost(id: string): Promise<BlogResult> {
@@ -80,5 +80,5 @@ export async function deleteBlogPost(id: string): Promise<BlogResult> {
   await prisma.blogPost.delete({ where: { id } });
   revalidatePath("/admin/content/blog");
   revalidatePath("/blog");
-  return { ok: true, message: "Article supprime." };
+  return { ok: true, message: "Article supprimé." };
 }

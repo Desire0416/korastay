@@ -93,9 +93,9 @@ export function MessageThread({ conversationId, messages: initial, currentUserId
       const res = await fetch("/api/upload", { method: "POST", body: fd });
       const data = await res.json();
       if (res.ok && data.url) setAttachment({ url: data.url, name: data.name ?? file.name, type: data.type ?? file.type });
-      else toast.error(data.error ?? "Echec de l'envoi du fichier.");
+      else toast.error(data.error ?? "Échec de l'envoi du fichier.");
     } catch {
-      toast.error("Echec de l'envoi du fichier.");
+      toast.error("Échec de l'envoi du fichier.");
     } finally {
       setUploading(false);
       if (fileRef.current) fileRef.current.value = "";
@@ -205,7 +205,7 @@ export function MessageThread({ conversationId, messages: initial, currentUserId
               <FileText className="h-5 w-5 text-brand-600" />
             )}
             <span className="max-w-[200px] truncate font-medium text-foreground">{attachment.name}</span>
-            <button type="button" onClick={() => setAttachment(null)} className="ml-auto rounded-full p-1 text-muted hover:bg-surface hover:text-danger" aria-label="Retirer la piece jointe">
+            <button type="button" onClick={() => setAttachment(null)} className="ml-auto rounded-full p-1 text-muted hover:bg-surface hover:text-danger" aria-label="Retirer la pièce jointe">
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -232,7 +232,7 @@ export function MessageThread({ conversationId, messages: initial, currentUserId
             value={body}
             onChange={(e) => setBody(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit(); } }}
-            placeholder={internal ? "Note interne pour l'equipe..." : "Ecrire un message..."}
+            placeholder={internal ? "Note interne pour l'équipe..." : "Ecrire un message..."}
             rows={1}
             className="max-h-32 min-h-[44px] flex-1 resize-none rounded-2xl border border-border bg-background px-4 py-2.5 text-sm focus-visible:border-brand-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-100"
           />
@@ -264,7 +264,7 @@ function Attachment({ url, name, type, mine }: { url: string; name?: string | nu
     return (
       <a href={url} target="_blank" rel="noopener noreferrer" className="block overflow-hidden rounded-xl">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={url} alt={name ?? "Piece jointe"} className="max-h-56 w-auto max-w-full rounded-xl object-cover" />
+        <img src={url} alt={name ?? "Pièce jointe"} className="max-h-56 w-auto max-w-full rounded-xl object-cover" />
       </a>
     );
   }

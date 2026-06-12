@@ -8,7 +8,7 @@ import { ReservationCard } from "@/components/dashboard/reservation-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 
-export const metadata = { title: "Mes reservations" };
+export const metadata = { title: "Mes réservations" };
 
 type SP = Record<string, string | string[] | undefined>;
 const str = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
@@ -48,30 +48,30 @@ export default async function BookingsPage({ searchParams }: { searchParams: Pro
 
   return (
     <div className="mx-auto max-w-5xl">
-      <PageHeader title="Mes reservations" description="Gerez vos sejours a venir, passes et annules." />
+      <PageHeader title="Mes réservations" description="Gérez vos séjours a venir, passes et annulés." />
 
       {reservations.length === 0 ? (
         <EmptyState
           icon={CalendarX}
-          title="Aucune reservation"
-          description="Vous n'avez pas encore de reservation. Trouvez votre prochain sejour des maintenant."
+          title="Aucune réservation"
+          description="Vous n'avez pas encore de réservation. Trouvez votre prochain séjour des maintenant."
           action={<Button asChild><Link href="/residences"><Compass className="h-4 w-4" /> Explorer</Link></Button>}
         />
       ) : (
         <>
           <FilterBar
             fields={[
-              { type: "search", name: "q", placeholder: "Reference, residence, pack..." },
-              { type: "select", name: "when", label: "Tous les sejours", options: [{ value: "upcoming", label: "A venir" }, { value: "past", label: "Passes" }, { value: "cancelled", label: "Annules" }] },
+              { type: "search", name: "q", placeholder: "Référence, résidence, pack..." },
+              { type: "select", name: "when", label: "Tous les séjours", options: [{ value: "upcoming", label: "A venir" }, { value: "past", label: "Passes" }, { value: "cancelled", label: "Annulés" }] },
             ]}
           />
           {visible === 0 ? (
-            <EmptyState icon={CalendarX} title="Aucun resultat" description="Aucune reservation ne correspond a ces criteres." />
+            <EmptyState icon={CalendarX} title="Aucun resultat" description="Aucune réservation ne correspond a ces critères." />
           ) : (
             <>
               {showUpcoming && <Section title="A venir" items={upcoming} />}
               {showPast && <Section title="Passes" items={past} />}
-              {showCancelled && <Section title="Annules" items={cancelled} />}
+              {showCancelled && <Section title="Annulés" items={cancelled} />}
             </>
           )}
         </>

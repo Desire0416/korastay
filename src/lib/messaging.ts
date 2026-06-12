@@ -8,7 +8,7 @@ export function isStaff(role: string) {
 export function roleLabelFor(role: string): string {
   switch (role) {
     case "TRAVELER": return "Voyageur";
-    case "OWNER": return "Hote";
+    case "OWNER": return "Hôte";
     case "PARTNER": return "Partenaire";
     case "BUSINESS": return "Business";
     case "ADMIN":

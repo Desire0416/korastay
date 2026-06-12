@@ -22,7 +22,7 @@ async function notify(userId: string, title: string, body: string, url?: string,
 export async function validateResidence(id: string, qualityLevel: string): Promise<AdminResult> {
   const admin = await requireRole(["ADMIN", "SUPER_ADMIN"]);
   if (!["ESSENTIAL", "COMFORT", "PREMIUM"].includes(qualityLevel)) {
-    return { ok: false, error: "Niveau de qualite invalide." };
+    return { ok: false, error: "Niveau de qualité invalide." };
   }
   const residence = await prisma.residence.findUnique({ where: { id } });
   if (!residence) return { ok: false, error: "Introuvable." };
@@ -31,14 +31,14 @@ export async function validateResidence(id: string, qualityLevel: string): Promi
     where: { id },
     data: {
       status: "PUBLISHED", verificationStatus: "VERIFIED", isVerified: true,
-      qualityLevel, badgeLabel: "Residence verifiee KoraStay", publishedAt: new Date(),
+      qualityLevel, badgeLabel: "Résidence vérifiée KoraStay", publishedAt: new Date(),
     },
   });
-  await notify(residence.ownerId, "Residence validee", `${residence.name} est validee et publiee (niveau ${qualityLevel}).`, "/owner/residences");
+  await notify(residence.ownerId, "Résidence validée", `${residence.name} est validée et publiée (niveau ${qualityLevel}).`, "/owner/residences");
   await audit(admin.id, "RESIDENCE_VALIDATED", "Residence", id, { qualityLevel });
   revalidatePath("/admin/residences");
   revalidatePath(`/admin/residences/${id}`);
-  return { ok: true, message: "Residence validee et publiee." };
+  return { ok: true, message: "Résidence validée et publiée." };
 }
 
 export async function requestResidenceChanges(id: string, note: string): Promise<AdminResult> {
@@ -46,10 +46,10 @@ export async function requestResidenceChanges(id: string, note: string): Promise
   const residence = await prisma.residence.findUnique({ where: { id } });
   if (!residence) return { ok: false, error: "Introuvable." };
   await prisma.residence.update({ where: { id }, data: { verificationStatus: "NEEDS_CHANGES" } });
-  await notify(residence.ownerId, "Corrections demandees", `${residence.name} : ${note || "Des modifications sont requises."}`, "/owner/residences");
+  await notify(residence.ownerId, "Corrections demandées", `${residence.name} : ${note || "Des modifications sont requises."}`, "/owner/residences");
   await audit(admin.id, "RESIDENCE_CHANGES_REQUESTED", "Residence", id, { note });
   revalidatePath(`/admin/residences/${id}`);
-  return { ok: true, message: "Demande de corrections envoyee." };
+  return { ok: true, message: "Demande de corrections envoyée." };
 }
 
 export async function setResidenceStatus(id: string, status: string): Promise<AdminResult> {
@@ -130,12 +130,12 @@ export async function sendBusinessQuote(id: string, _prev: AdminResult, formData
   // Notifie le client business (si compte rattache a l'email)
   const client = await prisma.user.findUnique({ where: { email: req.email }, select: { id: true } });
   if (client) {
-    await notify(client.id, "Devis recu", `Votre devis pour "${req.needType ?? req.organizationName}" est disponible.`, "/business/requests", "BUSINESS_QUOTE");
+    await notify(client.id, "Devis reçu", `Votre devis pour "${req.needType ?? req.organizationName}" est disponible.`, "/business/requests", "BUSINESS_QUOTE");
   }
   await audit(admin.id, "BUSINESS_QUOTE_SENT", "BusinessRequest", id, { amount });
   revalidatePath("/admin/business");
   revalidatePath(`/admin/business/${id}`);
-  return { ok: true, message: "Devis envoye au client." };
+  return { ok: true, message: "Devis envoyé au client." };
 }
 
 // ------------------------------------------------------------
@@ -146,7 +146,7 @@ export async function moderateReview(id: string, status: string): Promise<AdminR
   await prisma.review.update({ where: { id }, data: { status } });
   await audit(admin.id, "REVIEW_MODERATED", "Review", id, { status });
   revalidatePath("/admin/reviews");
-  return { ok: true, message: "Avis modere." };
+  return { ok: true, message: "Avis modéré." };
 }
 
 // ------------------------------------------------------------
@@ -193,12 +193,12 @@ export async function adminSetReservationStatus(id: string, status: string): Pro
     await prisma.payout.updateMany({ where: { reservationId: id, status: "SCHEDULED" }, data: { status: "CANCELLED" } });
   }
 
-  await notify(reservation.travelerId, "Mise a jour de reservation", `Votre reservation ${reservation.reference} a ete mise a jour.`, `/account/bookings/${id}`);
+  await notify(reservation.travelerId, "Mise a jour de réservation", `Votre réservation ${reservation.reference} a ete mise a jour.`, `/account/bookings/${id}`);
   await audit(admin.id, "RESERVATION_STATUS", "Reservation", id, { status });
   revalidatePath("/admin/reservations");
   revalidatePath(`/admin/reservations/${id}`);
   revalidatePath("/admin/payouts");
-  return { ok: true, message: "Reservation mise a jour." };
+  return { ok: true, message: "Réservation mise a jour." };
 }
 
 export async function processRefund(refundId: string): Promise<AdminResult> {

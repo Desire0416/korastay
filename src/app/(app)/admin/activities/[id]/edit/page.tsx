@@ -11,7 +11,7 @@ import { PhotosManager } from "@/components/dashboard/photos-manager";
 import { AdminActions } from "@/components/dashboard/admin-actions";
 import { Button } from "@/components/ui/button";
 
-export const metadata = { title: "Editer l'activite - Admin" };
+export const metadata = { title: "Editer l'activité - Admin" };
 
 type SP = Record<string, string | string[] | undefined>;
 
@@ -28,30 +28,30 @@ export default async function EditActivityPage({ params, searchParams }: { param
   return (
     <div className="mx-auto max-w-3xl">
       <Link href="/admin/activities" className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-muted hover:text-foreground">
-        <ChevronLeft className="h-4 w-4" /> Activites
+        <ChevronLeft className="h-4 w-4" /> Activités
       </Link>
       <PageHeader
-        title="Editer l'activite"
+        title="Editer l'activité"
         description={activity.name}
         actions={
           <div className="flex gap-2">
             {activity.status === "PUBLISHED" && (
               <Button asChild variant="outline" size="sm"><Link href={`/activites/${activity.slug}`} target="_blank"><ExternalLink className="h-4 w-4" /> Voir</Link></Button>
             )}
-            <AdminActions actions={[{ label: "Supprimer", icon: "Trash2", fn: deleteActivity.bind(null, activity.id), variant: "ghost", confirm: "Supprimer cette activite ?", redirectTo: "/admin/activities" }]} />
+            <AdminActions actions={[{ label: "Supprimer", icon: "Trash2", fn: deleteActivity.bind(null, activity.id), variant: "ghost", confirm: "Supprimer cette activité ?", redirectTo: "/admin/activities" }]} />
           </div>
         }
       />
 
       {sp.created === "1" && (
         <div className="mb-5 flex items-center gap-2 rounded-2xl border border-success/30 bg-emerald-50 p-4 text-sm text-success">
-          <CheckCircle2 className="h-5 w-5" /> Activite creee. Ajoutez des photos ci-dessous.
+          <CheckCircle2 className="h-5 w-5" /> Activité créée. Ajoutez des photos ci-dessous.
         </div>
       )}
 
       <section className="mb-6 rounded-3xl border border-border bg-surface p-5 shadow-soft">
-        <h2 className="mb-1 font-bold text-foreground">Photos de l'activite</h2>
-        <p className="mb-4 text-sm text-muted">Importez des photos (la premiere sert de couverture).</p>
+        <h2 className="mb-1 font-bold text-foreground">Photos de l'activité</h2>
+        <p className="mb-4 text-sm text-muted">Importez des photos (la première sert de couverture).</p>
         <PhotosManager entityId={activity.id} images={activity.images} onAdd={addActivityImage} onDelete={deleteActivityImage} onSetCover={setActivityCoverImage} />
       </section>
 

@@ -55,8 +55,8 @@ export default async function AdminUserDetail({ params }: { params: Promise<{ id
         </div>
 
         <div className="mt-6 grid grid-cols-3 gap-3 border-t border-border pt-6 text-center">
-          <Stat value={user._count.reservations} label="Reservations" />
-          <Stat value={user._count.residences} label="Residences" />
+          <Stat value={user._count.reservations} label="Réservations" />
+          <Stat value={user._count.residences} label="Résidences" />
           <Stat value={user._count.reviews} label="Avis" />
         </div>
       </div>
@@ -67,7 +67,7 @@ export default async function AdminUserDetail({ params }: { params: Promise<{ id
 
         {user.role === "OWNER" && (
           <div className="mt-5 border-t border-border pt-5">
-            <p className="mb-1 text-sm font-semibold text-foreground">Fiabilite des reversements</p>
+            <p className="mb-1 text-sm font-semibold text-foreground">Fiabilité des reversements</p>
             <p className="mb-2 text-xs text-muted">
               Actuel : <Badge tone={user.payoutTier === "RELIABLE" ? "success" : "neutral"}>{user.payoutTier === "RELIABLE" ? "Fiable (100% au check-in)" : "Nouveau (70% / 30%)"}</Badge>
             </p>

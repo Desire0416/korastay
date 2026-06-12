@@ -57,7 +57,7 @@ export function PackEditor({ destinations, packId, defaults }: PackEditorProps) 
     start(async () => {
       const res = await savePack({ ...form, id: packId });
       if (res && !res.ok) { setError(res.error ?? "Erreur."); toast.error(res.error ?? "Erreur."); }
-      else if (res?.ok) { toast.success(res.message ?? "Enregistre."); router.refresh(); }
+      else if (res?.ok) { toast.success(res.message ?? "Enregistré."); router.refresh(); }
       // En creation, l'action redirige automatiquement.
     });
   }

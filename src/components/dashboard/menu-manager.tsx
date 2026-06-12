@@ -24,7 +24,7 @@ export interface MenuItem {
   isAvailable: boolean;
 }
 
-const CATEGORIES = ["Entrees", "Plats", "Desserts", "Boissons", "Formules"];
+const CATEGORIES = ["Entrées", "Plats", "Desserts", "Boissons", "Formules"];
 
 export function MenuManager({ items }: { items: MenuItem[] }) {
   const router = useRouter();
@@ -54,7 +54,7 @@ export function MenuManager({ items }: { items: MenuItem[] }) {
   function runDelete(id: string) {
     if (!window.confirm("Supprimer ce plat ?")) return;
     setBusyId(id);
-    start(async () => { const r = await deleteMenuItem(id); if (r.ok) toast.success("Plat supprime."); router.refresh(); setBusyId(null); });
+    start(async () => { const r = await deleteMenuItem(id); if (r.ok) toast.success("Plat supprimé."); router.refresh(); setBusyId(null); });
   }
 
   const grouped = CATEGORIES.map((c) => ({ category: c, items: items.filter((i) => (i.category ?? "Plats") === c) }))
@@ -81,7 +81,7 @@ export function MenuManager({ items }: { items: MenuItem[] }) {
             <Field label="Prix (F CFA)" htmlFor="price" required>
               <Input id="price" name="price" type="number" min={0} step={100} defaultValue={editing?.price ?? ""} placeholder="3500" required />
             </Field>
-            <Field label="Categorie" htmlFor="category">
+            <Field label="Catégorie" htmlFor="category">
               <select id="category" name="category" defaultValue={editing?.category ?? "Plats"} className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm font-medium text-foreground focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100">
                 {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
@@ -104,7 +104,7 @@ export function MenuManager({ items }: { items: MenuItem[] }) {
         <div className="rounded-3xl border border-dashed border-border p-10 text-center">
           <CookingPot className="mx-auto h-9 w-9 text-muted" />
           <p className="mt-3 font-semibold text-foreground">Votre menu est vide</p>
-          <p className="text-sm text-muted">Ajoutez vos plats avec photo et prix pour les presenter aux voyageurs.</p>
+          <p className="text-sm text-muted">Ajoutez vos plats avec photo et prix pour les présenter aux voyageurs.</p>
         </div>
       ) : (
         [...grouped, ...(uncategorized.length ? [{ category: "Autres", items: uncategorized }] : [])].map((g) => (

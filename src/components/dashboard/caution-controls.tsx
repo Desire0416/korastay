@@ -47,7 +47,7 @@ export function CautionControls({
         <StatusBadge status={status} map={cautionStatusMeta} size="sm" />
       </div>
       <div className="flex flex-wrap gap-2">
-        <Button size="sm" variant="outline" loading={pending} onClick={() => run("HELD")}>Recue / bloquee</Button>
+        <Button size="sm" variant="outline" loading={pending} onClick={() => run("HELD")}>Reçue / bloquée</Button>
         <Button size="sm" variant="primary" loading={pending} onClick={() => run("RELEASED")}>Restituer</Button>
         <Button size="sm" variant="danger" loading={pending} onClick={() => run("RETAINED")}>Retenir</Button>
       </div>

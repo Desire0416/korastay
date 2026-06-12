@@ -4,7 +4,7 @@ import { createResidence } from "@/server/actions/owner";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ResidenceForm } from "@/components/dashboard/residence-form";
 
-export const metadata = { title: "Nouvelle residence" };
+export const metadata = { title: "Nouvelle résidence" };
 
 export default async function NewResidencePage() {
   await requireRole(["OWNER", "ADMIN", "SUPER_ADMIN"]);
@@ -16,16 +16,16 @@ export default async function NewResidencePage() {
   return (
     <div className="mx-auto max-w-3xl">
       <PageHeader
-        title="Ajouter une residence"
+        title="Ajouter une résidence"
         description="Renseignez les informations de votre logement. Il sera soumis a validation."
-        breadcrumbs={[{ label: "Mes residences", href: "/owner/residences" }, { label: "Nouvelle" }]}
+        breadcrumbs={[{ label: "Mes résidences", href: "/owner/residences" }, { label: "Nouvelle" }]}
       />
       <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
         <ResidenceForm
           action={createResidence}
           amenities={amenities}
           destinations={destinations}
-          submitLabel="Creer la residence"
+          submitLabel="Créer la résidence"
         />
       </div>
     </div>

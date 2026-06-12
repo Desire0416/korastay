@@ -73,8 +73,8 @@ export default async function AdminPartnerDetail({ params }: { params: Promise<{
             </div>
             <div className="flex flex-wrap gap-2">
               {partner.idDocumentUrl ? (
-                <a href={partner.idDocumentUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm font-semibold text-brand-600 hover:bg-surface-soft"><FileText className="h-4 w-4" /> Piece d&apos;identite</a>
-              ) : <span className="text-sm text-muted">Piece d&apos;identite non fournie.</span>}
+                <a href={partner.idDocumentUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm font-semibold text-brand-600 hover:bg-surface-soft"><FileText className="h-4 w-4" /> Pièce d&apos;identité</a>
+              ) : <span className="text-sm text-muted">Pièce d&apos;identité non fournie.</span>}
               {isDriver && partner.drivingLicenseUrl && (
                 <a href={partner.drivingLicenseUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm font-semibold text-brand-600 hover:bg-surface-soft"><FileText className="h-4 w-4" /> Permis de conduire</a>
               )}
@@ -95,7 +95,7 @@ export default async function AdminPartnerDetail({ params }: { params: Promise<{
 
           {partner.services.length > 0 && (
             <div className="rounded-3xl border border-border bg-surface p-5 shadow-soft">
-              <h3 className="mb-3 font-bold text-foreground">Services proposes</h3>
+              <h3 className="mb-3 font-bold text-foreground">Services proposés</h3>
               <div className="space-y-2">
                 {partner.services.map((s) => (
                   <div key={s.id} className="flex items-center justify-between rounded-2xl bg-surface-soft px-4 py-3">

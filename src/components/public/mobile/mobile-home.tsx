@@ -35,22 +35,22 @@ interface MobileHomeProps {
 
 type TabKey = "residences" | "packs" | "business";
 const TABS: { key: TabKey; label: string; icon: LucideIcon; color: string; badge?: string }[] = [
-  { key: "residences", label: "Residences", icon: HomeIcon, color: "text-brand-600" },
+  { key: "residences", label: "Location meublée", icon: HomeIcon, color: "text-brand-600" },
   { key: "packs", label: "Packs", icon: Compass, color: "text-gold-600", badge: "Populaire" },
   { key: "business", label: "Business", icon: Briefcase, color: "text-info" },
 ];
 
 const TRUST = [
-  { icon: ShieldCheck, title: "Residences verifiees", text: "Controlees par KoraStay." },
+  { icon: ShieldCheck, title: "Locations meublées vérifiées", text: "Contrôlées par KoraStay." },
   { icon: Smartphone, title: "Paiement mobile", text: "Orange Money, Wave, carte." },
-  { icon: Headset, title: "Assistance locale", text: "Avant, pendant, apres." },
+  { icon: Headset, title: "Assistance locale", text: "Avant, pendant, après." },
 ];
 
 const BUSINESS_BENEFITS = [
   "Contrats cadres & facturation centralisee",
   "Assistance dediee 7j/7",
   "Rapports mensuels detailles",
-  "Residences verifiees partout en Cote d'Ivoire",
+  "Locations meublées vérifiées partout en Côte d'Ivoire",
 ];
 
 function SectionHead({ title, subtitle, href }: { title: string; subtitle?: string; href?: string }) {
@@ -118,7 +118,7 @@ export function MobileHome({ residences, destinations, packs, reviews, stats, fa
         <div>
           {residences.length > 0 && (
             <section className="pt-5">
-              <SectionHead title="Residences populaires" subtitle="Les mieux notees, verifiees KoraStay" href="/residences" />
+              <SectionHead title="Locations meublées populaires" subtitle="Les mieux notées, vérifiées KoraStay" href="/residences" />
               <div className="no-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1">
                 {residences.map((r, i) => (
                   <div key={r.id} className="w-[52vw] max-w-[195px] shrink-0 snap-start">
@@ -144,7 +144,7 @@ export function MobileHome({ residences, destinations, packs, reviews, stats, fa
 
           {packs.length > 0 && (
             <section className="pt-7">
-              <SectionHead title="Packs Decouverte" subtitle="Sejours cle en main, guide inclus" href="/packs" />
+              <SectionHead title="Packs Découverte" subtitle="Séjours clé en main, guide inclus" href="/packs" />
               <div className="no-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1">
                 {packs.slice(0, 6).map((p) => (
                   <div key={p.id} className="w-[46vw] max-w-[170px] shrink-0 snap-start">
@@ -180,8 +180,8 @@ export function MobileHome({ residences, destinations, packs, reviews, stats, fa
             <Link href="/devenir-proprietaire" className="relative flex items-center justify-between gap-3 overflow-hidden rounded-3xl border border-border bg-brand-50 p-4 active:scale-[0.99]">
               <div className="min-w-0">
                 <HomeIcon className="h-6 w-6 text-brand-600" />
-                <h3 className="mt-2 font-display text-[16px] font-semibold text-brand-900">Vous etes proprietaire ?</h3>
-                <p className="text-[12px] text-brand-800/80">Publiez votre residence et recevez des reservations.</p>
+                <h3 className="mt-2 font-display text-[16px] font-semibold text-brand-900">Vous etes propriétaire ?</h3>
+                <p className="text-[12px] text-brand-800/80">Publiez votre résidence et recevez des réservations.</p>
               </div>
               <ArrowUpRight className="h-5 w-5 shrink-0 text-brand-600" />
             </Link>
@@ -215,7 +215,7 @@ export function MobileHome({ residences, destinations, packs, reviews, stats, fa
           <section className="px-5 pb-4 pt-8">
             <div className="grid grid-cols-3 gap-2 text-center">
               {[
-                { v: `${stats.residences}+`, l: "Residences" },
+                { v: `${stats.residences}+`, l: "Locations" },
                 { v: stats.destinations, l: "Destinations" },
                 { v: `${stats.packs}+`, l: "Packs" },
               ].map((s) => (
@@ -237,8 +237,8 @@ export function MobileHome({ residences, destinations, packs, reviews, stats, fa
       {tab === "packs" && (
         <section className="px-5 pb-4 pt-5">
           <div className="mb-3">
-            <h2 className="text-[19px] font-bold tracking-tight text-foreground">Packs Decouverte</h2>
-            <p className="text-[13px] text-muted">Sejours cle en main : hebergement, transport et guide local.</p>
+            <h2 className="text-[19px] font-bold tracking-tight text-foreground">Packs Découverte</h2>
+            <p className="text-[13px] text-muted">Séjours clé en main : hébergement, transport et guide local.</p>
           </div>
           {packs.length === 0 ? (
             <p className="py-10 text-center text-sm text-muted">Aucun pack disponible pour le moment.</p>
@@ -264,7 +264,7 @@ export function MobileHome({ residences, destinations, packs, reviews, stats, fa
             <div className="relative">
               <Briefcase className="h-7 w-7 text-gold-400" />
               <h2 className="mt-2 font-display text-xl font-semibold">KoraStay Business</h2>
-              <p className="mt-1 text-[13px] text-white/85">Hebergements fiables et facturables pour vos equipes en mission.</p>
+              <p className="mt-1 text-[13px] text-white/85">Hébergements fiables et facturables pour vos équipes en mission.</p>
             </div>
           </div>
           <ul className="mt-4 space-y-2.5">

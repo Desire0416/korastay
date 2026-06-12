@@ -60,7 +60,7 @@ export function BookingWidget(props: BookingWidgetProps) {
           onChange={(e) => setCleaning(e.target.checked)}
           className="h-5 w-5 rounded border-border text-brand-500 focus:ring-brand-400"
         />
-        <span className="font-medium text-foreground">Ajouter le menage</span>
+        <span className="font-medium text-foreground">Ajouter le ménage</span>
       </span>
       <span className="font-semibold text-foreground">+{formatPrice(props.cleaningFee)}</span>
     </label>
@@ -81,7 +81,7 @@ export function BookingWidget(props: BookingWidgetProps) {
       </div>
       {price.cleaningFee > 0 && (
         <div className="flex justify-between text-muted">
-          <span>Frais de menage</span>
+          <span>Frais de ménage</span>
           <span className="text-foreground">{formatPrice(price.cleaningFee)}</span>
         </div>
       )}
@@ -110,7 +110,7 @@ export function BookingWidget(props: BookingWidgetProps) {
       <PopoverContent align="end" className="w-72">
         <Stepper label="Adultes" value={adults} onChange={setAdults} min={1} max={props.maxCapacity} />
         <Stepper label="Enfants" hint="Moins de 12 ans" value={children} onChange={setChildren} max={props.maxCapacity} />
-        <p className="mt-2 text-xs text-muted">Capacite maximum : {props.maxCapacity} voyageurs.</p>
+        <p className="mt-2 text-xs text-muted">Capacité maximum : {props.maxCapacity} voyageurs.</p>
       </PopoverContent>
     </Popover>
   );
@@ -153,9 +153,9 @@ export function BookingWidget(props: BookingWidgetProps) {
         </div>
 
         <Button onClick={reserve} disabled={!hasRange} size="lg" className="mt-4 w-full">
-          {hasRange ? "Reserver" : "Selectionnez vos dates"}
+          {hasRange ? "Réserver" : "Sélectionnez vos dates"}
         </Button>
-        <p className="mt-2 text-center text-xs text-muted">Aucun montant ne sera debite a cette etape.</p>
+        <p className="mt-2 text-center text-xs text-muted">Aucun montant ne sera debite a cette étape.</p>
 
         {price && <div className="mt-5">{priceRows}</div>}
       </div>
@@ -181,10 +181,10 @@ export function BookingWidget(props: BookingWidgetProps) {
           </div>
           <Drawer>
             <DrawerTrigger asChild>
-              <Button size="lg">Reserver</Button>
+              <Button size="lg">Réserver</Button>
             </DrawerTrigger>
             <DrawerContent className="px-5 pb-6">
-              <DrawerTitle className="px-1 pt-4 text-xl font-bold">Votre sejour</DrawerTitle>
+              <DrawerTitle className="px-1 pt-4 text-xl font-bold">Votre séjour</DrawerTitle>
               <div className="my-4 max-h-[64dvh] space-y-5 overflow-y-auto px-1">
                 <div className="rounded-3xl border border-border p-3">
                   <Calendar value={range} onChange={setRange} numMonths={1} disabledRanges={props.disabledRanges} />
@@ -198,7 +198,7 @@ export function BookingWidget(props: BookingWidgetProps) {
               </div>
               <DrawerClose asChild>
                 <Button onClick={reserve} disabled={!hasRange} size="lg" className="w-full">
-                  {hasRange ? `Reserver - ${formatPrice(price!.total)}` : "Selectionnez vos dates"}
+                  {hasRange ? `Réserver - ${formatPrice(price!.total)}` : "Sélectionnez vos dates"}
                 </Button>
               </DrawerClose>
             </DrawerContent>

@@ -19,7 +19,7 @@ export default async function AdminBusinessDetail({ params }: { params: Promise<
   const req = await prisma.businessRequest.findUnique({ where: { id } });
   if (!req) notFound();
 
-  const isCustomPack = req.organizationType === "Particulier" || (req.needType ?? "").toLowerCase().includes("pack personnalise");
+  const isCustomPack = req.organizationType === "Particulier" || (req.needType ?? "").toLowerCase().includes("pack personnalisé");
 
   const actions = ["IN_REVIEW", "QUOTED", "CONFIRMED", "CLOSED"].map((s) => ({
     label: businessRequestStatusMeta[s].label,
@@ -39,9 +39,9 @@ export default async function AdminBusinessDetail({ params }: { params: Promise<
           <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
             <Line icon={Users} label="Contact" value={req.contactName} />
             <Line icon={Mail} label="Email" value={req.email} />
-            {req.phone && <Line icon={Phone} label="Telephone" value={req.phone} />}
+            {req.phone && <Line icon={Phone} label="Téléphone" value={req.phone} />}
             {req.city && <Line icon={MapPin} label="Ville" value={req.city} />}
-            {req.teamSize && <Line icon={Users} label="Equipe" value={`${req.teamSize} personnes`} />}
+            {req.teamSize && <Line icon={Users} label="Équipe" value={`${req.teamSize} personnes`} />}
             {req.budget && <Line icon={Wallet} label="Budget" value={formatPrice(req.budget)} />}
             {req.startDate && <Line icon={Calendar} label="Du" value={formatDate(req.startDate)} />}
             {req.endDate && <Line icon={Calendar} label="Au" value={formatDate(req.endDate)} />}
@@ -53,11 +53,11 @@ export default async function AdminBusinessDetail({ params }: { params: Promise<
         {isCustomPack && (
           <div className="flex items-center justify-between gap-3 rounded-3xl border border-brand-200 bg-brand-50/50 p-5">
             <div>
-              <p className="font-bold text-foreground">Demande de pack personnalise</p>
-              <p className="text-sm text-muted">Transformez cette demande en pack reservable.</p>
+              <p className="font-bold text-foreground">Demande de pack personnalisé</p>
+              <p className="text-sm text-muted">Transformez cette demande en pack réservable.</p>
             </div>
             <Button asChild>
-              <Link href={`/admin/packs/new?from=${req.id}`}><Compass className="h-4 w-4" /> Creer un pack</Link>
+              <Link href={`/admin/packs/new?from=${req.id}`}><Compass className="h-4 w-4" /> Créer un pack</Link>
             </Button>
           </div>
         )}

@@ -10,14 +10,14 @@ import { reservationStatusMeta, toFilterOptions } from "@/lib/enums";
 import { formatPrice, formatDateShort } from "@/lib/utils";
 import { CalendarCheck } from "lucide-react";
 
-export const metadata = { title: "Reservations - Admin" };
+export const metadata = { title: "Réservations - Admin" };
 
 type SP = Record<string, string | string[] | undefined>;
 const str = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
 const RESA_TYPE_LABELS: Record<string, string> = {
   RESIDENCE: "Residence",
-  PACK: "Pack Decouverte",
+  PACK: "Pack Découverte",
   CUSTOM_PACK: "Pack sur mesure",
   BUSINESS: "Business",
 };
@@ -55,18 +55,18 @@ export default async function AdminReservationsPage({ searchParams }: { searchPa
 
   return (
     <div className="mx-auto max-w-6xl">
-      <PageHeader title="Reservations" description="Suivi de toutes les reservations." />
+      <PageHeader title="Réservations" description="Suivi de toutes les réservations." />
 
       <FilterBar
         fields={[
-          { type: "search", name: "q", placeholder: "Reference, voyageur, residence..." },
+          { type: "search", name: "q", placeholder: "Référence, voyageur, résidence..." },
           { type: "select", name: "status", label: "Tous les statuts", options: toFilterOptions(reservationStatusMeta) },
           { type: "select", name: "type", label: "Tous les types", options: Object.entries(RESA_TYPE_LABELS).map(([value, label]) => ({ value, label })) },
         ]}
       />
 
       {reservations.length === 0 ? (
-        <EmptyState icon={CalendarCheck} title="Aucune reservation" description="Aucun resultat pour ces criteres." />
+        <EmptyState icon={CalendarCheck} title="Aucune réservation" description="Aucun resultat pour ces critères." />
       ) : (
       <>
       {/* Mobile : liste de cartes */}
@@ -91,7 +91,7 @@ export default async function AdminReservationsPage({ searchParams }: { searchPa
           <table className="w-full min-w-[700px] text-sm">
             <thead className="border-b border-border bg-surface-soft/50 text-left text-xs uppercase text-muted">
               <tr>
-                <th className="px-5 py-3 font-semibold">Reference</th>
+                <th className="px-5 py-3 font-semibold">Référence</th>
                 <th className="px-5 py-3 font-semibold">Objet</th>
                 <th className="px-5 py-3 font-semibold">Voyageur</th>
                 <th className="px-5 py-3 font-semibold">Date</th>

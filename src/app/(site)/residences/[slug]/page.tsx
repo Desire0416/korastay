@@ -28,7 +28,7 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const residence = await getResidenceBySlug(slug);
-  if (!residence) return { title: "Residence introuvable" };
+  if (!residence) return { title: "Résidence introuvable" };
   return {
     title: residence.name,
     description: residence.shortDescription ?? residence.description.slice(0, 150),
@@ -65,7 +65,7 @@ export default async function ResidenceDetailPage({
   ];
 
   const subRatings = [
-    { label: "Proprete", key: "cleanlinessRating" as const },
+    { label: "Propreté", key: "cleanlinessRating" as const },
     { label: "Emplacement", key: "locationRating" as const },
     { label: "Qualite/prix", key: "valueRating" as const },
     { label: "Communication", key: "communicationRating" as const },
@@ -117,7 +117,7 @@ export default async function ResidenceDetailPage({
         {/* Fil d'ariane + titre (desktop) */}
         <div className="hidden lg:block">
           <nav className="mb-3 flex items-center gap-1 text-sm text-muted">
-            <Link href="/residences" className="hover:text-foreground">Residences</Link>
+            <Link href="/residences" className="hover:text-foreground">Résidences</Link>
             <span>/</span>
             <Link href={`/residences?city=${residence.destination?.slug ?? ""}`} className="hover:text-foreground">{residence.city}</Link>
             <span>/</span>
@@ -191,8 +191,8 @@ export default async function ResidenceDetailPage({
                   <div className="flex items-center gap-3 rounded-2xl bg-brand-50 px-4 py-3">
                     <ShieldCheck className="h-6 w-6 text-brand-600" />
                     <div>
-                      <p className="text-sm font-bold text-brand-800">Residence verifiee KoraStay</p>
-                      <p className="text-xs text-brand-700/70">Controlee par notre equipe qualite</p>
+                      <p className="text-sm font-bold text-brand-800">Résidence vérifiée KoraStay</p>
+                      <p className="text-xs text-brand-700/70">Contrôlée par notre équipe qualité</p>
                     </div>
                   </div>
                 )}
@@ -216,7 +216,7 @@ export default async function ResidenceDetailPage({
 
             {/* Equipements */}
             <section className="border-b border-border py-7">
-              <h2 className="mb-4 text-xl font-bold text-foreground">Ce que propose ce logement</h2>
+              <h2 className="mb-4 text-xl font-bold text-foreground">Ce que proposé ce logement</h2>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {residence.amenities.map((ra) => (
                   <div key={ra.id} className="flex items-center gap-3 text-foreground/90">
@@ -230,11 +230,11 @@ export default async function ResidenceDetailPage({
             {/* Calendrier disponibilites */}
             <section className="border-b border-border py-7">
               <h2 className="mb-1 flex items-center gap-2 text-xl font-bold text-foreground">
-                <Clock className="h-5 w-5 text-brand-600" /> Disponibilites
+                <Clock className="h-5 w-5 text-brand-600" /> Disponibilités
               </h2>
               <p className="mb-2 text-sm text-muted">
-                Arrivee a partir de {residence.checkInTime} - Depart avant {residence.checkOutTime}.
-                Les dates indisponibles sont desactivees lors de la reservation.
+                Arrivée à partir de {residence.checkInTime} - Départ avant {residence.checkOutTime}.
+                Les dates indisponibles sont desactivees lors de la réservation.
               </p>
             </section>
 
@@ -242,7 +242,7 @@ export default async function ResidenceDetailPage({
             {residence.houseRules && (
               <section className="border-b border-border py-7">
                 <h2 className="mb-3 flex items-center gap-2 text-xl font-bold text-foreground">
-                  <ScrollText className="h-5 w-5 text-brand-600" /> Reglement interieur
+                  <ScrollText className="h-5 w-5 text-brand-600" /> Règlement intérieur
                 </h2>
                 <p className="whitespace-pre-line leading-relaxed text-foreground/90">{residence.houseRules}</p>
               </section>
@@ -291,7 +291,7 @@ export default async function ResidenceDetailPage({
                 ))}
               </div>
               {residence.reviews.length === 0 && (
-                <p className="text-muted">Soyez le premier a partager votre experience apres votre sejour.</p>
+                <p className="text-muted">Soyez le premier a partager votre expérience après votre séjour.</p>
               )}
             </section>
 
@@ -307,7 +307,7 @@ export default async function ResidenceDetailPage({
                   return (
                     <>
                       <MapEmbed latitude={lat} longitude={lng} label={`${residence.district ? residence.district + ", " : ""}${residence.city}`} heightClass="h-72" />
-                      <p className="mt-2 text-xs text-muted">Localisation approximative. L'adresse exacte est communiquee apres reservation.</p>
+                      <p className="mt-2 text-xs text-muted">Localisation approximative. L'adresse exacte est communiquee après réservation.</p>
                     </>
                   );
                 }
@@ -316,7 +316,7 @@ export default async function ResidenceDetailPage({
                     <div className="relative text-center">
                       <MapPin className="mx-auto h-8 w-8 text-gold-400" />
                       <p className="mt-2 font-bold">{residence.district ? `${residence.district}, ` : ""}{residence.city}</p>
-                      <p className="text-sm text-white/70">Localisation communiquee apres reservation</p>
+                      <p className="text-sm text-white/70">Localisation communiquee après réservation</p>
                     </div>
                   </div>
                 );
@@ -344,9 +344,9 @@ export default async function ResidenceDetailPage({
         {/* Packs & experiences de la ville */}
         <section className="border-t border-border py-10">
           <h2 className="font-display text-2xl font-semibold text-foreground">
-            Vivez {residence.city} : packs & experiences
+            Vivez {residence.city} : packs & expériences
           </h2>
-          <p className="mt-1 text-muted">Completez votre sejour avec un pack accompagne, ou composez le votre.</p>
+          <p className="mt-1 text-muted">Completez votre séjour avec un pack accompagné, ou composez le votre.</p>
 
           {cityPacks.length > 0 && (
             <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -359,7 +359,7 @@ export default async function ResidenceDetailPage({
           <div className="mt-5 flex flex-col items-start justify-between gap-4 rounded-3xl border-2 border-dashed border-brand-300 bg-brand-50/40 p-6 sm:flex-row sm:items-center">
             <div>
               <p className="font-bold text-brand-900">Aucun pack ne vous convient ?</p>
-              <p className="text-sm text-brand-800/80">Composez votre propre pack avec les activites et partenaires de {residence.city}.</p>
+              <p className="text-sm text-brand-800/80">Composez votre propre pack avec les activités et partenaires de {residence.city}.</p>
             </div>
             <Link
               href={`/packs/custom${residence.destination?.slug ? `?city=${residence.destination.slug}` : ""}`}
@@ -374,7 +374,7 @@ export default async function ResidenceDetailPage({
         {similar.length > 0 && (
           <section className="border-t border-border py-10">
             <h2 className="mb-6 font-display text-2xl font-semibold text-foreground">
-              Autres residences a {residence.city}
+              Autres résidences a {residence.city}
             </h2>
             <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
               {similar.map((r) => (

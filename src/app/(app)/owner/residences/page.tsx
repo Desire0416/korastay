@@ -11,7 +11,7 @@ import { SmartImage } from "@/components/ui/smart-image";
 import { residenceStatusMeta, toFilterOptions } from "@/lib/enums";
 import { formatPrice } from "@/lib/utils";
 
-export const metadata = { title: "Mes residences" };
+export const metadata = { title: "Mes résidences" };
 
 type SP = Record<string, string | string[] | undefined>;
 const str = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
@@ -32,8 +32,8 @@ export default async function OwnerResidencesPage({ searchParams }: { searchPara
   return (
     <div className="mx-auto max-w-5xl">
       <PageHeader
-        title="Mes residences"
-        description="Gerez vos logements, leurs tarifs et leur disponibilite."
+        title="Mes résidences"
+        description="Gérez vos logements, leurs tarifs et leur disponibilité."
         actions={<Button asChild><Link href="/owner/residences/new"><Plus className="h-4 w-4" /> Ajouter</Link></Button>}
       />
 
@@ -49,12 +49,12 @@ export default async function OwnerResidencesPage({ searchParams }: { searchPara
       {all.length === 0 ? (
         <EmptyState
           icon={Home}
-          title="Aucune residence"
-          description="Ajoutez votre premiere residence pour commencer a recevoir des reservations."
-          action={<Button asChild><Link href="/owner/residences/new"><Plus className="h-4 w-4" /> Ajouter une residence</Link></Button>}
+          title="Aucune résidence"
+          description="Ajoutez votre première résidence pour commencer a recevoir des réservations."
+          action={<Button asChild><Link href="/owner/residences/new"><Plus className="h-4 w-4" /> Ajouter une résidence</Link></Button>}
         />
       ) : residences.length === 0 ? (
-        <EmptyState icon={Home} title="Aucun resultat" description="Aucune residence ne correspond a ces criteres." />
+        <EmptyState icon={Home} title="Aucun resultat" description="Aucune résidence ne correspond a ces critères." />
       ) : (
         <div className="space-y-3">
           {residences.map((r) => (
@@ -72,12 +72,12 @@ export default async function OwnerResidencesPage({ searchParams }: { searchPara
                   <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5" /> {r.capacity}</span>
                   <span className="flex items-center gap-1"><BedDouble className="h-3.5 w-3.5" /> {r.bedrooms} ch.</span>
                   <span className="flex items-center gap-1"><Star className="h-3.5 w-3.5" /> {r.ratingCount} avis</span>
-                  <span>{r._count.reservations} reservation{r._count.reservations > 1 ? "s" : ""}</span>
+                  <span>{r._count.reservations} réservation{r._count.reservations > 1 ? "s" : ""}</span>
                 </div>
               </div>
               <div className="flex items-center justify-between gap-3 sm:flex-col sm:items-end">
                 <p className="font-extrabold text-foreground">{formatPrice(r.pricePerNight)}<span className="text-xs font-normal text-muted">/nuit</span></p>
-                <Button asChild variant="outline" size="sm"><Link href={`/owner/residences/${r.id}`}><Pencil className="h-3.5 w-3.5" /> Gerer</Link></Button>
+                <Button asChild variant="outline" size="sm"><Link href={`/owner/residences/${r.id}`}><Pencil className="h-3.5 w-3.5" /> Gérer</Link></Button>
               </div>
             </div>
           ))}

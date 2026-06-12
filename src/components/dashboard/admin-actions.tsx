@@ -26,7 +26,7 @@ export function AdminActions({ actions, size = "sm" }: { actions: AdminAction[];
     start(async () => {
       const res = await a.fn();
       if (res.ok) {
-        toast.success(res.message ?? "Action effectuee.");
+        toast.success(res.message ?? "Action effectuée.");
         if (a.redirectTo) router.push(a.redirectTo);
         else router.refresh();
       } else toast.error(res.error ?? "Erreur.");

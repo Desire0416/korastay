@@ -7,7 +7,7 @@ import { formatDate } from "@/lib/utils";
 
 export const metadata = {
   title: "Blog",
-  description: "Conseils de voyage, decouvertes et inspirations pour vos sejours en Afrique de l'Ouest avec KoraStay.",
+  description: "Conseils de voyage, découvertes et inspirations pour vos séjours en Afrique de l'Ouest avec KoraStay.",
 };
 
 export default async function BlogPage() {
@@ -24,14 +24,14 @@ export default async function BlogPage() {
             Inspirations & conseils de voyage
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-muted">
-            Decouvertes, bons plans et recits pour explorer l'Afrique de l'Ouest autrement.
+            Découvertes, bons plans et recits pour explorer l'Afrique de l'Ouest autrement.
           </p>
         </div>
       </section>
 
       <div className="container-page py-10">
         {posts.length === 0 ? (
-          <EmptyState icon={Newspaper} title="Aucun article" description="Les premiers articles arrivent bientot." />
+          <EmptyState icon={Newspaper} title="Aucun article" description="Les premiers articles arrivent bientôt." />
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {posts.map((p) => (

@@ -132,7 +132,7 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
 
       {/* Capacite */}
       <div className="border-t border-border pt-2">
-        <Stepper label="Voyageurs" hint="Capacite minimum" value={draft.capacity} onChange={(v) => setDraft({ ...draft, capacity: v })} min={0} max={16} />
+        <Stepper label="Voyageurs" hint="Capacité minimum" value={draft.capacity} onChange={(v) => setDraft({ ...draft, capacity: v })} min={0} max={16} />
       </div>
 
       {/* Verifie */}
@@ -141,7 +141,7 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
         onClick={() => setDraft({ ...draft, verified: !draft.verified })}
         className="flex w-full items-center justify-between border-t border-border pt-4"
       >
-        <span className="text-sm font-bold text-foreground">Residences verifiees uniquement</span>
+        <span className="text-sm font-bold text-foreground">Locations vérifiées uniquement</span>
         <span className={cn("relative h-6 w-11 rounded-full transition-colors", draft.verified ? "bg-brand-500" : "bg-border")}>
           <span className={cn("absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all", draft.verified ? "left-[22px]" : "left-0.5")} />
         </span>
@@ -149,7 +149,7 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
 
       {/* Equipements */}
       <div className="border-t border-border pt-4">
-        <p className="mb-2 text-sm font-bold text-foreground">Equipements</p>
+        <p className="mb-2 text-sm font-bold text-foreground">Équipements</p>
         <div className="grid grid-cols-2 gap-2">
           {AMENITIES.slice(0, 10).map((a) => (
             <button
@@ -228,7 +228,7 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
           size="sm"
           onClick={() => apply({ ...initial, verified: !initial.verified })}
         >
-          <Check className="h-4 w-4" /> Verifiees
+          <Check className="h-4 w-4" /> Vérifiées
         </Button>
       </div>
 

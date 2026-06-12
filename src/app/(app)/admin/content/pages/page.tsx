@@ -15,7 +15,7 @@ export default async function AdminContentPagesPage() {
 
   return (
     <div className="mx-auto max-w-4xl">
-      <PageHeader title="Pages de contenu" description="Editez les pages legales et institutionnelles." />
+      <PageHeader title="Pages de contenu" description="Editez les pages légales et institutionnelles." />
       <div className="space-y-3">
         {pages.map((p) => (
           <div key={p.id} className="flex items-center justify-between gap-4 rounded-3xl border border-border bg-surface p-5 shadow-soft">
@@ -27,7 +27,7 @@ export default async function AdminContentPagesPage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Badge tone={p.isPublished ? "success" : "neutral"}>{p.isPublished ? "Publiee" : "Brouillon"}</Badge>
+              <Badge tone={p.isPublished ? "success" : "neutral"}>{p.isPublished ? "Publiée" : "Brouillon"}</Badge>
               <Button asChild variant="outline" size="sm"><Link href={`/admin/content/pages/${p.id}`}><Pencil className="h-3.5 w-3.5" /> Editer</Link></Button>
             </div>
           </div>

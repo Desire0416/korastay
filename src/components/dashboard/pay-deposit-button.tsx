@@ -29,7 +29,7 @@ export function PayDepositButton({
     start(async () => {
       const res = await payReservationDeposit(reservationId, method);
       // En cas de succes, l'action redirige (le code ci-dessous ne s'execute pas).
-      if (res && !res.ok) toast.error(res.error ?? "Echec du paiement.");
+      if (res && !res.ok) toast.error(res.error ?? "Échec du paiement.");
     });
   }
 
@@ -50,7 +50,7 @@ export function PayDepositButton({
       <Button onClick={pay} loading={pending} size="lg" className="w-full">
         <CreditCard className="h-5 w-5" /> Payer l'acompte de {amountLabel}
       </Button>
-      <p className="text-center text-xs text-muted">Paiement securise. Le solde sera regle sur place.</p>
+      <p className="text-center text-xs text-muted">Paiement sécurisé. Le solde sera regle sur place.</p>
     </div>
   );
 }

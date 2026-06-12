@@ -18,7 +18,7 @@ const str = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
 const METHOD_LABELS: Record<string, string> = {
   ORANGE_MONEY: "Orange Money", WAVE: "Wave", MTN_MOMO: "MTN MoMo", CARD: "Carte bancaire",
-  BANK_TRANSFER: "Virement", CASH: "Especes", MANUAL: "Manuel", MOCK: "Demo",
+  BANK_TRANSFER: "Virement", CASH: "Especes", MANUAL: "Manuel", MOCK: "Démo",
 };
 
 export default async function AdminPaymentsPage({ searchParams }: { searchParams: Promise<SP> }) {
@@ -49,20 +49,20 @@ export default async function AdminPaymentsPage({ searchParams }: { searchParams
       {isMockPayments() && (
         <div className="mb-5 flex items-center gap-2 rounded-2xl border border-gold-200 bg-gold-50 px-4 py-3 text-sm text-gold-700">
           <AlertCircle className="h-4 w-4" />
-          <span><strong>Mode demonstration :</strong> les paiements sont simules (provider mock). Aucune transaction reelle.</span>
+          <span><strong>Mode démonstration :</strong> les paiements sont simules (provider mock). Aucune transaction reelle.</span>
         </div>
       )}
 
       <FilterBar
         fields={[
-          { type: "search", name: "q", placeholder: "Reference, client..." },
+          { type: "search", name: "q", placeholder: "Référence, client..." },
           { type: "select", name: "status", label: "Tous les statuts", options: toFilterOptions(paymentStatusMeta) },
           { type: "select", name: "method", label: "Tous les moyens", options: Object.entries(METHOD_LABELS).map(([value, label]) => ({ value, label })) },
         ]}
       />
 
       {payments.length === 0 ? (
-        <EmptyState icon={CreditCard} title="Aucun paiement" description="Aucun resultat pour ces criteres." />
+        <EmptyState icon={CreditCard} title="Aucun paiement" description="Aucun resultat pour ces critères." />
       ) : (
       <>
       {/* Mobile : liste de cartes */}
@@ -86,7 +86,7 @@ export default async function AdminPaymentsPage({ searchParams }: { searchParams
           <table className="w-full min-w-[640px] text-sm">
             <thead className="border-b border-border bg-surface-soft/50 text-left text-xs uppercase text-muted">
               <tr>
-                <th className="px-5 py-3 font-semibold">Reservation</th>
+                <th className="px-5 py-3 font-semibold">Réservation</th>
                 <th className="px-5 py-3 font-semibold">Methode</th>
                 <th className="px-5 py-3 font-semibold">Date</th>
                 <th className="px-5 py-3 font-semibold">Statut</th>

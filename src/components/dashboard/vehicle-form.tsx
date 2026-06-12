@@ -31,7 +31,7 @@ export function VehicleForm({ defaults }: Props) {
   return (
     <form action={action} className="space-y-5">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Field label="Type de vehicule" htmlFor="vehicleType" required>
+        <Field label="Type de véhicule" htmlFor="vehicleType" required>
           <Input id="vehicleType" name="vehicleType" defaultValue={defaults.vehicleType ?? ""} placeholder="Berline, SUV, minibus, van..." required />
         </Field>
         <Field label="Marque / modele" htmlFor="vehicleBrand">
@@ -44,8 +44,8 @@ export function VehicleForm({ defaults }: Props) {
           <Input id="vehicleSeats" name="vehicleSeats" type="number" min={1} max={60} defaultValue={defaults.vehicleSeats ?? ""} placeholder="4" />
         </Field>
       </div>
-      <UploadField name="drivingLicenseUrl" label="Permis de conduire" defaultUrl={defaults.drivingLicenseUrl ?? ""} kind="document" accept="image/*,application/pdf" hint="Mettez a jour votre permis si necessaire." />
-      <Button type="submit" loading={pending}>Enregistrer mon vehicule</Button>
+      <UploadField name="drivingLicenseUrl" label="Permis de conduire" defaultUrl={defaults.drivingLicenseUrl ?? ""} kind="document" accept="image/*,application/pdf" hint="Mettez a jour votre permis si nécessaire." />
+      <Button type="submit" loading={pending}>Enregistrer mon véhicule</Button>
     </form>
   );
 }

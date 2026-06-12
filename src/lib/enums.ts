@@ -128,14 +128,14 @@ export const paymentMethodMeta: Record<
   { label: string; hint?: string }
 > = {
   WAVE: { label: "Wave", hint: "Sans frais" },
-  ORANGE_MONEY: { label: "Orange Money", hint: "Cote d'Ivoire" },
+  ORANGE_MONEY: { label: "Orange Money", hint: "Côte d'Ivoire" },
   MTN_MOMO: { label: "MTN MoMo", hint: "Mobile Money" },
   MOOV_MONEY: { label: "Moov Money", hint: "Mobile Money" },
   CARD: { label: "Carte bancaire", hint: "Visa / Mastercard" },
   BANK_TRANSFER: { label: "Virement bancaire", hint: "Validation manuelle" },
   CASH: { label: "Especes", hint: "A l'agence" },
   MANUAL: { label: "Validation manuelle (admin)", hint: "Hors ligne" },
-  MOCK: { label: "Demo", hint: "Simulation" },
+  MOCK: { label: "Démo", hint: "Simulation" },
 };
 
 export const ReviewStatus = {
@@ -195,29 +195,29 @@ export const reservationStatusMeta: LabelMap = {
   PENDING_APPROVAL: { label: "En attente de validation", tone: "warning" },
   PENDING_PAYMENT: { label: "A payer (acompte)", tone: "warning" },
   PARTIALLY_PAID: { label: "Acompte regle", tone: "info" },
-  PAID: { label: "Integralement payee", tone: "success" },
-  CONFIRMED: { label: "Confirmee", tone: "success" },
-  CHECKED_IN: { label: "Sejour en cours", tone: "info" },
-  COMPLETED: { label: "Terminee", tone: "brand" },
-  CANCELLATION_REQUESTED: { label: "Annulation demandee", tone: "warning" },
-  CANCELLED: { label: "Annulee", tone: "danger" },
+  PAID: { label: "Intégralement payée", tone: "success" },
+  CONFIRMED: { label: "Confirmée", tone: "success" },
+  CHECKED_IN: { label: "Séjour en cours", tone: "info" },
+  COMPLETED: { label: "Terminée", tone: "brand" },
+  CANCELLATION_REQUESTED: { label: "Annulation demandée", tone: "warning" },
+  CANCELLED: { label: "Annulée", tone: "danger" },
   NO_SHOW: { label: "No-show", tone: "danger" },
   DISPUTED: { label: "Litige", tone: "danger" },
   REFUNDED: { label: "Remboursee", tone: "info" },
 };
 
 export const payoutStatusMeta: LabelMap = {
-  SCHEDULED: { label: "Planifie", tone: "warning" },
+  SCHEDULED: { label: "Planifié", tone: "warning" },
   RELEASED: { label: "Verse", tone: "success" },
-  BLOCKED: { label: "Bloque (litige)", tone: "danger" },
-  CANCELLED: { label: "Annule", tone: "neutral" },
+  BLOCKED: { label: "Bloqué (litige)", tone: "danger" },
+  CANCELLED: { label: "Annulé", tone: "neutral" },
 };
 
 export const cautionStatusMeta: LabelMap = {
   NONE: { label: "Sans caution", tone: "neutral" },
   REQUIRED: { label: "Caution requise", tone: "warning" },
-  HELD: { label: "Caution bloquee", tone: "info" },
-  RELEASED: { label: "Caution restituee", tone: "success" },
+  HELD: { label: "Caution bloquée", tone: "info" },
+  RELEASED: { label: "Caution restituée", tone: "success" },
   RETAINED: { label: "Caution retenue", tone: "danger" },
 };
 
@@ -238,10 +238,10 @@ export type PayoutTier = (typeof PayoutTier)[keyof typeof PayoutTier];
 export const paymentStatusMeta: LabelMap = {
   PENDING: { label: "En attente", tone: "warning" },
   PROCESSING: { label: "En cours", tone: "info" },
-  PAID: { label: "Paye", tone: "success" },
-  FAILED: { label: "Echoue", tone: "danger" },
+  PAID: { label: "Payé", tone: "success" },
+  FAILED: { label: "Échoué", tone: "danger" },
   EXPIRED: { label: "Expire", tone: "neutral" },
-  CANCELLED: { label: "Annule", tone: "neutral" },
+  CANCELLED: { label: "Annulé", tone: "neutral" },
   REFUNDED: { label: "Rembourse", tone: "info" },
   PARTIALLY_REFUNDED: { label: "Rembourse partiel", tone: "info" },
 };
@@ -249,37 +249,37 @@ export const paymentStatusMeta: LabelMap = {
 export const residenceStatusMeta: LabelMap = {
   DRAFT: { label: "Brouillon", tone: "neutral" },
   PENDING_VALIDATION: { label: "En attente de validation", tone: "warning" },
-  PUBLISHED: { label: "Publiee", tone: "success" },
-  UNPUBLISHED: { label: "Depubliee", tone: "neutral" },
+  PUBLISHED: { label: "Publiée", tone: "success" },
+  UNPUBLISHED: { label: "Dépubliée", tone: "neutral" },
   SUSPENDED: { label: "Suspendue", tone: "danger" },
-  ARCHIVED: { label: "Archivee", tone: "neutral" },
+  ARCHIVED: { label: "Archivée", tone: "neutral" },
 };
 
 export const verificationStatusMeta: LabelMap = {
   DRAFT: { label: "Brouillon", tone: "neutral" },
   PENDING_REVIEW: { label: "En attente", tone: "warning" },
-  NEEDS_CHANGES: { label: "Corrections demandees", tone: "warning" },
-  VERIFIED: { label: "Verifie", tone: "success" },
+  NEEDS_CHANGES: { label: "Corrections demandées", tone: "warning" },
+  VERIFIED: { label: "Vérifié", tone: "success" },
   REJECTED: { label: "Refuse", tone: "danger" },
   SUSPENDED: { label: "Suspendu", tone: "danger" },
 };
 
 export const missionStatusMeta: LabelMap = {
-  PROPOSED: { label: "Proposee", tone: "warning" },
-  ACCEPTED: { label: "Acceptee", tone: "info" },
-  REFUSED: { label: "Refusee", tone: "danger" },
-  CONFIRMED: { label: "Confirmee", tone: "success" },
-  COMPLETED: { label: "Terminee", tone: "brand" },
-  CANCELLED: { label: "Annulee", tone: "neutral" },
+  PROPOSED: { label: "Proposée", tone: "warning" },
+  ACCEPTED: { label: "Acceptée", tone: "info" },
+  REFUSED: { label: "Refusée", tone: "danger" },
+  CONFIRMED: { label: "Confirmée", tone: "success" },
+  COMPLETED: { label: "Terminée", tone: "brand" },
+  CANCELLED: { label: "Annulée", tone: "neutral" },
 };
 
 export const businessRequestStatusMeta: LabelMap = {
   NEW: { label: "Nouvelle", tone: "warning" },
   IN_REVIEW: { label: "En traitement", tone: "info" },
-  QUOTED: { label: "Devis envoye", tone: "brand" },
-  CONFIRMED: { label: "Confirmee", tone: "success" },
+  QUOTED: { label: "Devis envoyé", tone: "brand" },
+  CONFIRMED: { label: "Confirmée", tone: "success" },
   CLOSED: { label: "Cloturee", tone: "neutral" },
-  CANCELLED: { label: "Annulee", tone: "danger" },
+  CANCELLED: { label: "Annulée", tone: "danger" },
 };
 
 export const qualityLevelMeta: Record<
@@ -295,7 +295,7 @@ export const residenceTypeMeta: Record<
   string,
   { label: string; capacity: string }
 > = {
-  STUDIO: { label: "Studio meuble", capacity: "1-2 personnes" },
+  STUDIO: { label: "Studio meublé", capacity: "1-2 personnes" },
   T2: { label: "Appartement T2", capacity: "2-3 personnes" },
   T3: { label: "Appartement T3", capacity: "4-5 personnes" },
   VILLA: { label: "Villa / Maison", capacity: "6+ personnes" },
@@ -304,7 +304,7 @@ export const residenceTypeMeta: Record<
 export const activityCategoryMeta: Record<string, { label: string }> = {
   EXCURSION: { label: "Excursion" },
   VISITE: { label: "Visite de site" },
-  CULTURE: { label: "Experience culturelle" },
+  CULTURE: { label: "Expérience culturelle" },
   NATURE: { label: "Sortie nature" },
   AVENTURE: { label: "Aventure" },
   GASTRONOMIE: { label: "Gastronomie" },
@@ -317,13 +317,13 @@ export const partnerTypeMeta: Record<
   GUIDE: { label: "Guide touristique", plural: "Guides" },
   TRANSPORT: { label: "Transporteur", plural: "Transporteurs" },
   RESTAURANT: { label: "Restaurant", plural: "Restaurants" },
-  ACTIVITY: { label: "Prestataire d'activite", plural: "Activites" },
+  ACTIVITY: { label: "Prestataire d'activité", plural: "Activités" },
   OTHER: { label: "Autre prestataire", plural: "Autres" },
 };
 
 export const userRoleMeta: Record<string, { label: string; tone: BadgeTone }> = {
   TRAVELER: { label: "Voyageur", tone: "info" },
-  OWNER: { label: "Proprietaire", tone: "brand" },
+  OWNER: { label: "Propriétaire", tone: "brand" },
   PARTNER: { label: "Partenaire", tone: "gold" },
   BUSINESS: { label: "Business", tone: "neutral" },
   SUPPORT: { label: "Support", tone: "info" },

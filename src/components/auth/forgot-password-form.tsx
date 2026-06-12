@@ -20,7 +20,7 @@ export function ForgotPasswordForm() {
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-brand-50 text-brand-600">
           <MailCheck className="h-8 w-8" />
         </div>
-        <h1 className="mt-5 text-2xl font-bold text-foreground">Verifiez vos emails</h1>
+        <h1 className="mt-5 text-2xl font-bold text-foreground">Vérifiez vos emails</h1>
         <p className="mt-2 text-muted">{state.message}</p>
         <Button asChild variant="outline" className="mt-7"><Link href="/login">Retour a la connexion</Link></Button>
       </div>

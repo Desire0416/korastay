@@ -5,10 +5,10 @@ import { PageHeader } from "@/components/dashboard/page-header";
 export const metadata = { title: "Exports - Admin" };
 
 const EXPORTS = [
-  { type: "reservations", label: "Reservations", desc: "Toutes les reservations (CSV)", icon: CalendarCheck },
+  { type: "reservations", label: "Réservations", desc: "Toutes les réservations (CSV)", icon: CalendarCheck },
   { type: "payments", label: "Paiements", desc: "Toutes les transactions (CSV)", icon: CreditCard },
   { type: "users", label: "Utilisateurs", desc: "Tous les comptes (CSV)", icon: Users },
-  { type: "residences", label: "Residences", desc: "Catalogue complet (CSV)", icon: Home },
+  { type: "residences", label: "Résidences", desc: "Catalogue complet (CSV)", icon: Home },
   { type: "business", label: "Demandes Business", desc: "Demandes & devis (CSV)", icon: Briefcase },
 ];
 
@@ -16,7 +16,7 @@ export default async function AdminExportsPage() {
   await requireRole(["ADMIN", "SUPER_ADMIN"]);
   return (
     <div className="mx-auto max-w-3xl">
-      <PageHeader title="Exports" description="Telechargez vos donnees au format CSV (compatible Excel)." />
+      <PageHeader title="Exports" description="Telechargez vos données au format CSV (compatible Excel)." />
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {EXPORTS.map((e) => (
           <a
@@ -35,7 +35,7 @@ export default async function AdminExportsPage() {
           </a>
         ))}
       </div>
-      <p className="mt-4 text-xs text-muted">Les fichiers sont generes a la demande avec les donnees actuelles.</p>
+      <p className="mt-4 text-xs text-muted">Les fichiers sont générés a la demande avec les données actuelles.</p>
     </div>
   );
 }

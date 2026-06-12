@@ -30,7 +30,7 @@ export default async function OwnerResidenceDetail({
     <div className="mx-auto max-w-4xl">
       <PageHeader
         title={residence.name}
-        breadcrumbs={[{ label: "Mes residences", href: "/owner/residences" }, { label: residence.name }]}
+        breadcrumbs={[{ label: "Mes résidences", href: "/owner/residences" }, { label: residence.name }]}
         actions={
           <div className="flex flex-wrap gap-2">
             <Button asChild variant="outline" size="sm"><Link href={`/owner/residences/${id}/edit`}><Pencil className="h-4 w-4" /> Modifier</Link></Button>
@@ -43,7 +43,7 @@ export default async function OwnerResidenceDetail({
       {sp.created === "1" && (
         <div className="mb-6 flex items-center gap-3 rounded-2xl border border-success/30 bg-emerald-50 p-4">
           <CheckCircle2 className="h-5 w-5 text-success" />
-          <p className="text-sm text-success">Residence creee ! Elle est en attente de validation par l'equipe KoraStay.</p>
+          <p className="text-sm text-success">Résidence créée ! Elle est en attente de validation par l'équipe KoraStay.</p>
         </div>
       )}
 
@@ -54,7 +54,7 @@ export default async function OwnerResidenceDetail({
           </div>
 
           <div className="rounded-3xl border border-border bg-surface p-5 shadow-soft">
-            <h3 className="mb-3 font-bold text-foreground">Caracteristiques</h3>
+            <h3 className="mb-3 font-bold text-foreground">Caractéristiques</h3>
             <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
               <Feature icon={Home} label={residenceTypeMeta[residence.type]?.label ?? residence.type} />
               <Feature icon={Users} label={`${residence.capacity} voyageurs`} />
@@ -92,7 +92,7 @@ export default async function OwnerResidenceDetail({
           </div>
 
           <div className="space-y-2">
-            <Button asChild variant="outline" className="w-full justify-start"><Link href={`/owner/calendar`}><Calendar className="h-4 w-4" /> Gerer le calendrier</Link></Button>
+            <Button asChild variant="outline" className="w-full justify-start"><Link href={`/owner/calendar`}><Calendar className="h-4 w-4" /> Gérer le calendrier</Link></Button>
             {isPublished && (
               <Button asChild variant="ghost" className="w-full justify-start"><Link href={`/residences/${residence.slug}`} target="_blank"><ExternalLink className="h-4 w-4" /> Voir la fiche publique</Link></Button>
             )}

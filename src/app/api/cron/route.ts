@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
     await prisma.$transaction([
       prisma.reservation.update({ where: { id: r.id }, data: { status: "CANCELLED", cancelledAt: now } }),
       prisma.notification.create({
-        data: { userId: r.travelerId, title: "Demande expiree", body: `Votre demande ${r.reference} a expire sans validation et a ete annulee.`, type: "RESERVATION_CANCELLED", url: "/account/bookings" },
+        data: { userId: r.travelerId, title: "Demande expirée", body: `Votre demande ${r.reference} a expire sans validation et a ete annulée.`, type: "RESERVATION_CANCELLED", url: "/account/bookings" },
       }),
     ]);
     result.approvalExpired++;
@@ -65,7 +65,7 @@ export async function GET(req: NextRequest) {
     const already = await prisma.notification.count({ where: { userId: r.travelerId, type: "CHECKIN_REMINDER", url: `/account/bookings/${r.id}` } });
     if (already === 0) {
       await prisma.notification.create({
-        data: { userId: r.travelerId, title: "Votre sejour approche", body: `Rappel : votre sejour ${r.reference} commence bientot.`, type: "CHECKIN_REMINDER", url: `/account/bookings/${r.id}` },
+        data: { userId: r.travelerId, title: "Votre séjour approche", body: `Rappel : votre séjour ${r.reference} commence bientôt.`, type: "CHECKIN_REMINDER", url: `/account/bookings/${r.id}` },
       });
       result.checkinReminders++;
     }
@@ -81,7 +81,7 @@ export async function GET(req: NextRequest) {
     const already = await prisma.notification.count({ where: { userId: r.travelerId, type: "REVIEW_INVITE", url: `/account/bookings/${r.id}` } });
     if (already === 0) {
       await prisma.notification.create({
-        data: { userId: r.travelerId, title: "Laissez un avis", body: "Comment s'est passe votre sejour ? Partagez votre avis.", type: "REVIEW_INVITE", url: `/account/bookings/${r.id}` },
+        data: { userId: r.travelerId, title: "Laissez un avis", body: "Comment s'est passe votre séjour ? Partagez votre avis.", type: "REVIEW_INVITE", url: `/account/bookings/${r.id}` },
       });
       result.reviewInvites++;
     }

@@ -31,15 +31,15 @@ export default async function PartnerOnboardingPage() {
       <main className="container-page max-w-3xl py-10">
         {!profile ? (
           <EmptyCard
-            title="Profil partenaire en cours de creation"
-            text="Votre profil partenaire n'est pas encore configure par notre equipe. Contactez KoraStay pour finaliser votre inscription."
+            title="Profil partenaire en cours de création"
+            text="Votre profil partenaire n'est pas encore configure par notre équipe. Contactez KoraStay pour finaliser votre inscription."
           />
         ) : profile.verificationStatus !== "VERIFIED" ? (
           <div className="rounded-3xl border border-gold-200 bg-gold-50/60 p-8 text-center shadow-soft">
             <Clock className="mx-auto h-10 w-10 text-gold-600" />
             <h1 className="mt-3 text-xl font-bold text-gold-800">Profil en cours de validation</h1>
             <p className="mx-auto mt-2 max-w-md text-sm text-gold-800/80">
-              Votre profil <strong>{profile.businessName}</strong> est en cours de verification par l'equipe KoraStay.
+              Votre profil <strong>{profile.businessName}</strong> est en cours de vérification par l'équipe KoraStay.
               Vous pourrez completer votre configuration des qu'il sera valide.
             </p>
             <Button asChild variant="outline" className="mt-5"><Link href="/">Retour a l'accueil</Link></Button>
@@ -52,7 +52,7 @@ export default async function PartnerOnboardingPage() {
               </span>
               <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight text-foreground">Finalisez votre configuration</h1>
               <p className="mt-2 text-muted">
-                Derniere etape avant d'acceder a votre espace : completez vos informations et joignez vos justificatifs.
+                Dernière étape avant d'acceder a votre espace : completez vos informations et joignez vos justificatifs.
               </p>
             </div>
             <PartnerOnboardingForm

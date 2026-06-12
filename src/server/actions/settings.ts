@@ -21,5 +21,5 @@ export async function saveSettings(_prev: SettingsResult, formData: FormData): P
   await prisma.auditLog.create({ data: { actorId: admin.id, action: "SETTINGS_UPDATED", entityType: "Setting", entityId: "global" } });
   revalidatePath("/admin/settings");
   revalidatePath("/admin");
-  return { ok: true, message: "Parametres enregistres." };
+  return { ok: true, message: "Paramètres enregistrés." };
 }

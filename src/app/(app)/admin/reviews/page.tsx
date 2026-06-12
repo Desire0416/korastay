@@ -49,8 +49,8 @@ export default async function AdminReviewsPage({ searchParams }: { searchParams:
 
       <FilterBar
         fields={[
-          { type: "search", name: "q", placeholder: "Auteur, commentaire, residence..." },
-          { type: "select", name: "status", label: "Tous les statuts", options: [{ value: "PUBLISHED", label: "Publie" }, { value: "HIDDEN", label: "Masque" }, { value: "DELETED", label: "Supprime" }] },
+          { type: "search", name: "q", placeholder: "Auteur, commentaire, résidence..." },
+          { type: "select", name: "status", label: "Tous les statuts", options: [{ value: "PUBLISHED", label: "Publié" }, { value: "HIDDEN", label: "Masque" }, { value: "DELETED", label: "Supprimé" }] },
           { type: "select", name: "rating", label: "Toutes les notes", options: [5, 4, 3, 2, 1].map((n) => ({ value: String(n), label: `${n} etoile${n > 1 ? "s" : ""}` })) },
         ]}
       />
@@ -70,7 +70,7 @@ export default async function AdminReviewsPage({ searchParams }: { searchParams:
                 <div className="flex items-center gap-2">
                   <RatingStars value={r.rating} showValue={false} size="sm" />
                   <Badge tone={r.status === "PUBLISHED" ? "success" : r.status === "HIDDEN" ? "warning" : "danger"}>
-                    {r.status === "PUBLISHED" ? "Publie" : r.status === "HIDDEN" ? "Masque" : "Supprime"}
+                    {r.status === "PUBLISHED" ? "Publié" : r.status === "HIDDEN" ? "Masque" : "Supprimé"}
                   </Badge>
                 </div>
               </div>

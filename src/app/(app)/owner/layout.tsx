@@ -7,7 +7,7 @@ export default async function OwnerLayout({ children }: { children: React.ReactN
   const user = await requireRole(["OWNER", "ADMIN", "SUPER_ADMIN"], "/login?redirectTo=/owner");
   const notifCount = await getUnreadNotificationCount(user.id);
   return (
-    <ConnectedShell user={user} spaceLabel="Espace proprietaire" items={OWNER_NAV} notifCount={notifCount}>
+    <ConnectedShell user={user} spaceLabel="Espace propriétaire" items={OWNER_NAV} notifCount={notifCount}>
       {children}
     </ConnectedShell>
   );

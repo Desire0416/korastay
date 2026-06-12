@@ -32,7 +32,7 @@ export default async function BusinessRequestDetail({ params }: { params: Promis
 
       {/* Suivi */}
       <div className="mb-6 flex items-center justify-between rounded-3xl border border-border bg-surface p-5 shadow-soft">
-        {["Recue", "En traitement", "Devis", "Confirmee"].map((label, i) => (
+        {["Reçue", "En traitement", "Devis", "Confirmée"].map((label, i) => (
           <div key={label} className="flex flex-1 flex-col items-center text-center">
             <span className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ${i <= currentStep ? "bg-brand-500 text-white" : "bg-surface-soft text-muted"}`}>{i + 1}</span>
             <span className={`mt-1.5 text-xs ${i <= currentStep ? "font-semibold text-foreground" : "text-muted"}`}>{label}</span>
@@ -52,7 +52,7 @@ export default async function BusinessRequestDetail({ params }: { params: Promis
           {req.status === "QUOTED" && (
             <div className="mt-4">
               <AcceptQuoteButton requestId={req.id} />
-              <p className="mt-2 text-xs text-muted">En acceptant, notre equipe finalisera votre reservation.</p>
+              <p className="mt-2 text-xs text-muted">En acceptant, notre équipe finalisera votre réservation.</p>
             </div>
           )}
         </div>
@@ -61,9 +61,9 @@ export default async function BusinessRequestDetail({ params }: { params: Promis
       <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
         <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
           {req.city && <Info icon={MapPin} label="Ville" value={req.city} />}
-          {req.teamSize && <Info icon={Users} label="Equipe" value={`${req.teamSize} personnes`} />}
+          {req.teamSize && <Info icon={Users} label="Équipe" value={`${req.teamSize} personnes`} />}
           {req.budget && <Info icon={Wallet} label="Budget" value={formatPrice(req.budget)} />}
-          <Info icon={Calendar} label="Cree le" value={formatDate(req.createdAt)} />
+          <Info icon={Calendar} label="Créé le" value={formatDate(req.createdAt)} />
         </div>
         {req.notes && <p className="mt-4 border-t border-border pt-4 text-sm text-foreground/90">{req.notes}</p>}
       </div>

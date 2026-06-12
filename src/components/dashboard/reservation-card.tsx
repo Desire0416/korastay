@@ -39,7 +39,7 @@ export function ReservationCard({ reservation }: { reservation: ReservationCardD
           <div className="min-w-0">
             <p className="flex items-center gap-1.5 text-xs text-muted">
               {isPack ? <Package className="h-3.5 w-3.5" /> : <MapPin className="h-3.5 w-3.5" />}
-              {isPack ? "Pack Decouverte" : location}
+              {isPack ? "Pack Découverte" : location}
             </p>
             <h3 className="line-clamp-1 font-bold text-foreground">{title}</h3>
           </div>

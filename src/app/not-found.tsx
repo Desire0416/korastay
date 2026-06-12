@@ -20,7 +20,7 @@ export default function NotFound() {
           <Link href="/"><Home className="h-4 w-4" /> Retour a l'accueil</Link>
         </Button>
         <Button asChild variant="outline">
-          <Link href="/residences"><Compass className="h-4 w-4" /> Explorer les residences</Link>
+          <Link href="/residences"><Compass className="h-4 w-4" /> Explorer les résidences</Link>
         </Button>
       </div>
     </div>

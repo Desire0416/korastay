@@ -8,8 +8,8 @@ import { activityCategoryMeta } from "@/lib/enums";
 import { formatPrice, cn } from "@/lib/utils";
 
 export const metadata = {
-  title: "Activites & experiences",
-  description: "Excursions, visites de sites, experiences culturelles et sorties nature dans les villes couvertes par KoraStay, avec un guide certifie.",
+  title: "Activités & expériences",
+  description: "Excursions, visites de sites, expériences culturelles et sorties nature dans les villes couvertes par KoraStay, avec un guide certifie.",
 };
 
 type SP = Record<string, string | string[] | undefined>;
@@ -31,13 +31,13 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: P
       <section className="gradient-hero">
         <div className="container-page py-9 text-center md:py-16">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-sm font-semibold text-brand-700">
-            <Sparkles className="h-3.5 w-3.5" /> KoraStay Activites
+            <Sparkles className="h-3.5 w-3.5" /> KoraStay Activités
           </span>
           <h1 className="mx-auto mt-4 max-w-2xl font-display text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">
-            Vivez des experiences inoubliables
+            Vivez des expériences inoubliables
           </h1>
           <p className="mx-auto mt-3 max-w-xl text-sm text-muted md:text-base">
-            Excursions, visites, culture et nature. Chaque activite se reserve avec un guide certifie KoraStay.
+            Excursions, visites, culture et nature. Chaque activité se reserve avec un guide certifie KoraStay.
           </p>
         </div>
       </section>
@@ -66,7 +66,7 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: P
         </div>
 
         {activities.length === 0 ? (
-          <EmptyState icon={Compass} title="Aucune activite" description="Aucune activite ne correspond a ces criteres pour le moment." />
+          <EmptyState icon={Compass} title="Aucune activité" description="Aucune activité ne correspond a ces critères pour le moment." />
         ) : (
           <div className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-2 md:gap-5 lg:grid-cols-3 xl:grid-cols-4">
             {activities.map((a, i) => (

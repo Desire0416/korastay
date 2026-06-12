@@ -35,19 +35,19 @@ export default async function AdminDestinationsPage({ searchParams }: { searchPa
     <div className="mx-auto max-w-5xl">
       <PageHeader
         title="Destinations"
-        description="Gerez les villes couvertes par KoraStay."
+        description="Gérez les villes couvertes par KoraStay."
         actions={<Button asChild><Link href="/admin/destinations/new"><Plus className="h-4 w-4" /> Nouvelle destination</Link></Button>}
       />
 
       {sp.created === "1" && (
         <div className="mb-5 flex items-center gap-2 rounded-2xl border border-success/30 bg-emerald-50 p-4 text-sm text-success">
-          <CheckCircle2 className="h-5 w-5" /> Destination creee avec succes.
+          <CheckCircle2 className="h-5 w-5" /> Destination créée avec succès.
         </div>
       )}
 
       <FilterBar
         fields={[
-          { type: "search", name: "q", placeholder: "Nom, region..." },
+          { type: "search", name: "q", placeholder: "Nom, région..." },
           { type: "select", name: "active", label: "Toutes", options: [{ value: "active", label: "Actives" }, { value: "inactive", label: "Inactives" }] },
         ]}
       />
@@ -67,7 +67,7 @@ export default async function AdminDestinationsPage({ searchParams }: { searchPa
                 <Button asChild variant="outline" size="sm"><Link href={`/admin/destinations/${d.id}/edit`}><Pencil className="h-3.5 w-3.5" /> Modifier</Link></Button>
               </div>
               <p className="flex items-center gap-1 text-xs text-muted"><MapPin className="h-3 w-3" /> {d.region ?? "-"}</p>
-              <p className="mt-2 text-xs text-muted">{d._count.residences} residence(s) · {d._count.packs} pack(s) · priorite {d.priority}</p>
+              <p className="mt-2 text-xs text-muted">{d._count.residences} résidence(s) · {d._count.packs} pack(s) · priorité {d.priority}</p>
             </div>
           </div>
         ))}

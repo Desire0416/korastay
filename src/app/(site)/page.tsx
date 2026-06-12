@@ -24,24 +24,24 @@ import { initials } from "@/lib/utils";
 import { MobileHome } from "@/components/public/mobile/mobile-home";
 
 const CATEGORIES = [
-  { label: "Residences verifiees", href: "/residences", icon: HomeIcon, desc: "Logements meubles controles", color: "bg-brand-50 text-brand-600" },
-  { label: "Packs Decouverte", href: "/packs", icon: Compass, desc: "Sejours clE en main", color: "bg-gold-50 text-gold-600" },
+  { label: "Location meublée", href: "/residences", icon: HomeIcon, desc: "Logements meublés contrôlés", color: "bg-brand-50 text-brand-600" },
+  { label: "Packs Découverte", href: "/packs", icon: Compass, desc: "Séjours clE en main", color: "bg-gold-50 text-gold-600" },
   { label: "KoraStay Business", href: "/business", icon: Briefcase, desc: "Missions & entreprises", color: "bg-sky-50 text-info" },
   { label: "Devenir partenaire", href: "/partners", icon: Handshake, desc: "Guides, transport, resto", color: "bg-emerald-50 text-success" },
 ];
 
 const WHY = [
-  { icon: ShieldCheck, title: "Residences verifiees", text: "Chaque logement est controle selon des standards stricts de proprete, securite et equipement avant publication." },
-  { icon: Smartphone, title: "Paiement mobile", text: "Reservez et payez en toute simplicite via Orange Money, Wave ou carte bancaire." },
-  { icon: Headset, title: "Assistance locale", text: "Une equipe disponible avant, pendant et apres votre sejour, partout en Cote d'Ivoire." },
-  { icon: MapPinned, title: "Partenaires locaux", text: "Guides, transporteurs et restaurants selectionnes pour une experience authentique." },
+  { icon: ShieldCheck, title: "Locations meublées vérifiées", text: "Chaque logement est contrôle selon des standards stricts de propreté, sécurité et équipement avant publication." },
+  { icon: Smartphone, title: "Paiement mobile", text: "Réservez et payez en toute simplicité via Orange Money, Wave ou carte bancaire." },
+  { icon: Headset, title: "Assistance locale", text: "Une équipe disponible avant, pendant et après votre séjour, partout en Côte d'Ivoire." },
+  { icon: MapPinned, title: "Partenaires locaux", text: "Guides, transporteurs et restaurants sélectionnés pour une expérience authentique." },
 ];
 
 const FAQ = [
-  { q: "Comment savoir si une residence est fiable ?", a: "Chaque residence affichant le badge \"Residence verifiee KoraStay\" a ete controlee par notre equipe selon des criteres de proprete, securite, equipement et conformite." },
+  { q: "Comment savoir si une résidence est fiable ?", a: "Chaque résidence affichant le badge \"Résidence vérifiée KoraStay\" a ete contrôlée par notre équipe selon des critères de propreté, sécurité, équipement et conformite." },
   { q: "Quels moyens de paiement sont acceptes ?", a: "Orange Money, Wave, carte bancaire Visa/Mastercard et bientot MTN MoMo. Le paiement est securise et la reservation confirmee immediatement." },
-  { q: "Puis-je annuler ma reservation ?", a: "Oui. Pour les residences : remboursement integral a plus de 72h du check-in, 50% entre 24 et 72h. Les conditions detaillees sont sur chaque fiche." },
-  { q: "Qu'est-ce qu'un Pack Decouverte ?", a: "Un sejour clE en main incluant hebergement verifie, petit dejeuner, transport en ville et guide local certifie, pour decouvrir une destination sans rien organiser." },
+  { q: "Puis-je annuler ma réservation ?", a: "Oui. Pour les résidences : remboursement intégral a plus de 72h du check-in, 50% entre 24 et 72h. Les conditions detaillees sont sur chaque fiche." },
+  { q: "Qu'est-ce qu'un Pack Découverte ?", a: "Un séjour clE en main incluant hébergement vérifié, petit dejeuner, transport en ville et guide local certifie, pour découvrir une destination sans rien organiser." },
 ];
 
 export default async function HomePage() {
@@ -105,7 +105,7 @@ export default async function HomePage() {
 
           <div className="mx-auto mt-10 flex max-w-lg items-center justify-center gap-8 text-center">
             {[
-              { value: `${stats.residences}+`, label: "Residences" },
+              { value: `${stats.residences}+`, label: "Locations" },
               { value: stats.destinations, label: "Destinations" },
               { value: `${stats.packs}+`, label: "Packs" },
             ].map((s) => (
@@ -146,7 +146,7 @@ export default async function HomePage() {
         <SectionHeading
           eyebrow="Explorer"
           title="Destinations populaires"
-          description="De Daloa a Assinie, decouvrez les villes ou KoraStay vous accueille."
+          description="De Daloa a Assinie, découvrez les villes ou KoraStay vous accueille."
           href="/destinations"
         />
         <div className="no-scrollbar -mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 md:mx-0 md:grid md:grid-cols-6 md:overflow-visible md:px-0">
@@ -161,9 +161,9 @@ export default async function HomePage() {
       {/* ===== RESIDENCES VEDETTES ===== */}
       <section className="container-page py-10">
         <SectionHeading
-          eyebrow="Selection"
-          title="Residences vedettes"
-          description="Les logements les mieux notes, verifies par KoraStay."
+          eyebrow="Sélection"
+          title="Locations meublées vedettes"
+          description="Les logements les mieux notes, vérifiés par KoraStay."
           href="/residences"
         />
         <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -181,9 +181,9 @@ export default async function HomePage() {
       {/* ===== PACKS ===== */}
       <section className="container-page py-10">
         <SectionHeading
-          eyebrow="KoraStay Decouverte"
+          eyebrow="KoraStay Découverte"
           title="Packs touristiques accompagnes"
-          description="Des sejours clE en main avec hebergement, transport et guide local."
+          description="Des séjours clE en main avec hébergement, transport et guide local."
           href="/packs"
         />
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -200,7 +200,7 @@ export default async function HomePage() {
             align="center"
             eyebrow="Pourquoi KoraStay"
             title="Voyagez l'esprit tranquille"
-            description="Une plateforme pensee pour la confiance, du premier clic au retour de sejour."
+            description="Une plateforme pensee pour la confiance, du premier clic au retour de séjour."
           />
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {WHY.map((item, i) => (
@@ -226,7 +226,7 @@ export default async function HomePage() {
             <Briefcase className="h-9 w-9 text-gold-400" />
             <h3 className="mt-4 font-display text-2xl font-semibold">KoraStay Business</h3>
             <p className="mt-2 max-w-sm text-white/80">
-              Hebergements fiables et facturables pour vos equipes en mission.
+              Hébergements fiables et facturables pour vos équipes en mission.
               Contrats cadres, assistance dediee et rapports mensuels.
             </p>
             <Button asChild variant="accent" className="mt-6">
@@ -237,14 +237,14 @@ export default async function HomePage() {
         <div className="relative overflow-hidden rounded-4xl border border-border bg-brand-50 p-8 sm:p-10">
           <HomeIcon className="h-9 w-9 text-brand-600" />
           <h3 className="mt-4 font-display text-2xl font-semibold text-brand-900">
-            Vous etes proprietaire ?
+            Vous etes propriétaire ?
           </h3>
           <p className="mt-2 max-w-sm text-brand-800/80">
-            Publiez votre residence, gerez votre calendrier et vos revenus, et
-            recevez des reservations verifiees partout en Cote d'Ivoire.
+            Publiez votre résidence, gérez votre calendrier et vos revenus, et
+            recevez des réservations vérifiées partout en Côte d'Ivoire.
           </p>
           <Button asChild className="mt-6">
-            <Link href="/devenir-proprietaire">Rejoindre le reseau <ArrowRight className="h-4 w-4" /></Link>
+            <Link href="/devenir-proprietaire">Rejoindre le réseau <ArrowRight className="h-4 w-4" /></Link>
           </Button>
         </div>
       </section>

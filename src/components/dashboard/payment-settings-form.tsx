@@ -19,8 +19,8 @@ function PolicySelect({ name, defaultValue }: { name: string; defaultValue: stri
       defaultValue={defaultValue}
       className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm font-medium text-foreground focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
     >
-      <option value="HALF">50 % a la reservation</option>
-      <option value="FULL">100 % a la reservation</option>
+      <option value="HALF">50 % a la réservation</option>
+      <option value="FULL">100 % a la réservation</option>
     </select>
   );
 }
@@ -38,7 +38,7 @@ export function PaymentSettingsForm({ settings }: { settings: PaymentSettings })
       {/* 1. Moyens de paiement */}
       <section className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
         <h2 className="font-bold text-foreground">1. Moyens de paiement actives</h2>
-        <p className="mb-4 text-sm text-muted">Seuls les moyens coches sont proposes au voyageur.</p>
+        <p className="mb-4 text-sm text-muted">Seuls les moyens coches sont proposés au voyageur.</p>
         <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
           {METHODS.map((m) => (
             <label key={m} className="flex cursor-pointer items-center gap-3 rounded-2xl border border-border px-4 py-3 hover:border-brand-300 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50/60">
@@ -71,13 +71,13 @@ export function PaymentSettingsForm({ settings }: { settings: PaymentSettings })
 
       {/* 3. Regles residences */}
       <section className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
-        <h2 className="font-bold text-foreground">3. Acompte residences</h2>
-        <p className="mb-4 text-sm text-muted">Politique appliquee selon le type de residence (un reglage par residence peut forcer la valeur).</p>
+        <h2 className="font-bold text-foreground">3. Acompte résidences</h2>
+        <p className="mb-4 text-sm text-muted">Politique appliquee selon le type de résidence (un reglage par résidence peut forcer la valeur).</p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="Residence standard" htmlFor="residenceStandardPolicy"><PolicySelect name="residenceStandardPolicy" defaultValue={settings.residenceStandardPolicy} /></Field>
-          <Field label="Residence premium" htmlFor="residencePremiumPolicy"><PolicySelect name="residencePremiumPolicy" defaultValue={settings.residencePremiumPolicy} /></Field>
+          <Field label="Résidence standard" htmlFor="residenceStandardPolicy"><PolicySelect name="residenceStandardPolicy" defaultValue={settings.residenceStandardPolicy} /></Field>
+          <Field label="Résidence premium" htmlFor="residencePremiumPolicy"><PolicySelect name="residencePremiumPolicy" defaultValue={settings.residencePremiumPolicy} /></Field>
           <Field label="Forte demande" htmlFor="residenceHighDemandPolicy"><PolicySelect name="residenceHighDemandPolicy" defaultValue={settings.residenceHighDemandPolicy} /></Field>
-          <Field label="Sejour d'une nuit" htmlFor="residenceOneNightPolicy"><PolicySelect name="residenceOneNightPolicy" defaultValue={settings.residenceOneNightPolicy} /></Field>
+          <Field label="Séjour d'une nuit" htmlFor="residenceOneNightPolicy"><PolicySelect name="residenceOneNightPolicy" defaultValue={settings.residenceOneNightPolicy} /></Field>
           <Field label="Client entreprise (acompte %)" htmlFor="businessDepositPercent" hint="Defaut : 50 %">
             <Input id="businessDepositPercent" name="businessDepositPercent" type="number" min={0} max={100} step="5" defaultValue={settings.businessDepositPercent} />
           </Field>
@@ -86,23 +86,23 @@ export function PaymentSettingsForm({ settings }: { settings: PaymentSettings })
 
       {/* 4. Packs & activites */}
       <section className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
-        <h2 className="font-bold text-foreground">4. Packs &amp; activites</h2>
+        <h2 className="font-bold text-foreground">4. Packs &amp; activités</h2>
         <p className="mb-4 text-sm text-muted">Les packs touristiques exigent en principe 100 % avant confirmation.</p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Packs touristiques" htmlFor="packPolicy"><PolicySelect name="packPolicy" defaultValue={settings.packPolicy} /></Field>
-          <Field label="Activites" htmlFor="activityPolicy"><PolicySelect name="activityPolicy" defaultValue={settings.activityPolicy} /></Field>
+          <Field label="Activités" htmlFor="activityPolicy"><PolicySelect name="activityPolicy" defaultValue={settings.activityPolicy} /></Field>
         </div>
       </section>
 
       {/* 8. Reversements hote */}
       <section className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
-        <h2 className="font-bold text-foreground">5. Reversements proprietaire</h2>
-        <p className="mb-4 text-sm text-muted">Part versee a l'arrivee du voyageur ; le reste est verse au depart. Un litige bloque tout reversement.</p>
+        <h2 className="font-bold text-foreground">5. Reversements propriétaire</h2>
+        <p className="mb-4 text-sm text-muted">Part versee a l'arrivée du voyageur ; le reste est verse au départ. Un litige bloqué tout reversement.</p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="Nouveau proprietaire : % au check-in" htmlFor="payoutNewCheckInPercent" hint="Reste verse au check-out (defaut 70/30)">
+          <Field label="Nouveau propriétaire : % au check-in" htmlFor="payoutNewCheckInPercent" hint="Reste verse au check-out (defaut 70/30)">
             <Input id="payoutNewCheckInPercent" name="payoutNewCheckInPercent" type="number" min={0} max={100} step="5" defaultValue={settings.payoutNewCheckInPercent} />
           </Field>
-          <Field label="Proprietaire fiable : % au check-in" htmlFor="payoutReliableCheckInPercent" hint="Defaut 100 %">
+          <Field label="Propriétaire fiable : % au check-in" htmlFor="payoutReliableCheckInPercent" hint="Defaut 100 %">
             <Input id="payoutReliableCheckInPercent" name="payoutReliableCheckInPercent" type="number" min={0} max={100} step="5" defaultValue={settings.payoutReliableCheckInPercent} />
           </Field>
         </div>
@@ -111,7 +111,7 @@ export function PaymentSettingsForm({ settings }: { settings: PaymentSettings })
       {/* 9. Message client */}
       <section className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
         <h2 className="mb-1 font-bold text-foreground">6. Message de reassurance client</h2>
-        <p className="mb-4 text-sm text-muted">Affiche sur la page de reservation : tout paiement passe par KoraStay.</p>
+        <p className="mb-4 text-sm text-muted">Affiche sur la page de réservation : tout paiement passe par KoraStay.</p>
         <Textarea name="payViaKoraStayNote" defaultValue={settings.payViaKoraStayNote} rows={3} />
       </section>
 

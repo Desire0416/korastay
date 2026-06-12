@@ -39,16 +39,16 @@ export default async function AdminCustomPackDetail({ params }: { params: Promis
             <Line icon={MapPin} label="Destination" value={req.cityName} />
             <Line icon={Users} label="Voyageurs" value={String(req.persons)} />
             {req.startDate && <Line icon={Calendar} label="Date souhaitee" value={formatDate(req.startDate)} />}
-            <Line icon={Calendar} label="Cree le" value={formatDate(req.createdAt)} />
+            <Line icon={Calendar} label="Créé le" value={formatDate(req.createdAt)} />
             <Line icon={Users} label="Contact" value={req.contactName} />
             <Line icon={Mail} label="Email" value={req.email} />
-            {req.phone && <Line icon={Phone} label="Telephone" value={req.phone} />}
+            {req.phone && <Line icon={Phone} label="Téléphone" value={req.phone} />}
           </div>
           {req.notes && <p className="mt-4 border-t border-border pt-4 text-sm text-foreground/90">{req.notes}</p>}
         </div>
 
         <div className="rounded-3xl border border-border bg-surface p-5 shadow-soft">
-          <h3 className="mb-3 font-bold text-foreground">Prestations selectionnees</h3>
+          <h3 className="mb-3 font-bold text-foreground">Prestations sélectionnées</h3>
           <ul className="space-y-2">
             {req.items.map((it) => (
               <li key={it.id} className="flex items-center justify-between gap-2 rounded-2xl bg-surface-soft px-4 py-2.5 text-sm">
@@ -72,14 +72,14 @@ export default async function AdminCustomPackDetail({ params }: { params: Promis
         {/* Conversion / reservation liee */}
         {req.reservationId ? (
           <div className="flex items-center justify-between gap-3 rounded-3xl border border-success/30 bg-emerald-50 p-5">
-            <p className="text-sm font-semibold text-success">Converti en reservation.</p>
-            <Button asChild variant="outline" size="sm"><Link href={`/admin/reservations/${req.reservationId}`}><ExternalLink className="h-4 w-4" /> Voir la reservation</Link></Button>
+            <p className="text-sm font-semibold text-success">Converti en réservation.</p>
+            <Button asChild variant="outline" size="sm"><Link href={`/admin/reservations/${req.reservationId}`}><ExternalLink className="h-4 w-4" /> Voir la réservation</Link></Button>
           </div>
         ) : (
           <ConvertCustomPackButton
             id={req.id}
             disabled={req.status !== "CONFIRMED" || !req.userId}
-            hint={!req.userId ? "Le voyageur n'a pas de compte : conversion impossible." : req.status !== "CONFIRMED" ? "Disponible une fois le devis accepte (statut Confirmee)." : undefined}
+            hint={!req.userId ? "Le voyageur n'a pas de compte : conversion impossible." : req.status !== "CONFIRMED" ? "Disponible une fois le devis accepte (statut Confirmée)." : undefined}
           />
         )}
 

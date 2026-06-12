@@ -16,7 +16,7 @@ export default async function OwnerMessagesPage() {
     <div className="mx-auto max-w-3xl">
       <PageHeader title="Messages" description="Echangez avec vos voyageurs et l'assistance KoraStay." actions={<StartSupportButton />} />
       {conversations.length === 0 ? (
-        <EmptyState icon={MessageCircle} title="Aucune conversation" description="Contactez un voyageur depuis une reservation, ou l'assistance KoraStay." />
+        <EmptyState icon={MessageCircle} title="Aucune conversation" description="Contactez un voyageur depuis une réservation, ou l'assistance KoraStay." />
       ) : (
         <div className="overflow-hidden rounded-3xl border border-border bg-surface shadow-soft">
           <ConversationList conversations={conversations} basePath="/owner/messages" />

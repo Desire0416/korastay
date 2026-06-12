@@ -39,7 +39,7 @@ export async function submitContact(_prev: LeadResult, formData: FormData): Prom
     html: emailLayout("Nouveau message", `<p><strong>${d.name}</strong> (${d.email})</p><p>${d.message}</p>`),
     text: d.message,
   });
-  return { ok: true, message: "Merci ! Votre message a bien ete envoye. Nous vous repondrons rapidement." };
+  return { ok: true, message: "Merci ! Votre message a bien ete envoyé. Nous vous repondrons rapidement." };
 }
 
 // ------------------------------------------------------------
@@ -49,7 +49,7 @@ export async function submitOwnerApplication(_prev: LeadResult, formData: FormDa
   const schema = z.object({
     name: z.string().min(2, "Nom requis"),
     email: z.string().email("Email invalide"),
-    phone: z.string().min(6, "Telephone requis"),
+    phone: z.string().min(6, "Téléphone requis"),
     city: z.string().min(2, "Ville requise"),
     residenceCount: z.string().optional(),
     message: z.string().optional(),
@@ -58,13 +58,13 @@ export async function submitOwnerApplication(_prev: LeadResult, formData: FormDa
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message };
   const d = parsed.data;
 
-  await notifyAdmins("Nouvelle demande proprietaire", `${d.name} (${d.city}) souhaite rejoindre le reseau.`, "/admin/users");
+  await notifyAdmins("Nouvelle demande propriétaire", `${d.name} (${d.city}) souhaite rejoindre le réseau.`, "/admin/users");
   await sendEmail({
     to: CONTACT_EMAIL,
-    subject: `[Proprietaire] ${d.name} - ${d.city}`,
-    html: emailLayout("Demande proprietaire", `<p><strong>${d.name}</strong> - ${d.email} - ${d.phone}</p><p>Ville : ${d.city}</p><p>Residences : ${d.residenceCount ?? "-"}</p><p>${d.message ?? ""}</p>`),
+    subject: `[Propriétaire] ${d.name} - ${d.city}`,
+    html: emailLayout("Demande propriétaire", `<p><strong>${d.name}</strong> - ${d.email} - ${d.phone}</p><p>Ville : ${d.city}</p><p>Residences : ${d.residenceCount ?? "-"}</p><p>${d.message ?? ""}</p>`),
   });
-  return { ok: true, message: "Demande envoyee ! Notre equipe vous contactera sous 48h pour finaliser votre inscription." };
+  return { ok: true, message: "Demande envoyée ! Notre équipe vous contactera sous 48h pour finaliser votre inscription." };
 }
 
 // ------------------------------------------------------------
@@ -75,7 +75,7 @@ export async function submitPartnerApplication(_prev: LeadResult, formData: Form
     businessName: z.string().min(2, "Nom requis"),
     type: z.string().min(2),
     email: z.string().email("Email invalide"),
-    phone: z.string().min(6, "Telephone requis"),
+    phone: z.string().min(6, "Téléphone requis"),
     city: z.string().min(2, "Ville requise"),
     message: z.string().optional(),
   });
@@ -89,7 +89,7 @@ export async function submitPartnerApplication(_prev: LeadResult, formData: Form
     subject: `[Partenaire] ${d.businessName} - ${d.type}`,
     html: emailLayout("Demande partenaire", `<p><strong>${d.businessName}</strong> (${d.type})</p><p>${d.email} - ${d.phone} - ${d.city}</p><p>${d.message ?? ""}</p>`),
   });
-  return { ok: true, message: "Candidature recue ! Nous etudions votre profil et revenons vers vous rapidement." };
+  return { ok: true, message: "Candidature reçue ! Nous etudions votre profil et revenons vers vous rapidement." };
 }
 
 // ------------------------------------------------------------
@@ -133,7 +133,7 @@ export async function submitBusinessRequest(_prev: LeadResult, formData: FormDat
     subject: `[Business] ${d.organizationName}`,
     html: emailLayout("Demande Business", `<p><strong>${d.organizationName}</strong></p><p>${d.contactName} - ${d.email}</p><p>${d.notes ?? ""}</p>`),
   });
-  return { ok: true, message: "Demande envoyee ! Un conseiller KoraStay Business vous contactera pour etablir un devis." };
+  return { ok: true, message: "Demande envoyée ! Un conseiller KoraStay Business vous contactera pour etablir un devis." };
 }
 
 // ------------------------------------------------------------
@@ -162,7 +162,7 @@ export async function submitCustomPack(_prev: LeadResult, formData: FormData): P
       email: d.email,
       phone: d.phone || null,
       city: d.destination,
-      needType: `Pack personnalise - ${d.style ?? "sur mesure"}`,
+      needType: `Pack personnalisé - ${d.style ?? "sur mesure"}`,
       missionLocation: d.destination,
       teamSize: d.persons ? Number(d.persons) : null,
       budget: d.budget ? Number(d.budget) : null,
@@ -170,6 +170,6 @@ export async function submitCustomPack(_prev: LeadResult, formData: FormData): P
       status: "NEW",
     },
   });
-  await notifyAdmins("Demande de pack personnalise", `${d.name} - ${d.destination}`, "/admin/business");
-  return { ok: true, message: "Votre demande de pack personnalise est envoyee ! Nous composons votre sejour et revenons avec une proposition." };
+  await notifyAdmins("Demande de pack personnalisé", `${d.name} - ${d.destination}`, "/admin/business");
+  return { ok: true, message: "Votre demande de pack personnalisé est envoyée ! Nous composons votre séjour et revenons avec une proposition." };
 }

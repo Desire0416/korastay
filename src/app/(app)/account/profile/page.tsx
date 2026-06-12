@@ -12,7 +12,7 @@ export default async function ProfilePage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <PageHeader title="Mon profil" description="Gerez vos informations personnelles et votre photo." />
+      <PageHeader title="Mon profil" description="Gérez vos informations personnelles et votre photo." />
       <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
         <ProfileForm
           defaults={{

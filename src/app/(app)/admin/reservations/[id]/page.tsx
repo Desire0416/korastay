@@ -35,15 +35,15 @@ export default async function AdminReservationDetail({ params }: { params: Promi
   const canRecordPayment = ["PENDING_PAYMENT", "PARTIALLY_PAID"].includes(reservation.status);
 
   const actions = [];
-  if (reservation.status === "CONFIRMED") actions.push({ label: "Marquer arrivee (check-in)", fn: adminSetReservationStatus.bind(null, id, "CHECKED_IN"), variant: "primary" as const });
-  if (["CONFIRMED", "CHECKED_IN"].includes(reservation.status)) actions.push({ label: "Marquer terminee", fn: adminSetReservationStatus.bind(null, id, "COMPLETED"), variant: "outline" as const });
-  if (["CONFIRMED", "PENDING_PAYMENT", "CHECKED_IN"].includes(reservation.status)) actions.push({ label: "Annuler", fn: adminSetReservationStatus.bind(null, id, "CANCELLED"), variant: "danger" as const, confirm: "Annuler cette reservation ?" });
-  if (reservation.status !== "DISPUTED") actions.push({ label: "Signaler un litige", fn: adminSetReservationStatus.bind(null, id, "DISPUTED"), variant: "outline" as const, confirm: "Signaler un litige ? Les reversements seront bloques." });
+  if (reservation.status === "CONFIRMED") actions.push({ label: "Marquer arrivée (check-in)", fn: adminSetReservationStatus.bind(null, id, "CHECKED_IN"), variant: "primary" as const });
+  if (["CONFIRMED", "CHECKED_IN"].includes(reservation.status)) actions.push({ label: "Marquer terminée", fn: adminSetReservationStatus.bind(null, id, "COMPLETED"), variant: "outline" as const });
+  if (["CONFIRMED", "PENDING_PAYMENT", "CHECKED_IN"].includes(reservation.status)) actions.push({ label: "Annuler", fn: adminSetReservationStatus.bind(null, id, "CANCELLED"), variant: "danger" as const, confirm: "Annuler cette réservation ?" });
+  if (reservation.status !== "DISPUTED") actions.push({ label: "Signaler un litige", fn: adminSetReservationStatus.bind(null, id, "DISPUTED"), variant: "outline" as const, confirm: "Signaler un litige ? Les reversements seront bloqués." });
 
   return (
     <div className="mx-auto max-w-4xl">
       <Link href="/admin/reservations" className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-muted hover:text-foreground">
-        <ChevronLeft className="h-4 w-4" /> Reservations
+        <ChevronLeft className="h-4 w-4" /> Réservations
       </Link>
       <PageHeader title={reservation.reference} actions={<StatusBadge status={reservation.status} map={reservationStatusMeta} />} />
 
@@ -59,7 +59,7 @@ export default async function AdminReservationDetail({ params }: { params: Promi
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_300px]">
         <div className="space-y-5">
-          <Card title="Sejour">
+          <Card title="Séjour">
             <Line icon={Home} text={reservation.residence?.name ?? reservation.pack?.name ?? reservation.activity?.name ?? "-"} />
             <Line icon={CalendarDays} text={`${formatDate(reservation.startDate)} - ${formatDate(reservation.endDate)}`} />
             <Line icon={Users} text={`${reservation.adults + reservation.children} voyageur(s)`} />
@@ -73,10 +73,10 @@ export default async function AdminReservationDetail({ params }: { params: Promi
             <div className="space-y-2 text-sm">
               <Row label="Sous-total" value={formatPrice(reservation.subtotalAmount)} />
               <Row label="Frais de service" value={formatPrice(reservation.serviceFeeAmount)} />
-              {reservation.cleaningFeeAmount > 0 && <Row label="Menage" value={formatPrice(reservation.cleaningFeeAmount)} />}
+              {reservation.cleaningFeeAmount > 0 && <Row label="Ménage" value={formatPrice(reservation.cleaningFeeAmount)} />}
               <div className="flex justify-between border-t border-border pt-2 font-bold text-foreground"><span>Total</span><span>{formatPrice(reservation.totalAmount)}</span></div>
               <Row label={`Acompte (${reservation.paymentPolicy === "FULL" ? "100%" : "50%"})`} value={formatPrice(reservation.depositAmount)} />
-              <Row label="Deja paye" value={formatPrice(reservation.amountPaid)} />
+              <Row label="Déjà payé" value={formatPrice(reservation.amountPaid)} />
               <Row label="Solde restant" value={formatPrice(reservation.balanceDueAmount)} />
             </div>
             {reservation.payments.length > 0 && (
@@ -97,9 +97,9 @@ export default async function AdminReservationDetail({ params }: { params: Promi
           {/* Validation d'un paiement declare (virement) */}
           {pendingPayment && (
             <div className="rounded-3xl border border-gold-200 bg-gold-50/60 p-5 shadow-soft">
-              <p className="mb-1 flex items-center gap-2 font-bold text-gold-800"><ShieldQuestion className="h-5 w-5" /> Paiement a verifier</p>
+              <p className="mb-1 flex items-center gap-2 font-bold text-gold-800"><ShieldQuestion className="h-5 w-5" /> Paiement a vérifier</p>
               <p className="mb-3 text-sm text-gold-800/80">
-                Un paiement de <strong>{formatPrice(pendingPayment.amount)}</strong> ({paymentMethodMeta[pendingPayment.method]?.label ?? pendingPayment.method}) est en attente de verification.
+                Un paiement de <strong>{formatPrice(pendingPayment.amount)}</strong> ({paymentMethodMeta[pendingPayment.method]?.label ?? pendingPayment.method}) est en attente de vérification.
               </p>
               <AdminActions actions={[{ label: "Valider ce paiement", icon: "CreditCard", fn: validatePendingPayment.bind(null, pendingPayment.id), variant: "primary" }]} />
             </div>
@@ -107,29 +107,29 @@ export default async function AdminReservationDetail({ params }: { params: Promi
 
           {/* Enregistrement manuel d'un paiement recu hors API */}
           {canRecordPayment && (
-            <Card title="Valider un paiement recu (hors API)">
+            <Card title="Valider un paiement reçu (hors API)">
               <ManualPaymentForm reservationId={reservation.id} defaultAmount={reservation.depositAmount > 0 ? reservation.depositAmount : reservation.totalAmount} />
             </Card>
           )}
 
           {/* Caution */}
           {reservation.cautionAmount > 0 && (
-            <Card title="Caution (depot de garantie)">
+            <Card title="Caution (dépôt de garantie)">
               <CautionControls reservationId={reservation.id} amount={reservation.cautionAmount} status={reservation.cautionStatus} />
             </Card>
           )}
 
           {/* Reversements hote */}
           {reservation.payouts.length > 0 && (
-            <Card title="Reversements proprietaire">
+            <Card title="Reversements propriétaire">
               <div className="space-y-2 text-sm">
                 {reservation.payouts.map((p) => (
                   <div key={p.id} className="flex items-center justify-between rounded-xl bg-surface-soft px-3 py-2">
-                    <span className="flex items-center gap-2 text-muted"><Banknote className="h-4 w-4" /> {p.trigger === "CHECK_IN" ? "Apres arrivee" : "Apres depart"} ({p.percentage}%)</span>
+                    <span className="flex items-center gap-2 text-muted"><Banknote className="h-4 w-4" /> {p.trigger === "CHECK_IN" ? "Après arrivée" : "Après départ"} ({p.percentage}%)</span>
                     <span className="flex items-center gap-2"><span className="font-semibold text-foreground">{formatPrice(p.amount)}</span><StatusBadge status={p.status} map={payoutStatusMeta} size="sm" /></span>
                   </div>
                 ))}
-                <Link href="/admin/payouts" className="block pt-1 text-xs font-semibold text-brand-600 hover:underline">Gerer les reversements →</Link>
+                <Link href="/admin/payouts" className="block pt-1 text-xs font-semibold text-brand-600 hover:underline">Gérer les reversements →</Link>
               </div>
             </Card>
           )}

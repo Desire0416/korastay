@@ -37,7 +37,7 @@ export function PhotosManager({
     setBusyId(id);
     start(async () => {
       const r = await onDelete(id);
-      if (r.ok) { toast.success("Photo supprimee."); router.refresh(); }
+      if (r.ok) { toast.success("Photo supprimée."); router.refresh(); }
       else toast.error(r.error ?? "Erreur");
       setBusyId(null);
     });
@@ -61,7 +61,7 @@ export function PhotosManager({
         fd.append("file", file);
         const res = await fetch("/api/upload", { method: "POST", body: fd });
         const data = await res.json();
-        if (!res.ok) { toast.error(data.error ?? "Echec de l'upload."); continue; }
+        if (!res.ok) { toast.error(data.error ?? "Échec de l'upload."); continue; }
         await onAdd(entityId, data.url);
       }
       toast.success("Photos ajoutees.");
@@ -83,7 +83,7 @@ export function PhotosManager({
         <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" multiple className="hidden" onChange={(e) => onFiles(e.target.files)} disabled={uploading} />
         {uploading ? <Loader2 className="h-8 w-8 animate-spin text-brand-500" /> : <ImagePlus className="h-8 w-8 text-brand-500" />}
         <p className="font-semibold text-foreground">{uploading ? "Envoi en cours..." : "Ajouter des photos"}</p>
-        <p className="text-sm text-muted">JPG, PNG ou WebP - 6 Mo max. Glissez ou cliquez pour selectionner.</p>
+        <p className="text-sm text-muted">JPG, PNG ou WebP - 6 Mo max. Glissez ou cliquez pour sélectionner.</p>
       </label>
 
       {images.length > 0 && (

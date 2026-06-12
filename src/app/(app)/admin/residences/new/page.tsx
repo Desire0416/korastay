@@ -6,7 +6,7 @@ import { createResidence } from "@/server/actions/owner";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ResidenceForm } from "@/components/dashboard/residence-form";
 
-export const metadata = { title: "Nouvelle residence - Admin" };
+export const metadata = { title: "Nouvelle résidence - Admin" };
 
 export default async function AdminNewResidencePage() {
   await requireRole(["ADMIN", "SUPER_ADMIN"]);
@@ -19,9 +19,9 @@ export default async function AdminNewResidencePage() {
   return (
     <div className="mx-auto max-w-3xl">
       <Link href="/admin/residences" className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-muted hover:text-foreground">
-        <ChevronLeft className="h-4 w-4" /> Residences
+        <ChevronLeft className="h-4 w-4" /> Résidences
       </Link>
-      <PageHeader title="Nouvelle residence" description="Creez une residence et attribuez-la a un proprietaire." />
+      <PageHeader title="Nouvelle résidence" description="Créez une résidence et attribuez-la a un propriétaire." />
       <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
         <ResidenceForm
           action={createResidence}
@@ -30,7 +30,7 @@ export default async function AdminNewResidencePage() {
           scope="admin"
           defaultStatus="PUBLISHED"
           owners={owners.map((o) => ({ id: o.id, name: `${o.firstName} ${o.lastName} (${o.email})` }))}
-          submitLabel="Creer la residence"
+          submitLabel="Créer la résidence"
         />
       </div>
     </div>

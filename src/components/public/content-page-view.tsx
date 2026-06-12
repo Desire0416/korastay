@@ -10,11 +10,11 @@ export async function ContentPageView({ slug }: { slug: string }) {
 
   return (
     <article className="container-page max-w-3xl py-12">
-      <p className="text-sm font-semibold uppercase tracking-wide text-brand-600">Document legal</p>
+      <p className="text-sm font-semibold uppercase tracking-wide text-brand-600">Document légal</p>
       <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
         {page.title}
       </h1>
-      <p className="mt-2 text-sm text-muted">Derniere mise a jour : {formatDate(page.updatedAt)}</p>
+      <p className="mt-2 text-sm text-muted">Dernière mise a jour : {formatDate(page.updatedAt)}</p>
 
       <div className="mt-8 space-y-4 leading-relaxed text-foreground/90">
         {paragraphs.map((p, i) => (

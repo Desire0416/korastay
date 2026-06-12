@@ -26,9 +26,9 @@ export default async function PartnerRevenuesPage() {
         <KpiCard label="Revenu total" value={formatPrice(total)} icon={Wallet} tone="success" />
         <KpiCard label="Missions" value={missions.length} icon={Briefcase} tone="brand" />
       </div>
-      <h2 className="mb-3 mt-8 text-lg font-bold text-foreground">Detail</h2>
+      <h2 className="mb-3 mt-8 text-lg font-bold text-foreground">Détail</h2>
       {missions.length === 0 ? (
-        <EmptyState icon={Wallet} title="Aucun revenu" description="Vos revenus apparaitront apres vos premieres missions confirmees." />
+        <EmptyState icon={Wallet} title="Aucun revenu" description="Vos revenus apparaitront après vos premières missions confirmées." />
       ) : (
         <div className="space-y-2">
           {missions.map((m) => (

@@ -13,7 +13,7 @@ const schema = z.object({
   name: z.string().min(3, "Nom requis"),
   category: z.string().min(1),
   city: z.string().min(2, "Ville requise"),
-  description: z.string().min(20, "Description trop courte (20 caracteres min)"),
+  description: z.string().min(20, "Description trop courte (20 caractères min)"),
   shortDescription: z.string().optional(),
   durationHours: z.coerce.number().int().min(1).max(72),
   pricePerPerson: z.coerce.number().int().min(0),
@@ -68,7 +68,7 @@ export async function saveActivity(id: string | null, _prev: ActivityResult, for
     await prisma.activity.update({ where: { id }, data });
     revalidatePath("/admin/activities");
     revalidatePath("/activites");
-    return { ok: true, message: "Activite mise a jour." };
+    return { ok: true, message: "Activité mise a jour." };
   }
 
   const slug = await uniqueSlug(d.name);
@@ -99,7 +99,7 @@ export async function toggleActivityPublish(id: string): Promise<ActivityResult>
   await prisma.activity.update({ where: { id }, data: { status: next } });
   revalidatePath("/admin/activities");
   revalidatePath("/activites");
-  return { ok: true, message: next === "PUBLISHED" ? "Activite publiee." : "Activite depubliee." };
+  return { ok: true, message: next === "PUBLISHED" ? "Activité publiée." : "Activité dépubliée." };
 }
 
 export async function deleteActivity(id: string): Promise<ActivityResult> {
@@ -107,7 +107,7 @@ export async function deleteActivity(id: string): Promise<ActivityResult> {
   await prisma.activity.delete({ where: { id } });
   revalidatePath("/admin/activities");
   revalidatePath("/activites");
-  return { ok: true, message: "Activite supprimee." };
+  return { ok: true, message: "Activité supprimée." };
 }
 
 // --- Images (reutilise PhotosManager) ---

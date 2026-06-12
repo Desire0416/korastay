@@ -17,7 +17,7 @@ export const metadata = { title: "Reversements - Admin" };
 type SP = Record<string, string | string[] | undefined>;
 const str = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
-const TRIGGER_LABELS: Record<string, string> = { CHECK_IN: "Apres arrivee", CHECK_OUT: "Apres depart" };
+const TRIGGER_LABELS: Record<string, string> = { CHECK_IN: "Après arrivée", CHECK_OUT: "Après départ" };
 
 export default async function AdminPayoutsPage({ searchParams }: { searchParams: Promise<SP> }) {
   await requireRole(["ADMIN", "SUPER_ADMIN"]);
@@ -47,7 +47,7 @@ export default async function AdminPayoutsPage({ searchParams }: { searchParams:
     return (
       <AdminActions
         actions={[
-          ...(blocked ? [] : [{ label: "Liberer", icon: "Banknote", fn: releasePayout.bind(null, p.id), variant: "primary" as const, confirm: `Liberer ${formatPrice(p.amount)} ?` }]),
+          ...(blocked ? [] : [{ label: "Libérer", icon: "Banknote", fn: releasePayout.bind(null, p.id), variant: "primary" as const, confirm: `Libérer ${formatPrice(p.amount)} ?` }]),
           { label: "Bloquer", fn: blockPayout.bind(null, p.id), variant: "ghost" as const },
         ]}
       />
@@ -56,15 +56,15 @@ export default async function AdminPayoutsPage({ searchParams }: { searchParams:
 
   return (
     <div className="mx-auto max-w-5xl">
-      <PageHeader title="Reversements proprietaires" description="Versements echelonnes selon la fiabilite de l'hote (70/30 ou 100%)." />
+      <PageHeader title="Reversements propriétaires" description="Versements echelonnes selon la fiabilite de l'hote (70/30 ou 100%)." />
 
       <div className="mb-5 grid grid-cols-2 gap-3">
         <div className="rounded-2xl border border-border bg-surface p-4 shadow-soft">
-          <p className="text-xs uppercase text-muted">A liberer</p>
+          <p className="text-xs uppercase text-muted">A libérer</p>
           <p className="mt-1 text-xl font-extrabold text-gold-700">{formatPrice(scheduled._sum.amount ?? 0)}</p>
         </div>
         <div className="rounded-2xl border border-border bg-surface p-4 shadow-soft">
-          <p className="text-xs uppercase text-muted">Deja verse</p>
+          <p className="text-xs uppercase text-muted">Déjà verse</p>
           <p className="mt-1 text-xl font-extrabold text-success">{formatPrice(released._sum.amount ?? 0)}</p>
         </div>
       </div>
@@ -72,7 +72,7 @@ export default async function AdminPayoutsPage({ searchParams }: { searchParams:
       <FilterBar fields={[{ type: "select", name: "status", label: "Tous les statuts", options: toFilterOptions(payoutStatusMeta) }]} />
 
       {payouts.length === 0 ? (
-        <EmptyState icon={Banknote} title="Aucun reversement" description="Les reversements apparaissent ici apres confirmation d'une reservation residence." />
+        <EmptyState icon={Banknote} title="Aucun reversement" description="Les reversements apparaissent ici après confirmation d'une réservation résidence." />
       ) : (
         <>
           {/* Mobile */}
@@ -97,8 +97,8 @@ export default async function AdminPayoutsPage({ searchParams }: { searchParams:
               <table className="w-full min-w-[720px] text-sm">
                 <thead className="border-b border-border bg-surface-soft/50 text-left text-xs uppercase text-muted">
                   <tr>
-                    <th className="px-5 py-3 font-semibold">Reservation</th>
-                    <th className="px-5 py-3 font-semibold">Hote</th>
+                    <th className="px-5 py-3 font-semibold">Réservation</th>
+                    <th className="px-5 py-3 font-semibold">Hôte</th>
                     <th className="px-5 py-3 font-semibold">Declencheur</th>
                     <th className="px-5 py-3 font-semibold">Statut</th>
                     <th className="px-5 py-3 text-right font-semibold">Montant</th>

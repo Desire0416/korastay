@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { VehicleForm } from "@/components/dashboard/vehicle-form";
 
-export const metadata = { title: "Mon vehicule - Partenaire" };
+export const metadata = { title: "Mon véhicule - Partenaire" };
 
 export default async function PartnerVehiclePage() {
   const user = await requireRole(["PARTNER", "ADMIN", "SUPER_ADMIN"]);
@@ -16,11 +16,11 @@ export default async function PartnerVehiclePage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <PageHeader title="Mon vehicule" description="Les informations affichees aux voyageurs lors de vos missions de transport." />
+      <PageHeader title="Mon véhicule" description="Les informations affichees aux voyageurs lors de vos missions de transport." />
 
       <div className="mb-5 flex items-center gap-3 rounded-2xl border border-brand-200 bg-brand-50/60 p-4 text-sm text-brand-800">
         <Car className="h-5 w-5 shrink-0 text-brand-600" />
-        Un vehicule a jour rassure les voyageurs et facilite l&apos;attribution des missions de transfert.
+        Un véhicule a jour rassure les voyageurs et facilité l&apos;attribution des missions de transfert.
       </div>
 
       <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">

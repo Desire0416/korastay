@@ -35,7 +35,7 @@ export function LeadForm({ action, fields, submitLabel }: LeadFormProps) {
         <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-success text-white">
           <CheckCircle2 className="h-7 w-7" />
         </div>
-        <h3 className="mt-4 text-lg font-bold text-success">Demande envoyee !</h3>
+        <h3 className="mt-4 text-lg font-bold text-success">Demande envoyée !</h3>
         <p className="mt-1.5 max-w-md text-sm text-emerald-800/80">{state.message}</p>
       </div>
     );
@@ -63,7 +63,7 @@ export function LeadForm({ action, fields, submitLabel }: LeadFormProps) {
                 defaultValue={f.defaultValue ?? ""}
                 className="h-12 w-full rounded-2xl border border-border bg-surface px-4 text-[15px] text-foreground focus-visible:border-brand-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-100"
               >
-                <option value="" disabled>{f.placeholder ?? "Selectionner..."}</option>
+                <option value="" disabled>{f.placeholder ?? "Sélectionner..."}</option>
                 {f.options?.map((o) => (
                   <option key={o.value} value={o.value}>{o.label}</option>
                 ))}

@@ -64,7 +64,7 @@ export function ActivityBookingWidget({
         </p>
         {guides.length === 0 ? (
           <p className="rounded-2xl bg-gold-50 px-4 py-3 text-sm text-gold-700">
-            Aucun guide verifie n'est disponible dans cette ville pour le moment. Revenez bientot.
+            Aucun guide vérifié n'est disponible dans cette ville pour le moment. Revenez bientôt.
           </p>
         ) : (
           <div className="space-y-2">
@@ -104,7 +104,7 @@ export function ActivityBookingWidget({
           <Field label="Email" htmlFor="guestEmail" required>
             <Input id="guestEmail" name="guestEmail" type="email" defaultValue={defaultEmail} required />
           </Field>
-          <Field label="Telephone" htmlFor="guestPhone">
+          <Field label="Téléphone" htmlFor="guestPhone">
             <Input id="guestPhone" name="guestPhone" defaultValue={defaultPhone} placeholder="+225 ..." />
           </Field>
         </div>
@@ -118,7 +118,7 @@ export function ActivityBookingWidget({
       {/* Recap */}
       <div className="mt-4 space-y-1.5 border-t border-border pt-4 text-sm">
         <div className="flex justify-between text-muted"><span>{formatPrice(pricePerPerson)} x {persons}</span><span className="text-foreground">{formatPrice(subtotal)}</span></div>
-        <p className="text-xs text-muted">Frais de service ajoutes a l'etape suivante. Aucun paiement maintenant : validation puis acompte.</p>
+        <p className="text-xs text-muted">Frais de service ajoutés a l'étape suivante. Aucun paiement maintenant : validation puis acompte.</p>
       </div>
 
       {state.error && (

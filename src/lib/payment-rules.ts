@@ -60,7 +60,7 @@ export const DEFAULT_PAYMENT_SETTINGS: PaymentSettings = {
   payoutNewCheckInPercent: 70,
   payoutReliableCheckInPercent: 100,
   payViaKoraStayNote:
-    "Tous les paiements sont securises et transitent par KoraStay. Ne reglez jamais directement l'hote ou le prestataire avant votre arrivee.",
+    "Tous les paiements sont sécurisés et transitent par KoraStay. Ne reglez jamais directement l'hôte ou le prestataire avant votre arrivée.",
 };
 
 export const PAYMENT_SETTINGS_KEY = "payment_settings";

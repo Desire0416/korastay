@@ -28,10 +28,10 @@ export function ActivityForm({ id, defaults = {}, destinations }: { id?: string;
   return (
     <form action={formAction} className="space-y-4">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Field label="Nom de l'activite" htmlFor="name" required className="sm:col-span-2">
+        <Field label="Nom de l'activité" htmlFor="name" required className="sm:col-span-2">
           <Input id="name" name="name" defaultValue={defaults.name} placeholder="Randonnee au Mont Tonkpi" required />
         </Field>
-        <Field label="Categorie" htmlFor="category" required>
+        <Field label="Catégorie" htmlFor="category" required>
           <select id="category" name="category" defaultValue={defaults.category ?? "EXCURSION"} className="h-12 w-full rounded-2xl border border-border bg-surface px-4 text-[15px] focus-visible:border-brand-400 focus-visible:outline-none">
             {Object.entries(activityCategoryMeta).map(([v, m]) => <option key={v} value={v}>{m.label}</option>)}
           </select>
@@ -40,7 +40,7 @@ export function ActivityForm({ id, defaults = {}, destinations }: { id?: string;
           <input list="act-cities" id="city" name="city" defaultValue={defaults.city} placeholder="Man" required className="h-12 w-full rounded-2xl border border-border bg-surface px-4 text-[15px] focus-visible:border-brand-400 focus-visible:outline-none" />
           <datalist id="act-cities">{destinations.map((d) => <option key={d.name} value={d.name} />)}</datalist>
         </Field>
-        <Field label="Duree (heures)" htmlFor="durationHours" required>
+        <Field label="Durée (heures)" htmlFor="durationHours" required>
           <Input id="durationHours" name="durationHours" type="number" min={1} max={72} defaultValue={defaults.durationHours ?? 3} required />
         </Field>
         <Field label="Prix / personne (F CFA)" htmlFor="pricePerPerson" required>
@@ -53,15 +53,15 @@ export function ActivityForm({ id, defaults = {}, destinations }: { id?: string;
           <Input id="maxPersons" name="maxPersons" type="number" min={1} defaultValue={defaults.maxPersons ?? 10} required />
         </Field>
         <Field label="Niveau / difficulte" htmlFor="difficulty">
-          <Input id="difficulty" name="difficulty" defaultValue={defaults.difficulty} placeholder="Facile, modere, sportif..." />
+          <Input id="difficulty" name="difficulty" defaultValue={defaults.difficulty} placeholder="Facile, modéré, sportif..." />
         </Field>
         <Field label="Point de rendez-vous" htmlFor="meetingPoint">
-          <Input id="meetingPoint" name="meetingPoint" defaultValue={defaults.meetingPoint} placeholder="Devant l'hotel de ville" />
+          <Input id="meetingPoint" name="meetingPoint" defaultValue={defaults.meetingPoint} placeholder="Devant l'hôtel de ville" />
         </Field>
       </div>
 
-      <Field label="Resume court" htmlFor="shortDescription" hint="Affiche dans le catalogue (facultatif).">
-        <Input id="shortDescription" name="shortDescription" defaultValue={defaults.shortDescription} placeholder="Une journee inoubliable..." />
+      <Field label="Résumé court" htmlFor="shortDescription" hint="Affiche dans le catalogue (facultatif).">
+        <Input id="shortDescription" name="shortDescription" defaultValue={defaults.shortDescription} placeholder="Une journée inoubliable..." />
       </Field>
       <Field label="Description" htmlFor="description" required>
         <Textarea id="description" name="description" defaultValue={defaults.description} rows={5} placeholder="Decrivez le deroule, les points forts..." required />
@@ -81,7 +81,7 @@ export function ActivityForm({ id, defaults = {}, destinations }: { id?: string;
         </div>
       )}
 
-      <Button type="submit" size="lg" loading={pending}>{id ? "Enregistrer" : "Creer l'activite"}</Button>
+      <Button type="submit" size="lg" loading={pending}>{id ? "Enregistrer" : "Créer l'activité"}</Button>
     </form>
   );
 }

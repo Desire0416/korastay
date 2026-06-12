@@ -42,7 +42,7 @@ export default async function BusinessRequestsPage({ searchParams }: { searchPar
 
       {sp.created === "1" && (
         <div className="mb-5 flex items-center gap-2 rounded-2xl border border-success/30 bg-emerald-50 p-4 text-sm text-success">
-          <CheckCircle2 className="h-5 w-5" /> Votre demande a ete envoyee. Un conseiller KoraStay Business vous contactera.
+          <CheckCircle2 className="h-5 w-5" /> Votre demande a ete envoyée. Un conseiller KoraStay Business vous contactera.
         </div>
       )}
 
@@ -54,7 +54,7 @@ export default async function BusinessRequestsPage({ searchParams }: { searchPar
       />
 
       {requests.length === 0 ? (
-        <EmptyState icon={FileText} title="Aucune demande" description="Creez votre premiere demande de sejour professionnel." action={<Button asChild><Link href="/business/requests/new">Nouvelle demande</Link></Button>} />
+        <EmptyState icon={FileText} title="Aucune demande" description="Créez votre première demande de séjour professionnel." action={<Button asChild><Link href="/business/requests/new">Nouvelle demande</Link></Button>} />
       ) : (
         <div className="space-y-3">
           {requests.map((r) => (

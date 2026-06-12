@@ -53,7 +53,7 @@ export default async function DestinationDetailPage({ params }: { params: Promis
           <section className="mb-12">
             <div className="mb-5 flex items-center justify-between">
               <h2 className="font-display text-2xl font-semibold text-foreground">
-                Residences a {dest.name}
+                Résidences a {dest.name}
               </h2>
               <Link href={`/residences?city=${dest.slug}`} className="flex items-center gap-1 text-sm font-semibold text-brand-600">
                 Tout voir <ArrowRight className="h-4 w-4" />
@@ -67,8 +67,8 @@ export default async function DestinationDetailPage({ params }: { params: Promis
           </section>
         ) : (
           <div className="mb-12 rounded-3xl border border-dashed border-border bg-surface-soft/40 p-8 text-center">
-            <p className="text-muted">De nouvelles residences arrivent bientot a {dest.name}.</p>
-            <Button asChild variant="outline" className="mt-4"><Link href="/residences">Voir toutes les residences</Link></Button>
+            <p className="text-muted">De nouvelles résidences arrivent bientôt a {dest.name}.</p>
+            <Button asChild variant="outline" className="mt-4"><Link href="/residences">Voir toutes les résidences</Link></Button>
           </div>
         )}
 
@@ -76,7 +76,7 @@ export default async function DestinationDetailPage({ params }: { params: Promis
         {dest.packs.length > 0 && (
           <section>
             <h2 className="mb-5 font-display text-2xl font-semibold text-foreground">
-              Packs Decouverte a {dest.name}
+              Packs Découverte a {dest.name}
             </h2>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {dest.packs.map((p) => (

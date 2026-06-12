@@ -9,26 +9,26 @@ import {
 
 export const metadata = {
   title: "Devenir partenaire",
-  description: "Rejoignez le reseau KoraStay Partners : guides, transporteurs, restaurants et prestataires d'activites.",
+  description: "Rejoignez le réseau KoraStay Partners : guides, transporteurs, restaurants et prestataires d'activités.",
 };
 
 const TYPES = [
   { icon: Compass, label: "Guides touristiques" },
   { icon: Car, label: "Transporteurs" },
   { icon: UtensilsCrossed, label: "Restaurants" },
-  { icon: Camera, label: "Activites & experiences" },
+  { icon: Camera, label: "Activités & expériences" },
 ];
 
 const BENEFITS = [
-  { icon: TrendingUp, title: "Plus de visibilite", text: "Touchez des voyageurs qualifies a la recherche d'experiences locales." },
-  { icon: Wallet, title: "Revenus reguliers", text: "Recevez des missions et suivez vos revenus depuis votre espace." },
-  { icon: ShieldCheck, title: "Reseau de confiance", text: "Beneficiez du label KoraStay et de la confiance qu'il inspire." },
+  { icon: TrendingUp, title: "Plus de visibilite", text: "Touchez des voyageurs qualifies a la recherche d'expériences locales." },
+  { icon: Wallet, title: "Revenus réguliers", text: "Recevez des missions et suivez vos revenus depuis votre espace." },
+  { icon: ShieldCheck, title: "Réseau de confiance", text: "Beneficiez du label KoraStay et de la confiance qu'il inspire." },
 ];
 
 const FAQ = [
-  { q: "Comment devenir partenaire ?", a: "Remplissez le formulaire, notre equipe etudie votre profil puis valide votre compte. Vous completez ensuite vos services et disponibilites." },
-  { q: "Y a-t-il des frais d'inscription ?", a: "Non. L'inscription au reseau KoraStay Partners est gratuite. Une commission s'applique uniquement sur les missions realisees." },
-  { q: "Quels documents fournir ?", a: "Une piece d'identite, vos justificatifs d'activite et quelques photos de vos prestations." },
+  { q: "Comment devenir partenaire ?", a: "Remplissez le formulaire, notre équipe etudie votre profil puis valide votre compte. Vous completez ensuite vos services et disponibilités." },
+  { q: "Y a-t-il des frais d'inscription ?", a: "Non. L'inscription au réseau KoraStay Partners est gratuite. Une commission s'applique uniquement sur les missions realisees." },
+  { q: "Quels documents fournir ?", a: "Une pièce d'identité, vos justificatifs d'activité et quelques photos de vos prestations." },
 ];
 
 export default function PartnersPage() {
@@ -40,11 +40,11 @@ export default function PartnersPage() {
             <Handshake className="h-3.5 w-3.5" /> KoraStay Partners
           </span>
           <h1 className="mx-auto mt-5 max-w-2xl font-display text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">
-            Rejoignez le reseau des partenaires locaux
+            Rejoignez le réseau des partenaires locaux
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-muted">
-            Guides, transporteurs, restaurants et prestataires : developpez votre activite
-            avec KoraStay et offrez des experiences authentiques.
+            Guides, transporteurs, restaurants et prestataires : developpez votre activité
+            avec KoraStay et offrez des expériences authentiques.
           </p>
           <div className="mx-auto mt-8 grid max-w-2xl grid-cols-2 gap-3 sm:grid-cols-4">
             {TYPES.map((t) => (
@@ -93,7 +93,7 @@ export default function PartnersPage() {
               action={submitPartnerApplication}
               submitLabel="Envoyer ma candidature"
               fields={[
-                { name: "businessName", label: "Nom / Enseigne", required: true, full: true, placeholder: "Votre activite" },
+                { name: "businessName", label: "Nom / Enseigne", required: true, full: true, placeholder: "Votre activité" },
                 { name: "type", label: "Type de partenaire", type: "select", required: true, placeholder: "Choisir", options: [
                   { value: "GUIDE", label: "Guide touristique" },
                   { value: "TRANSPORT", label: "Transporteur" },
@@ -103,8 +103,8 @@ export default function PartnersPage() {
                 ] },
                 { name: "city", label: "Ville", required: true, placeholder: "Daloa" },
                 { name: "email", label: "Email", type: "email", required: true, placeholder: "vous@email.com" },
-                { name: "phone", label: "Telephone", type: "tel", required: true, placeholder: "+225 ..." },
-                { name: "message", label: "Presentez votre activite", type: "textarea", placeholder: "Vos services, votre experience..." },
+                { name: "phone", label: "Téléphone", type: "tel", required: true, placeholder: "+225 ..." },
+                { name: "message", label: "Présentez votre activité", type: "textarea", placeholder: "Vos services, votre expérience..." },
               ]}
             />
           </div>

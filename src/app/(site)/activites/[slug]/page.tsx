@@ -11,7 +11,7 @@ import { activityCategoryMeta } from "@/lib/enums";
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const a = await getActivityBySlug(slug);
-  return { title: a?.name ?? "Activite", description: a?.shortDescription ?? undefined };
+  return { title: a?.name ?? "Activité", description: a?.shortDescription ?? undefined };
 }
 
 export default async function ActivityDetailPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -34,7 +34,7 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
       <div className="container-page pt-0 lg:pt-6">
         <div className="mb-4 hidden lg:block">
           <nav className="mb-2 flex items-center gap-1 text-sm text-muted">
-            <Link href="/activites" className="hover:text-foreground">Activites</Link>
+            <Link href="/activites" className="hover:text-foreground">Activités</Link>
             <span>/</span><span className="text-foreground">{activity.name}</span>
           </nav>
         </div>
@@ -67,7 +67,7 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
             </div>
 
             <section className="border-b border-border py-7">
-              <h2 className="mb-3 text-xl font-bold text-foreground">A propos de cette activite</h2>
+              <h2 className="mb-3 text-xl font-bold text-foreground">A propos de cette activité</h2>
               <p className="whitespace-pre-line leading-relaxed text-foreground/90">{activity.description}</p>
             </section>
 
@@ -107,9 +107,9 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
               ) : (
                 <div className="rounded-3xl border border-border bg-surface p-6 text-center shadow-card">
                   <p className="font-bold text-foreground">A partir de {activity.pricePerPerson.toLocaleString("fr-FR")} F CFA / pers.</p>
-                  <p className="mt-1 text-sm text-muted">Connectez-vous pour reserver cette activite avec un guide.</p>
+                  <p className="mt-1 text-sm text-muted">Connectez-vous pour réserver cette activité avec un guide.</p>
                   <Link href={`/login?redirectTo=/activites/${activity.slug}`} className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-brand-500 px-5 py-3 font-semibold text-white hover:bg-brand-600">
-                    Se connecter pour reserver
+                    Se connecter pour réserver
                   </Link>
                 </div>
               )}

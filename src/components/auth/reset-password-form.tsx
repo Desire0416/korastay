@@ -30,10 +30,10 @@ export function ResetPasswordForm({ token }: { token: string }) {
   return (
     <div>
       <h1 className="text-2xl font-bold text-foreground">Nouveau mot de passe</h1>
-      <p className="mt-1.5 text-muted">Choisissez un nouveau mot de passe securise.</p>
+      <p className="mt-1.5 text-muted">Choisissez un nouveau mot de passe sécurisé.</p>
       <form action={action} className="mt-7 space-y-4">
         <input type="hidden" name="token" value={token} />
-        <Field label="Nouveau mot de passe" htmlFor="password" required hint="8 caracteres minimum">
+        <Field label="Nouveau mot de passe" htmlFor="password" required hint="8 caractères minimum">
           <Input id="password" name="password" type="password" placeholder="********" required autoComplete="new-password" />
         </Field>
         {state.error && (

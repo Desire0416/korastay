@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 export function VerifiedBadge({
   className,
-  label = "Verifiee",
+  label = "Vérifiée",
   size = "md",
 }: {
   className?: string;

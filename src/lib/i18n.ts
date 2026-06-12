@@ -10,7 +10,7 @@ export const LOCALES: Locale[] = ["fr", "en"];
 export const DEFAULT_LOCALE: Locale = "fr";
 export const LOCALE_COOKIE = "korastay_locale";
 
-export const LOCALE_LABELS: Record<Locale, string> = { fr: "Francais", en: "English" };
+export const LOCALE_LABELS: Record<Locale, string> = { fr: "Français", en: "English" };
 
 export interface Dictionary {
   locale: Locale;
@@ -62,20 +62,20 @@ const NAV_EN: Record<string, string> = {
   "/conditions-generales": "Terms & conditions",
   "/politique-annulation": "Cancellation policy",
   "/confidentialite": "Privacy policy",
-  "/mentions-legales": "Legal notice",
+  "/mentions-legales": "Légal notice",
 };
 
 const FOOTER_COLUMNS_EN: Record<string, string> = {
   Explorer: "Explore",
   Rejoindre: "Join us",
   KoraStay: "KoraStay",
-  Legal: "Legal",
+  Legal: "Légal",
 };
 
 const FR: Dictionary = {
   locale: "fr",
   header: {
-    becomeHost: "Devenir proprietaire",
+    becomeHost: "Devenir propriétaire",
     login: "Connexion",
     register: "S'inscrire",
     logout: "Se deconnecter",
@@ -83,25 +83,25 @@ const FR: Dictionary = {
   },
   footer: {
     tagline:
-      "La plateforme ouest-africaine qui simplifie la reservation de residences verifiees et l'organisation de sejours authentiques.",
+      "La plateforme ouest-africaine qui simplifie la réservation de résidences vérifiées et l'organisation de séjours authentiques.",
     reassurance: [
-      { title: "Residences verifiees", text: "Chaque logement controle par KoraStay." },
+      { title: "Résidences vérifiées", text: "Chaque logement contrôle par KoraStay." },
       { title: "Paiement mobile", text: "Orange Money, Wave et carte bancaire." },
-      { title: "Assistance locale", text: "Avant, pendant et apres le sejour." },
+      { title: "Assistance locale", text: "Avant, pendant et après le séjour." },
     ],
     rights: "Tous droits reserves.",
-    madeInPrefix: "Concu en Cote d'Ivoire",
+    madeInPrefix: "Concu en Côte d'Ivoire",
     madeIn: "pour l'Afrique de l'Ouest.",
   },
   home: {
-    heroBadge: "La plateforme ouest-africaine du sejour verifie",
-    heroTitleLine1: "Reservez des residences verifiees,",
-    heroTitleHighlight: "vivez des sejours d'exception.",
+    heroBadge: "La plateforme ouest-africaine du séjour vérifié",
+    heroTitleLine1: "Réservez des résidences vérifiées,",
+    heroTitleHighlight: "vivez des séjours d'exception.",
     heroSubtitle:
-      "KoraStay reunit hebergements meubles, packs touristiques et partenaires locaux pour voyager sans incertitude en Afrique de l'Ouest.",
+      "KoraStay reunit hébergements meublés, packs touristiques et partenaires locaux pour voyager sans incertitude en Afrique de l'Ouest.",
     searchCta: "Rechercher",
   },
-  common: { discover: "Decouvrir", seeAll: "Voir tout" },
+  common: { discover: "Découvrir", seeAll: "Voir tout" },
   nav: {},
   footerColumns: {},
 };
@@ -124,7 +124,7 @@ const EN: Dictionary = {
       { title: "Local support", text: "Before, during and after your stay." },
     ],
     rights: "All rights reserved.",
-    madeInPrefix: "Made in Cote d'Ivoire",
+    madeInPrefix: "Made in Côte d'Ivoire",
     madeIn: "for West Africa.",
   },
   home: {

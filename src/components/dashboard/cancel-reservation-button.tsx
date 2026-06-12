@@ -26,7 +26,7 @@ export function CancelReservationButton({ reservationId, refundLabel, refundAmou
     startTransition(async () => {
       const res = await cancelReservation(reservationId);
       if (res.ok) {
-        toast.success("Reservation annulee.");
+        toast.success("Réservation annulée.");
         setOpen(false);
         router.refresh();
       } else {
@@ -39,7 +39,7 @@ export function CancelReservationButton({ reservationId, refundLabel, refundAmou
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
         <Button variant="outline" className="w-full text-danger hover:bg-red-50">
-          <XCircle className="h-4 w-4" /> Annuler la reservation
+          <XCircle className="h-4 w-4" /> Annuler la réservation
         </Button>
       </DrawerTrigger>
       <DrawerContent className="px-5 pb-7">
@@ -47,7 +47,7 @@ export function CancelReservationButton({ reservationId, refundLabel, refundAmou
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-danger">
             <AlertTriangle className="h-6 w-6" />
           </div>
-          <DrawerTitle className="mt-4 text-xl font-bold">Annuler cette reservation ?</DrawerTitle>
+          <DrawerTitle className="mt-4 text-xl font-bold">Annuler cette réservation ?</DrawerTitle>
           <p className="mt-2 text-sm text-muted">{refundLabel}.</p>
           <div className="mt-4 flex items-center justify-between rounded-2xl bg-surface-soft px-4 py-3">
             <span className="text-sm font-medium text-foreground">Remboursement estime</span>

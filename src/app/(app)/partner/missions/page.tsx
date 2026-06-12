@@ -35,7 +35,7 @@ export default async function PartnerMissionsPage({ searchParams }: { searchPara
 
   return (
     <div className="mx-auto max-w-4xl">
-      <PageHeader title="Mes missions" description="Les missions qui vous sont proposees." />
+      <PageHeader title="Mes missions" description="Les missions qui vous sont proposées." />
 
       {profile && (
         <FilterBar
@@ -47,7 +47,7 @@ export default async function PartnerMissionsPage({ searchParams }: { searchPara
       )}
 
       {!profile || profile.missions.length === 0 ? (
-        <EmptyState icon={Briefcase} title="Aucune mission" description={hasFilters ? "Aucun resultat pour ces criteres." : "Les missions proposees apparaitront ici selon votre ville et votre type de service."} />
+        <EmptyState icon={Briefcase} title="Aucune mission" description={hasFilters ? "Aucun resultat pour ces critères." : "Les missions proposées apparaitront ici selon votre ville et votre type de service."} />
       ) : (
         <div className="space-y-3">
           {profile.missions.map((m) => (

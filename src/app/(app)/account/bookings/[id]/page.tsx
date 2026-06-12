@@ -58,16 +58,16 @@ export default async function BookingDetailPage({
   return (
     <div className="mx-auto max-w-4xl">
       <Link href="/account/bookings" className="mb-5 inline-flex items-center gap-1 text-sm font-semibold text-muted hover:text-foreground">
-        <ChevronLeft className="h-4 w-4" /> Mes reservations
+        <ChevronLeft className="h-4 w-4" /> Mes réservations
       </Link>
 
       {justConfirmed && reservation.status === "CONFIRMED" && (
         <div className="mb-6 flex items-start gap-3 rounded-3xl border border-success/30 bg-emerald-50 p-5">
           <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0 text-success" />
           <div>
-            <p className="font-bold text-success">Reservation confirmee !</p>
+            <p className="font-bold text-success">Réservation confirmée !</p>
             <p className="text-sm text-emerald-700/80">
-              Un email de confirmation vous a ete envoye. Votre recu KoraStay est disponible ci-dessous.
+              Un email de confirmation vous a ete envoyé. Votre reçu KoraStay est disponible ci-dessous.
             </p>
           </div>
         </div>
@@ -77,9 +77,9 @@ export default async function BookingDetailPage({
         <div className="mb-6 flex items-start gap-3 rounded-3xl border border-gold-200 bg-gold-50 p-5">
           <Send className="mt-0.5 h-6 w-6 shrink-0 text-gold-600" />
           <div>
-            <p className="font-bold text-gold-800">Demande envoyee !</p>
+            <p className="font-bold text-gold-800">Demande envoyée !</p>
             <p className="text-sm text-gold-700/80">
-              Votre demande est en attente de validation. Vous serez notifie des qu'elle sera acceptee pour regler l'acompte.
+              Votre demande est en attente de validation. Vous serez notifié des qu'elle sera acceptée pour regler l'acompte.
             </p>
           </div>
         </div>
@@ -89,9 +89,9 @@ export default async function BookingDetailPage({
         <div className="mb-6 flex items-start gap-3 rounded-3xl border border-sky-200 bg-sky-50 p-5">
           <Clock className="mt-0.5 h-6 w-6 shrink-0 text-info" />
           <div>
-            <p className="font-bold text-info">Paiement en cours de verification</p>
+            <p className="font-bold text-info">Paiement en cours de vérification</p>
             <p className="text-sm text-sky-700/80">
-              Votre reglement nous a ete signale. Il sera confirme des sa validation par l'equipe KoraStay - vous recevrez une notification.
+              Votre règlement nous a ete signale. Il sera confirmé des sa validation par l'équipe KoraStay - vous recevrez une notification.
             </p>
           </div>
         </div>
@@ -116,7 +116,7 @@ export default async function BookingDetailPage({
         </div>
 
         <div className="grid grid-cols-1 gap-5 p-5 sm:grid-cols-3">
-          <Info icon={Ticket} label="Reference" value={reservation.reference} />
+          <Info icon={Ticket} label="Référence" value={reservation.reference} />
           <Info icon={CalendarDays} label="Dates" value={`${formatDate(reservation.startDate)} - ${formatDate(reservation.endDate)}`} />
           <Info icon={Users} label="Voyageurs" value={`${reservation.adults + reservation.children} personne${reservation.adults + reservation.children > 1 ? "s" : ""}`} />
         </div>
@@ -129,8 +129,8 @@ export default async function BookingDetailPage({
             <Clock className="h-5 w-5" /> En attente de validation
           </p>
           <p className="mb-4 text-sm text-gold-800/80">
-            Votre demande a ete transmise {isPack ? "a l'equipe KoraStay" : "a l'hote et a KoraStay"}.
-            Une fois validee, vous reglerez un acompte de <strong>{formatPrice(reservation.depositAmount)}</strong> pour confirmer.
+            Votre demande a ete transmise {isPack ? "a l'équipe KoraStay" : "a l'hôte et a KoraStay"}.
+            Une fois validée, vous reglerez un acompte de <strong>{formatPrice(reservation.depositAmount)}</strong> pour confirmer.
           </p>
           <ValidationCountdown
             deadline={reservation.expiresAt.toISOString()}
@@ -143,10 +143,10 @@ export default async function BookingDetailPage({
       {reservation.status === "PENDING_PAYMENT" && !hasPendingPayment && (
         <div className="mt-6 rounded-3xl border border-brand-200 bg-brand-50/50 p-5 shadow-soft">
           <p className="mb-1 flex items-center gap-2 font-bold text-brand-800">
-            <CheckCircle2 className="h-5 w-5" /> Demande validee !
+            <CheckCircle2 className="h-5 w-5" /> Demande validée !
           </p>
           <p className="mb-4 text-sm text-brand-800/80">
-            Reglez <strong>{formatPrice(reservation.depositAmount)}</strong> ({reservation.paymentPolicy === "FULL" ? "100% du sejour" : "acompte"}) pour confirmer votre reservation.
+            Reglez <strong>{formatPrice(reservation.depositAmount)}</strong> ({reservation.paymentPolicy === "FULL" ? "100% du séjour" : "acompte"}) pour confirmer votre réservation.
             {reservation.balanceDueAmount > 0 && ` Le solde (${formatPrice(reservation.balanceDueAmount)}) sera regle avant ou au check-in.`}
           </p>
           <PayDepositButton
@@ -162,18 +162,18 @@ export default async function BookingDetailPage({
         <div className="space-y-6">
           <section className="rounded-3xl border border-border bg-surface p-5 shadow-soft">
             <h2 className="mb-4 flex items-center gap-2 font-bold text-foreground">
-              <Receipt className="h-5 w-5 text-brand-600" /> Detail du paiement
+              <Receipt className="h-5 w-5 text-brand-600" /> Détail du paiement
             </h2>
             <div className="space-y-2.5 text-sm">
-              <Row label="Prix du sejour" value={formatPrice(reservation.subtotalAmount)} />
-              {reservation.cleaningFeeAmount > 0 && <Row label="Frais de menage" value={formatPrice(reservation.cleaningFeeAmount)} />}
+              <Row label="Prix du séjour" value={formatPrice(reservation.subtotalAmount)} />
+              {reservation.cleaningFeeAmount > 0 && <Row label="Frais de ménage" value={formatPrice(reservation.cleaningFeeAmount)} />}
               <Row label="Frais de service KoraStay" value={formatPrice(reservation.serviceFeeAmount)} />
               <div className="flex justify-between border-t border-border pt-3 text-base font-extrabold text-foreground">
-                <span>Total du sejour</span><span>{formatPrice(reservation.totalAmount)}</span>
+                <span>Total du séjour</span><span>{formatPrice(reservation.totalAmount)}</span>
               </div>
               {reservation.cautionAmount > 0 && (
                 <div className="flex items-center justify-between rounded-xl bg-surface-soft px-3 py-2 text-foreground">
-                  <span className="flex items-center gap-1.5">Caution (depot de garantie)
+                  <span className="flex items-center gap-1.5">Caution (dépôt de garantie)
                     <StatusBadge status={reservation.cautionStatus} map={cautionStatusMeta} size="sm" />
                   </span>
                   <span className="font-semibold">{formatPrice(reservation.cautionAmount)}</span>
@@ -212,7 +212,7 @@ export default async function BookingDetailPage({
           {/* Programme pack */}
           {isPack && reservation.pack?.programDays && reservation.pack.programDays.length > 0 && (
             <section className="rounded-3xl border border-border bg-surface p-5 shadow-soft">
-              <h2 className="mb-4 font-bold text-foreground">Programme du sejour</h2>
+              <h2 className="mb-4 font-bold text-foreground">Programme du séjour</h2>
               <div className="space-y-5">
                 {reservation.pack.programDays.map((day) => (
                   <div key={day.id}>
@@ -235,15 +235,15 @@ export default async function BookingDetailPage({
         <aside className="space-y-4">
           {reservation.residence && (
             <div className="rounded-3xl border border-border bg-surface p-5 shadow-soft">
-              <p className="text-sm font-bold text-foreground">Votre hote</p>
+              <p className="text-sm font-bold text-foreground">Votre hôte</p>
               <p className="mt-1 text-sm text-muted">{reservation.residence.owner.firstName}</p>
               <div className="mt-3 space-y-2">
                 <ContactButton
                   otherUserId={reservation.residence.owner.id}
                   reservationId={reservation.id}
-                  subject={`Reservation ${reservation.reference}`}
+                  subject={`Réservation ${reservation.reference}`}
                   basePath="/account/messages"
-                  label="Contacter l'hote"
+                  label="Contacter l'hôte"
                   variant="primary"
                   className="w-full"
                 />
@@ -253,7 +253,7 @@ export default async function BookingDetailPage({
                   </a>
                 )}
                 <Button asChild variant="outline" className="w-full">
-                  <Link href={`/residences/${reservation.residence.slug}`}>Voir la residence</Link>
+                  <Link href={`/residences/${reservation.residence.slug}`}>Voir la résidence</Link>
                 </Button>
               </div>
             </div>
@@ -262,7 +262,7 @@ export default async function BookingDetailPage({
           {hasReceipt && (
             <Button asChild variant="outline" className="w-full">
               <Link href={`/account/bookings/${reservation.id}/recu`} target="_blank">
-                <Receipt className="h-4 w-4" /> Recu KoraStay
+                <Receipt className="h-4 w-4" /> Reçu KoraStay
               </Link>
             </Button>
           )}
@@ -283,7 +283,7 @@ export default async function BookingDetailPage({
 
           <div className="flex items-center gap-2 rounded-2xl bg-surface-soft px-4 py-3 text-xs text-muted">
             <ShieldCheck className="h-4 w-4 text-brand-500" />
-            Reservation protegee par KoraStay Assistance.
+            Réservation protégée par KoraStay Assistance.
           </div>
         </aside>
       </div>

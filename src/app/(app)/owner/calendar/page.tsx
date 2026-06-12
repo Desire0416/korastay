@@ -22,9 +22,9 @@ export default async function OwnerCalendarPage() {
 
   return (
     <div className="mx-auto max-w-5xl">
-      <PageHeader title="Calendrier & disponibilites" description="Bloquez des periodes et visualisez vos reservations." />
+      <PageHeader title="Calendrier & disponibilités" description="Bloquez des periodes et visualisez vos réservations." />
       {data.length === 0 ? (
-        <EmptyState icon={Calendar} title="Aucune residence" description="Ajoutez une residence pour gerer son calendrier." action={<Button asChild><Link href="/owner/residences/new">Ajouter une residence</Link></Button>} />
+        <EmptyState icon={Calendar} title="Aucune résidence" description="Ajoutez une résidence pour gérer son calendrier." action={<Button asChild><Link href="/owner/residences/new">Ajouter une résidence</Link></Button>} />
       ) : (
         <AvailabilityManager residences={data} />
       )}

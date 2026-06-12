@@ -40,7 +40,7 @@ export function UploadField({
       if (res.ok && data.url) {
         setUrl(data.url);
         toast.success("Fichier importe.");
-      } else toast.error(data.error ?? "Echec de l'import.");
+      } else toast.error(data.error ?? "Échec de l'import.");
     } catch {
       toast.error("Import indisponible pour le moment.");
     } finally {
@@ -62,14 +62,14 @@ export function UploadField({
         <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface-soft/50 p-3">
           {kind === "image" ? (
             <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl">
-              <SmartImage src={url} alt={label ?? "Apercu"} seed={name} />
+              <SmartImage src={url} alt={label ?? "Aperçu"} seed={name} />
             </div>
           ) : (
             <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-success">
               <FileCheck2 className="h-6 w-6" />
             </span>
           )}
-          <span className="flex-1 truncate text-sm text-muted">{kind === "document" ? "Document importe" : "Image importee"}</span>
+          <span className="flex-1 truncate text-sm text-muted">{kind === "document" ? "Document importe" : "Image importée"}</span>
           <button type="button" onClick={() => setUrl("")} className="rounded-lg p-1.5 text-muted hover:bg-surface hover:text-danger" aria-label="Retirer">
             <X className="h-4 w-4" />
           </button>

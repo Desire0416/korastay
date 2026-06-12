@@ -3,9 +3,9 @@
 // ============================================================
 
 export const APP_NAME = "KoraStay";
-export const APP_TAGLINE = "Reservez votre sejour, vivez l'Afrique de l'Ouest.";
+export const APP_TAGLINE = "Réservez votre séjour, vivez l'Afrique de l'Ouest.";
 export const APP_DESCRIPTION =
-  "KoraStay reunit hebergements meubles verifies, packs touristiques et partenaires locaux pour voyager sans incertitude en Afrique de l'Ouest.";
+  "KoraStay reunit hébergements meublés vérifiés, packs touristiques et partenaires locaux pour voyager sans incertitude en Afrique de l'Ouest.";
 
 export const CONTACT_EMAIL =
   process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "contact@korastay.com";
@@ -45,17 +45,17 @@ export const ROLE_HOME: Record<string, string> = {
 export const AMENITIES = [
   { slug: "wifi", name: "WiFi", icon: "Wifi", category: "Connectivite" },
   { slug: "climatisation", name: "Climatisation", icon: "Snowflake", category: "Confort" },
-  { slug: "cuisine", name: "Cuisine equipee", icon: "CookingPot", category: "Cuisine" },
+  { slug: "cuisine", name: "Cuisine équipée", icon: "CookingPot", category: "Cuisine" },
   { slug: "eau-chaude", name: "Eau chaude", icon: "Droplets", category: "Confort" },
-  { slug: "parking", name: "Parking", icon: "Car", category: "Exterieur" },
+  { slug: "parking", name: "Parking", icon: "Car", category: "Extérieur" },
   { slug: "television", name: "Television", icon: "Tv", category: "Confort" },
   { slug: "petit-dejeuner", name: "Petit dejeuner", icon: "Coffee", category: "Services" },
-  { slug: "menage", name: "Menage", icon: "Sparkles", category: "Services" },
-  { slug: "balcon", name: "Balcon", icon: "Building2", category: "Exterieur" },
-  { slug: "terrasse", name: "Terrasse", icon: "Trees", category: "Exterieur" },
-  { slug: "securite", name: "Securite 24/7", icon: "ShieldCheck", category: "Securite" },
-  { slug: "groupe-electrogene", name: "Groupe electrogene", icon: "Zap", category: "Confort" },
-  { slug: "piscine", name: "Piscine", icon: "Waves", category: "Exterieur" },
+  { slug: "menage", name: "Ménage", icon: "Sparkles", category: "Services" },
+  { slug: "balcon", name: "Balcon", icon: "Building2", category: "Extérieur" },
+  { slug: "terrasse", name: "Terrasse", icon: "Trees", category: "Extérieur" },
+  { slug: "securite", name: "Securite 24/7", icon: "ShieldCheck", category: "Sécurité" },
+  { slug: "groupe-electrogene", name: "Groupe électrogène", icon: "Zap", category: "Confort" },
+  { slug: "piscine", name: "Piscine", icon: "Waves", category: "Extérieur" },
   { slug: "lave-linge", name: "Lave-linge", icon: "WashingMachine", category: "Services" },
   { slug: "bureau", name: "Espace bureau", icon: "Laptop", category: "Business" },
   { slug: "ascenseur", name: "Ascenseur", icon: "ArrowUpDown", category: "Confort" },
@@ -63,8 +63,8 @@ export const AMENITIES = [
 
 // Categories d'accueil
 export const HOME_CATEGORIES = [
-  { key: "residences", label: "Residences", href: "/residences", icon: "Home" },
-  { key: "packs", label: "Packs Decouverte", href: "/packs", icon: "Compass" },
+  { key: "residences", label: "Location meublée", href: "/residences", icon: "Home" },
+  { key: "packs", label: "Packs Découverte", href: "/packs", icon: "Compass" },
   { key: "business", label: "Business", href: "/business", icon: "Briefcase" },
   { key: "partners", label: "Partenaires", href: "/partners", icon: "Handshake" },
 ] as const;
@@ -74,8 +74,8 @@ export const SORT_OPTIONS = [
   { value: "featured", label: "Pertinence" },
   { value: "price_asc", label: "Prix croissant" },
   { value: "price_desc", label: "Prix decroissant" },
-  { value: "rating", label: "Mieux notees" },
-  { value: "recent", label: "Plus recentes" },
+  { value: "rating", label: "Mieux notées" },
+  { value: "recent", label: "Plus récentes" },
 ] as const;
 
 export const STAY_TYPES = [

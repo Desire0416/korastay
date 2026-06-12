@@ -28,7 +28,7 @@ const ADMIN_ITEMS = ADMIN_NAV.flatMap((g) => g.items);
 
 const ROLE_MENUS: Record<string, { label: string; items: typeof ACCOUNT_NAV }> = {
   TRAVELER: { label: "Espace voyageur", items: ACCOUNT_NAV.slice(0, 5) },
-  OWNER: { label: "Espace proprietaire", items: OWNER_NAV.slice(0, 5) },
+  OWNER: { label: "Espace propriétaire", items: OWNER_NAV.slice(0, 5) },
   PARTNER: { label: "Espace partenaire", items: PARTNER_NAV.slice(0, 5) },
   BUSINESS: { label: "Espace business", items: BUSINESS_NAV },
   ADMIN: { label: "Administration", items: ADMIN_ITEMS.slice(1, 6) },

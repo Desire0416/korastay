@@ -21,7 +21,7 @@ export default async function PartnerCalendarPage() {
     <div className="mx-auto max-w-3xl">
       <PageHeader title="Calendrier" description="Vos missions a venir." />
       {missions.length === 0 ? (
-        <EmptyState icon={Calendar} title="Aucune mission programmee" description="Vos missions acceptees apparaitront ici par date." />
+        <EmptyState icon={Calendar} title="Aucune mission programmée" description="Vos missions acceptées apparaitront ici par date." />
       ) : (
         <div className="space-y-3">
           {missions.map((m) => (

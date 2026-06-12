@@ -24,7 +24,7 @@ export function PasswordForm() {
       <Field label="Mot de passe actuel" htmlFor="currentPassword" required>
         <Input id="currentPassword" name="currentPassword" type="password" required autoComplete="current-password" />
       </Field>
-      <Field label="Nouveau mot de passe" htmlFor="newPassword" required hint="8 caracteres minimum">
+      <Field label="Nouveau mot de passe" htmlFor="newPassword" required hint="8 caractères minimum">
         <Input id="newPassword" name="newPassword" type="password" required autoComplete="new-password" />
       </Field>
       <Button type="submit" loading={pending}>Modifier le mot de passe</Button>

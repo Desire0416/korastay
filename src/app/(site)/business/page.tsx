@@ -6,19 +6,19 @@ import { submitBusinessRequest } from "@/server/actions/leads";
 
 export const metadata = {
   title: "KoraStay Business",
-  description: "Hebergements professionnels fiables et facturables pour vos equipes en mission en Afrique de l'Ouest.",
+  description: "Hébergements professionnels fiables et facturables pour vos équipes en mission en Afrique de l'Ouest.",
 };
 
 const BENEFITS = [
   { icon: Receipt, title: "Facturation dediee", text: "Factures entreprise, TVA si applicable, bon de commande." },
-  { icon: Wifi, title: "Logements equipes", text: "WiFi fiable, espace bureau, calme et proximite des services." },
-  { icon: FileSignature, title: "Contrat cadre", text: "Tarifs negocies pour vos reservations recurrentes." },
+  { icon: Wifi, title: "Logements équipes", text: "WiFi fiable, espace bureau, calme et proximité des services." },
+  { icon: FileSignature, title: "Contrat cadre", text: "Tarifs negocies pour vos réservations recurrentes." },
   { icon: Headset, title: "Assistance dediee", text: "Un interlocuteur KoraStay Business pour vos missions." },
-  { icon: Users, title: "Gestion d'equipe", text: "Centralisez les reservations de vos collaborateurs." },
-  { icon: Building2, title: "Rapport mensuel", text: "Recapitulatif des sejours et depenses par mission." },
+  { icon: Users, title: "Gestion d'équipe", text: "Centralisez les réservations de vos collaborateurs." },
+  { icon: Building2, title: "Rapport mensuel", text: "Récapitulatif des séjours et depenses par mission." },
 ];
 
-const CASES = ["ONG en mission terrain", "Entreprise en deplacement", "Delegation officielle", "Equipe projet"];
+const CASES = ["ONG en mission terrain", "Entreprise en deplacement", "Delegation officielle", "Équipe projet"];
 
 export default function BusinessPage() {
   return (
@@ -30,11 +30,11 @@ export default function BusinessPage() {
               <Briefcase className="h-3.5 w-3.5" /> KoraStay Business
             </span>
             <h1 className="mt-5 font-display text-4xl font-semibold leading-tight tracking-tight text-foreground sm:text-5xl">
-              Des sejours professionnels fiables, facturables et assistes.
+              Des séjours professionnels fiables, facturables et assistes.
             </h1>
             <p className="mt-4 max-w-lg text-muted">
-              KoraStay accompagne entreprises, ONG, administrations et institutions
-              pour loger leurs equipes en mission partout en Cote d'Ivoire.
+              KoraStay accompagné entreprises, ONG, administrations et institutions
+              pour loger leurs équipes en mission partout en Côte d'Ivoire.
             </p>
             <div className="mt-6 flex flex-wrap gap-2">
               {CASES.map((c) => (
@@ -45,7 +45,7 @@ export default function BusinessPage() {
 
           <div className="rounded-4xl border border-border bg-surface p-6 shadow-card sm:p-8" id="devis">
             <h2 className="text-xl font-bold text-foreground">Demander un devis</h2>
-            <p className="mb-5 mt-1 text-sm text-muted">Reponse sous 48h ouvrees.</p>
+            <p className="mb-5 mt-1 text-sm text-muted">Réponse sous 48h ouvrees.</p>
             <LeadForm
               action={submitBusinessRequest}
               submitLabel="Envoyer la demande"
@@ -57,9 +57,9 @@ export default function BusinessPage() {
                 ], placeholder: "Type d'organisation" },
                 { name: "contactName", label: "Contact", required: true, placeholder: "Votre nom" },
                 { name: "email", label: "Email", type: "email", required: true, placeholder: "vous@entreprise.com" },
-                { name: "phone", label: "Telephone", type: "tel", placeholder: "+225 ..." },
+                { name: "phone", label: "Téléphone", type: "tel", placeholder: "+225 ..." },
                 { name: "city", label: "Ville de mission", placeholder: "Daloa, Man..." },
-                { name: "teamSize", label: "Taille equipe", type: "number", placeholder: "5" },
+                { name: "teamSize", label: "Taille équipe", type: "number", placeholder: "5" },
                 { name: "notes", label: "Vos besoins", type: "textarea", placeholder: "Dates, exigences, budget..." },
               ]}
             />

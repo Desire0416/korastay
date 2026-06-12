@@ -29,12 +29,12 @@ export default async function AdminBlogPage({ searchParams }: { searchParams: Pr
       />
       {sp.created === "1" && (
         <div className="mb-5 flex items-center gap-2 rounded-2xl border border-success/30 bg-emerald-50 p-4 text-sm text-success">
-          <CheckCircle2 className="h-5 w-5" /> Article cree.
+          <CheckCircle2 className="h-5 w-5" /> Article créé.
         </div>
       )}
 
       {posts.length === 0 ? (
-        <EmptyState icon={Newspaper} title="Aucun article" description="Creez votre premier article de blog." action={<Button asChild><Link href="/admin/content/blog/new">Nouvel article</Link></Button>} />
+        <EmptyState icon={Newspaper} title="Aucun article" description="Créez votre premier article de blog." action={<Button asChild><Link href="/admin/content/blog/new">Nouvel article</Link></Button>} />
       ) : (
         <div className="space-y-3">
           {posts.map((p) => (
@@ -43,7 +43,7 @@ export default async function AdminBlogPage({ searchParams }: { searchParams: Pr
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="font-bold text-foreground">{p.title}</h3>
-                  <Badge tone={p.isPublished ? "success" : "neutral"}>{p.isPublished ? "Publie" : "Brouillon"}</Badge>
+                  <Badge tone={p.isPublished ? "success" : "neutral"}>{p.isPublished ? "Publié" : "Brouillon"}</Badge>
                 </div>
                 <p className="text-xs text-muted">maj {formatDate(p.updatedAt)}{p.author ? ` · ${p.author.firstName} ${p.author.lastName}` : ""}</p>
               </div>

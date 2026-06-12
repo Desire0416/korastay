@@ -31,9 +31,9 @@ export async function completePartnerOnboarding(_prev: PartnerResult, formData: 
   const phone = String(formData.get("phone") ?? "").trim();
   const city = String(formData.get("city") ?? "").trim();
 
-  if (!idDocumentUrl) return { ok: false, error: "La piece d'identite est obligatoire.", values };
-  if (description.length < 20) return { ok: false, error: "Decrivez votre activite (20 caracteres minimum).", values };
-  if (!phone) return { ok: false, error: "Un numero de telephone est requis.", values };
+  if (!idDocumentUrl) return { ok: false, error: "La pièce d'identité est obligatoire.", values };
+  if (description.length < 20) return { ok: false, error: "Decrivez votre activité (20 caractères minimum).", values };
+  if (!phone) return { ok: false, error: "Un numéro de téléphone est requis.", values };
   if (!city) return { ok: false, error: "Indiquez votre ville.", values };
 
   const data: Record<string, unknown> = {
@@ -53,7 +53,7 @@ export async function completePartnerOnboarding(_prev: PartnerResult, formData: 
     const drivingLicenseUrl = String(formData.get("drivingLicenseUrl") ?? "").trim();
     const vehicleType = String(formData.get("vehicleType") ?? "").trim();
     if (!drivingLicenseUrl) return { ok: false, error: "Le permis de conduire est obligatoire pour un chauffeur.", values };
-    if (!vehicleType) return { ok: false, error: "Indiquez le type de vehicule.", values };
+    if (!vehicleType) return { ok: false, error: "Indiquez le type de véhicule.", values };
     data.drivingLicenseUrl = drivingLicenseUrl;
     data.vehicleType = vehicleType;
     data.vehicleBrand = String(formData.get("vehicleBrand") ?? "").trim() || null;
@@ -70,8 +70,8 @@ export async function completePartnerOnboarding(_prev: PartnerResult, formData: 
   await prisma.notification.createMany({
     data: (await prisma.user.findMany({ where: { role: { in: ["ADMIN", "SUPER_ADMIN"] } }, select: { id: true } })).map((a) => ({
       userId: a.id,
-      title: "Configuration partenaire terminee",
-      body: `${profile.businessName} a complete sa configuration.`,
+      title: "Configuration partenaire terminée",
+      body: `${profile.businessName} a complète sa configuration.`,
       type: "PARTNER",
       url: "/admin/partners",
     })),
@@ -87,7 +87,7 @@ export async function savePartnerVehicle(_prev: PartnerResult, formData: FormDat
   if (profile.type !== "TRANSPORT") return { ok: false, error: "Reserve aux chauffeurs." };
 
   const vehicleType = String(formData.get("vehicleType") ?? "").trim();
-  if (!vehicleType) return { ok: false, error: "Le type de vehicule est requis." };
+  if (!vehicleType) return { ok: false, error: "Le type de véhicule est requis." };
   const seats = Number(formData.get("vehicleSeats"));
 
   await prisma.partnerProfile.update({
@@ -102,7 +102,7 @@ export async function savePartnerVehicle(_prev: PartnerResult, formData: FormDat
   });
   revalidatePath("/partner/vehicle");
   revalidatePath("/partner");
-  return { ok: true, message: "Vehicule mis a jour." };
+  return { ok: true, message: "Véhicule mis a jour." };
 }
 
 // ============================================================
@@ -140,7 +140,7 @@ export async function saveMenuItem(_prev: PartnerResult, formData: FormData): Pr
     });
   }
   revalidatePath("/partner/menu");
-  return { ok: true, message: "Menu enregistre." };
+  return { ok: true, message: "Menu enregistré." };
 }
 
 export async function deleteMenuItem(itemId: string): Promise<PartnerResult> {
@@ -151,7 +151,7 @@ export async function deleteMenuItem(itemId: string): Promise<PartnerResult> {
   if (!item) return { ok: false, error: "Plat introuvable." };
   await prisma.partnerMenuItem.delete({ where: { id: itemId } });
   revalidatePath("/partner/menu");
-  return { ok: true, message: "Plat supprime." };
+  return { ok: true, message: "Plat supprimé." };
 }
 
 export async function toggleMenuItem(itemId: string): Promise<PartnerResult> {
@@ -218,5 +218,5 @@ export async function respondToMission(missionId: string, accept: boolean): Prom
   });
   revalidatePath("/partner/missions");
   revalidatePath(`/partner/missions/${missionId}`);
-  return { ok: true, message: accept ? "Mission acceptee." : "Mission refusee." };
+  return { ok: true, message: accept ? "Mission acceptée." : "Mission refusée." };
 }

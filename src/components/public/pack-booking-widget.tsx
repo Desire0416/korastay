@@ -47,7 +47,7 @@ export function PackBookingWidget(props: PackBookingWidgetProps) {
         <PopoverTrigger asChild>
           <button className="flex w-full items-center justify-between rounded-2xl border border-border px-4 py-3 text-left text-sm">
             <span>
-              <span className="block text-2xs font-bold uppercase text-muted">Date de depart</span>
+              <span className="block text-2xs font-bold uppercase text-muted">Date de départ</span>
               <span className={cn("font-semibold", range.start ? "text-foreground" : "text-muted")}>
                 {range.start ? formatDate(range.start) : "Choisir une date"}
               </span>
@@ -71,7 +71,7 @@ export function PackBookingWidget(props: PackBookingWidgetProps) {
         </div>
         {price.extras > 0 && (
           <div className="flex justify-between text-muted">
-            <span>Personnes supplementaires</span>
+            <span>Personnes supplémentaires</span>
             <span className="text-foreground">{formatPrice(price.extras)}</span>
           </div>
         )}
@@ -96,7 +96,7 @@ export function PackBookingWidget(props: PackBookingWidgetProps) {
         </p>
         <div className="space-y-3">{body}</div>
         <Button onClick={reserve} disabled={!range.start} size="lg" className="mt-4 w-full">
-          {range.start ? "Reserver ce pack" : "Choisir une date"}
+          {range.start ? "Réserver ce pack" : "Choisir une date"}
         </Button>
       </div>
 
@@ -107,13 +107,13 @@ export function PackBookingWidget(props: PackBookingWidgetProps) {
             {formatPrice(props.price)}<span className="text-sm font-normal text-muted"> / pack</span>
           </p>
           <Drawer>
-            <DrawerTrigger asChild><Button size="lg">Reserver</Button></DrawerTrigger>
+            <DrawerTrigger asChild><Button size="lg">Réserver</Button></DrawerTrigger>
             <DrawerContent className="px-5 pb-6">
-              <DrawerTitle className="px-1 pt-4 text-xl font-bold">Reserver ce pack</DrawerTitle>
+              <DrawerTitle className="px-1 pt-4 text-xl font-bold">Réserver ce pack</DrawerTitle>
               <div className="my-4 space-y-3 px-1">{body}</div>
               <DrawerClose asChild>
                 <Button onClick={reserve} disabled={!range.start} size="lg" className="w-full">
-                  {range.start ? `Reserver - ${formatPrice(price.total)}` : "Choisir une date"}
+                  {range.start ? `Réserver - ${formatPrice(price.total)}` : "Choisir une date"}
                 </Button>
               </DrawerClose>
             </DrawerContent>

@@ -15,7 +15,7 @@ const residenceSchema = z.object({
   city: z.string().min(2, "Ville requise"),
   district: z.string().optional(),
   address: z.string().optional(),
-  description: z.string().min(20, "Description trop courte (20 caracteres min)"),
+  description: z.string().min(20, "Description trop courte (20 caractères min)"),
   shortDescription: z.string().optional(),
   capacity: z.coerce.number().int().min(1),
   bedrooms: z.coerce.number().int().min(0),
@@ -67,7 +67,7 @@ export async function createResidence(_prev: OwnerResult, formData: FormData): P
   let effectiveOwnerId = user.id;
   if (admin && requestedOwnerId) {
     const targetOwner = await prisma.user.findUnique({ where: { id: requestedOwnerId }, select: { id: true } });
-    if (!targetOwner) return { ok: false, error: "Proprietaire selectionne introuvable." };
+    if (!targetOwner) return { ok: false, error: "Propriétaire selectionne introuvable." };
     effectiveOwnerId = targetOwner.id;
   }
 
@@ -106,7 +106,7 @@ export async function createResidence(_prev: OwnerResult, formData: FormData): P
       status: publishNow ? "PUBLISHED" : "PENDING_VALIDATION",
       verificationStatus: publishNow ? "VERIFIED" : "PENDING_REVIEW",
       isVerified: publishNow,
-      badgeLabel: publishNow ? "Residence verifiee KoraStay" : null,
+      badgeLabel: publishNow ? "Résidence vérifiée KoraStay" : null,
       publishedAt: publishNow ? new Date() : null,
       images: {
         create: [1, 2, 3, 4].map((n) => ({
@@ -131,7 +131,7 @@ export async function createResidence(_prev: OwnerResult, formData: FormData): P
     if (admins.length) {
       await prisma.notification.createMany({
         data: admins.map((a) => ({
-          userId: a.id, title: "Residence a valider",
+          userId: a.id, title: "Résidence a valider",
           body: `${d.name} (${d.city}) attend une validation.`,
           type: "ADMIN_VALIDATION", url: `/admin/residences/${residence.id}`,
         })),
@@ -147,7 +147,7 @@ export async function createResidence(_prev: OwnerResult, formData: FormData): P
 export async function updateResidence(id: string, _prev: OwnerResult, formData: FormData): Promise<OwnerResult> {
   const user = await requireRole(["OWNER", "ADMIN", "SUPER_ADMIN"]);
   const existing = await prisma.residence.findFirst({ where: residenceScope(user, id) });
-  if (!existing) return { ok: false, error: "Residence introuvable." };
+  if (!existing) return { ok: false, error: "Résidence introuvable." };
 
   const parsed = residenceSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message };
@@ -166,7 +166,7 @@ export async function updateResidence(id: string, _prev: OwnerResult, formData: 
       statusPatch.isVerified = true;
       statusPatch.verificationStatus = "VERIFIED";
       statusPatch.publishedAt = existing.publishedAt ?? new Date();
-      statusPatch.badgeLabel = existing.badgeLabel ?? "Residence verifiee KoraStay";
+      statusPatch.badgeLabel = existing.badgeLabel ?? "Résidence vérifiée KoraStay";
     }
   }
 
@@ -199,7 +199,7 @@ export async function updateResidence(id: string, _prev: OwnerResult, formData: 
   revalidatePath(`/owner/residences/${id}`);
   revalidatePath(`/admin/residences/${id}`);
   revalidatePath("/residences");
-  return { ok: true, message: "Residence mise a jour." };
+  return { ok: true, message: "Résidence mise a jour." };
 }
 
 export async function toggleResidencePublish(id: string): Promise<OwnerResult> {
@@ -207,14 +207,14 @@ export async function toggleResidencePublish(id: string): Promise<OwnerResult> {
   const residence = await prisma.residence.findFirst({ where: residenceScope(user, id) });
   if (!residence) return { ok: false, error: "Introuvable." };
   if (!["PUBLISHED", "UNPUBLISHED"].includes(residence.status)) {
-    return { ok: false, error: "La residence doit etre validee avant publication." };
+    return { ok: false, error: "La résidence doit être validée avant publication." };
   }
   const next = residence.status === "PUBLISHED" ? "UNPUBLISHED" : "PUBLISHED";
   await prisma.residence.update({ where: { id }, data: { status: next, publishedAt: next === "PUBLISHED" ? new Date() : residence.publishedAt } });
   revalidatePath("/owner/residences");
   revalidatePath(`/owner/residences/${id}`);
   revalidatePath(`/admin/residences/${id}`);
-  return { ok: true, message: next === "PUBLISHED" ? "Residence publiee." : "Residence depubliee." };
+  return { ok: true, message: next === "PUBLISHED" ? "Résidence publiée." : "Résidence dépubliée." };
 }
 
 export async function addAvailabilityBlock(formData: FormData): Promise<OwnerResult> {
@@ -226,13 +226,13 @@ export async function addAvailabilityBlock(formData: FormData): Promise<OwnerRes
 
   const residence = await prisma.residence.findFirst({ where: residenceScope(user, residenceId) });
   if (!residence) return { ok: false, error: "Introuvable." };
-  if (end <= start) return { ok: false, error: "La date de fin doit etre apres le debut." };
+  if (end <= start) return { ok: false, error: "La date de fin doit être après le debut." };
 
   await prisma.residenceAvailabilityBlock.create({
     data: { residenceId, startDate: start, endDate: end, reason, createdById: user.id },
   });
   revalidatePath("/owner/calendar");
-  return { ok: true, message: "Periode bloquee." };
+  return { ok: true, message: "Periode bloquée." };
 }
 
 export async function removeAvailabilityBlock(blockId: string): Promise<OwnerResult> {
@@ -275,7 +275,7 @@ export async function deleteResidenceImage(imageId: string): Promise<OwnerResult
 export async function replyToReview(reviewId: string, reply: string): Promise<OwnerResult> {
   const user = await requireRole(["OWNER", "ADMIN", "SUPER_ADMIN"]);
   const text = reply.trim();
-  if (!text) return { ok: false, error: "Reponse vide." };
+  if (!text) return { ok: false, error: "Réponse vide." };
 
   const review = await prisma.review.findUnique({
     where: { id: reviewId },
@@ -283,7 +283,7 @@ export async function replyToReview(reviewId: string, reply: string): Promise<Ow
   });
   if (!review) return { ok: false, error: "Avis introuvable." };
   if (!isAdminUser(user) && review.residence?.ownerId !== user.id) {
-    return { ok: false, error: "Cet avis ne concerne pas vos residences." };
+    return { ok: false, error: "Cet avis ne concerne pas vos résidences." };
   }
 
   await prisma.review.update({ where: { id: reviewId }, data: { ownerReply: text } });
@@ -293,8 +293,8 @@ export async function replyToReview(reviewId: string, reply: string): Promise<Ow
     await prisma.notification.create({
       data: {
         userId: review.author.id,
-        title: "Reponse a votre avis",
-        body: "L'hote a repondu a votre avis.",
+        title: "Réponse a votre avis",
+        body: "L'hôte a répondu a votre avis.",
         type: "REVIEW_REPLY",
         url: "/account/reviews",
       },
@@ -303,7 +303,7 @@ export async function replyToReview(reviewId: string, reply: string): Promise<Ow
 
   revalidatePath("/owner/reviews");
   revalidatePath("/admin/reviews");
-  return { ok: true, message: "Reponse publiee." };
+  return { ok: true, message: "Réponse publiée." };
 }
 
 export async function setCoverImage(imageId: string): Promise<OwnerResult> {

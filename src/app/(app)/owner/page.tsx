@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { reservationStatusMeta } from "@/lib/enums";
 import { formatPrice, formatDateRange } from "@/lib/utils";
 
-export const metadata = { title: "Tableau de bord proprietaire" };
+export const metadata = { title: "Tableau de bord propriétaire" };
 
 export default async function OwnerDashboard() {
   const user = await requireRole(["OWNER", "ADMIN", "SUPER_ADMIN"]);
@@ -24,32 +24,32 @@ export default async function OwnerDashboard() {
     <div className="mx-auto max-w-6xl">
       <PageHeader
         title={`Bonjour ${user.firstName}`}
-        description="Pilotez vos residences et vos reservations."
-        actions={<Button asChild><Link href="/owner/residences/new"><Plus className="h-4 w-4" /> Ajouter une residence</Link></Button>}
+        description="Pilotez vos résidences et vos réservations."
+        actions={<Button asChild><Link href="/owner/residences/new"><Plus className="h-4 w-4" /> Ajouter une résidence</Link></Button>}
       />
 
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <KpiCard label="Residences publiees" value={stats.published} icon={Home} tone="brand" href="/owner/residences?status=PUBLISHED" />
+        <KpiCard label="Résidences publiees" value={stats.published} icon={Home} tone="brand" href="/owner/residences?status=PUBLISHED" />
         <KpiCard label="En attente" value={stats.pending} icon={Clock} tone="gold" hint="Validation KoraStay" href="/owner/residences?status=PENDING_VALIDATION" />
-        <KpiCard label="Reservations" value={stats.bookings} icon={CalendarCheck} tone="info" href="/owner/bookings" />
+        <KpiCard label="Réservations" value={stats.bookings} icon={CalendarCheck} tone="info" href="/owner/bookings" />
         <KpiCard label="Revenus" value={formatPrice(stats.revenue)} icon={Wallet} tone="success" href="/owner/revenues" />
       </div>
 
       <div className="mt-8 flex items-center justify-between">
-        <h2 className="text-xl font-bold text-foreground">Reservations recentes</h2>
+        <h2 className="text-xl font-bold text-foreground">Réservations récentes</h2>
         <Link href="/owner/bookings" className="flex items-center gap-1 text-sm font-semibold text-brand-600">Tout voir <ArrowRight className="h-4 w-4" /></Link>
       </div>
 
       <div className="mt-4">
         {recent.length === 0 ? (
-          <EmptyState icon={CalendarCheck} title="Aucune reservation" description="Vos reservations apparaitront ici une fois vos residences publiees." />
+          <EmptyState icon={CalendarCheck} title="Aucune réservation" description="Vos réservations apparaitront ici une fois vos résidences publiees." />
         ) : (
           <div className="overflow-hidden rounded-3xl border border-border bg-surface shadow-soft">
             <table className="w-full text-sm">
               <thead className="border-b border-border bg-surface-soft/50 text-left text-xs uppercase text-muted">
                 <tr>
-                  <th className="px-5 py-3 font-semibold">Reference</th>
-                  <th className="hidden px-5 py-3 font-semibold sm:table-cell">Residence</th>
+                  <th className="px-5 py-3 font-semibold">Référence</th>
+                  <th className="hidden px-5 py-3 font-semibold sm:table-cell">Résidence</th>
                   <th className="hidden px-5 py-3 font-semibold md:table-cell">Dates</th>
                   <th className="px-5 py-3 font-semibold">Statut</th>
                   <th className="px-5 py-3 text-right font-semibold">Montant</th>

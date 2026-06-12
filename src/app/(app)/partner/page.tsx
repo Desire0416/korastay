@@ -31,8 +31,8 @@ export default async function PartnerDashboard({ searchParams }: { searchParams:
       <div className="mx-auto max-w-2xl">
         <PageHeader title={`Bonjour ${user.firstName}`} />
         <div className="rounded-3xl border border-dashed border-border bg-surface-soft/40 p-8 text-center">
-          <h2 className="text-lg font-bold text-foreground">Profil partenaire en cours de creation</h2>
-          <p className="mt-2 text-muted">Votre profil partenaire n'est pas encore configure. Contactez l'equipe KoraStay pour finaliser votre inscription.</p>
+          <h2 className="text-lg font-bold text-foreground">Profil partenaire en cours de création</h2>
+          <p className="mt-2 text-muted">Votre profil partenaire n'est pas encore configure. Contactez l'équipe KoraStay pour finaliser votre inscription.</p>
           <Button asChild className="mt-5"><Link href="/contact">Contacter KoraStay</Link></Button>
         </div>
       </div>
@@ -45,8 +45,8 @@ export default async function PartnerDashboard({ searchParams }: { searchParams:
   const TYPE_HINTS: Record<string, { tip: string; servicesLabel: string }> = {
     GUIDE: { tip: "Proposez vos visites guidees et excursions, indiquez vos langues et zones couvertes.", servicesLabel: "vos visites et excursions" },
     TRANSPORT: { tip: "Proposez vos trajets et transferts (aeroport, gare, intercite) avec vos tarifs.", servicesLabel: "vos trajets et transferts" },
-    RESTAURANT: { tip: "Proposez vos menus et formules, et vos creneaux de reservation.", servicesLabel: "vos menus et formules" },
-    ACTIVITY: { tip: "Proposez vos activites et experiences avec duree et tarif indicatif.", servicesLabel: "vos activites et experiences" },
+    RESTAURANT: { tip: "Proposez vos menus et formules, et vos creneaux de réservation.", servicesLabel: "vos menus et formules" },
+    ACTIVITY: { tip: "Proposez vos activités et expériences avec durée et tarif indicatif.", servicesLabel: "vos activités et expériences" },
     OTHER: { tip: "Proposez vos prestations avec une description claire et un tarif indicatif.", servicesLabel: "vos prestations" },
   };
   const hint = TYPE_HINTS[profile.type] ?? TYPE_HINTS.OTHER;
@@ -63,7 +63,7 @@ export default async function PartnerDashboard({ searchParams }: { searchParams:
         <div className="mb-6 flex items-start gap-3 rounded-2xl border border-success/30 bg-emerald-50 p-4">
           <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-success" />
           <p className="text-sm text-emerald-700">
-            <span className="font-bold">Configuration terminee !</span> Bienvenue dans votre espace. Completez votre offre pour recevoir des missions.
+            <span className="font-bold">Configuration terminée !</span> Bienvenue dans votre espace. Completez votre offre pour recevoir des missions.
           </p>
         </div>
       )}
@@ -71,7 +71,7 @@ export default async function PartnerDashboard({ searchParams }: { searchParams:
       {profile.verificationStatus === "PENDING_REVIEW" && (
         <div className="mb-6 flex items-center gap-3 rounded-2xl border border-gold-200 bg-gold-50 p-4">
           <Clock className="h-5 w-5 text-gold-600" />
-          <p className="text-sm text-gold-700">Votre profil est en cours de validation par l'equipe KoraStay.</p>
+          <p className="text-sm text-gold-700">Votre profil est en cours de validation par l'équipe KoraStay.</p>
         </div>
       )}
 
@@ -97,7 +97,7 @@ export default async function PartnerDashboard({ searchParams }: { searchParams:
           <span className="flex items-center gap-3">
             <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-50 text-brand-600"><Car className="h-5 w-5" /></span>
             <span>
-              <span className="block font-bold text-foreground">Mon vehicule</span>
+              <span className="block font-bold text-foreground">Mon véhicule</span>
               <span className="block text-sm text-muted">{profile.vehicleType ? `${profile.vehicleType}${profile.vehicleSeats ? ` · ${profile.vehicleSeats} places` : ""}` : "A renseigner"}</span>
             </span>
           </span>
@@ -115,7 +115,7 @@ export default async function PartnerDashboard({ searchParams }: { searchParams:
       </div>
 
       <div className="mt-8 flex items-center justify-between">
-        <h2 className="text-xl font-bold text-foreground">Missions recentes</h2>
+        <h2 className="text-xl font-bold text-foreground">Missions récentes</h2>
         <Link href="/partner/missions" className="flex items-center gap-1 text-sm font-semibold text-brand-600">Tout voir <ArrowRight className="h-4 w-4" /></Link>
       </div>
       <div className="mt-4 space-y-2">

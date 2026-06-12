@@ -34,7 +34,7 @@ export function CustomPackQuoteForm({ id, currentAmount, currentMessage }: { id:
           <Input id="quoteAmount" name="quoteAmount" type="number" min={1000} step={1000} defaultValue={currentAmount ?? undefined} placeholder="45000" required />
         </Field>
         <Field label="Message au client" htmlFor="quoteMessage">
-          <Textarea id="quoteMessage" name="quoteMessage" defaultValue={currentMessage ?? ""} rows={2} placeholder="Detail de l'offre..." />
+          <Textarea id="quoteMessage" name="quoteMessage" defaultValue={currentMessage ?? ""} rows={2} placeholder="Détail de l'offre..." />
         </Field>
         {state.error && <div className="flex items-center gap-2 rounded-xl bg-red-50 px-3 py-2 text-sm text-danger"><AlertCircle className="h-4 w-4" /> {state.error}</div>}
         <Button type="submit" loading={pending}>{currentAmount ? "Mettre a jour le devis" : "Envoyer le devis"}</Button>
@@ -48,8 +48,8 @@ export function ConvertCustomPackButton({ id, disabled, hint }: { id: string; di
   const [pending, start] = React.useTransition();
   return (
     <div className="rounded-3xl border border-brand-200 bg-brand-50/50 p-5">
-      <h3 className="mb-1 flex items-center gap-2 font-bold text-foreground"><Wand2 className="h-4 w-4 text-brand-600" /> Convertir en reservation</h3>
-      <p className="mb-3 text-sm text-muted">Cree une reservation confirmee pour le voyageur et des missions pour chaque partenaire du panier.</p>
+      <h3 className="mb-1 flex items-center gap-2 font-bold text-foreground"><Wand2 className="h-4 w-4 text-brand-600" /> Convertir en réservation</h3>
+      <p className="mb-3 text-sm text-muted">Créé une réservation confirmée pour le voyageur et des missions pour chaque partenaire du panier.</p>
       <Button
         disabled={disabled}
         loading={pending}
@@ -59,7 +59,7 @@ export function ConvertCustomPackButton({ id, disabled, hint }: { id: string; di
           else toast.error(res.error ?? "Erreur.");
         })}
       >
-        <Wand2 className="h-4 w-4" /> Convertir en reservation & missions
+        <Wand2 className="h-4 w-4" /> Convertir en réservation & missions
       </Button>
       {hint && <p className="mt-2 text-xs text-muted">{hint}</p>}
     </div>

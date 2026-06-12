@@ -25,7 +25,7 @@ export function ApproveReservationButtons({ reservationId }: { reservationId: st
 
   return (
     <div className="flex flex-wrap gap-2">
-      <Button onClick={() => run(approveReservation, "Reservation validee.")} loading={pending} className="flex-1">
+      <Button onClick={() => run(approveReservation, "Réservation validée.")} loading={pending} className="flex-1">
         <CheckCircle2 className="h-4 w-4" /> Valider la demande
       </Button>
       <Button
@@ -33,7 +33,7 @@ export function ApproveReservationButtons({ reservationId }: { reservationId: st
         loading={pending}
         className="flex-1"
         onClick={() => {
-          if (window.confirm("Decliner cette demande de reservation ?")) run(rejectReservation, "Demande declinee.");
+          if (window.confirm("Decliner cette demande de réservation ?")) run(rejectReservation, "Demande déclinée.");
         }}
       >
         <XCircle className="h-4 w-4" /> Decliner

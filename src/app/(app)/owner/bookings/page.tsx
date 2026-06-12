@@ -9,7 +9,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { reservationStatusMeta, toFilterOptions } from "@/lib/enums";
 import { formatPrice, formatDateRange } from "@/lib/utils";
 
-export const metadata = { title: "Reservations recues" };
+export const metadata = { title: "Réservations reçues" };
 
 type SP = Record<string, string | string[] | undefined>;
 const str = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
@@ -32,19 +32,19 @@ export default async function OwnerBookingsPage({ searchParams }: { searchParams
 
   return (
     <div className="mx-auto max-w-5xl">
-      <PageHeader title="Reservations recues" description="Toutes les reservations de vos residences." />
+      <PageHeader title="Réservations reçues" description="Toutes les réservations de vos résidences." />
 
       {all.length > 0 && (
         <FilterBar
           fields={[
-            { type: "search", name: "q", placeholder: "Reference, residence, voyageur..." },
+            { type: "search", name: "q", placeholder: "Référence, résidence, voyageur..." },
             { type: "select", name: "status", label: "Tous les statuts", options: toFilterOptions(reservationStatusMeta) },
           ]}
         />
       )}
 
       {bookings.length === 0 ? (
-        <EmptyState icon={CalendarCheck} title="Aucune reservation" description={all.length === 0 ? "Les reservations de vos residences apparaitront ici." : "Aucun resultat pour ces criteres."} />
+        <EmptyState icon={CalendarCheck} title="Aucune réservation" description={all.length === 0 ? "Les réservations de vos résidences apparaitront ici." : "Aucun resultat pour ces critères."} />
       ) : (
       <>
         {/* Mobile : liste de cartes */}
@@ -69,8 +69,8 @@ export default async function OwnerBookingsPage({ searchParams }: { searchParams
             <table className="w-full min-w-[640px] text-sm">
               <thead className="border-b border-border bg-surface-soft/50 text-left text-xs uppercase text-muted">
                 <tr>
-                  <th className="px-5 py-3 font-semibold">Reference</th>
-                  <th className="px-5 py-3 font-semibold">Residence</th>
+                  <th className="px-5 py-3 font-semibold">Référence</th>
+                  <th className="px-5 py-3 font-semibold">Résidence</th>
                   <th className="px-5 py-3 font-semibold">Voyageur</th>
                   <th className="px-5 py-3 font-semibold">Dates</th>
                   <th className="px-5 py-3 font-semibold">Statut</th>

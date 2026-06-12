@@ -149,7 +149,7 @@ export function HeroSearch({ destinations, variant = "hero", pill = false }: Her
         </DrawerTrigger>
         <DrawerContent className="px-5 pb-8">
           <div className="overflow-y-auto px-1 pt-4">
-            <h2 className="text-xl font-bold text-foreground">Rechercher un sejour</h2>
+            <h2 className="text-xl font-bold text-foreground">Rechercher un séjour</h2>
 
             <p className="mb-2 mt-5 text-sm font-bold text-foreground">Destination</p>
             <div className="flex flex-wrap gap-2">

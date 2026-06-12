@@ -42,7 +42,7 @@ export async function sendEmail(input: SendEmailInput): Promise<void> {
       }),
     });
   } catch (err) {
-    console.error("[email] echec d'envoi:", err);
+    console.error("[email] échec d'envoi:", err);
   }
 }
 

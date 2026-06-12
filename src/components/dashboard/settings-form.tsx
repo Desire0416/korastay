@@ -43,7 +43,7 @@ export function SettingsForm({ contactEmail, contactPhone, announcement }: Props
           <Field label="Email de contact" htmlFor="contact_email">
             <Input id="contact_email" name="contact_email" type="email" defaultValue={contactEmail} />
           </Field>
-          <Field label="Telephone de contact" htmlFor="contact_phone">
+          <Field label="Téléphone de contact" htmlFor="contact_phone">
             <Input id="contact_phone" name="contact_phone" defaultValue={contactPhone} />
           </Field>
         </div>
@@ -52,10 +52,10 @@ export function SettingsForm({ contactEmail, contactPhone, announcement }: Props
       <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
         <h2 className="mb-1 font-bold text-foreground">Annonce</h2>
         <p className="mb-4 text-sm text-muted">Message affiche en banniere sur le tableau de bord admin (laisser vide pour masquer).</p>
-        <Textarea name="announcement" defaultValue={announcement} rows={2} placeholder="Ex: Maintenance prevue dimanche soir." />
+        <Textarea name="announcement" defaultValue={announcement} rows={2} placeholder="Ex: Maintenance prévue dimanche soir." />
       </div>
 
-      <Button type="submit" size="lg" loading={pending}>Enregistrer les parametres</Button>
+      <Button type="submit" size="lg" loading={pending}>Enregistrer les paramètres</Button>
     </form>
   );
 }

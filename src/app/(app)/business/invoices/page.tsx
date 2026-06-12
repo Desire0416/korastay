@@ -22,9 +22,9 @@ export default async function BusinessInvoicesPage() {
 
   return (
     <div className="mx-auto max-w-4xl">
-      <PageHeader title="Factures" description="Vos factures pour les sejours confirmes." />
+      <PageHeader title="Factures" description="Vos factures pour les séjours confirmés." />
       {invoices.length === 0 ? (
-        <EmptyState icon={Receipt} title="Aucune facture" description="Vos factures seront disponibles ici une fois vos demandes confirmees." />
+        <EmptyState icon={Receipt} title="Aucune facture" description="Vos factures seront disponibles ici une fois vos demandes confirmées." />
       ) : (
         <div className="space-y-3">
           {invoices.map((inv) => (
@@ -38,7 +38,7 @@ export default async function BusinessInvoicesPage() {
               </div>
               <div className="flex items-center gap-3">
                 {inv.budget && <span className="font-semibold text-foreground">{formatPrice(inv.budget)}</span>}
-                <Badge tone="success">Payee</Badge>
+                <Badge tone="success">Payée</Badge>
                 <Button variant="outline" size="sm" disabled><Download className="h-3.5 w-3.5" /> PDF</Button>
               </div>
             </div>

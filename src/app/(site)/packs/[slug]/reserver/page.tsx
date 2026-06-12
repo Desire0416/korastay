@@ -12,7 +12,7 @@ import { ReservationCheckout } from "@/components/public/reservation-checkout";
 import { SmartImage } from "@/components/ui/smart-image";
 import { formatPrice, formatDate } from "@/lib/utils";
 
-export const metadata = { title: "Reserver un pack" };
+export const metadata = { title: "Réserver un pack" };
 
 type SP = Record<string, string | string[] | undefined>;
 const str = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
@@ -60,7 +60,7 @@ export default async function PackReserverPage({
       <Link href={`/packs/${slug}`} className="mb-5 inline-flex items-center gap-1 text-sm font-semibold text-muted hover:text-foreground">
         <ChevronLeft className="h-4 w-4" /> Retour au pack
       </Link>
-      <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground">Reserver votre pack</h1>
+      <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground">Réserver votre pack</h1>
 
       <div className="mt-7 grid grid-cols-1 gap-10 lg:grid-cols-[1fr_400px]">
         <div className="order-2 lg:order-1">
@@ -90,7 +90,7 @@ export default async function PackReserverPage({
               </div>
             </div>
             <div className="mt-5 space-y-3 border-t border-border pt-5 text-sm">
-              <div className="flex items-center gap-2 text-foreground"><CalendarDays className="h-4 w-4 text-muted" /> Depart le {formatDate(startDate!)}</div>
+              <div className="flex items-center gap-2 text-foreground"><CalendarDays className="h-4 w-4 text-muted" /> Départ le {formatDate(startDate!)}</div>
               <div className="flex items-center gap-2 text-foreground"><Clock className="h-4 w-4 text-muted" /> {pack.durationDays}j / {pack.durationNights}n</div>
               <div className="flex items-center gap-2 text-foreground"><Users className="h-4 w-4 text-muted" /> {persons} voyageur{persons > 1 ? "s" : ""}</div>
             </div>
@@ -104,7 +104,7 @@ export default async function PackReserverPage({
               </div>
             </div>
             <p className="mt-4 flex items-center gap-1.5 text-xs text-muted">
-              <ShieldCheck className="h-4 w-4 text-brand-500" /> Paiement securise via KoraStay - Partenaires certifies
+              <ShieldCheck className="h-4 w-4 text-brand-500" /> Paiement sécurisé via KoraStay - Partenaires certifies
             </p>
           </div>
         </aside>

@@ -38,7 +38,7 @@ export function BusinessQuoteForm({ requestId, currentAmount, currentMessage }: 
           <Input id="quoteAmount" name="quoteAmount" type="number" min={1000} step={1000} defaultValue={currentAmount ?? undefined} placeholder="1500000" required />
         </Field>
         <Field label="Message au client" htmlFor="quoteMessage">
-          <Textarea id="quoteMessage" name="quoteMessage" defaultValue={currentMessage ?? ""} rows={3} placeholder="Detail de l'offre, conditions..." />
+          <Textarea id="quoteMessage" name="quoteMessage" defaultValue={currentMessage ?? ""} rows={3} placeholder="Détail de l'offre, conditions..." />
         </Field>
         {state.error && (
           <div className="flex items-center gap-2 rounded-xl bg-red-50 px-3 py-2 text-sm text-danger">

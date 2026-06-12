@@ -31,7 +31,7 @@ export function AvailabilityManager({ residences }: { residences: Residence[] })
   ];
 
   function block() {
-    if (!range.start || !range.end) { toast.error("Selectionnez une periode."); return; }
+    if (!range.start || !range.end) { toast.error("Sélectionnez une periode."); return; }
     const fd = new FormData();
     fd.set("residenceId", activeId);
     fd.set("startDate", range.start.toISOString());
@@ -39,7 +39,7 @@ export function AvailabilityManager({ residences }: { residences: Residence[] })
     fd.set("reason", reason || "Indisponible");
     start(async () => {
       const res = await addAvailabilityBlock(fd);
-      if (res.ok) { toast.success("Periode bloquee."); setRange({ start: null, end: null }); setReason(""); router.refresh(); }
+      if (res.ok) { toast.success("Periode bloquée."); setRange({ start: null, end: null }); setReason(""); router.refresh(); }
       else toast.error(res.error ?? "Erreur.");
     });
   }
@@ -72,15 +72,15 @@ export function AvailabilityManager({ residences }: { residences: Residence[] })
               <Lock className="h-4 w-4" /> Bloquer ces dates
             </Button>
           </div>
-          <p className="mt-2 text-xs text-muted">Les dates reservees (clients) ne peuvent pas etre debloquees ici.</p>
+          <p className="mt-2 text-xs text-muted">Les dates réservées (clients) ne peuvent pas être debloquees ici.</p>
         </div>
 
         {/* Listes */}
         <div className="space-y-6">
           <div className="rounded-3xl border border-border bg-surface p-5 shadow-soft">
-            <h3 className="mb-3 font-bold text-foreground">Reservations confirmees</h3>
+            <h3 className="mb-3 font-bold text-foreground">Réservations confirmées</h3>
             {active.bookings.length === 0 ? (
-              <p className="text-sm text-muted">Aucune reservation a venir.</p>
+              <p className="text-sm text-muted">Aucune réservation a venir.</p>
             ) : (
               <ul className="space-y-2">
                 {active.bookings.map((b, i) => (
@@ -94,7 +94,7 @@ export function AvailabilityManager({ residences }: { residences: Residence[] })
           </div>
 
           <div className="rounded-3xl border border-border bg-surface p-5 shadow-soft">
-            <h3 className="mb-3 font-bold text-foreground">Periodes bloquees</h3>
+            <h3 className="mb-3 font-bold text-foreground">Periodes bloquées</h3>
             {active.blocks.length === 0 ? (
               <div className="flex items-center gap-2 text-sm text-muted"><CalendarOff className="h-4 w-4" /> Aucun blocage manuel.</div>
             ) : (

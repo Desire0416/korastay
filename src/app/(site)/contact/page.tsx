@@ -3,22 +3,22 @@ import { LeadForm } from "@/components/public/lead-form";
 import { submitContact } from "@/server/actions/leads";
 import { CONTACT_EMAIL, CONTACT_PHONE } from "@/lib/constants";
 
-export const metadata = { title: "Contact", description: "Contactez l'equipe KoraStay." };
+export const metadata = { title: "Contact", description: "Contactez l'équipe KoraStay." };
 
 export default function ContactPage() {
   return (
     <div className="container-page py-12">
       <div className="mx-auto max-w-2xl text-center">
         <h1 className="font-display text-4xl font-semibold tracking-tight text-foreground">Contactez-nous</h1>
-        <p className="mt-3 text-muted">Une question, une demande ? Notre equipe vous repond rapidement.</p>
+        <p className="mt-3 text-muted">Une question, une demande ? Notre équipe vous répond rapidement.</p>
       </div>
 
       <div className="mx-auto mt-10 grid max-w-5xl grid-cols-1 gap-8 lg:grid-cols-[1fr_1.4fr]">
         <div className="space-y-4">
           {[
             { icon: Mail, label: "Email", value: CONTACT_EMAIL, href: `mailto:${CONTACT_EMAIL}` },
-            { icon: Phone, label: "Telephone", value: CONTACT_PHONE, href: `tel:${CONTACT_PHONE.replace(/\s/g, "")}` },
-            { icon: MapPin, label: "Zone", value: "Cote d'Ivoire - Afrique de l'Ouest" },
+            { icon: Phone, label: "Téléphone", value: CONTACT_PHONE, href: `tel:${CONTACT_PHONE.replace(/\s/g, "")}` },
+            { icon: MapPin, label: "Zone", value: "Côte d'Ivoire - Afrique de l'Ouest" },
             { icon: Clock, label: "Horaires", value: "Lun - Sam, 8h - 19h" },
           ].map((c) => (
             <div key={c.label} className="flex items-center gap-4 rounded-3xl border border-border bg-surface p-5 shadow-soft">

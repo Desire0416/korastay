@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
       });
       return NextResponse.json({ url: blob.url, name: file.name, type: file.type, size: file.size });
     } catch {
-      return NextResponse.json({ error: "Echec de l'envoi du fichier (stockage)." }, { status: 502 });
+      return NextResponse.json({ error: "Échec de l'envoi du fichier (stockage)." }, { status: 502 });
     }
   }
 

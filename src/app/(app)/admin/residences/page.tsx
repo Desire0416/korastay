@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { residenceStatusMeta, residenceTypeMeta, qualityLevelMeta, toFilterOptions } from "@/lib/enums";
 import { formatPrice } from "@/lib/utils";
 
-export const metadata = { title: "Residences - Admin" };
+export const metadata = { title: "Résidences - Admin" };
 
 type SP = Record<string, string | string[] | undefined>;
 const str = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
@@ -43,14 +43,14 @@ export default async function AdminResidencesPage({ searchParams }: { searchPara
   return (
     <div className="mx-auto max-w-6xl">
       <PageHeader
-        title="Residences"
-        description="Validez, creez et gerez le catalogue de residences."
-        actions={<Button asChild><Link href="/admin/residences/new"><Plus className="h-4 w-4" /> Nouvelle residence</Link></Button>}
+        title="Résidences"
+        description="Validez, créez et gérez le catalogue de résidences."
+        actions={<Button asChild><Link href="/admin/residences/new"><Plus className="h-4 w-4" /> Nouvelle résidence</Link></Button>}
       />
 
       <FilterBar
         fields={[
-          { type: "search", name: "q", placeholder: "Nom, ville, proprietaire..." },
+          { type: "search", name: "q", placeholder: "Nom, ville, propriétaire..." },
           { type: "select", name: "status", label: "Tous les statuts", options: toFilterOptions(residenceStatusMeta) },
           { type: "select", name: "type", label: "Tous les types", options: toFilterOptions(residenceTypeMeta) },
         ]}
@@ -71,7 +71,7 @@ export default async function AdminResidencesPage({ searchParams }: { searchPara
             <p className="hidden shrink-0 font-extrabold text-foreground sm:block">{formatPrice(r.pricePerNight)}<span className="text-xs font-normal text-muted">/nuit</span></p>
           </Link>
         ))}
-        {residences.length === 0 && <p className="py-10 text-center text-muted">Aucune residence.</p>}
+        {residences.length === 0 && <p className="py-10 text-center text-muted">Aucune résidence.</p>}
       </div>
     </div>
   );

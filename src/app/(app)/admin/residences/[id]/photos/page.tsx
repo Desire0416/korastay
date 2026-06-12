@@ -20,7 +20,7 @@ export default async function AdminResidencePhotosPage({ params }: { params: Pro
   return (
     <div className="mx-auto max-w-4xl">
       <Link href={`/admin/residences/${id}`} className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-muted hover:text-foreground">
-        <ChevronLeft className="h-4 w-4" /> Retour a la residence
+        <ChevronLeft className="h-4 w-4" /> Retour a la résidence
       </Link>
       <PageHeader title="Photos" description={residence.name} />
       <PhotosManager entityId={id} images={residence.images} />

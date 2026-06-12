@@ -14,9 +14,9 @@ export default async function AccountMessagesPage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <PageHeader title="Messages" description="Echangez avec vos hotes et l'assistance KoraStay." actions={<StartSupportButton />} />
+      <PageHeader title="Messages" description="Echangez avec vos hôtes et l'assistance KoraStay." actions={<StartSupportButton />} />
       {conversations.length === 0 ? (
-        <EmptyState icon={MessageCircle} title="Aucune conversation" description="Contactez l'assistance ou un hote depuis une reservation pour demarrer une discussion." />
+        <EmptyState icon={MessageCircle} title="Aucune conversation" description="Contactez l'assistance ou un hôte depuis une réservation pour demarrer une discussion." />
       ) : (
         <div className="overflow-hidden rounded-3xl border border-border bg-surface shadow-soft">
           <ConversationList conversations={conversations} basePath="/account/messages" />

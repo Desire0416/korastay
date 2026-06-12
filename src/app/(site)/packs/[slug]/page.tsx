@@ -56,7 +56,7 @@ export default async function PackDetailPage({ params }: { params: Promise<{ slu
         <div className="mb-4 hidden items-end justify-between lg:flex">
           <div>
             <nav className="mb-2 flex items-center gap-1 text-sm text-muted">
-              <Link href="/packs" className="hover:text-foreground">Packs Decouverte</Link>
+              <Link href="/packs" className="hover:text-foreground">Packs Découverte</Link>
               <span>/</span><span className="text-foreground">{pack.name}</span>
             </nav>
             <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground">{pack.name}</h1>

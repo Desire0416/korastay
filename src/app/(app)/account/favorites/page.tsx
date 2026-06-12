@@ -17,20 +17,20 @@ export default async function FavoritesPage() {
 
   return (
     <div className="mx-auto max-w-6xl">
-      <PageHeader title="Mes favoris" description="Vos residences et packs sauvegardes." />
+      <PageHeader title="Mes favoris" description="Vos résidences et packs sauvegardes." />
 
       {empty ? (
         <EmptyState
           icon={HeartOff}
           title="Aucun favori pour le moment"
-          description="Touchez le coeur sur une residence ou un pack pour le retrouver ici."
+          description="Touchez le coeur sur une résidence ou un pack pour le retrouver ici."
           action={<Button asChild><Link href="/residences"><Compass className="h-4 w-4" /> Explorer</Link></Button>}
         />
       ) : (
         <div className="space-y-10">
           {residences.length > 0 && (
             <section>
-              <h2 className="mb-4 text-lg font-bold text-foreground">Residences ({residences.length})</h2>
+              <h2 className="mb-4 text-lg font-bold text-foreground">Résidences ({residences.length})</h2>
               <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
                 {residences.map((r) => (
                   <ResidenceCard key={r.id} residence={r} favorited />

@@ -8,7 +8,7 @@ import { metaFor, reservationStatusMeta } from "@/lib/enums";
 import { formatPrice, formatDate } from "@/lib/utils";
 import { CONTACT_EMAIL, CONTACT_PHONE } from "@/lib/constants";
 
-export const metadata = { title: "Recu KoraStay" };
+export const metadata = { title: "Reçu KoraStay" };
 
 export default async function ReceiptPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireUser();
@@ -16,7 +16,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
   const r = await getReservationDetail(user.id, id);
   if (!r) notFound();
 
-  const title = r.residence?.name ?? r.pack?.name ?? "Sejour";
+  const title = r.residence?.name ?? r.pack?.name ?? "Séjour";
   const place = r.residence?.city ?? r.pack?.destination?.name ?? "";
   const paid = r.payments.find((p) => p.status === "PAID");
   const balance = r.totalAmount - r.depositAmount;
@@ -38,11 +38,11 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
             <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500 text-lg font-extrabold text-white">K</span>
             <div>
               <p className="font-display text-lg font-semibold text-foreground">KoraStay</p>
-              <p className="text-xs text-muted">Sejours verifies en Afrique de l'Ouest</p>
+              <p className="text-xs text-muted">Séjours vérifiés en Afrique de l'Ouest</p>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-sm font-bold text-foreground">Recu de reservation</p>
+            <p className="text-sm font-bold text-foreground">Reçu de réservation</p>
             <p className="text-sm font-semibold text-brand-600">{r.reference}</p>
             <p className="text-xs text-muted">Emis le {formatDate(new Date())}</p>
           </div>
@@ -60,9 +60,9 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
           {/* Detail montants */}
           <div className="mt-6 rounded-2xl border border-border">
             <Row label="Sous-total" value={formatPrice(r.subtotalAmount)} />
-            {r.cleaningFeeAmount > 0 && <Row label="Frais de menage" value={formatPrice(r.cleaningFeeAmount)} />}
+            {r.cleaningFeeAmount > 0 && <Row label="Frais de ménage" value={formatPrice(r.cleaningFeeAmount)} />}
             <Row label="Frais de service KoraStay" value={formatPrice(r.serviceFeeAmount)} />
-            <Row label="Total du sejour" value={formatPrice(r.totalAmount)} strong />
+            <Row label="Total du séjour" value={formatPrice(r.totalAmount)} strong />
             {r.depositAmount > 0 && (
               <>
                 <Row label="Acompte regle" value={formatPrice(r.depositAmount)} tone="brand" />
@@ -79,7 +79,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
 
           <div className="mt-6 flex items-center gap-2 rounded-2xl bg-brand-50/60 px-4 py-3 text-xs text-brand-800">
             <ShieldCheck className="h-4 w-4 shrink-0 text-brand-600" />
-            Ce recu atteste de votre reservation aupres de KoraStay. Le solde du sejour est regle sur place aupres de l'hote.
+            Ce reçu atteste de votre réservation aupres de KoraStay. Le solde du séjour est regle sur place aupres de l'hôte.
           </div>
 
           <div className="mt-5 border-t border-border pt-4 text-center text-xs text-muted">

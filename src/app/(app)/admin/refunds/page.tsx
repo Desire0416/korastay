@@ -43,7 +43,7 @@ export default async function AdminRefundsPage({ searchParams }: { searchParams:
 
       <FilterBar
         fields={[
-          { type: "search", name: "q", placeholder: "Reference, client, motif..." },
+          { type: "search", name: "q", placeholder: "Référence, client, motif..." },
           { type: "select", name: "status", label: "Tous les statuts", options: [{ value: "PENDING", label: "En attente" }, { value: "PAID", label: "Traite" }] },
         ]}
       />

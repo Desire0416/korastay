@@ -60,7 +60,7 @@ export function ConversationView({ conversation, user, basePath }: ConversationV
       {res && (
         <div className="flex items-center gap-2 border-b border-border bg-surface-soft/50 px-4 py-2 text-xs text-muted">
           <Info className="h-3.5 w-3.5" />
-          A propos de la reservation <span className="font-semibold text-foreground">{res.reference}</span>
+          A propos de la réservation <span className="font-semibold text-foreground">{res.reference}</span>
           {res.residence && <> — {res.residence.name}</>}
           {res.pack && <> — {res.pack.name}</>}
         </div>

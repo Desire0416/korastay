@@ -62,7 +62,7 @@ export function CardImageCarousel({
           <button
             type="button"
             onClick={(e) => { e.preventDefault(); scrollTo(active - 1); }}
-            aria-label="Image precedente"
+            aria-label="Image précédente"
             className={cn(
               "absolute left-2 top-1/2 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-ink shadow-soft transition-opacity md:flex",
               active === 0 ? "pointer-events-none opacity-0" : "opacity-0 group-hover/carousel:opacity-100"

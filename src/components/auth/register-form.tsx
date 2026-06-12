@@ -23,7 +23,7 @@ export function RegisterForm() {
         <h1 className="mt-5 text-2xl font-bold text-foreground">Confirmez votre email</h1>
         <p className="mt-2 text-muted">{state.message}</p>
         <div className="mt-5 rounded-2xl border border-dashed border-border bg-surface-soft/40 p-4 text-sm text-muted">
-          Pensez a verifier vos <strong>spams</strong>. Le lien de confirmation est valable 24h.
+          Pensez a vérifier vos <strong>spams</strong>. Le lien de confirmation est valable 24h.
         </div>
         <div className="mt-7 flex flex-col gap-3">
           <Button asChild size="lg"><Link href="/login">Aller a la connexion</Link></Button>
@@ -35,7 +35,7 @@ export function RegisterForm() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-foreground">Creer votre compte</h1>
+      <h1 className="text-2xl font-bold text-foreground">Créer votre compte</h1>
       <p className="mt-1.5 text-muted">Rejoignez KoraStay en quelques secondes.</p>
 
       <form action={action} className="mt-7 space-y-4">
@@ -50,10 +50,10 @@ export function RegisterForm() {
         <Field label="Email" htmlFor="email" required error={state.fieldErrors?.email}>
           <Input id="email" name="email" type="email" placeholder="vous@email.com" required autoComplete="email" defaultValue={state.values?.email ?? ""} />
         </Field>
-        <Field label="Telephone" htmlFor="phone" hint="Optionnel" error={state.fieldErrors?.phone}>
+        <Field label="Téléphone" htmlFor="phone" hint="Optionnel" error={state.fieldErrors?.phone}>
           <Input id="phone" name="phone" placeholder="+225 07 ..." autoComplete="tel" defaultValue={state.values?.phone ?? ""} />
         </Field>
-        <Field label="Mot de passe" htmlFor="password" required hint="8 caracteres minimum" error={state.fieldErrors?.password}>
+        <Field label="Mot de passe" htmlFor="password" required hint="8 caractères minimum" error={state.fieldErrors?.password}>
           <Input id="password" name="password" type="password" placeholder="********" required autoComplete="new-password" />
         </Field>
 
@@ -61,7 +61,7 @@ export function RegisterForm() {
           <input type="checkbox" required className="mt-0.5 h-4 w-4 rounded border-border text-brand-500" />
           <span>
             J'accepte les{" "}
-            <Link href="/conditions-generales" className="font-semibold text-brand-600">conditions generales</Link>{" "}
+            <Link href="/conditions-generales" className="font-semibold text-brand-600">conditions générales</Link>{" "}
             et la{" "}
             <Link href="/confidentialite" className="font-semibold text-brand-600">politique de confidentialite</Link>.
           </span>
@@ -75,12 +75,12 @@ export function RegisterForm() {
         )}
 
         <Button type="submit" size="lg" loading={pending} className="w-full">
-          Creer mon compte
+          Créer mon compte
         </Button>
       </form>
 
       <p className="mt-6 text-center text-sm text-muted">
-        Deja un compte ?{" "}
+        Déjà un compte ?{" "}
         <Link href="/login" className="font-semibold text-brand-600 hover:text-brand-700">
           Se connecter
         </Link>

@@ -56,30 +56,30 @@ export function ResidenceForm({
       {/* Section admin : proprietaire & statut */}
       {isAdmin && owners && (
         <Section title="Attribution (admin)">
-          <Field label="Proprietaire" htmlFor="ownerId" required>
+          <Field label="Propriétaire" htmlFor="ownerId" required>
             <select id="ownerId" name="ownerId" defaultValue={selectedOwnerId ?? ""} required className="h-12 w-full rounded-2xl border border-border bg-surface px-4 text-[15px] focus-visible:border-brand-400 focus-visible:outline-none">
-              <option value="" disabled>Selectionner un proprietaire</option>
+              <option value="" disabled>Sélectionner un propriétaire</option>
               {owners.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
             </select>
           </Field>
-          <Field label="Statut" htmlFor="status" hint="Publier rend la residence visible immediatement.">
+          <Field label="Statut" htmlFor="status" hint="Publier rend la résidence visible immédiatement.">
             <select id="status" name="status" defaultValue={defaultStatus ?? "PUBLISHED"} className="h-12 w-full rounded-2xl border border-border bg-surface px-4 text-[15px] focus-visible:border-brand-400 focus-visible:outline-none">
-              <option value="PUBLISHED">Publiee (verifiee)</option>
+              <option value="PUBLISHED">Publiée (vérifiée)</option>
               <option value="PENDING_VALIDATION">En attente de validation</option>
-              <option value="UNPUBLISHED">Depubliee</option>
+              <option value="UNPUBLISHED">Dépubliée</option>
             </select>
           </Field>
         </Section>
       )}
 
       {/* Informations generales */}
-      <Section title="Informations generales">
-        <Field label="Nom de la residence" htmlFor="name" required className="sm:col-span-2">
-          <Input id="name" name="name" defaultValue={dv.name} placeholder="Lux Residence Daloa" required />
+      <Section title="Informations générales">
+        <Field label="Nom de la résidence" htmlFor="name" required className="sm:col-span-2">
+          <Input id="name" name="name" defaultValue={dv.name} placeholder="Lux Résidence Daloa" required />
         </Field>
         <Field label="Type de logement" htmlFor="type" required>
           <select id="type" name="type" defaultValue={dv.type ?? "STUDIO"} className="h-12 w-full rounded-2xl border border-border bg-surface px-4 text-[15px] focus-visible:border-brand-400 focus-visible:outline-none">
-            <option value="STUDIO">Studio meuble</option>
+            <option value="STUDIO">Studio meublé</option>
             <option value="T2">Appartement T2</option>
             <option value="T3">Appartement T3</option>
             <option value="VILLA">Villa / Maison</option>
@@ -95,15 +95,15 @@ export function ResidenceForm({
           <Input id="district" name="district" defaultValue={dv.district} placeholder="Lobia 2" />
         </Field>
         <Field label="Adresse" htmlFor="address">
-          <Input id="address" name="address" defaultValue={dv.address} placeholder="Adresse complete (non publique)" />
+          <Input id="address" name="address" defaultValue={dv.address} placeholder="Adresse complète (non publique)" />
         </Field>
         <Field label="Description" htmlFor="description" required className="sm:col-span-2">
-          <Textarea id="description" name="description" defaultValue={dv.description} placeholder="Decrivez votre residence, son ambiance, ses atouts..." rows={5} required />
+          <Textarea id="description" name="description" defaultValue={dv.description} placeholder="Decrivez votre résidence, son ambiance, ses atouts..." rows={5} required />
         </Field>
       </Section>
 
       {/* Capacite */}
-      <Section title="Capacite & couchage">
+      <Section title="Capacité & couchage">
         <Field label="Voyageurs max" htmlFor="capacity" required>
           <Input id="capacity" name="capacity" type="number" min={1} defaultValue={dv.capacity ?? 2} required />
         </Field>
@@ -123,7 +123,7 @@ export function ResidenceForm({
         <Field label="Prix par nuit" htmlFor="pricePerNight" required>
           <Input id="pricePerNight" name="pricePerNight" type="number" min={1000} step={500} defaultValue={dv.pricePerNight} placeholder="25000" required />
         </Field>
-        <Field label="Frais de menage" htmlFor="cleaningFee">
+        <Field label="Frais de ménage" htmlFor="cleaningFee">
           <Input id="cleaningFee" name="cleaningFee" type="number" min={0} step={500} defaultValue={dv.cleaningFee ?? 0} placeholder="5000" />
         </Field>
         <Field label="Montant de la caution" htmlFor="depositAmount">
@@ -136,38 +136,38 @@ export function ResidenceForm({
         <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border p-3.5 sm:col-span-2">
           <input type="checkbox" name="cautionEnabled" value="1" defaultChecked={dv.cautionEnabled ?? false} className="mt-0.5 h-5 w-5 rounded border-border text-brand-500 focus:ring-brand-400" />
           <span>
-            <span className="block text-sm font-semibold text-foreground">Exiger une caution (depot de garantie)</span>
-            <span className="block text-xs text-muted">Le montant ci-dessus pourra etre bloque puis restitue au depart.</span>
+            <span className="block text-sm font-semibold text-foreground">Exiger une caution (dépôt de garantie)</span>
+            <span className="block text-xs text-muted">Le montant ci-dessus pourra être bloqué puis restitué au départ.</span>
           </span>
         </label>
-        <Field label="Justification de la caution" htmlFor="cautionJustification" className="sm:col-span-2" hint="Affichee au voyageur (ex: objets de valeur, equipements fragiles).">
-          <Input id="cautionJustification" name="cautionJustification" defaultValue={dv.cautionJustification ?? ""} placeholder="Ex: protection des equipements" />
+        <Field label="Justification de la caution" htmlFor="cautionJustification" className="sm:col-span-2" hint="Affichee au voyageur (ex: objets de valeur, équipements fragiles).">
+          <Input id="cautionJustification" name="cautionJustification" defaultValue={dv.cautionJustification ?? ""} placeholder="Ex: protection des équipements" />
         </Field>
         <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border p-3.5 sm:col-span-2">
           <input type="checkbox" name="isHighDemand" value="1" defaultChecked={dv.isHighDemand ?? false} className="mt-0.5 h-5 w-5 rounded border-border text-brand-500 focus:ring-brand-400" />
           <span>
-            <span className="block text-sm font-semibold text-foreground">Residence a forte demande</span>
-            <span className="block text-xs text-muted">Paiement de 100% exige a la reservation (selon les regles de paiement).</span>
+            <span className="block text-sm font-semibold text-foreground">Résidence a forte demande</span>
+            <span className="block text-xs text-muted">Paiement de 100% exige a la réservation (selon les regles de paiement).</span>
           </span>
         </label>
       </Section>
 
       {/* Horaires */}
-      <Section title="Arrivee & depart">
-        <Field label="Heure d'arrivee" htmlFor="checkInTime">
+      <Section title="Arrivée & départ">
+        <Field label="Heure d'arrivée" htmlFor="checkInTime">
           <Input id="checkInTime" name="checkInTime" type="time" defaultValue={dv.checkInTime ?? "14:00"} />
         </Field>
-        <Field label="Heure de depart" htmlFor="checkOutTime">
+        <Field label="Heure de départ" htmlFor="checkOutTime">
           <Input id="checkOutTime" name="checkOutTime" type="time" defaultValue={dv.checkOutTime ?? "11:00"} />
         </Field>
-        <Field label="Reglement interieur" htmlFor="houseRules" className="sm:col-span-2">
+        <Field label="Règlement intérieur" htmlFor="houseRules" className="sm:col-span-2">
           <Textarea id="houseRules" name="houseRules" defaultValue={dv.houseRules} placeholder="Non fumeur, pas de fetes, respect du voisinage..." rows={3} />
         </Field>
       </Section>
 
       {/* Equipements */}
       <div>
-        <h3 className="mb-3 font-bold text-foreground">Equipements</h3>
+        <h3 className="mb-3 font-bold text-foreground">Équipements</h3>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
           {amenities.map((a) => (
             <label key={a.id} className="flex cursor-pointer items-center gap-2 rounded-xl border border-border px-3 py-2.5 text-sm transition-colors has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50">
@@ -188,7 +188,7 @@ export function ResidenceForm({
       <div className="flex items-center gap-3">
         <Button type="submit" size="lg" loading={pending}>{submitLabel}</Button>
         <p className="text-sm text-muted">
-          {isAdmin ? "Vous gerez cette residence en tant qu'administrateur." : "Votre residence sera soumise a validation KoraStay."}
+          {isAdmin ? "Vous gérez cette résidence en tant qu'administrateur." : "Votre résidence sera soumise a validation KoraStay."}
         </p>
       </div>
     </form>

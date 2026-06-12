@@ -17,7 +17,7 @@ export async function updateProfile(_prev: FormResult, formData: FormData): Prom
     phone: z.string().optional(),
     city: z.string().optional(),
     country: z.string().optional(),
-    bio: z.string().max(600, "Bio trop longue (600 caracteres max)").optional(),
+    bio: z.string().max(600, "Bio trop longue (600 caractères max)").optional(),
     avatarUrl: z.string().optional(),
   });
   const parsed = schema.safeParse(Object.fromEntries(formData));
@@ -42,7 +42,7 @@ export async function updateProfile(_prev: FormResult, formData: FormData): Prom
     },
   });
   ["/account/profile", "/owner/profile", "/partner/profile", "/business/profile"].forEach((p) => revalidatePath(p));
-  return { ok: true, message: "Profil mis a jour avec succes." };
+  return { ok: true, message: "Profil mis a jour avec succès." };
 }
 
 export async function changePassword(_prev: FormResult, formData: FormData): Promise<FormResult> {
@@ -51,14 +51,14 @@ export async function changePassword(_prev: FormResult, formData: FormData): Pro
 
   const current = String(formData.get("currentPassword") ?? "");
   const next = String(formData.get("newPassword") ?? "");
-  if (next.length < 8) return { ok: false, error: "Le nouveau mot de passe doit faire 8 caracteres minimum." };
+  if (next.length < 8) return { ok: false, error: "Le nouveau mot de passe doit faire 8 caractères minimum." };
 
   const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
   if (!dbUser || !(await verifyPassword(current, dbUser.passwordHash))) {
     return { ok: false, error: "Mot de passe actuel incorrect." };
   }
   await prisma.user.update({ where: { id: user.id }, data: { passwordHash: await hashPassword(next) } });
-  return { ok: true, message: "Mot de passe modifie avec succes." };
+  return { ok: true, message: "Mot de passe modifié avec succès." };
 }
 
 export async function createReview(_prev: FormResult, formData: FormData): Promise<FormResult> {
@@ -75,8 +75,8 @@ export async function createReview(_prev: FormResult, formData: FormData): Promi
     where: { id: reservationId, travelerId: user.id, status: "COMPLETED" },
     include: { review: true },
   });
-  if (!reservation) return { ok: false, error: "Reservation introuvable ou non eligible." };
-  if (reservation.review) return { ok: false, error: "Vous avez deja laisse un avis." };
+  if (!reservation) return { ok: false, error: "Réservation introuvable ou non eligible." };
+  if (reservation.review) return { ok: false, error: "Vous avez déjà laisse un avis." };
 
   await prisma.$transaction(async (tx) => {
     await tx.review.create({

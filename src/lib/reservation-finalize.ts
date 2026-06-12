@@ -47,12 +47,12 @@ export async function finalizeReservationPayment(reservationId: string, paidAmou
   }
 
   const label =
-    reservation.residence?.name ?? reservation.pack?.name ?? reservation.activity?.name ?? "votre sejour";
+    reservation.residence?.name ?? reservation.pack?.name ?? reservation.activity?.name ?? "votre séjour";
   await prisma.notification.create({
     data: {
       userId: reservation.travelerId,
-      title: "Reservation confirmee",
-      body: `Votre reservation ${reservation.reference} pour ${label} est confirmee. Recu disponible.`,
+      title: "Réservation confirmée",
+      body: `Votre réservation ${reservation.reference} pour ${label} est confirmée. Reçu disponible.`,
       type: "RESERVATION_CONFIRMED",
       url: `/account/bookings/${reservationId}`,
     },
@@ -61,8 +61,8 @@ export async function finalizeReservationPayment(reservationId: string, paidAmou
     await prisma.notification.create({
       data: {
         userId: reservation.residence.ownerId,
-        title: "Reservation confirmee",
-        body: `${reservation.guestName} a confirme sa reservation a ${reservation.residence.name} (${reservation.reference}).`,
+        title: "Réservation confirmée",
+        body: `${reservation.guestName} a confirmé sa réservation a ${reservation.residence.name} (${reservation.reference}).`,
         type: "OWNER_BOOKING",
         url: "/owner/bookings",
       },
@@ -70,12 +70,12 @@ export async function finalizeReservationPayment(reservationId: string, paidAmou
   }
   await sendEmail({
     to: reservation.guestEmail,
-    subject: `Reservation confirmee - ${reservation.reference}`,
+    subject: `Réservation confirmée - ${reservation.reference}`,
     html: emailLayout(
-      "Votre reservation est confirmee",
-      `<p>Bonjour ${reservation.guestName},</p><p>Votre reservation <strong>${reservation.reference}</strong> pour ${label} est confirmee. Montant regle : ${formatPrice(paidAmount)}.${balanceDue > 0 ? ` Solde restant : ${formatPrice(balanceDue)}.` : ""}</p>`
+      "Votre réservation est confirmée",
+      `<p>Bonjour ${reservation.guestName},</p><p>Votre reservation <strong>${reservation.reference}</strong> pour ${label} est confirmée. Montant regle : ${formatPrice(paidAmount)}.${balanceDue > 0 ? ` Solde restant : ${formatPrice(balanceDue)}.` : ""}</p>`
     ),
-    text: `Reservation ${reservation.reference} confirmee.`,
+    text: `Réservation ${reservation.reference} confirmée.`,
   });
 
   if (reservation.packId) {
@@ -99,7 +99,7 @@ export async function finalizeReservationPayment(reservationId: string, paidAmou
             partnerProfileId: guide.id,
             reservationId,
             title: `Guide - ${reservation.activity.name}`,
-            description: `Accompagnement de l'activite "${reservation.activity.name}" pour ${reservation.guestName}.`,
+            description: `Accompagnement de l'activité "${reservation.activity.name}" pour ${reservation.guestName}.`,
             city: guide.city,
             scheduledAt: reservation.startDate,
             status: "PROPOSED",
@@ -109,8 +109,8 @@ export async function finalizeReservationPayment(reservationId: string, paidAmou
         await prisma.notification.create({
           data: {
             userId: guide.userId,
-            title: "Mission confirmee",
-            body: `La reservation de l'activite "${reservation.activity.name}" est confirmee.`,
+            title: "Mission confirmée",
+            body: `La réservation de l'activité "${reservation.activity.name}" est confirmée.`,
             type: "PARTNER_MISSION",
             url: "/partner/missions",
           },
@@ -144,8 +144,8 @@ async function createOwnerPayouts(reservationId: string, ownerId: string, ownerR
       status: "SCHEDULED",
       note:
         p.trigger === "CHECK_IN"
-          ? "A liberer apres l'arrivee du voyageur"
-          : "A liberer apres le depart du voyageur",
+          ? "A libérer après l'arrivée du voyageur"
+          : "A libérer après le départ du voyageur",
     })),
   });
 }
@@ -177,7 +177,7 @@ async function autoProposePartnersForPack(packId: string, reservationId: string,
         reservationId,
         packId,
         title: partner.type === "GUIDE" ? `Guide - ${pack.name}` : `Transport - ${pack.name}`,
-        description: `Mission proposee automatiquement pour le pack ${pack.name} a ${city}.`,
+        description: `Mission proposée automatiquement pour le pack ${pack.name} a ${city}.`,
         city,
         scheduledAt,
         status: "PROPOSED",
@@ -187,8 +187,8 @@ async function autoProposePartnersForPack(packId: string, reservationId: string,
     await prisma.notification.create({
       data: {
         userId: partner.userId,
-        title: "Nouvelle mission proposee",
-        body: `Une mission "${pack.name}" a ${city} vous est proposee.`,
+        title: "Nouvelle mission proposée",
+        body: `Une mission "${pack.name}" a ${city} vous est proposée.`,
         type: "PARTNER_MISSION",
         url: "/partner/missions",
       },

@@ -31,18 +31,18 @@ export default async function BusinessDashboard() {
     <div className="mx-auto max-w-5xl">
       <PageHeader
         title={account?.name ?? `Bonjour ${user.firstName}`}
-        description="Pilotez vos demandes et sejours professionnels."
+        description="Pilotez vos demandes et séjours professionnels."
         actions={<Button asChild><Link href="/business/requests/new"><Plus className="h-4 w-4" /> Nouvelle demande</Link></Button>}
       />
 
       <div className="grid grid-cols-3 gap-3 sm:gap-4">
         <KpiCard label="Demandes" value={requests.length} icon={FileText} tone="brand" href="/business/requests" />
         <KpiCard label="En cours" value={pending} icon={Clock} tone="gold" href="/business/requests?status=open" />
-        <KpiCard label="Confirmees" value={confirmed} icon={CheckCircle2} tone="success" href="/business/requests?status=CONFIRMED" />
+        <KpiCard label="Confirmées" value={confirmed} icon={CheckCircle2} tone="success" href="/business/requests?status=CONFIRMED" />
       </div>
 
       <div className="mt-8 flex items-center justify-between">
-        <h2 className="text-xl font-bold text-foreground">Demandes recentes</h2>
+        <h2 className="text-xl font-bold text-foreground">Demandes récentes</h2>
         <Link href="/business/requests" className="flex items-center gap-1 text-sm font-semibold text-brand-600">Tout voir <ArrowRight className="h-4 w-4" /></Link>
       </div>
       <div className="mt-4 space-y-2">
@@ -50,7 +50,7 @@ export default async function BusinessDashboard() {
           <div className="rounded-3xl border border-dashed border-border bg-surface-soft/40 p-8 text-center">
             <Building2 className="mx-auto h-8 w-8 text-brand-500" />
             <p className="mt-2 font-bold text-foreground">Aucune demande</p>
-            <p className="text-sm text-muted">Soumettez une demande pour vos sejours professionnels.</p>
+            <p className="text-sm text-muted">Soumettez une demande pour vos séjours professionnels.</p>
             <Button asChild className="mt-4"><Link href="/business/requests/new">Nouvelle demande</Link></Button>
           </div>
         ) : requests.slice(0, 5).map((r) => (

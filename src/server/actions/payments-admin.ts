@@ -72,7 +72,7 @@ export async function savePaymentSettings(
   });
   revalidatePath("/admin/settings/payments");
   revalidatePath("/admin/settings");
-  return { ok: true, message: "Regles de paiement enregistrees." };
+  return { ok: true, message: "Regles de paiement enregistrées." };
 }
 
 // ============================================================
@@ -91,16 +91,16 @@ export async function recordManualPayment(
   const paidAtRaw = String(formData.get("paidAt") ?? "").trim();
   const comment = String(formData.get("comment") ?? "").trim();
 
-  if (!reservationId) return { ok: false, error: "Reservation manquante." };
+  if (!reservationId) return { ok: false, error: "Réservation manquante." };
   if (amount <= 0) return { ok: false, error: "Montant invalide." };
 
   const reservation = await prisma.reservation.findUnique({
     where: { id: reservationId },
     select: { id: true, status: true, reference: true, totalAmount: true, amountPaid: true },
   });
-  if (!reservation) return { ok: false, error: "Reservation introuvable." };
+  if (!reservation) return { ok: false, error: "Réservation introuvable." };
   if (!["PENDING_PAYMENT", "PARTIALLY_PAID"].includes(reservation.status)) {
-    return { ok: false, error: "Cette reservation n'attend pas de paiement." };
+    return { ok: false, error: "Cette réservation n'attend pas de paiement." };
   }
 
   const paidAt = paidAtRaw ? new Date(paidAtRaw) : new Date();
@@ -144,7 +144,7 @@ export async function validatePendingPayment(paymentId: string): Promise<PayAdmi
     select: { id: true, status: true, amount: true, reservationId: true },
   });
   if (!payment) return { ok: false, error: "Paiement introuvable." };
-  if (payment.status === "PAID") return { ok: false, error: "Paiement deja valide." };
+  if (payment.status === "PAID") return { ok: false, error: "Paiement déjà valide." };
 
   await prisma.payment.update({ where: { id: paymentId }, data: { status: "PAID", paidAt: new Date() } });
   await finalizeReservationPayment(payment.reservationId, payment.amount);
@@ -164,22 +164,22 @@ export async function releasePayout(payoutId: string): Promise<PayAdminResult> {
   const admin = await requireRole(["ADMIN", "SUPER_ADMIN"]);
   const payout = await prisma.payout.findUnique({ where: { id: payoutId }, include: { reservation: { select: { status: true, reference: true } } } });
   if (!payout) return { ok: false, error: "Reversement introuvable." };
-  if (payout.status === "RELEASED") return { ok: false, error: "Deja verse." };
-  if (payout.reservation.status === "DISPUTED") return { ok: false, error: "Litige en cours : reversement bloque." };
+  if (payout.status === "RELEASED") return { ok: false, error: "Déjà verse." };
+  if (payout.reservation.status === "DISPUTED") return { ok: false, error: "Litige en cours : reversement bloqué." };
 
   await prisma.payout.update({ where: { id: payoutId }, data: { status: "RELEASED", releasedAt: new Date(), releasedById: admin.id } });
   await prisma.notification.create({
     data: {
       userId: payout.ownerId,
-      title: "Reversement effectue",
-      body: `Un reversement de ${formatPrice(payout.amount)} (${payout.reservation.reference}) a ete libere.`,
+      title: "Reversement effectué",
+      body: `Un reversement de ${formatPrice(payout.amount)} (${payout.reservation.reference}) a ete libéré.`,
       type: "PAYOUT_RELEASED",
       url: "/owner/revenues",
     },
   });
   await prisma.auditLog.create({ data: { actorId: admin.id, action: "PAYOUT_RELEASED", entityType: "Payout", entityId: payoutId, metadata: JSON.stringify({ amount: payout.amount }) } });
   revalidatePath("/admin/payouts");
-  return { ok: true, message: `Reversement de ${formatPrice(payout.amount)} libere.` };
+  return { ok: true, message: `Reversement de ${formatPrice(payout.amount)} libéré.` };
 }
 
 export async function blockPayout(payoutId: string): Promise<PayAdminResult> {
@@ -189,7 +189,7 @@ export async function blockPayout(payoutId: string): Promise<PayAdminResult> {
   await prisma.payout.update({ where: { id: payoutId }, data: { status: "BLOCKED" } });
   await prisma.auditLog.create({ data: { actorId: admin.id, action: "PAYOUT_BLOCKED", entityType: "Payout", entityId: payoutId } });
   revalidatePath("/admin/payouts");
-  return { ok: true, message: "Reversement bloque." };
+  return { ok: true, message: "Reversement bloqué." };
 }
 
 // Fiabilite de l'hote (NEW = 70/30, RELIABLE = 100% au check-in).
@@ -200,7 +200,7 @@ export async function setOwnerPayoutTier(userId: string, tier: string): Promise<
   await prisma.auditLog.create({ data: { actorId: admin.id, action: "PAYOUT_TIER_SET", entityType: "User", entityId: userId, metadata: JSON.stringify({ tier: value }) } });
   revalidatePath("/admin/users");
   revalidatePath(`/admin/users/${userId}`);
-  return { ok: true, message: `Fiabilite mise a jour (${value === "RELIABLE" ? "fiable" : "nouveau"}).` };
+  return { ok: true, message: `Fiabilité mise a jour (${value === "RELIABLE" ? "fiable" : "nouveau"}).` };
 }
 
 // ============================================================
@@ -219,7 +219,7 @@ export async function setCautionStatus(
   }
 
   const reservation = await prisma.reservation.findUnique({ where: { id: reservationId }, select: { travelerId: true, reference: true, notes: true } });
-  if (!reservation) return { ok: false, error: "Reservation introuvable." };
+  if (!reservation) return { ok: false, error: "Réservation introuvable." };
 
   await prisma.reservation.update({
     where: { id: reservationId },
@@ -232,7 +232,7 @@ export async function setCautionStatus(
     data: {
       userId: reservation.travelerId,
       title: "Mise a jour de la caution",
-      body: `La caution de votre reservation ${reservation.reference} est : ${status === "RELEASED" ? "restituee" : status === "RETAINED" ? "retenue" : status === "HELD" ? "bloquee" : "requise"}.`,
+      body: `La caution de votre réservation ${reservation.reference} est : ${status === "RELEASED" ? "restituee" : status === "RETAINED" ? "retenue" : status === "HELD" ? "bloquee" : "requise"}.`,
       type: "CAUTION_UPDATE",
       url: `/account/bookings/${reservationId}`,
     },

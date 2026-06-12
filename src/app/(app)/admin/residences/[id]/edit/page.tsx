@@ -7,7 +7,7 @@ import { updateResidence } from "@/server/actions/owner";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ResidenceForm } from "@/components/dashboard/residence-form";
 
-export const metadata = { title: "Modifier la residence - Admin" };
+export const metadata = { title: "Modifier la résidence - Admin" };
 
 export default async function AdminEditResidencePage({ params }: { params: Promise<{ id: string }> }) {
   await requireRole(["ADMIN", "SUPER_ADMIN"]);
@@ -25,9 +25,9 @@ export default async function AdminEditResidencePage({ params }: { params: Promi
   return (
     <div className="mx-auto max-w-3xl">
       <Link href={`/admin/residences/${id}`} className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-muted hover:text-foreground">
-        <ChevronLeft className="h-4 w-4" /> Retour a la residence
+        <ChevronLeft className="h-4 w-4" /> Retour a la résidence
       </Link>
-      <PageHeader title="Modifier la residence" description={residence.name} />
+      <PageHeader title="Modifier la résidence" description={residence.name} />
       <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
         <ResidenceForm
           action={boundUpdate}

@@ -60,8 +60,8 @@ export async function sendMessage(
 
   const staff = isStaff(user.role);
   const isParticipant = convo.participants.some((p) => p.userId === user.id);
-  if (!isParticipant && !staff) return { ok: false, error: "Acces refuse." };
-  if (isInternal && !staff) return { ok: false, error: "Reserve a l'equipe." };
+  if (!isParticipant && !staff) return { ok: false, error: "Accès refuse." };
+  if (isInternal && !staff) return { ok: false, error: "Reserve a l'équipe." };
 
   // Le staff qui repond rejoint la conversation
   if (!isParticipant && staff) {
@@ -93,7 +93,7 @@ export async function sendMessage(
   ]);
 
   if (!isInternal) {
-    const preview = text || (attachment ? "\u{1F4CE} Piece jointe" : "");
+    const preview = text || (attachment ? "\u{1F4CE} Pièce jointe" : "");
     await notifyParticipants(conversationId, user.id, `${user.firstName} ${user.lastName}`, preview);
   }
 

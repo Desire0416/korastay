@@ -12,7 +12,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { activityCategoryMeta } from "@/lib/enums";
 import { formatPrice } from "@/lib/utils";
 
-export const metadata = { title: "Activites - Admin" };
+export const metadata = { title: "Activités - Admin" };
 
 export default async function AdminActivitiesPage() {
   await requireRole(["ADMIN", "SUPER_ADMIN"]);
@@ -21,13 +21,13 @@ export default async function AdminActivitiesPage() {
   return (
     <div className="mx-auto max-w-4xl">
       <PageHeader
-        title="Activites"
-        description="Catalogue d'activites et experiences (reservees avec un guide)."
-        actions={<Button asChild><Link href="/admin/activities/new"><Plus className="h-4 w-4" /> Nouvelle activite</Link></Button>}
+        title="Activités"
+        description="Catalogue d'activités et expériences (réservées avec un guide)."
+        actions={<Button asChild><Link href="/admin/activities/new"><Plus className="h-4 w-4" /> Nouvelle activité</Link></Button>}
       />
 
       {activities.length === 0 ? (
-        <EmptyState icon={Compass} title="Aucune activite" description="Creez votre premiere activite." action={<Button asChild><Link href="/admin/activities/new">Nouvelle activite</Link></Button>} />
+        <EmptyState icon={Compass} title="Aucune activité" description="Créez votre première activité." action={<Button asChild><Link href="/admin/activities/new">Nouvelle activité</Link></Button>} />
       ) : (
         <div className="space-y-3">
           {activities.map((a) => (
@@ -36,7 +36,7 @@ export default async function AdminActivitiesPage() {
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="font-bold text-foreground">{a.name}</h3>
-                  <Badge tone={a.status === "PUBLISHED" ? "success" : "neutral"}>{a.status === "PUBLISHED" ? "Publiee" : "Brouillon"}</Badge>
+                  <Badge tone={a.status === "PUBLISHED" ? "success" : "neutral"}>{a.status === "PUBLISHED" ? "Publiée" : "Brouillon"}</Badge>
                   <Badge tone="brand">{activityCategoryMeta[a.category]?.label ?? a.category}</Badge>
                 </div>
                 <p className="text-xs text-muted">{a.city} · {a.durationHours}h · {formatPrice(a.pricePerPerson)}/pers.</p>

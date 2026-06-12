@@ -13,7 +13,7 @@ import { submitCustomPack, type CustomPackResult } from "@/server/actions/custom
 import type { CityService } from "@/lib/custom-pack-queries";
 
 const TYPE_LABELS: Record<string, string> = {
-  GUIDE: "Guides & visites", TRANSPORT: "Transport", RESTAURANT: "Restauration", ACTIVITY: "Activites", OTHER: "Autres prestations",
+  GUIDE: "Guides & visites", TRANSPORT: "Transport", RESTAURANT: "Restauration", ACTIVITY: "Activités", OTHER: "Autres prestations",
 };
 const SERVICE_FEE = 0.07; // apercu (le total faisant foi est calcule cote serveur)
 
@@ -89,10 +89,10 @@ export function CustomPackBuilder({ cities, servicesByCity, initialCityName, def
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-success text-white">
           <CheckCircle2 className="h-8 w-8" />
         </div>
-        <h2 className="mt-4 text-2xl font-bold text-success">Pack envoye !</h2>
+        <h2 className="mt-4 text-2xl font-bold text-success">Pack envoyé !</h2>
         <p className="mt-2 text-emerald-800/80">
-          Votre pack personnalise <span className="font-bold">{done.reference}</span> a ete soumis. Notre equipe et les
-          partenaires concernes ont ete notifies et reviennent vers vous rapidement.
+          Votre pack personnalisé <span className="font-bold">{done.reference}</span> a ete soumis. Notre équipe et les
+          partenaires concernes ont ete notifiés et reviennent vers vous rapidement.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Button onClick={() => router.push("/account/custom-packs")}>Suivre ma demande</Button>
@@ -121,7 +121,7 @@ export function CustomPackBuilder({ cities, servicesByCity, initialCityName, def
           ))}
         </div>
 
-        <p className="mb-3 text-sm font-bold text-foreground">2. Selectionnez vos activites & partenaires</p>
+        <p className="mb-3 text-sm font-bold text-foreground">2. Sélectionnez vos activités & partenaires</p>
         {services.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-border bg-surface-soft/40 p-8 text-center text-muted">
             Aucun partenaire disponible pour cette ville pour le moment.
@@ -199,8 +199,8 @@ export function CustomPackBuilder({ cities, servicesByCity, initialCityName, def
           <div className="mt-4 space-y-3 border-t border-border pt-4">
             <Field label="Nom" required><Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Votre nom" /></Field>
             <Field label="Email" required><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="vous@email.com" /></Field>
-            <Field label="Telephone"><Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+225 ..." /></Field>
-            <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Precisions (facultatif)..." rows={2} />
+            <Field label="Téléphone"><Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+225 ..." /></Field>
+            <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Précisions (facultatif)..." rows={2} />
           </div>
 
           {error && (
@@ -212,7 +212,7 @@ export function CustomPackBuilder({ cities, servicesByCity, initialCityName, def
           <Button onClick={submit} loading={pending} size="lg" className="mt-4 w-full">
             <Sparkles className="h-4 w-4" /> Soumettre mon pack
           </Button>
-          <p className="mt-2 text-center text-xs text-muted">Devis indicatif. Notre equipe confirme la disponibilite.</p>
+          <p className="mt-2 text-center text-xs text-muted">Devis indicatif. Notre équipe confirmé la disponibilité.</p>
         </div>
       </aside>
     </div>

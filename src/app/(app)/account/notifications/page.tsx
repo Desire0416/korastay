@@ -23,7 +23,7 @@ export default async function NotificationsPage() {
       />
 
       {notifications.length === 0 ? (
-        <EmptyState icon={Bell} title="Aucune notification" description="Vous serez informe ici de l'evolution de vos reservations." />
+        <EmptyState icon={Bell} title="Aucune notification" description="Vous serez informe ici de l'evolution de vos réservations." />
       ) : (
         <div className="space-y-2">
           {notifications.map((n) => {

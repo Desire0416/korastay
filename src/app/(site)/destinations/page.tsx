@@ -3,7 +3,7 @@ import { DestinationCard } from "@/components/public/destination-card";
 
 export const metadata = {
   title: "Destinations",
-  description: "Decouvrez les villes ou KoraStay vous accueille, de Daloa a Assinie.",
+  description: "Découvrez les villes ou KoraStay vous accueille, de Daloa a Assinie.",
 };
 
 export default async function DestinationsPage() {
@@ -18,7 +18,7 @@ export default async function DestinationsPage() {
           </h1>
           <p className="mx-auto mt-3 max-w-xl text-sm text-muted md:text-base">
             Des montagnes de Man aux plages d'Assinie, explorez la richesse de
-            l'Afrique de l'Ouest avec des sejours verifies.
+            l'Afrique de l'Ouest avec des séjours vérifiés.
           </p>
         </div>
       </section>

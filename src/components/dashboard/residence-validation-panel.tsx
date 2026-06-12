@@ -37,7 +37,7 @@ export function ResidenceValidationPanel({ id, status }: { id: string; status: s
 
       {needsValidation && (
         <div className="mt-4">
-          <p className="mb-2 text-sm font-semibold text-foreground">Attribuer un niveau de qualite</p>
+          <p className="mb-2 text-sm font-semibold text-foreground">Attribuer un niveau de qualité</p>
           <div className="grid grid-cols-3 gap-2">
             {LEVELS.map((l) => (
               <button key={l.value} onClick={() => setLevel(l.value)} className={cn("rounded-2xl border p-3 text-center transition-colors", level === l.value ? "border-brand-500 bg-brand-50" : "border-border")}>
@@ -52,7 +52,7 @@ export function ResidenceValidationPanel({ id, status }: { id: string; status: s
 
           <div className="mt-4 border-t border-border pt-4">
             <p className="mb-2 text-sm font-semibold text-foreground">Demander des corrections</p>
-            <Textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Precisez les modifications attendues..." rows={2} />
+            <Textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Précisez les modifications attendues..." rows={2} />
             <Button variant="outline" className="mt-2 w-full" loading={pending} onClick={() => run(() => requestResidenceChanges(id, note))}>
               <AlertCircle className="h-4 w-4" /> Demander des corrections
             </Button>

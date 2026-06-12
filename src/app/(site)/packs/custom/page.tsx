@@ -5,7 +5,7 @@ import { CustomPackBuilder } from "@/components/public/custom-pack-builder";
 
 export const metadata = {
   title: "Composer mon pack",
-  description: "Composez votre pack sur mesure : activites, guides, transport et restauration locaux. Voyez le prix et soumettez votre demande.",
+  description: "Composez votre pack sur mesure : activités, guides, transport et restauration locaux. Voyez le prix et soumettez votre demande.",
 };
 
 type SP = Record<string, string | string[] | undefined>;
@@ -38,7 +38,7 @@ export default async function CustomPackPage({ searchParams }: { searchParams: P
             Composez votre pack ideal
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-muted">
-            Choisissez votre destination, ajoutez les activites et partenaires locaux qui vous plaisent,
+            Choisissez votre destination, ajoutez les activités et partenaires locaux qui vous plaisent,
             visualisez le prix et soumettez votre pack pour validation.
           </p>
         </div>
@@ -47,7 +47,7 @@ export default async function CustomPackPage({ searchParams }: { searchParams: P
       <div className="container-page py-10">
         {cities.length === 0 ? (
           <div className="mx-auto max-w-xl rounded-3xl border border-dashed border-border bg-surface-soft/40 p-10 text-center text-muted">
-            Aucun partenaire n'est encore disponible. Revenez bientot !
+            Aucun partenaire n'est encore disponible. Revenez bientôt !
           </div>
         ) : (
           <CustomPackBuilder

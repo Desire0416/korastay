@@ -41,7 +41,7 @@ export function PartnerOnboardingForm({ type, defaults }: Props) {
       <section className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
         <h2 className="mb-4 font-bold text-foreground">Informations de base</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="Telephone" htmlFor="phone" required>
+          <Field label="Téléphone" htmlFor="phone" required>
             <Input id="phone" name="phone" defaultValue={v.phone ?? defaults.phone ?? ""} placeholder="+225 ..." required />
           </Field>
           <Field label="WhatsApp" htmlFor="whatsapp">
@@ -54,10 +54,10 @@ export function PartnerOnboardingForm({ type, defaults }: Props) {
             <Input id="zonesCovered" name="zonesCovered" defaultValue={v.zonesCovered ?? defaults.zonesCovered ?? ""} placeholder="Cocody, Plateau, Marcory" />
           </Field>
           <Field label="Langues parlees" htmlFor="languages" hint="Separees par des virgules" className="sm:col-span-2">
-            <Input id="languages" name="languages" defaultValue={v.languages ?? defaults.languages ?? ""} placeholder="Francais, Anglais, Dioula" />
+            <Input id="languages" name="languages" defaultValue={v.languages ?? defaults.languages ?? ""} placeholder="Français, Anglais, Dioula" />
           </Field>
-          <Field label="Presentation de votre activite" htmlFor="description" required className="sm:col-span-2">
-            <Textarea id="description" name="description" rows={3} defaultValue={v.description ?? defaults.description ?? ""} placeholder="Decrivez votre activite, votre experience, vos points forts..." required />
+          <Field label="Présentation de votre activité" htmlFor="description" required className="sm:col-span-2">
+            <Textarea id="description" name="description" rows={3} defaultValue={v.description ?? defaults.description ?? ""} placeholder="Decrivez votre activité, votre expérience, vos points forts..." required />
           </Field>
           {isRestaurant && (
             <Field label="Type de cuisine" htmlFor="cuisineType" className="sm:col-span-2">
@@ -70,9 +70,9 @@ export function PartnerOnboardingForm({ type, defaults }: Props) {
       {/* Justificatifs */}
       <section className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
         <h2 className="mb-1 font-bold text-foreground">Justificatifs</h2>
-        <p className="mb-4 text-sm text-muted">Vos documents restent confidentiels et servent uniquement a la verification.</p>
+        <p className="mb-4 text-sm text-muted">Vos documents restent confidentiels et servent uniquement a la vérification.</p>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <UploadField name="idDocumentUrl" label="Piece d'identite" required kind="document" accept="image/*,application/pdf" hint="CNI, passeport ou permis (image ou PDF)." />
+          <UploadField name="idDocumentUrl" label="Pièce d'identité" required kind="document" accept="image/*,application/pdf" hint="CNI, passeport ou permis (image ou PDF)." />
           <UploadField name="coverImageUrl" label="Photo de votre espace" hint="Visuel affiche aux voyageurs (optionnel)." />
           {isDriver && (
             <UploadField name="drivingLicenseUrl" label="Permis de conduire" required kind="document" accept="image/*,application/pdf" hint="Obligatoire pour les chauffeurs." />
@@ -83,9 +83,9 @@ export function PartnerOnboardingForm({ type, defaults }: Props) {
       {/* Vehicule (chauffeur) */}
       {isDriver && (
         <section className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
-          <h2 className="mb-4 font-bold text-foreground">Votre vehicule</h2>
+          <h2 className="mb-4 font-bold text-foreground">Votre véhicule</h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field label="Type de vehicule" htmlFor="vehicleType" required>
+            <Field label="Type de véhicule" htmlFor="vehicleType" required>
               <Input id="vehicleType" name="vehicleType" defaultValue={v.vehicleType ?? ""} placeholder="Berline, SUV, minibus, van..." required />
             </Field>
             <Field label="Marque / modele" htmlFor="vehicleBrand">

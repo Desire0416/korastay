@@ -61,7 +61,7 @@ export async function createResidenceReservation(
   formData: FormData
 ): Promise<ReservationResult> {
   const user = await getCurrentUser();
-  if (!user) return { ok: false, error: "Veuillez vous connecter pour reserver." };
+  if (!user) return { ok: false, error: "Veuillez vous connecter pour réserver." };
 
   const parsed = residenceSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) {
@@ -69,20 +69,20 @@ export async function createResidenceReservation(
   }
   const data = parsed.data;
   if (!data.acceptTerms) {
-    return { ok: false, error: "Vous devez accepter les conditions de reservation." };
+    return { ok: false, error: "Vous devez accepter les conditions de réservation." };
   }
 
   const startDate = new Date(data.checkin);
   const endDate = new Date(data.checkout);
   const nights = nightsBetween(startDate, endDate);
-  if (nights < 1) return { ok: false, error: "Selectionnez au moins une nuit." };
+  if (nights < 1) return { ok: false, error: "Sélectionnez au moins une nuit." };
   if (startDate < new Date(new Date().toDateString())) {
-    return { ok: false, error: "Les dates passees ne sont pas reservables." };
+    return { ok: false, error: "Les dates passées ne sont pas réservables." };
   }
 
   const residence = await prisma.residence.findUnique({ where: { id: data.residenceId } });
   if (!residence || residence.status !== "PUBLISHED") {
-    return { ok: false, error: "Residence indisponible." };
+    return { ok: false, error: "Résidence indisponible." };
   }
 
   const settings = await getPaymentSettings();
@@ -117,12 +117,12 @@ export async function createResidenceReservation(
           endDate: { gt: startDate },
         },
       });
-      if (overlap) throw new Error("Ces dates viennent d'etre demandees. Choisissez d'autres dates.");
+      if (overlap) throw new Error("Ces dates viennent d'être demandées. Choisissez d'autres dates.");
 
       const block = await tx.residenceAvailabilityBlock.findFirst({
         where: { residenceId: residence.id, startDate: { lt: endDate }, endDate: { gt: startDate } },
       });
-      if (block) throw new Error("Ces dates sont bloquees par le proprietaire.");
+      if (block) throw new Error("Ces dates sont bloquées par le propriétaire.");
 
       const reservation = await tx.reservation.create({
         data: {
@@ -156,25 +156,25 @@ export async function createResidenceReservation(
   await prisma.notification.create({
     data: {
       userId: residence.ownerId,
-      title: "Nouvelle demande de reservation",
-      body: `${data.guestName} souhaite reserver ${residence.name}. A valider sous ${RESIDENCE_VALIDATION_HOURS}h.`,
+      title: "Nouvelle demande de réservation",
+      body: `${data.guestName} souhaite réserver ${residence.name}. A valider sous ${RESIDENCE_VALIDATION_HOURS}h.`,
       type: "RESERVATION_REQUEST",
       url: "/owner/bookings",
     },
   });
   await notifyAdmins(
-    "Demande de reservation residence",
+    "Demande de réservation résidence",
     `${residence.name} - ${data.guestName}. Validation sous ${RESIDENCE_VALIDATION_HOURS}h.`,
     "/admin/reservations"
   );
   await sendEmail({
     to: data.guestEmail,
-    subject: "Demande de reservation recue - KoraStay",
+    subject: "Demande de réservation reçue - KoraStay",
     html: emailLayout(
-      "Votre demande a bien ete recue",
+      "Votre demande a bien ete reçue",
       `<p>Bonjour ${data.guestName},</p><p>Votre demande pour <strong>${residence.name}</strong> est en attente de validation par l'hote. Vous serez notifie sous ${RESIDENCE_VALIDATION_HOURS}h pour proceder au paiement de l'acompte.</p>`
     ),
-    text: `Demande de reservation recue pour ${residence.name}.`,
+    text: `Demande de réservation reçue pour ${residence.name}.`,
   });
 
   redirect(`/account/bookings/${reservationId}?requested=1`);
@@ -199,7 +199,7 @@ export async function createPackReservation(
   formData: FormData
 ): Promise<ReservationResult> {
   const user = await getCurrentUser();
-  if (!user) return { ok: false, error: "Veuillez vous connecter pour reserver." };
+  if (!user) return { ok: false, error: "Veuillez vous connecter pour réserver." };
 
   const parsed = packSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) {
@@ -256,18 +256,18 @@ export async function createPackReservation(
   });
 
   await notifyAdmins(
-    "Demande de reservation pack",
+    "Demande de réservation pack",
     `${pack.name} - ${data.guestName}. Validation sous ${PACK_VALIDATION_DAYS} jours.`,
     "/admin/reservations"
   );
   await sendEmail({
     to: data.guestEmail,
-    subject: "Demande de pack recue - KoraStay",
+    subject: "Demande de pack reçue - KoraStay",
     html: emailLayout(
-      "Votre demande de pack a bien ete recue",
+      "Votre demande de pack a bien ete reçue",
       `<p>Bonjour ${data.guestName},</p><p>Votre demande pour le pack <strong>${pack.name}</strong> est en cours de validation par notre equipe. Vous serez notifie sous ${PACK_VALIDATION_DAYS} jours pour le paiement de l'acompte.</p>`
     ),
-    text: `Demande de pack recue pour ${pack.name}.`,
+    text: `Demande de pack reçue pour ${pack.name}.`,
   });
 
   redirect(`/account/bookings/${reservation.id}?requested=1`);
@@ -293,7 +293,7 @@ export async function createActivityReservation(
   formData: FormData
 ): Promise<ReservationResult> {
   const user = await getCurrentUser();
-  if (!user) return { ok: false, error: "Veuillez vous connecter pour reserver." };
+  if (!user) return { ok: false, error: "Veuillez vous connecter pour réserver." };
 
   const parsed = activitySchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Formulaire invalide." };
@@ -301,9 +301,9 @@ export async function createActivityReservation(
   if (!data.acceptTerms) return { ok: false, error: "Vous devez accepter les conditions." };
 
   const activity = await prisma.activity.findUnique({ where: { id: data.activityId } });
-  if (!activity || activity.status !== "PUBLISHED") return { ok: false, error: "Activite indisponible." };
+  if (!activity || activity.status !== "PUBLISHED") return { ok: false, error: "Activité indisponible." };
   if (data.persons > activity.maxPersons) {
-    return { ok: false, error: `Cette activite accueille au maximum ${activity.maxPersons} personnes.` };
+    return { ok: false, error: `Cette activité accueille au maximum ${activity.maxPersons} personnes.` };
   }
 
   const guide = await prisma.partnerProfile.findFirst({
@@ -345,24 +345,24 @@ export async function createActivityReservation(
     data: {
       userId: guide.userId,
       title: "Demande d'accompagnement",
-      body: `${data.guestName} souhaite reserver l'activite "${activity.name}" avec vous.`,
+      body: `${data.guestName} souhaite réserver l'activité "${activity.name}" avec vous.`,
       type: "PARTNER_MISSION",
       url: "/partner/missions",
     },
   });
   await notifyAdmins(
-    "Demande de reservation activite",
+    "Demande de réservation activité",
     `${activity.name} - ${data.guestName} (guide: ${guide.businessName}). Validation sous ${RESIDENCE_VALIDATION_HOURS}h.`,
     "/admin/reservations"
   );
   await sendEmail({
     to: data.guestEmail,
-    subject: "Demande d'activite recue - KoraStay",
+    subject: "Demande d'activité reçue - KoraStay",
     html: emailLayout(
-      "Votre demande d'activite a bien ete recue",
+      "Votre demande d'activité a bien ete reçue",
       `<p>Bonjour ${data.guestName},</p><p>Votre demande pour <strong>${activity.name}</strong> avec un guide est en attente de validation. Vous serez notifie pour le paiement de l'acompte.</p>`
     ),
-    text: `Demande d'activite recue pour ${activity.name}.`,
+    text: `Demande d'activité reçue pour ${activity.name}.`,
   });
 
   redirect(`/account/bookings/${reservation.id}?requested=1`);
@@ -379,10 +379,10 @@ export async function approveReservation(reservationId: string): Promise<Reserva
     where: { id: reservationId },
     include: { residence: { select: { ownerId: true, name: true } }, pack: { select: { name: true } } },
   });
-  if (!reservation) return { ok: false, error: "Reservation introuvable." };
+  if (!reservation) return { ok: false, error: "Réservation introuvable." };
 
   const isOwner = reservation.residence?.ownerId === user.id;
-  if (!isOwner && !isStaff(user.role)) return { ok: false, error: "Acces refuse." };
+  if (!isOwner && !isStaff(user.role)) return { ok: false, error: "Accès refuse." };
   if (reservation.status !== "PENDING_APPROVAL") {
     return { ok: false, error: "Cette demande n'est plus en attente de validation." };
   }
@@ -395,8 +395,8 @@ export async function approveReservation(reservationId: string): Promise<Reserva
     prisma.notification.create({
       data: {
         userId: reservation.travelerId,
-        title: "Reservation validee",
-        body: `Votre demande ${reservation.reference} est validee. Payez l'acompte de ${formatPrice(reservation.depositAmount)} pour confirmer.`,
+        title: "Réservation validée",
+        body: `Votre demande ${reservation.reference} est validée. Payez l'acompte de ${formatPrice(reservation.depositAmount)} pour confirmer.`,
         type: "RESERVATION_APPROVED",
         url: `/account/bookings/${reservationId}`,
       },
@@ -405,12 +405,12 @@ export async function approveReservation(reservationId: string): Promise<Reserva
 
   await sendEmail({
     to: reservation.guestEmail,
-    subject: `Demande validee - ${reservation.reference}`,
+    subject: `Demande validée - ${reservation.reference}`,
     html: emailLayout(
-      "Votre demande est validee",
+      "Votre demande est validée",
       `<p>Bonjour ${reservation.guestName},</p><p>Bonne nouvelle ! Votre demande <strong>${reservation.reference}</strong> est validee. Reglez l'acompte de <strong>${formatPrice(reservation.depositAmount)}</strong> pour confirmer votre reservation.</p>`
     ),
-    text: `Demande ${reservation.reference} validee. Acompte : ${formatPrice(reservation.depositAmount)}.`,
+    text: `Demande ${reservation.reference} validée. Acompte : ${formatPrice(reservation.depositAmount)}.`,
   });
 
   ["/owner/bookings", "/admin/reservations"].forEach((p) => revalidatePath(p));
@@ -426,10 +426,10 @@ export async function rejectReservation(reservationId: string): Promise<Reservat
     where: { id: reservationId },
     include: { residence: { select: { ownerId: true } } },
   });
-  if (!reservation) return { ok: false, error: "Reservation introuvable." };
+  if (!reservation) return { ok: false, error: "Réservation introuvable." };
 
   const isOwner = reservation.residence?.ownerId === user.id;
-  if (!isOwner && !isStaff(user.role)) return { ok: false, error: "Acces refuse." };
+  if (!isOwner && !isStaff(user.role)) return { ok: false, error: "Accès refuse." };
   if (reservation.status !== "PENDING_APPROVAL") {
     return { ok: false, error: "Cette demande n'est plus en attente." };
   }
@@ -442,8 +442,8 @@ export async function rejectReservation(reservationId: string): Promise<Reservat
     prisma.notification.create({
       data: {
         userId: reservation.travelerId,
-        title: "Demande declinee",
-        body: `Votre demande ${reservation.reference} n'a pas pu etre validee. Aucun montant ne vous a ete debite.`,
+        title: "Demande déclinée",
+        body: `Votre demande ${reservation.reference} n'a pas pu être validée. Aucun montant ne vous a ete debite.`,
         type: "RESERVATION_CANCELLED",
         url: `/account/bookings/${reservationId}`,
       },
@@ -476,10 +476,10 @@ export async function payReservationDeposit(
     },
   });
   if (!reservation || reservation.travelerId !== user.id) {
-    return { ok: false, error: "Reservation introuvable." };
+    return { ok: false, error: "Réservation introuvable." };
   }
   if (reservation.status !== "PENDING_PAYMENT") {
-    return { ok: false, error: "Cette reservation n'est pas en attente de paiement." };
+    return { ok: false, error: "Cette réservation n'est pas en attente de paiement." };
   }
 
   const amount = reservation.depositAmount > 0 ? reservation.depositAmount : reservation.totalAmount;
@@ -516,8 +516,8 @@ export async function payReservationDeposit(
     await prisma.notification.create({
       data: {
         userId: reservation.travelerId,
-        title: "Paiement en cours de verification",
-        body: `Votre paiement pour ${reservation.reference} sera confirme des sa validation par KoraStay.`,
+        title: "Paiement en cours de vérification",
+        body: `Votre paiement pour ${reservation.reference} sera confirmé des sa validation par KoraStay.`,
         type: "PAYMENT_PENDING",
         url: `/account/bookings/${reservationId}`,
       },
@@ -555,8 +555,8 @@ export async function expireStaleReservations(): Promise<number> {
     prisma.notification.createMany({
       data: stale.map((r) => ({
         userId: r.travelerId,
-        title: "Demande expiree",
-        body: `Votre demande ${r.reference} a expire sans validation et a ete annulee automatiquement.`,
+        title: "Demande expirée",
+        body: `Votre demande ${r.reference} a expire sans validation et a ete annulée automatiquement.`,
         type: "RESERVATION_CANCELLED",
         url: "/account/bookings",
       })),
@@ -577,10 +577,10 @@ export async function cancelReservation(reservationId: string): Promise<Reservat
     include: { payments: { where: { status: "PAID" }, take: 1 } },
   });
   if (!reservation || reservation.travelerId !== user.id) {
-    return { ok: false, error: "Reservation introuvable." };
+    return { ok: false, error: "Réservation introuvable." };
   }
   if (!["CONFIRMED", "PENDING_PAYMENT", "PENDING_APPROVAL"].includes(reservation.status)) {
-    return { ok: false, error: "Cette reservation ne peut pas etre annulee." };
+    return { ok: false, error: "Cette réservation ne peut pas être annulée." };
   }
 
   const estimate =
@@ -609,8 +609,8 @@ export async function cancelReservation(reservationId: string): Promise<Reservat
     await tx.notification.create({
       data: {
         userId: user.id,
-        title: "Reservation annulee",
-        body: `Votre reservation ${reservation.reference} a ete annulee.${hasPaid ? " " + estimate.label + "." : ""}`,
+        title: "Réservation annulée",
+        body: `Votre réservation ${reservation.reference} a ete annulée.${hasPaid ? " " + estimate.label + "." : ""}`,
         type: "RESERVATION_CANCELLED",
         url: `/account/bookings/${reservationId}`,
       },

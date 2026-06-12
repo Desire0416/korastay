@@ -35,7 +35,7 @@ export function DestinationCard({ destination, size = "sm" }: DestinationCardPro
           )}
           {count > 0 && (
             <p className="mt-1 text-xs font-medium text-white/90">
-              {count} residence{count > 1 ? "s" : ""}
+              {count} résidence{count > 1 ? "s" : ""}
             </p>
           )}
         </div>

@@ -3,7 +3,7 @@ import { CheckCircle2, XCircle } from "lucide-react";
 import { verifyEmailAction } from "@/server/actions/auth";
 import { Button } from "@/components/ui/button";
 
-export const metadata = { title: "Verification de l'email" };
+export const metadata = { title: "Vérification de l'email" };
 
 type SP = Record<string, string | string[] | undefined>;
 
@@ -26,11 +26,11 @@ export default async function VerifyEmailPage({
         {result.ok ? <CheckCircle2 className="h-8 w-8" /> : <XCircle className="h-8 w-8" />}
       </div>
       <h1 className="mt-5 text-2xl font-bold text-foreground">
-        {result.ok ? "Email confirme !" : "Verification impossible"}
+        {result.ok ? "Email confirmé !" : "Vérification impossible"}
       </h1>
       <p className="mt-2 text-muted">
         {result.ok
-          ? "Votre adresse email a ete confirmee avec succes. Vous pouvez profiter pleinement de KoraStay."
+          ? "Votre adresse email a ete confirmée avec succès. Vous pouvez profiter pleinement de KoraStay."
           : result.error}
       </p>
       <div className="mt-7 flex flex-col gap-3">

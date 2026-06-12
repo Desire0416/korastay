@@ -45,9 +45,9 @@ export function ProfileForm({ defaults }: ProfileFormProps) {
       const data = await res.json();
       if (res.ok && data.url) {
         setAvatar(data.url);
-        toast.success("Photo prete. N'oubliez pas d'enregistrer.");
+        toast.success("Photo prête. N'oubliez pas d'enregistrer.");
       } else {
-        toast.error(data.error ?? "Echec de l'upload.");
+        toast.error(data.error ?? "Échec de l'upload.");
       }
     } finally {
       setUploading(false);
@@ -99,24 +99,24 @@ export function ProfileForm({ defaults }: ProfileFormProps) {
         </Field>
       </div>
 
-      <Field label="Email" hint="L'email ne peut pas etre modifie ici.">
+      <Field label="Email" hint="L'email ne peut pas être modifié ici.">
         <Input defaultValue={defaults.email} disabled />
       </Field>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Field label="Telephone" htmlFor="phone">
+        <Field label="Téléphone" htmlFor="phone">
           <Input id="phone" name="phone" defaultValue={defaults.phone} placeholder="+225 ..." />
         </Field>
         <Field label="Ville" htmlFor="city">
           <Input id="city" name="city" defaultValue={defaults.city} placeholder="Abidjan" />
         </Field>
         <Field label="Pays" htmlFor="country">
-          <Input id="country" name="country" defaultValue={defaults.country ?? "Cote d'Ivoire"} placeholder="Cote d'Ivoire" />
+          <Input id="country" name="country" defaultValue={defaults.country ?? "Côte d'Ivoire"} placeholder="Côte d'Ivoire" />
         </Field>
       </div>
 
-      <Field label="A propos de moi" htmlFor="bio" hint="Une courte presentation (facultatif).">
-        <Textarea id="bio" name="bio" defaultValue={defaults.bio ?? ""} rows={4} placeholder="Parlez un peu de vous, de vos preferences de voyage..." maxLength={600} />
+      <Field label="A propos de moi" htmlFor="bio" hint="Une courte présentation (facultatif).">
+        <Textarea id="bio" name="bio" defaultValue={defaults.bio ?? ""} rows={4} placeholder="Parlez un peu de vous, de vos préférences de voyage..." maxLength={600} />
       </Field>
 
       <Button type="submit" loading={pending}>Enregistrer les modifications</Button>

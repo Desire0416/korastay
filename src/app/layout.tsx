@@ -23,7 +23,7 @@ const fraunces = Fraunces({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
   title: {
-    default: `${APP_NAME} - Reservez votre sejour, vivez l'Afrique de l'Ouest`,
+    default: `${APP_NAME} - Réservez votre séjour, vivez l'Afrique de l'Ouest`,
     template: `%s - ${APP_NAME}`,
   },
   description: APP_DESCRIPTION,

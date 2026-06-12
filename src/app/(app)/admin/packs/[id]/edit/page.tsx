@@ -46,7 +46,7 @@ export default async function EditPackPage({ params }: { params: Promise<{ id: s
       />
       <section className="mb-6 rounded-3xl border border-border bg-surface p-5 shadow-soft">
         <h2 className="mb-1 font-bold text-foreground">Photos du pack</h2>
-        <p className="mb-4 text-sm text-muted">Importez des photos (la premiere sert de couverture).</p>
+        <p className="mb-4 text-sm text-muted">Importez des photos (la première sert de couverture).</p>
         <PhotosManager
           entityId={pack.id}
           images={pack.images}

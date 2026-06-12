@@ -6,7 +6,7 @@ import { updateResidence } from "@/server/actions/owner";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ResidenceForm } from "@/components/dashboard/residence-form";
 
-export const metadata = { title: "Modifier la residence" };
+export const metadata = { title: "Modifier la résidence" };
 
 export default async function EditResidencePage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireRole(["OWNER", "ADMIN", "SUPER_ADMIN"]);
@@ -23,8 +23,8 @@ export default async function EditResidencePage({ params }: { params: Promise<{ 
   return (
     <div className="mx-auto max-w-3xl">
       <PageHeader
-        title="Modifier la residence"
-        breadcrumbs={[{ label: "Mes residences", href: "/owner/residences" }, { label: residence.name, href: `/owner/residences/${id}` }, { label: "Modifier" }]}
+        title="Modifier la résidence"
+        breadcrumbs={[{ label: "Mes résidences", href: "/owner/residences" }, { label: residence.name, href: `/owner/residences/${id}` }, { label: "Modifier" }]}
       />
       <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
         <ResidenceForm

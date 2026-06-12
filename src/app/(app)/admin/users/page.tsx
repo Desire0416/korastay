@@ -19,7 +19,7 @@ const str = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 const ACCOUNT_STATUS_OPTIONS = [
   { value: "ACTIVE", label: "Actif" },
   { value: "SUSPENDED", label: "Suspendu" },
-  { value: "DISABLED", label: "Desactive" },
+  { value: "DISABLED", label: "Désactivé" },
   { value: "PENDING_EMAIL_VERIFICATION", label: "Email a confirmer" },
 ];
 
@@ -54,14 +54,14 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
 
       <FilterBar
         fields={[
-          { type: "search", name: "q", placeholder: "Nom, email, telephone..." },
+          { type: "search", name: "q", placeholder: "Nom, email, téléphone..." },
           { type: "select", name: "role", label: "Tous les roles", options: toFilterOptions(userRoleMeta, ["TRAVELER", "OWNER", "PARTNER", "BUSINESS", "SUPPORT", "ADMIN", "SUPER_ADMIN"]) },
           { type: "select", name: "status", label: "Tous les statuts", options: ACCOUNT_STATUS_OPTIONS },
         ]}
       />
 
       {users.length === 0 ? (
-        <EmptyState icon={Users} title="Aucun utilisateur" description="Aucun resultat pour ces criteres." />
+        <EmptyState icon={Users} title="Aucun utilisateur" description="Aucun resultat pour ces critères." />
       ) : (
       <>
       {/* Mobile : liste de cartes */}
@@ -102,7 +102,7 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
                     </Link>
                   </td>
                   <td className="px-5 py-3"><Badge tone={userRoleMeta[u.role]?.tone}>{userRoleMeta[u.role]?.label}</Badge></td>
-                  <td className="px-5 py-3"><Badge tone={u.status === "ACTIVE" ? "success" : u.status === "SUSPENDED" ? "danger" : "neutral"}>{u.status === "ACTIVE" ? "Actif" : u.status === "SUSPENDED" ? "Suspendu" : u.status === "DISABLED" ? "Desactive" : "Email a confirmer"}</Badge></td>
+                  <td className="px-5 py-3"><Badge tone={u.status === "ACTIVE" ? "success" : u.status === "SUSPENDED" ? "danger" : "neutral"}>{u.status === "ACTIVE" ? "Actif" : u.status === "SUSPENDED" ? "Suspendu" : u.status === "DISABLED" ? "Désactivé" : "Email a confirmer"}</Badge></td>
                   <td className="px-5 py-3 text-muted">{formatDate(u.createdAt)}</td>
                 </tr>
               ))}

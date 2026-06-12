@@ -8,7 +8,7 @@ import { formatDate, initials } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ReviewReplyForm } from "@/components/dashboard/review-reply-form";
 
-export const metadata = { title: "Avis recus" };
+export const metadata = { title: "Avis reçus" };
 
 export default async function OwnerReviewsPage() {
   const user = await requireRole(["OWNER", "ADMIN", "SUPER_ADMIN"]);
@@ -16,9 +16,9 @@ export default async function OwnerReviewsPage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <PageHeader title="Avis recus" description="Les retours de vos voyageurs." />
+      <PageHeader title="Avis reçus" description="Les retours de vos voyageurs." />
       {reviews.length === 0 ? (
-        <EmptyState icon={Star} title="Aucun avis" description="Les avis de vos voyageurs apparaitront ici apres leurs sejours." />
+        <EmptyState icon={Star} title="Aucun avis" description="Les avis de vos voyageurs apparaitront ici après leurs séjours." />
       ) : (
         <div className="space-y-3">
           {reviews.map((r) => (

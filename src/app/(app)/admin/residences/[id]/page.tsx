@@ -32,7 +32,7 @@ export default async function AdminResidenceDetail({ params, searchParams }: { p
   return (
     <div className="mx-auto max-w-5xl">
       <Link href="/admin/residences" className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-muted hover:text-foreground">
-        <ChevronLeft className="h-4 w-4" /> Residences
+        <ChevronLeft className="h-4 w-4" /> Résidences
       </Link>
       <PageHeader
         title={residence.name}
@@ -52,7 +52,7 @@ export default async function AdminResidenceDetail({ params, searchParams }: { p
       {sp.created === "1" && (
         <div className="mb-6 flex items-center gap-3 rounded-2xl border border-success/30 bg-emerald-50 p-4">
           <CheckCircle2 className="h-5 w-5 text-success" />
-          <p className="text-sm text-success">Residence creee avec succes.</p>
+          <p className="text-sm text-success">Résidence créée avec succès.</p>
         </div>
       )}
 
@@ -88,7 +88,7 @@ export default async function AdminResidenceDetail({ params, searchParams }: { p
 
         <aside className="space-y-4">
           <div className="rounded-3xl border border-border bg-surface p-5 shadow-soft">
-            <h3 className="mb-2 flex items-center gap-2 font-bold text-foreground"><User className="h-4 w-4 text-brand-600" /> Proprietaire</h3>
+            <h3 className="mb-2 flex items-center gap-2 font-bold text-foreground"><User className="h-4 w-4 text-brand-600" /> Propriétaire</h3>
             <p className="text-sm font-semibold text-foreground">{residence.owner.firstName} {residence.owner.lastName}</p>
             <p className="text-sm text-muted">{residence.owner.email}</p>
             {residence.owner.phone && <p className="text-sm text-muted">{residence.owner.phone}</p>}

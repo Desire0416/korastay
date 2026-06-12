@@ -14,9 +14,9 @@ export default async function PartnerMessagesPage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <PageHeader title="Messages" description="Echangez avec l'equipe KoraStay." actions={<StartSupportButton label="Contacter KoraStay" />} />
+      <PageHeader title="Messages" description="Echangez avec l'équipe KoraStay." actions={<StartSupportButton label="Contacter KoraStay" />} />
       {conversations.length === 0 ? (
-        <EmptyState icon={MessageCircle} title="Aucune conversation" description="Contactez l'equipe KoraStay pour toute question sur vos missions ou votre profil." />
+        <EmptyState icon={MessageCircle} title="Aucune conversation" description="Contactez l'équipe KoraStay pour toute question sur vos missions ou votre profil." />
       ) : (
         <div className="overflow-hidden rounded-3xl border border-border bg-surface shadow-soft">
           <ConversationList conversations={conversations} basePath="/partner/messages" />

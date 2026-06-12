@@ -37,7 +37,7 @@ export function ValidationCountdown({ deadline, startedAt }: { deadline: string;
   }, [expired, router]);
 
   function label() {
-    if (expired) return "Delai expire";
+    if (expired) return "Délai expire";
     const s = Math.floor(remaining / 1000);
     const d = Math.floor(s / 86400);
     const h = Math.floor((s % 86400) / 3600);
@@ -64,8 +64,8 @@ export function ValidationCountdown({ deadline, startedAt }: { deadline: string;
       </div>
       <p className="mt-2 text-xs text-muted">
         {expired
-          ? "Sans validation a temps, la demande est annulee automatiquement."
-          : "Votre demande sera annulee automatiquement si elle n'est pas validee a temps."}
+          ? "Sans validation a temps, la demande est annulée automatiquement."
+          : "Votre demande sera annulée automatiquement si elle n'est pas validée a temps."}
       </p>
     </div>
   );

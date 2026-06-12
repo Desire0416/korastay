@@ -18,20 +18,20 @@ export default async function OwnerRevenuesPage() {
       <PageHeader title="Revenus" description="Suivez vos gains (hors frais de service KoraStay)." />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <KpiCard label="Revenu total" value={formatPrice(total)} icon={Wallet} tone="success" />
-        <KpiCard label="Reservations" value={reservations.length} icon={TrendingUp} tone="brand" />
+        <KpiCard label="Réservations" value={reservations.length} icon={TrendingUp} tone="brand" />
         <KpiCard label="Panier moyen" value={formatPrice(avg)} icon={Wallet} tone="gold" />
       </div>
 
-      <h2 className="mb-3 mt-8 text-lg font-bold text-foreground">Detail des revenus</h2>
+      <h2 className="mb-3 mt-8 text-lg font-bold text-foreground">Détail des revenus</h2>
       {reservations.length === 0 ? (
-        <EmptyState icon={Wallet} title="Aucun revenu" description="Vos revenus apparaitront ici apres vos premieres reservations confirmees." />
+        <EmptyState icon={Wallet} title="Aucun revenu" description="Vos revenus apparaitront ici après vos premières réservations confirmées." />
       ) : (
         <div className="overflow-hidden rounded-3xl border border-border bg-surface shadow-soft">
           <table className="w-full text-sm">
             <thead className="border-b border-border bg-surface-soft/50 text-left text-xs uppercase text-muted">
               <tr>
-                <th className="px-5 py-3 font-semibold">Reference</th>
-                <th className="hidden px-5 py-3 font-semibold sm:table-cell">Residence</th>
+                <th className="px-5 py-3 font-semibold">Référence</th>
+                <th className="hidden px-5 py-3 font-semibold sm:table-cell">Résidence</th>
                 <th className="hidden px-5 py-3 font-semibold md:table-cell">Date</th>
                 <th className="px-5 py-3 text-right font-semibold">Votre part</th>
               </tr>

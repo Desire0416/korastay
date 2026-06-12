@@ -19,12 +19,12 @@ export default async function NewServicePage() {
       <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
         <LeadForm
           action={createPartnerService as never}
-          submitLabel="Creer le service"
+          submitLabel="Créer le service"
           fields={[
             { name: "title", label: "Titre du service", required: true, full: true, placeholder: "Visite guidee de Daloa" },
             { name: "city", label: "Ville", placeholder: "Daloa" },
-            { name: "priceFrom", label: "Prix a partir de (F CFA)", type: "number", placeholder: "15000" },
-            { name: "duration", label: "Duree", placeholder: "Demi-journee" },
+            { name: "priceFrom", label: "Prix à partir de (F CFA)", type: "number", placeholder: "15000" },
+            { name: "duration", label: "Durée", placeholder: "Demi-journée" },
             { name: "description", label: "Description", type: "textarea", placeholder: "Ce que comprend la prestation..." },
           ]}
         />

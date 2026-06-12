@@ -49,7 +49,7 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
       <p className="mt-6 text-center text-sm text-muted">
         Pas encore de compte ?{" "}
         <Link href="/register" className="font-semibold text-brand-600 hover:text-brand-700">
-          Creer un compte
+          Créer un compte
         </Link>
       </p>
     </div>

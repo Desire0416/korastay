@@ -39,7 +39,7 @@ export default async function AdminPartnersPage({ searchParams }: { searchParams
 
   return (
     <div className="mx-auto max-w-5xl">
-      <PageHeader title="Partenaires" description="Validez et gerez le reseau de partenaires." />
+      <PageHeader title="Partenaires" description="Validez et gérez le réseau de partenaires." />
 
       <FilterBar
         fields={[

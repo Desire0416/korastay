@@ -30,8 +30,8 @@ const registerSchema = z.object({
   firstName: z.string().min(2, "Prenom requis"),
   lastName: z.string().min(2, "Nom requis"),
   email: z.string().email("Email invalide"),
-  phone: z.string().min(6, "Telephone requis").optional().or(z.literal("")),
-  password: z.string().min(8, "8 caracteres minimum"),
+  phone: z.string().min(6, "Téléphone requis").optional().or(z.literal("")),
+  password: z.string().min(8, "8 caractères minimum"),
 });
 
 export async function registerAction(
@@ -61,7 +61,7 @@ export async function registerAction(
     where: { email: data.email.toLowerCase() },
   });
   if (existing) {
-    return { ok: false, error: "Un compte existe deja avec cet email.", values };
+    return { ok: false, error: "Un compte existe déjà avec cet email.", values };
   }
 
   const passwordHash = await hashPassword(data.password);
@@ -102,7 +102,7 @@ export async function registerAction(
     data: {
       userId: user.id,
       title: "Bienvenue sur KoraStay",
-      body: "Votre compte a ete cree. Confirmez votre email pour activer votre compte.",
+      body: "Votre compte a ete créé. Confirmez votre email pour activer votre compte.",
       type: "WELCOME",
     },
   });
@@ -112,7 +112,7 @@ export async function registerAction(
   return {
     ok: true,
     message:
-      "Votre compte a ete cree. Un email de confirmation vient de vous etre envoye : cliquez sur le lien pour activer votre compte avant de vous connecter.",
+      "Votre compte a ete créé. Un email de confirmation vient de vous être envoyé : cliquez sur le lien pour activer votre compte avant de vous connecter.",
   };
 }
 
@@ -145,7 +145,7 @@ export async function loginAction(
   if (user.status === "PENDING_EMAIL_VERIFICATION") {
     return {
       ok: false,
-      error: "Votre compte n'est pas encore active. Confirmez votre email (verifiez vos spams) pour vous connecter.",
+      error: "Votre compte n'est pas encore active. Confirmez votre email (vérifiez vos spams) pour vous connecter.",
       values: { email: parsed.data.email },
     };
   }
@@ -196,7 +196,7 @@ export async function resendVerificationAction(
     });
   }
   // Reponse identique que le compte existe/soit deja actif ou non (securite).
-  return { ok: true, message: "Si votre compte est en attente, un nouvel email de confirmation vient d'etre envoye." };
+  return { ok: true, message: "Si votre compte est en attente, un nouvel email de confirmation vient d'être envoyé." };
 }
 
 // ------------------------------------------------------------
@@ -220,7 +220,7 @@ export async function verifyEmailAction(token: string): Promise<ActionState> {
       data: { usedAt: new Date() },
     }),
   ]);
-  return { ok: true, message: "Email confirme avec succes." };
+  return { ok: true, message: "Email confirmé avec succès." };
 }
 
 // ------------------------------------------------------------
@@ -259,7 +259,7 @@ export async function forgotPasswordAction(
   return {
     ok: true,
     message:
-      "Si un compte existe avec cet email, un lien de reinitialisation a ete envoye.",
+      "Si un compte existe avec cet email, un lien de reinitialisation a ete envoyé.",
   };
 }
 
@@ -270,7 +270,7 @@ export async function resetPasswordAction(
   const token = String(formData.get("token") ?? "");
   const password = String(formData.get("password") ?? "");
   if (password.length < 8) {
-    return { ok: false, error: "8 caracteres minimum." };
+    return { ok: false, error: "8 caractères minimum." };
   }
   const record = await prisma.passwordResetToken.findUnique({ where: { token } });
   if (!record || record.usedAt || record.expiresAt < new Date()) {

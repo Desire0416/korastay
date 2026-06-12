@@ -11,9 +11,9 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export const metadata = {
-  title: "Residences verifiees",
+  title: "Locations meublées vérifiées",
   description:
-    "Parcourez les residences meublees verifiees KoraStay en Cote d'Ivoire : studios, appartements et villas.",
+    "Parcourez les locations meublées vérifiées KoraStay en Côte d'Ivoire : studios, appartements et villas.",
 };
 
 type SP = Record<string, string | string[] | undefined>;
@@ -66,11 +66,11 @@ export default async function ResidencesPage({
     <div className="container-page py-5 md:py-8">
       <div className="mb-4 md:mb-6">
         <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
-          {cityName ? `Residences a ${cityName}` : "Residences verifiees"}
+          {cityName ? `Locations meublées à ${cityName}` : "Locations meublées vérifiées"}
         </h1>
         <p className="mt-1 text-sm text-muted md:text-base">
           {total} logement{total > 1 ? "s" : ""} disponible{total > 1 ? "s" : ""}
-          {cityName ? "" : " en Cote d'Ivoire"}
+          {cityName ? "" : " en Côte d'Ivoire"}
         </p>
       </div>
 
@@ -86,7 +86,7 @@ export default async function ResidencesPage({
       {items.length === 0 ? (
         <EmptyState
           icon={SearchX}
-          title="Aucune residence ne correspond"
+          title="Aucune résidence ne correspond"
           description="Essayez d'elargir votre recherche ou de modifier vos filtres."
           action={
             <Button asChild>
@@ -125,7 +125,7 @@ export default async function ResidencesPage({
       {pageCount > 1 && (
         <div className="mt-12 flex items-center justify-center gap-2">
           <Button asChild variant="outline" size="icon" disabled={page <= 1}>
-            <Link href={pageHref(Math.max(1, page - 1))} aria-label="Page precedente">
+            <Link href={pageHref(Math.max(1, page - 1))} aria-label="Page précédente">
               <ChevronLeft className="h-4 w-4" />
             </Link>
           </Button>

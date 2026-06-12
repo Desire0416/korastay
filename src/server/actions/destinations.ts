@@ -42,7 +42,7 @@ export async function saveDestination(id: string | null, _prev: DestResult, form
   const data = {
     name: d.name,
     region: d.region || null,
-    country: d.country || "Cote d'Ivoire",
+    country: d.country || "Côte d'Ivoire",
     description: d.description || null,
     heroImageUrl: d.heroImageUrl || null,
     priority: d.priority,
@@ -72,7 +72,7 @@ export async function toggleDestinationActive(id: string): Promise<DestResult> {
   await prisma.destination.update({ where: { id }, data: { isActive: !dest.isActive } });
   revalidatePath("/admin/destinations");
   revalidatePath("/destinations");
-  return { ok: true, message: dest.isActive ? "Destination desactivee." : "Destination activee." };
+  return { ok: true, message: dest.isActive ? "Destination désactivée." : "Destination activée." };
 }
 
 export async function deleteDestination(id: string): Promise<DestResult> {
@@ -83,9 +83,9 @@ export async function deleteDestination(id: string): Promise<DestResult> {
   });
   if (!counts) return { ok: false, error: "Introuvable." };
   if (counts._count.residences > 0 || counts._count.packs > 0) {
-    return { ok: false, error: "Impossible : des residences ou packs sont lies. Desactivez-la plutot." };
+    return { ok: false, error: "Impossible : des résidences ou packs sont lies. Desactivez-la plutôt." };
   }
   await prisma.destination.delete({ where: { id } });
   revalidatePath("/admin/destinations");
-  return { ok: true, message: "Destination supprimee." };
+  return { ok: true, message: "Destination supprimée." };
 }
