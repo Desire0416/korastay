@@ -221,7 +221,11 @@ for (const [k, v] of Object.entries(BASE)) {
   if (!(cap in MAP)) MAP[cap] = capV;
 }
 const KEYS = Object.keys(MAP).sort((a, b) => b.length - a.length);
-const WORD_RE = new RegExp("\\b(" + KEYS.join("|") + ")\\b", "g");
+// Frontieres "lettre" incluant les caracteres accentues (A-ÿ) : JS \b est
+// ASCII-only, donc un accent agit comme une frontiere et permettrait de
+// re-matcher un bout de mot adjacent a un accent (ex: "très" dans "paramètres"
+// -> "paramètrès"). Les lookarounds rendent le script idempotent et sur.
+const WORD_RE = new RegExp("(?<![A-Za-zÀ-ÿ])(" + KEYS.join("|") + ")(?![A-Za-zÀ-ÿ])", "g");
 
 function applyDict(text: string): string {
   let out = text.replace(WORD_RE, (m) => MAP[m] ?? m);

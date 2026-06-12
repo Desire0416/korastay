@@ -14,10 +14,14 @@ export function ValidationCountdown({ deadline, startedAt }: { deadline: string;
   const start = React.useMemo(() => new Date(startedAt).getTime(), [startedAt]);
   const total = Math.max(1, end - start);
 
-  const [now, setNow] = React.useState(() => Date.now());
+  // Valeur initiale deterministe (issue des props) pour que le rendu serveur
+  // et le premier rendu client soient identiques -> pas de mismatch d'hydratation.
+  // L'heure reelle est appliquee juste apres le montage.
+  const [now, setNow] = React.useState(start);
   const firedRef = React.useRef(false);
 
   React.useEffect(() => {
+    setNow(Date.now());
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, []);
