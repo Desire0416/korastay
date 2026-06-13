@@ -18,7 +18,7 @@ import { generateReference, nightsBetween, formatPrice } from "@/lib/utils";
 import { getPaymentProviderForMethod } from "@/lib/payments";
 import { sendEmail, emailLayout } from "@/lib/email";
 import { paymentMethodMeta } from "@/lib/enums";
-import { RESIDENCE_VALIDATION_HOURS, PACK_VALIDATION_DAYS } from "@/lib/constants";
+import { RESIDENCE_VALIDATION_HOURS, PACK_VALIDATION_DAYS, PAYMENT_DEADLINE_HOURS } from "@/lib/constants";
 
 export type ReservationResult = {
   ok: boolean;
@@ -110,12 +110,22 @@ export async function createResidenceReservation(
   let reservationId: string;
   try {
     reservationId = await prisma.$transaction(async (tx) => {
+      const now = new Date();
       const overlap = await tx.reservation.findFirst({
         where: {
           residenceId: residence.id,
-          status: { in: ["CONFIRMED", "CHECKED_IN", "PENDING_PAYMENT", "PENDING_APPROVAL"] },
           startDate: { lt: endDate },
           endDate: { gt: startDate },
+          OR: [
+            // Reservations fermes : bloquent toujours.
+            { status: { in: ["CONFIRMED", "CHECKED_IN"] } },
+            // Holds en attente : ne bloquent que s'ils ne sont pas expires
+            // (expiresAt null = paiement declare/en cours -> on garde la date).
+            {
+              status: { in: ["PENDING_PAYMENT", "PENDING_APPROVAL"] },
+              OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+            },
+          ],
         },
       });
       if (overlap) throw new Error("Ces dates viennent d'être demandées. Choisissez d'autres dates.");
@@ -391,13 +401,19 @@ export async function approveReservation(reservationId: string): Promise<Reserva
   await prisma.$transaction([
     prisma.reservation.update({
       where: { id: reservationId },
-      data: { status: "PENDING_PAYMENT", approvedAt: new Date(), approvedById: user.id, expiresAt: null },
+      data: {
+        status: "PENDING_PAYMENT",
+        approvedAt: new Date(),
+        approvedById: user.id,
+        // Delai de paiement : au-dela (sans paiement declare), auto-annulation.
+        expiresAt: new Date(Date.now() + PAYMENT_DEADLINE_HOURS * HOUR),
+      },
     }),
     prisma.notification.create({
       data: {
         userId: reservation.travelerId,
         title: "Réservation validée",
-        body: `Votre demande ${reservation.reference} est validée. Payez l'acompte de ${formatPrice(reservation.depositAmount)} pour confirmer.`,
+        body: `Votre demande ${reservation.reference} est validée. Payez l'acompte de ${formatPrice(reservation.depositAmount)} sous ${PAYMENT_DEADLINE_HOURS}h pour confirmer.`,
         type: "RESERVATION_APPROVED",
         url: `/account/bookings/${reservationId}`,
       },
@@ -590,6 +606,9 @@ export async function declareReservationPayment(
       data: { reservationId, method, status: "PENDING", amount, provider: "manual", providerReference: reference, metadata },
     });
   }
+
+  // Paiement declare : on suspend le delai d'auto-annulation (l'admin valide).
+  await prisma.reservation.update({ where: { id: reservationId }, data: { expiresAt: null } });
 
   await notifyAdmins(
     "Paiement a valider",

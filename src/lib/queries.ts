@@ -136,7 +136,17 @@ export async function getResidenceBySlug(slug: string) {
         take: 8,
       },
       reservations: {
-        where: { status: { in: ["CONFIRMED", "CHECKED_IN", "PENDING_PAYMENT"] } },
+        // Dates indisponibles : reservations fermes + holds en attente NON
+        // expires (un hold de paiement expire libere la date).
+        where: {
+          OR: [
+            { status: { in: ["CONFIRMED", "CHECKED_IN"] } },
+            {
+              status: "PENDING_PAYMENT",
+              OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+            },
+          ],
+        },
         select: { startDate: true, endDate: true },
       },
     },

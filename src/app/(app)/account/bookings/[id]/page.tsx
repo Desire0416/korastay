@@ -152,6 +152,11 @@ export default async function BookingDetailPage({
             Reglez <strong>{formatPrice(reservation.depositAmount)}</strong> ({reservation.paymentPolicy === "FULL" ? "100% du séjour" : "acompte"}) pour confirmer votre réservation.
             {reservation.balanceDueAmount > 0 && ` Le solde (${formatPrice(reservation.balanceDueAmount)}) sera regle avant ou au check-in.`}
           </p>
+          {reservation.expiresAt && (
+            <p className="mb-4 flex items-center gap-1.5 text-sm font-semibold text-gold-700">
+              <Clock className="h-4 w-4 shrink-0" /> À régler avant le {formatDate(reservation.expiresAt)} — au-delà, la réservation est annulée et les dates libérées.
+            </p>
+          )}
           <ManualPaymentPanel
             reservationId={reservation.id}
             amountLabel={formatPrice(reservation.depositAmount)}

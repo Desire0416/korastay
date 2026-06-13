@@ -23,6 +23,11 @@ export const PAYMENT_HOLD_MINUTES = 15;
 export const RESIDENCE_VALIDATION_HOURS = 24;
 export const PACK_VALIDATION_DAYS = 7;
 
+// Delai laisse au voyageur pour regler l'acompte apres validation de la demande.
+// Au-dela (sans paiement declare), la reservation est auto-annulee et les dates
+// sont liberees. Declarer un paiement met ce delai en pause (l'admin valide).
+export const PAYMENT_DEADLINE_HOURS = 72;
+
 // Session
 export const SESSION_COOKIE = "korastay_session";
 export const SESSION_DURATION_DAYS = 30;

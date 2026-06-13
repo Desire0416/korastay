@@ -32,15 +32,30 @@ export async function GET(req: NextRequest) {
     result.approvalExpired++;
   }
 
-  // 1) Liberer les reservations en attente de paiement expirees
+  // 1) Annuler les reservations dont le delai de paiement est expire SANS
+  //    paiement declare. Declarer un paiement met expiresAt a null (l'admin
+  //    valide), donc ces reservations ne sont jamais concernees ici.
   const expired = await prisma.reservation.findMany({
-    where: { status: "PENDING_PAYMENT", expiresAt: { lt: now } },
-    select: { id: true },
+    where: {
+      status: "PENDING_PAYMENT",
+      expiresAt: { lt: now },
+      payments: { none: { status: { in: ["PENDING", "PAID"] } } },
+    },
+    select: { id: true, travelerId: true, reference: true },
   });
   for (const r of expired) {
     await prisma.$transaction([
       prisma.reservation.update({ where: { id: r.id }, data: { status: "CANCELLED", cancelledAt: now } }),
       prisma.payment.updateMany({ where: { reservationId: r.id, status: { in: ["PENDING", "PROCESSING"] } }, data: { status: "EXPIRED" } }),
+      prisma.notification.create({
+        data: {
+          userId: r.travelerId,
+          title: "Réservation annulée",
+          body: `Faute de paiement dans les délais, votre réservation ${r.reference} a ete annulée. Les dates sont a nouveau disponibles.`,
+          type: "RESERVATION_CANCELLED",
+          url: "/account/bookings",
+        },
+      }),
     ]);
     result.expiredReleased++;
   }
