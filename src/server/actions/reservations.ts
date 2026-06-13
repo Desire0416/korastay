@@ -17,6 +17,7 @@ import { finalizeReservationPayment } from "@/lib/reservation-finalize";
 import { generateReference, nightsBetween, formatPrice } from "@/lib/utils";
 import { getPaymentProviderForMethod } from "@/lib/payments";
 import { sendEmail, emailLayout } from "@/lib/email";
+import { paymentMethodMeta } from "@/lib/enums";
 import { RESIDENCE_VALIDATION_HOURS, PACK_VALIDATION_DAYS } from "@/lib/constants";
 
 export type ReservationResult = {
@@ -535,6 +536,78 @@ export async function payReservationDeposit(
 
   revalidatePath("/account/bookings");
   redirect(`/account/bookings/${reservationId}?confirmed=1`);
+}
+
+// ------------------------------------------------------------
+// Declaration de paiement hors ligne (sans agregateur) : le voyageur
+// indique qu'il a regle (moyen + reference de transaction + capture).
+// On cree un paiement EN ATTENTE que l'admin valide (validatePendingPayment).
+// N'auto-confirme JAMAIS -> aucun risque de faux "paye" en production.
+// ------------------------------------------------------------
+export async function declareReservationPayment(
+  _prev: ReservationResult,
+  formData: FormData
+): Promise<ReservationResult> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, error: "Non autorise." };
+
+  const reservationId = String(formData.get("reservationId") ?? "");
+  const method = String(formData.get("method") ?? "").trim();
+  const reference = String(formData.get("reference") ?? "").trim();
+  const proofUrl = String(formData.get("proofUrl") ?? "").trim();
+
+  const reservation = await prisma.reservation.findUnique({
+    where: { id: reservationId },
+    select: {
+      id: true, travelerId: true, status: true, reference: true,
+      depositAmount: true, totalAmount: true, guestName: true,
+    },
+  });
+  if (!reservation || reservation.travelerId !== user.id) {
+    return { ok: false, error: "Réservation introuvable." };
+  }
+  if (reservation.status !== "PENDING_PAYMENT") {
+    return { ok: false, error: "Cette réservation n'attend pas de paiement." };
+  }
+  if (!method) return { ok: false, error: "Choisissez le moyen utilisé." };
+  if (!reference) return { ok: false, error: "Indiquez la référence de votre transaction." };
+
+  const amount = reservation.depositAmount > 0 ? reservation.depositAmount : reservation.totalAmount;
+  const metadata = JSON.stringify({ proofUrl: proofUrl || null, declaredBy: user.id, source: "traveler_declaration" });
+
+  // Met a jour une declaration en attente existante, sinon en cree une.
+  const existing = await prisma.payment.findFirst({
+    where: { reservationId, status: "PENDING" },
+    select: { id: true },
+  });
+  if (existing) {
+    await prisma.payment.update({
+      where: { id: existing.id },
+      data: { method, amount, provider: "manual", providerReference: reference, metadata },
+    });
+  } else {
+    await prisma.payment.create({
+      data: { reservationId, method, status: "PENDING", amount, provider: "manual", providerReference: reference, metadata },
+    });
+  }
+
+  await notifyAdmins(
+    "Paiement a valider",
+    `${reservation.guestName} a declare un paiement (${paymentMethodMeta[method]?.label ?? method}, ref. ${reference}) de ${formatPrice(amount)} pour ${reservation.reference}.`,
+    "/admin/payments"
+  );
+  await prisma.notification.create({
+    data: {
+      userId: user.id,
+      title: "Déclaration de paiement reçue",
+      body: `Votre paiement pour ${reservation.reference} sera confirmé des sa validation par KoraStay.`,
+      type: "PAYMENT_PENDING",
+      url: `/account/bookings/${reservationId}`,
+    },
+  });
+
+  revalidatePath(`/account/bookings/${reservationId}`);
+  redirect(`/account/bookings/${reservationId}?pending_validation=1`);
 }
 
 // ============================================================

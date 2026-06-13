@@ -35,6 +35,12 @@ export interface PaymentSettings {
   payoutReliableCheckInPercent: number; // hote fiable : % verse au check-in
   // 10. Message de reassurance client
   payViaKoraStayNote: string;
+  // 11. Reception des paiements hors ligne (sans agregateur) : numeros mobile
+  // money par moyen, coordonnees bancaires, et instructions affichees au
+  // voyageur a l'etape "regler l'acompte".
+  receivingNumbers: Record<string, string>;
+  bankDetails: string;
+  manualInstructions: string;
 }
 
 export const DEFAULT_PAYMENT_SETTINGS: PaymentSettings = {
@@ -61,6 +67,9 @@ export const DEFAULT_PAYMENT_SETTINGS: PaymentSettings = {
   payoutReliableCheckInPercent: 100,
   payViaKoraStayNote:
     "Tous les paiements sont sécurisés et transitent par KoraStay. Ne reglez jamais directement l'hôte ou le prestataire avant votre arrivée.",
+  receivingNumbers: { WAVE: "", ORANGE_MONEY: "", MTN_MOMO: "", MOOV_MONEY: "" },
+  bankDetails: "",
+  manualInstructions: "",
 };
 
 export const PAYMENT_SETTINGS_KEY = "payment_settings";
@@ -70,6 +79,10 @@ function merge(parsed: Partial<PaymentSettings>): PaymentSettings {
     ...DEFAULT_PAYMENT_SETTINGS,
     ...parsed,
     methods: { ...DEFAULT_PAYMENT_SETTINGS.methods, ...(parsed.methods ?? {}) },
+    receivingNumbers: {
+      ...DEFAULT_PAYMENT_SETTINGS.receivingNumbers,
+      ...(parsed.receivingNumbers ?? {}),
+    },
   };
 }
 

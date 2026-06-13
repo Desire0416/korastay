@@ -11,6 +11,7 @@ import { paymentMethodMeta } from "@/lib/enums";
 import type { PaymentSettings } from "@/lib/payment-rules";
 
 const METHODS = ["WAVE", "ORANGE_MONEY", "MTN_MOMO", "MOOV_MONEY", "CARD", "BANK_TRANSFER", "MANUAL"] as const;
+const MOBILE_METHODS = ["WAVE", "ORANGE_MONEY", "MTN_MOMO", "MOOV_MONEY"] as const;
 
 function PolicySelect({ name, defaultValue }: { name: string; defaultValue: string }) {
   return (
@@ -49,6 +50,29 @@ export function PaymentSettingsForm({ settings }: { settings: PaymentSettings })
               </span>
             </label>
           ))}
+        </div>
+      </section>
+
+      {/* 1 bis. Reception des paiements hors ligne (sans agregateur) */}
+      <section className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
+        <h2 className="font-bold text-foreground">Réception des paiements (sans API)</h2>
+        <p className="mb-4 text-sm text-muted">
+          Numéros et coordonnées affichés au voyageur pour régler l&apos;acompte. Il déclare ensuite sa transaction (référence + capture), que vous validez dans « Paiements ».
+        </p>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {MOBILE_METHODS.map((m) => (
+            <Field key={m} label={`Numéro ${paymentMethodMeta[m]?.label ?? m}`} htmlFor={`recv_${m}`}>
+              <Input id={`recv_${m}`} name={`recv_${m}`} placeholder="+225 07 00 00 00 00" defaultValue={settings.receivingNumbers?.[m] ?? ""} />
+            </Field>
+          ))}
+        </div>
+        <div className="mt-4 grid grid-cols-1 gap-4">
+          <Field label="Coordonnées bancaires (virement)" htmlFor="bankDetails" hint="Titulaire, banque, IBAN / RIB">
+            <Textarea id="bankDetails" name="bankDetails" rows={3} defaultValue={settings.bankDetails ?? ""} placeholder="KoraStay SARL — Banque ... — IBAN CI..." />
+          </Field>
+          <Field label="Instructions complémentaires" htmlFor="manualInstructions" hint="Affichées sous les coordonnées">
+            <Textarea id="manualInstructions" name="manualInstructions" rows={2} defaultValue={settings.manualInstructions ?? ""} placeholder="Ex : indiquez la référence de la réservation dans le motif du paiement." />
+          </Field>
         </div>
       </section>
 

@@ -75,8 +75,17 @@ class NotConfiguredProvider implements PaymentProvider {
   }
 }
 
+// Provider effectif. Sans PAYMENT_PROVIDER configure : "mock" (auto-confirme)
+// UNIQUEMENT en developpement pour la demo ; en production on bascule sur
+// "manual" -> jamais de fausse confirmation de paiement sans agregateur.
+function defaultProviderKey(): string {
+  const explicit = process.env.PAYMENT_PROVIDER;
+  if (explicit) return explicit.toLowerCase();
+  return process.env.NODE_ENV === "production" ? "manual" : "mock";
+}
+
 export function getPaymentProvider(): PaymentProvider {
-  const key = (process.env.PAYMENT_PROVIDER ?? "mock").toLowerCase();
+  const key = defaultProviderKey();
   switch (key) {
     case "manual":
       return new ManualPaymentProvider();
@@ -102,8 +111,7 @@ export function getPaymentProviderForMethod(method: string): PaymentProvider {
   return getPaymentProvider();
 }
 
-export const isMockPayments = () =>
-  (process.env.PAYMENT_PROVIDER ?? "mock").toLowerCase() === "mock";
+export const isMockPayments = () => defaultProviderKey() === "mock";
 
 // Liste de reference (libelles dans enums.paymentMethodMeta).
 export const PAYMENT_METHOD_OPTIONS = [

@@ -10,7 +10,7 @@ import { estimateResidenceRefund, estimatePackRefund } from "@/lib/pricing";
 import { getPaymentSettings, enabledPaymentMethods } from "@/lib/payment-rules";
 import { CancelReservationButton } from "@/components/dashboard/cancel-reservation-button";
 import { ValidationCountdown } from "@/components/dashboard/validation-countdown";
-import { PayDepositButton } from "@/components/dashboard/pay-deposit-button";
+import { ManualPaymentPanel } from "@/components/dashboard/manual-payment-panel";
 import { ContactButton } from "@/components/messaging/contact-button";
 import { SmartImage } from "@/components/ui/smart-image";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -37,7 +37,10 @@ export default async function BookingDetailPage({
   const justRequested = sp.requested === "1";
   const pendingValidation = sp.pending_validation === "1";
   const paySettings = await getPaymentSettings();
-  const payMethods = enabledPaymentMethods(paySettings).map((v) => ({ value: v, label: paymentMethodMeta[v]?.label ?? v }));
+  const recvNumbers = paySettings.receivingNumbers ?? {};
+  const manualOptions = enabledPaymentMethods(paySettings)
+    .filter((v) => v !== "CARD") // la carte exige un agregateur en ligne
+    .map((v) => ({ value: v, label: paymentMethodMeta[v]?.label ?? v, number: recvNumbers[v] ?? "" }));
   const hasPendingPayment = reservation.payments.some((p) => p.status === "PENDING");
   const isPack = reservation.type === "PACK";
   const isActivity = reservation.type === "ACTIVITY";
@@ -149,10 +152,13 @@ export default async function BookingDetailPage({
             Reglez <strong>{formatPrice(reservation.depositAmount)}</strong> ({reservation.paymentPolicy === "FULL" ? "100% du séjour" : "acompte"}) pour confirmer votre réservation.
             {reservation.balanceDueAmount > 0 && ` Le solde (${formatPrice(reservation.balanceDueAmount)}) sera regle avant ou au check-in.`}
           </p>
-          <PayDepositButton
+          <ManualPaymentPanel
             reservationId={reservation.id}
             amountLabel={formatPrice(reservation.depositAmount)}
-            methods={payMethods}
+            reference={reservation.reference}
+            options={manualOptions}
+            bankDetails={paySettings.bankDetails ?? ""}
+            instructions={paySettings.manualInstructions ?? ""}
           />
         </div>
       )}

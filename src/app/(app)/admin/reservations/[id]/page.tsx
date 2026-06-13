@@ -32,6 +32,10 @@ export default async function AdminReservationDetail({ params }: { params: Promi
   if (!reservation) notFound();
 
   const pendingPayment = reservation.payments.find((p) => p.status === "PENDING");
+  let pendingProofUrl: string | null = null;
+  if (pendingPayment?.metadata) {
+    try { pendingProofUrl = JSON.parse(pendingPayment.metadata)?.proofUrl ?? null; } catch { /* metadata libre */ }
+  }
   const canRecordPayment = ["PENDING_PAYMENT", "PARTIALLY_PAID"].includes(reservation.status);
 
   const actions = [];
@@ -98,9 +102,16 @@ export default async function AdminReservationDetail({ params }: { params: Promi
           {pendingPayment && (
             <div className="rounded-3xl border border-gold-200 bg-gold-50/60 p-5 shadow-soft">
               <p className="mb-1 flex items-center gap-2 font-bold text-gold-800"><ShieldQuestion className="h-5 w-5" /> Paiement a vérifier</p>
-              <p className="mb-3 text-sm text-gold-800/80">
+              <p className="mb-2 text-sm text-gold-800/80">
                 Un paiement de <strong>{formatPrice(pendingPayment.amount)}</strong> ({paymentMethodMeta[pendingPayment.method]?.label ?? pendingPayment.method}) est en attente de vérification.
+                {pendingPayment.providerReference && <> Référence déclarée par le voyageur : <strong>{pendingPayment.providerReference}</strong>.</>}
               </p>
+              {pendingProofUrl && (
+                <a href={pendingProofUrl} target="_blank" rel="noopener noreferrer" className="mb-3 inline-block text-sm font-semibold text-brand-600 underline">
+                  Voir la capture du paiement
+                </a>
+              )}
+              <p className="mb-3 text-xs text-gold-800/70">Vérifiez la réception sur votre compte avant de valider.</p>
               <AdminActions actions={[{ label: "Valider ce paiement", icon: "CreditCard", fn: validatePendingPayment.bind(null, pendingPayment.id), variant: "primary" }]} />
             </div>
           )}

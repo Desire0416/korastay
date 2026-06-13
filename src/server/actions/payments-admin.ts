@@ -45,6 +45,16 @@ export async function savePaymentSettings(
   const methods: Record<string, boolean> = {};
   for (const m of CONFIGURABLE_METHODS) methods[m] = formData.get(`method_${m}`) === "1";
 
+  // Numeros de reception (mobile money) pour le paiement hors ligne.
+  const MOBILE_METHODS = [
+    PaymentMethod.WAVE,
+    PaymentMethod.ORANGE_MONEY,
+    PaymentMethod.MTN_MOMO,
+    PaymentMethod.MOOV_MONEY,
+  ];
+  const receivingNumbers: Record<string, string> = {};
+  for (const m of MOBILE_METHODS) receivingNumbers[m] = String(formData.get(`recv_${m}`) ?? "").trim();
+
   const feePercent = Math.min(30, Math.max(0, num(formData.get("serviceFeePercent"), d.serviceFeePercent)));
   const feeMin = Math.max(0, num(formData.get("serviceFeeMin"), d.serviceFeeMin));
   const feeMax = Math.max(feeMin, num(formData.get("serviceFeeMax"), d.serviceFeeMax));
@@ -64,6 +74,9 @@ export async function savePaymentSettings(
     payoutNewCheckInPercent: Math.min(100, Math.max(0, num(formData.get("payoutNewCheckInPercent"), d.payoutNewCheckInPercent))),
     payoutReliableCheckInPercent: Math.min(100, Math.max(0, num(formData.get("payoutReliableCheckInPercent"), d.payoutReliableCheckInPercent))),
     payViaKoraStayNote: String(formData.get("payViaKoraStayNote") ?? "").trim() || d.payViaKoraStayNote,
+    receivingNumbers,
+    bankDetails: String(formData.get("bankDetails") ?? "").trim(),
+    manualInstructions: String(formData.get("manualInstructions") ?? "").trim(),
   };
 
   await persistPaymentSettings(settings);
