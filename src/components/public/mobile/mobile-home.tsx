@@ -4,17 +4,20 @@ import * as React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
-  ArrowRight, ArrowUpRight, Home as HomeIcon, Compass, Briefcase,
-  ShieldCheck, Smartphone, Headset, Star, Quote, Check,
+  ArrowRight, ArrowUpRight, Home as HomeIcon, Compass, Sparkles, Clock, MapPin,
+  ShieldCheck, Smartphone, Headset, Star, Quote,
   Eye, Users, KeyRound, Handshake, BedDouble, type LucideIcon,
 } from "lucide-react";
 import { HeroSearch } from "../hero-search";
 import { DestinationCard } from "../destination-card";
 import { MobileResidenceCard, MobilePackCard } from "./mobile-cards";
 import { CountUp } from "../count-up";
+import { SmartImage } from "@/components/ui/smart-image";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { cn, initials } from "@/lib/utils";
+import { activityCategoryMeta } from "@/lib/enums";
+import { cn, initials, formatPrice } from "@/lib/utils";
 import type { ResidenceCardData, CommunityStats } from "@/lib/queries";
+import type { ActivityCardData } from "@/lib/activity-queries";
 
 type Destination = React.ComponentProps<typeof DestinationCard>["destination"];
 type Pack = React.ComponentProps<typeof MobilePackCard>["pack"];
@@ -30,30 +33,24 @@ interface MobileHomeProps {
   residences: ResidenceCardData[];
   destinations: Destination[];
   packs: Pack[];
+  activities: ActivityCardData[];
   reviews: Review[];
   stats: { residences: number; destinations: number; packs: number };
   community: CommunityStats | null;
   favorites: { residences: Set<string>; packs: Set<string> };
 }
 
-type TabKey = "residences" | "packs" | "business";
+type TabKey = "residences" | "packs" | "activites";
 const TABS: { key: TabKey; label: string; icon: LucideIcon; color: string; badge?: string }[] = [
   { key: "residences", label: "Location meublée", icon: HomeIcon, color: "text-brand-600" },
   { key: "packs", label: "Packs", icon: Compass, color: "text-gold-600", badge: "Populaire" },
-  { key: "business", label: "Business", icon: Briefcase, color: "text-info" },
+  { key: "activites", label: "Activités", icon: Sparkles, color: "text-success" },
 ];
 
 const TRUST = [
   { icon: ShieldCheck, title: "Locations meublées vérifiées", text: "Contrôlées par KoraStay." },
   { icon: Smartphone, title: "Paiement mobile", text: "Orange Money, Wave, carte." },
   { icon: Headset, title: "Assistance locale", text: "Avant, pendant, après." },
-];
-
-const BUSINESS_BENEFITS = [
-  "Contrats cadres & facturation centralisee",
-  "Assistance dediee 7j/7",
-  "Rapports mensuels detailles",
-  "Locations meublées vérifiées partout en Côte d'Ivoire",
 ];
 
 function SectionHead({ title, subtitle, href }: { title: string; subtitle?: string; href?: string }) {
@@ -72,7 +69,7 @@ function SectionHead({ title, subtitle, href }: { title: string; subtitle?: stri
   );
 }
 
-export function MobileHome({ residences, destinations, packs, reviews, stats, community, favorites }: MobileHomeProps) {
+export function MobileHome({ residences, destinations, packs, activities, reviews, stats, community, favorites }: MobileHomeProps) {
   const [tab, setTab] = React.useState<TabKey>("residences");
 
   // Tuiles de stats (affichees seulement si l'admin a active la section).
@@ -276,29 +273,50 @@ export function MobileHome({ residences, destinations, packs, reviews, stats, co
         </section>
       )}
 
-      {/* ===== Onglet BUSINESS ===== */}
-      {tab === "business" && (
+      {/* ===== Onglet ACTIVITES ===== */}
+      {tab === "activites" && (
         <section className="px-5 pb-4 pt-5">
-          <div className="relative overflow-hidden rounded-3xl bg-ink p-5 text-white">
-            <div className="gradient-hero absolute inset-0 opacity-40" />
-            <div className="relative">
-              <Briefcase className="h-7 w-7 text-gold-400" />
-              <h2 className="mt-2 font-display text-xl font-semibold">KoraStay Business</h2>
-              <p className="mt-1 text-[13px] text-white/85">Hébergements fiables et facturables pour vos équipes en mission.</p>
-            </div>
+          <div className="mb-3">
+            <h2 className="text-[19px] font-bold tracking-tight text-foreground">Activités &amp; expériences</h2>
+            <p className="text-[13px] text-muted">Excursions, visites et sorties nature, avec guide certifié.</p>
           </div>
-          <ul className="mt-4 space-y-2.5">
-            {BUSINESS_BENEFITS.map((b) => (
-              <li key={b} className="flex items-center gap-2.5 text-[14px] text-foreground">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-600">
-                  <Check className="h-3.5 w-3.5" />
-                </span>
-                {b}
-              </li>
-            ))}
-          </ul>
-          <Link href="/business" className="mt-5 flex items-center justify-center gap-2 rounded-full bg-brand-500 py-3.5 font-semibold text-white active:scale-[0.99]">
-            Demander un devis <ArrowRight className="h-4 w-4" />
+          {activities.length === 0 ? (
+            <p className="py-10 text-center text-sm text-muted">Aucune activité disponible pour le moment.</p>
+          ) : (
+            <div className="grid grid-cols-2 gap-3">
+              {activities.map((a) => (
+                <Link
+                  key={a.id}
+                  href={`/activites/${a.slug}`}
+                  className="group block overflow-hidden rounded-3xl border border-border bg-surface shadow-soft active:scale-[0.99]"
+                >
+                  <div className="relative aspect-[4/3] overflow-hidden">
+                    <SmartImage src={a.images[0]?.url} alt={a.name} seed={`act-${a.slug}`} />
+                    <span className="absolute left-2 top-2 rounded-full bg-white/95 px-2 py-0.5 text-[10px] font-bold text-ink shadow-soft">
+                      {activityCategoryMeta[a.category]?.label ?? a.category}
+                    </span>
+                  </div>
+                  <div className="p-3">
+                    <h3 className="line-clamp-1 text-[13.5px] font-bold text-foreground">{a.name}</h3>
+                    <p className="mt-0.5 flex items-center gap-1 text-[11.5px] text-muted"><MapPin className="h-3 w-3" /> {a.city}</p>
+                    <div className="mt-1 flex items-center gap-2 text-[11px] text-muted">
+                      <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {a.durationHours}h</span>
+                      {a.ratingCount > 0 && (
+                        <span className="flex items-center gap-0.5"><Star className="h-3 w-3 fill-gold-500 text-gold-500" /> {a.ratingAverage.toFixed(1)}</span>
+                      )}
+                    </div>
+                    <p className="mt-1.5 text-[13.5px]">
+                      <span className="font-extrabold text-foreground">{formatPrice(a.pricePerPerson)}</span>
+                      <span className="text-muted"> / pers.</span>
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+          <Link href="/activites" className="mt-4 flex items-center justify-between rounded-2xl border border-border bg-surface px-4 py-3 text-[14px] font-semibold text-foreground active:bg-surface-soft">
+            Voir toutes les activités
+            <ArrowRight className="h-4 w-4 text-muted" />
           </Link>
         </section>
       )}

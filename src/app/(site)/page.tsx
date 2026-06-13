@@ -19,6 +19,7 @@ import {
   getFeaturedResidences, getPopularDestinations, getPacks,
   getRecentReviews, getPlatformStats, getCommunityStats,
 } from "@/lib/queries";
+import { getFeaturedActivities } from "@/lib/activity-queries";
 import { getUserFavoriteIds } from "@/server/actions/favorites";
 import { getI18n } from "@/lib/i18n.server";
 import { initials } from "@/lib/utils";
@@ -46,11 +47,12 @@ const FAQ = [
 ];
 
 export default async function HomePage() {
-  const [residences, destinations, packs, reviews, stats, community, favorites, { dict }] =
+  const [residences, destinations, packs, activities, reviews, stats, community, favorites, { dict }] =
     await Promise.all([
       getFeaturedResidences(6),
       getPopularDestinations(6),
       getPacks(),
+      getFeaturedActivities(6),
       getRecentReviews(3),
       getPlatformStats(),
       getCommunityStats().catch(() => null),
@@ -65,6 +67,7 @@ export default async function HomePage() {
         residences={residences}
         destinations={destinations}
         packs={packs}
+        activities={activities}
         reviews={reviews}
         stats={stats}
         community={community}
