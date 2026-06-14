@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { getReservationDetail } from "@/lib/account-queries";
-import { estimateResidenceRefund, estimatePackRefund } from "@/lib/pricing";
+import { estimateResidenceRefund, estimatePackRefund, stayDiscountRate } from "@/lib/pricing";
 import { getPaymentSettings, enabledPaymentMethods } from "@/lib/payment-rules";
 import { CancelReservationButton } from "@/components/dashboard/cancel-reservation-button";
 import { ValidationCountdown } from "@/components/dashboard/validation-countdown";
@@ -49,6 +49,12 @@ export default async function BookingDetailPage({
   const seed = reservation.residence?.slug ?? reservation.pack?.slug ?? reservation.activity?.slug ?? reservation.id;
   const placeLabel = reservation.residence?.city ?? reservation.pack?.destination?.name ?? reservation.activity?.city;
   const payment = reservation.payments[0];
+  // Remise duree de sejour : recalculee a partir des montants stockes.
+  const stayDiscount = Math.max(
+    0,
+    reservation.subtotalAmount + reservation.cleaningFeeAmount + reservation.serviceFeeAmount - reservation.totalAmount,
+  );
+  const stayDiscountPct = Math.round(stayDiscountRate(reservation.nights) * 100);
 
   const refund = isPack
     ? estimatePackRefund(reservation.totalAmount, reservation.serviceFeeAmount, reservation.startDate)
@@ -179,6 +185,12 @@ export default async function BookingDetailPage({
               <Row label="Prix du séjour" value={formatPrice(reservation.subtotalAmount)} />
               {reservation.cleaningFeeAmount > 0 && <Row label="Frais de ménage" value={formatPrice(reservation.cleaningFeeAmount)} />}
               <Row label="Frais de service KoraStay" value={formatPrice(reservation.serviceFeeAmount)} />
+              {stayDiscount > 0 && (
+                <div className="flex justify-between font-semibold text-success">
+                  <span>Réduction séjour{stayDiscountPct > 0 ? ` (−${stayDiscountPct}%)` : ""}</span>
+                  <span>−{formatPrice(stayDiscount)}</span>
+                </div>
+              )}
               <div className="flex justify-between border-t border-border pt-3 text-base font-extrabold text-foreground">
                 <span>Total du séjour</span><span>{formatPrice(reservation.totalAmount)}</span>
               </div>

@@ -89,6 +89,12 @@ export function BookingWidget(props: BookingWidgetProps) {
         <span>Frais de service KoraStay</span>
         <span className="text-foreground">{formatPrice(price.serviceFee)}</span>
       </div>
+      {price.stayDiscount > 0 && (
+        <div className="flex justify-between font-semibold text-success">
+          <span>Réduction séjour (−{Math.round(price.stayDiscountRate * 100)}%)</span>
+          <span>−{formatPrice(price.stayDiscount)}</span>
+        </div>
+      )}
       <div className="flex justify-between border-t border-border pt-3 text-base font-bold text-foreground">
         <span>Total</span>
         <span>{formatPrice(price.total)}</span>

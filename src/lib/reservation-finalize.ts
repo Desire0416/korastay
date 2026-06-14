@@ -38,11 +38,14 @@ export async function finalizeReservationPayment(reservationId: string, paidAmou
   });
 
   // Reversements hote (residences uniquement) : echelonnes selon la fiabilite.
+  // Revenu hote = total paye par le voyageur - frais de service KoraStay.
+  // (Ainsi l'hote absorbe l'eventuelle remise duree de sejour, et KoraStay
+  // conserve ses frais ; formule juste avec ou sans remise.)
   if (reservation.residence) {
     await createOwnerPayouts(
       reservationId,
       reservation.residence.ownerId,
-      reservation.subtotalAmount + reservation.cleaningFeeAmount
+      Math.max(0, reservation.totalAmount - reservation.serviceFeeAmount)
     );
   }
 

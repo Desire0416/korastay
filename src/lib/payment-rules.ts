@@ -144,7 +144,8 @@ export interface ReservationFinance {
   subtotal: number;
   cleaningFee: number;
   serviceFee: number;
-  total: number;
+  stayDiscount: number; // remise duree de sejour (en F CFA)
+  total: number; // total APRES remise
   policy: DepositPolicy;
   depositDue: number; // a payer maintenant
   balanceDue: number; // solde restant (regle plus tard / sur place)
@@ -160,14 +161,18 @@ export function buildFinance(input: {
   businessPercent?: number;
   cautionEnabled?: boolean;
   cautionAmount?: number;
+  stayDiscountRate?: number; // remise duree de sejour (0, 0.10, 0.15)
 }): ReservationFinance {
   const cleaningFee = input.cleaningFee ?? 0;
-  const total = input.subtotal + cleaningFee + input.serviceFee;
+  const gross = input.subtotal + cleaningFee + input.serviceFee;
+  const stayDiscount = Math.round(gross * (input.stayDiscountRate ?? 0));
+  const total = gross - stayDiscount;
   const depositDue = computeDepositDue(total, input.policy, input.businessPercent);
   return {
     subtotal: input.subtotal,
     cleaningFee,
     serviceFee: input.serviceFee,
+    stayDiscount,
     total,
     policy: input.policy,
     depositDue,

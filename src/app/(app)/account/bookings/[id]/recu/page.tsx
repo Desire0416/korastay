@@ -6,6 +6,7 @@ import { getReservationDetail } from "@/lib/account-queries";
 import { PrintButton } from "@/components/dashboard/print-button";
 import { metaFor, reservationStatusMeta } from "@/lib/enums";
 import { formatPrice, formatDate } from "@/lib/utils";
+import { stayDiscountRate } from "@/lib/pricing";
 import { CONTACT_EMAIL, CONTACT_PHONE } from "@/lib/constants";
 
 export const metadata = { title: "Reçu KoraStay" };
@@ -21,6 +22,8 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
   const paid = r.payments.find((p) => p.status === "PAID");
   const balance = r.totalAmount - r.depositAmount;
   const statusMeta = metaFor(reservationStatusMeta, r.status);
+  const stayDiscount = Math.max(0, r.subtotalAmount + r.cleaningFeeAmount + r.serviceFeeAmount - r.totalAmount);
+  const stayDiscountPct = Math.round(stayDiscountRate(r.nights) * 100);
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -62,6 +65,9 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
             <Row label="Sous-total" value={formatPrice(r.subtotalAmount)} />
             {r.cleaningFeeAmount > 0 && <Row label="Frais de ménage" value={formatPrice(r.cleaningFeeAmount)} />}
             <Row label="Frais de service KoraStay" value={formatPrice(r.serviceFeeAmount)} />
+            {stayDiscount > 0 && (
+              <Row label={`Réduction séjour${stayDiscountPct > 0 ? ` (−${stayDiscountPct}%)` : ""}`} value={`−${formatPrice(stayDiscount)}`} tone="success" />
+            )}
             <Row label="Total du séjour" value={formatPrice(r.totalAmount)} strong />
             {r.depositAmount > 0 && (
               <>
@@ -101,11 +107,11 @@ function Field({ label, value, sub }: { label: string; value: string; sub?: stri
   );
 }
 
-function Row({ label, value, strong, tone }: { label: string; value: string; strong?: boolean; tone?: "brand" | "muted" }) {
+function Row({ label, value, strong, tone }: { label: string; value: string; strong?: boolean; tone?: "brand" | "muted" | "success" }) {
   return (
     <div className={`flex items-center justify-between px-4 py-2.5 text-sm ${strong ? "border-t border-border" : ""}`}>
-      <span className={tone === "muted" ? "text-muted" : "text-foreground"}>{label}</span>
-      <span className={`${strong ? "text-base font-extrabold" : "font-semibold"} ${tone === "brand" ? "text-brand-700" : tone === "muted" ? "text-muted" : "text-foreground"}`}>{value}</span>
+      <span className={tone === "muted" ? "text-muted" : tone === "success" ? "text-success" : "text-foreground"}>{label}</span>
+      <span className={`${strong ? "text-base font-extrabold" : "font-semibold"} ${tone === "brand" ? "text-brand-700" : tone === "muted" ? "text-muted" : tone === "success" ? "text-success" : "text-foreground"}`}>{value}</span>
     </div>
   );
 }

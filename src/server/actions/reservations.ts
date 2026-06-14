@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { isStaff } from "@/lib/messaging";
 import {
-  computeResidencePrice, computePackPrice,
+  computeResidencePrice, computePackPrice, stayDiscountRate,
   estimateResidenceRefund, estimatePackRefund,
 } from "@/lib/pricing";
 import {
@@ -105,6 +105,7 @@ export async function createResidenceReservation(
     policy,
     cautionEnabled: residence.cautionEnabled,
     cautionAmount: residence.depositAmount,
+    stayDiscountRate: stayDiscountRate(nights),
   });
 
   let reservationId: string;

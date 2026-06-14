@@ -18,7 +18,19 @@ export interface PriceBreakdown {
   cleaningFee: number;
   serviceFee: number;
   extras: number;
-  total: number;
+  stayDiscountRate: number; // 0, 0.10 ou 0.15 selon la duree
+  stayDiscount: number; // montant de la remise (en F CFA)
+  total: number; // total APRES remise
+}
+
+// Reduction automatique selon la duree du sejour (residences) :
+//   2 a 7 nuits   -> -10 %
+//   plus de 7 nuits -> -15 %
+// Appliquee au montant total a payer par le voyageur.
+export function stayDiscountRate(nights: number): number {
+  if (nights > 7) return 0.15;
+  if (nights >= 2) return 0.1;
+  return 0;
 }
 
 // Frais de service = pourcentage du sous-total, borne (optionnellement) entre
@@ -45,8 +57,11 @@ export function computeResidencePrice(input: ResidencePriceInput): PriceBreakdow
     input.serviceFeeMin ?? 0,
     input.serviceFeeMax ?? Number.MAX_SAFE_INTEGER
   );
-  const total = subtotal + cleaningFee + serviceFee + extras;
-  return { nights, subtotal, cleaningFee, serviceFee, extras, total };
+  const gross = subtotal + cleaningFee + serviceFee + extras;
+  const rate = stayDiscountRate(nights);
+  const stayDiscount = Math.round(gross * rate);
+  const total = gross - stayDiscount;
+  return { nights, subtotal, cleaningFee, serviceFee, extras, stayDiscountRate: rate, stayDiscount, total };
 }
 
 export interface PackPriceInput {
@@ -76,6 +91,8 @@ export function computePackPrice(input: PackPriceInput): PriceBreakdown {
     cleaningFee: 0,
     serviceFee,
     extras,
+    stayDiscountRate: 0,
+    stayDiscount: 0,
     total,
   };
 }

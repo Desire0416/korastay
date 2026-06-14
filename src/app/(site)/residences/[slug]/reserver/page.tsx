@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ChevronLeft, Users, CalendarDays, ShieldCheck } from "lucide-react";
 import { getResidenceBySlug } from "@/lib/queries";
 import { getCurrentUser } from "@/lib/auth";
-import { computeResidencePrice } from "@/lib/pricing";
+import { computeResidencePrice, stayDiscountRate } from "@/lib/pricing";
 import { getPaymentSettings, resolveResidencePolicy, buildFinance, enabledPaymentMethods } from "@/lib/payment-rules";
 import { isMockPayments } from "@/lib/payments";
 import { paymentMethodMeta } from "@/lib/enums";
@@ -62,6 +62,7 @@ export default async function ReserverPage({
     policy,
     cautionEnabled: residence.cautionEnabled,
     cautionAmount: residence.depositAmount,
+    stayDiscountRate: stayDiscountRate(price.nights),
   });
   const methods = enabledPaymentMethods(settings).map((v) => ({
     value: v,
@@ -145,6 +146,12 @@ export default async function ReserverPage({
                 <span>Frais de service KoraStay</span>
                 <span className="text-foreground">{formatPrice(finance.serviceFee)}</span>
               </div>
+              {finance.stayDiscount > 0 && (
+                <div className="flex justify-between font-semibold text-success">
+                  <span>Réduction séjour (−{Math.round(stayDiscountRate(price.nights) * 100)}%)</span>
+                  <span>−{formatPrice(finance.stayDiscount)}</span>
+                </div>
+              )}
               <div className="flex justify-between border-t border-border pt-3 text-lg font-extrabold text-foreground">
                 <span>Total</span>
                 <span>{formatPrice(finance.total)}</span>
