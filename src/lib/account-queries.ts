@@ -41,6 +41,8 @@ export async function getTravelerFavorites(userId: string) {
           id: true, slug: true, name: true, type: true, city: true, district: true,
           shortDescription: true, pricePerNight: true, capacity: true, bedrooms: true,
           isVerified: true, qualityLevel: true, ratingAverage: true, ratingCount: true,
+          latitude: true, longitude: true,
+          destination: { select: { latitude: true, longitude: true } },
           images: { select: { url: true, altText: true }, orderBy: { sortOrder: "asc" }, take: 5 },
         },
       },

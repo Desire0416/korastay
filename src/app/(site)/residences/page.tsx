@@ -6,6 +6,7 @@ import { getUserFavoriteIds } from "@/server/actions/favorites";
 import { ResidenceCard } from "@/components/public/residence-card";
 import { MobileResidenceCard } from "@/components/public/mobile/mobile-cards";
 import { ResidenceFilters } from "@/components/public/residence-filters";
+import { ResidencesMap } from "@/components/public/residences-map";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -51,6 +52,27 @@ export default async function ResidencesPage({
 
   const cityName = destinations.find((d) => d.slug === filters.city)?.name;
 
+  // Donnees carte : coords propres de la residence, repli sur celles de la
+  // destination. Si on utilise le repli (residence sans coords), petit decalage
+  // deterministe autour du centre-ville pour ne pas empiler les marqueurs.
+  const jitter = (seed: string, range = 0.012): [number, number] => {
+    let h = 0;
+    for (let i = 0; i < seed.length; i++) h = (Math.imul(h, 31) + seed.charCodeAt(i)) | 0;
+    const f = (n: number) => ((((n % 1000) + 1000) % 1000) / 1000 - 0.5) * range;
+    return [f(h), f(h >> 10)];
+  };
+  const mapData = items.flatMap((r) => {
+    let lat = r.latitude ?? r.destination?.latitude ?? null;
+    let lng = r.longitude ?? r.destination?.longitude ?? null;
+    if (lat == null || lng == null) return [];
+    if (r.latitude == null || r.longitude == null) {
+      const [dLat, dLng] = jitter(r.id);
+      lat += dLat;
+      lng += dLng;
+    }
+    return [{ id: r.id, slug: r.slug, name: r.name, city: r.city, latitude: lat, longitude: lng, pricePerNight: r.pricePerNight }];
+  });
+
   // Construit l'URL d'une page donnee en conservant les filtres
   function pageHref(p: number) {
     const params = new URLSearchParams();
@@ -82,6 +104,8 @@ export default async function ResidencesPage({
           />
         </Suspense>
       </div>
+
+      <ResidencesMap residences={mapData} />
 
       {items.length === 0 ? (
         <EmptyState

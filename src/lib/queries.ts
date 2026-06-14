@@ -25,6 +25,9 @@ const residenceCardSelect = {
   qualityLevel: true,
   ratingAverage: true,
   ratingCount: true,
+  latitude: true,
+  longitude: true,
+  destination: { select: { latitude: true, longitude: true } },
   images: {
     select: { url: true, altText: true },
     orderBy: { sortOrder: "asc" },
