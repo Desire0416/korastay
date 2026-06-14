@@ -16,6 +16,7 @@ export async function saveSettings(_prev: SettingsResult, formData: FormData): P
   // Les frais de service sont desormais geres dans /admin/settings/payments.
   await setKey("contact_email", String(formData.get("contact_email") ?? "").trim());
   await setKey("contact_phone", String(formData.get("contact_phone") ?? "").trim());
+  await setKey("whatsapp_number", String(formData.get("whatsapp_number") ?? "").trim());
   await setKey("announcement", String(formData.get("announcement") ?? "").trim());
 
   // Affichage (ou non) de la section publique "KoraStay en chiffres".
@@ -24,8 +25,9 @@ export async function saveSettings(_prev: SettingsResult, formData: FormData): P
   await prisma.auditLog.create({ data: { actorId: admin.id, action: "SETTINGS_UPDATED", entityType: "Setting", entityId: "global" } });
   revalidatePath("/admin/settings");
   revalidatePath("/admin");
-  // Reflete immediatement le basculement sur l'accueil public.
+  // Reflete immediatement les changements sur le site public.
   revalidateTag("community-stats");
+  revalidateTag("site-settings");
   revalidatePath("/");
   return { ok: true, message: "Paramètres enregistrés." };
 }

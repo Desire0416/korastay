@@ -25,6 +25,7 @@ export default async function AdminSettingsPage() {
       <SettingsForm
         contactEmail={settings.contact_email}
         contactPhone={settings.contact_phone}
+        whatsappNumber={settings.whatsapp_number}
         announcement={settings.announcement}
         statsVisible={settings.community_stats_visible === "true"}
       />
