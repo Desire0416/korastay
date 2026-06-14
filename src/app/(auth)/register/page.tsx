@@ -9,14 +9,14 @@ type AccountType = "TRAVELER" | "OWNER" | "PARTNER";
 export default async function RegisterPage({
   searchParams,
 }: {
-  searchParams: Promise<{ type?: string }>;
+  searchParams: Promise<{ type?: string; ref?: string }>;
 }) {
   const user = await getCurrentUser();
   if (user) redirect(homeForRole(user.role));
 
-  const { type } = await searchParams;
+  const { type, ref } = await searchParams;
   const defaultType: AccountType =
     type === "OWNER" || type === "PARTNER" ? type : "TRAVELER";
 
-  return <RegisterForm defaultType={defaultType} />;
+  return <RegisterForm defaultType={defaultType} defaultReferral={ref ?? ""} />;
 }

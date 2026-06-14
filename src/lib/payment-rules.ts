@@ -145,7 +145,8 @@ export interface ReservationFinance {
   cleaningFee: number;
   serviceFee: number;
   stayDiscount: number; // remise duree de sejour (en F CFA)
-  total: number; // total APRES remise
+  referralDiscount: number; // remise parrainage filleul (en F CFA)
+  total: number; // total APRES remises
   policy: DepositPolicy;
   depositDue: number; // a payer maintenant
   balanceDue: number; // solde restant (regle plus tard / sur place)
@@ -162,17 +163,21 @@ export function buildFinance(input: {
   cautionEnabled?: boolean;
   cautionAmount?: number;
   stayDiscountRate?: number; // remise duree de sejour (0, 0.10, 0.15)
+  referralDiscountRate?: number; // remise parrainage filleul (ex: 0.05)
 }): ReservationFinance {
   const cleaningFee = input.cleaningFee ?? 0;
   const gross = input.subtotal + cleaningFee + input.serviceFee;
   const stayDiscount = Math.round(gross * (input.stayDiscountRate ?? 0));
-  const total = gross - stayDiscount;
+  const afterStay = gross - stayDiscount;
+  const referralDiscount = Math.round(afterStay * (input.referralDiscountRate ?? 0));
+  const total = afterStay - referralDiscount;
   const depositDue = computeDepositDue(total, input.policy, input.businessPercent);
   return {
     subtotal: input.subtotal,
     cleaningFee,
     serviceFee: input.serviceFee,
     stayDiscount,
+    referralDiscount,
     total,
     policy: input.policy,
     depositDue,

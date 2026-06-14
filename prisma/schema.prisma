@@ -46,6 +46,12 @@ model User {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
+  // Parrainage : code (unicite assuree cote code) + lien parrain -> filleul
+  referralCode    String?
+  referredById    String?
+  referredBy      User?     @relation("Referrals", fields: [referredById], references: [id])
+  referrals       User[]    @relation("Referrals")
+
   sessions               Session[]
   emailTokens            EmailVerificationToken[]
   passwordResetTokens    PasswordResetToken[]
@@ -66,6 +72,8 @@ model User {
 
   @@index([role])
   @@index([status])
+  @@index([referredById])
+  @@index([referralCode])
 }
 
 model Session {
@@ -325,6 +333,7 @@ model Reservation {
   subtotalAmount    Int          @default(0)
   serviceFeeAmount  Int          @default(0)
   cleaningFeeAmount Int          @default(0)
+  referralDiscountAmount Int     @default(0) // remise parrainage (filleul, 1ere resa)
   totalAmount       Int          @default(0)
   depositAmount     Int          @default(0) // acompte a payer maintenant (apres validation)
   amountPaid        Int          @default(0) // cumul deja paye via KoraStay

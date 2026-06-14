@@ -14,6 +14,7 @@ import {
 } from "@/lib/auth";
 import { sendEmail, emailLayout, emailButton } from "@/lib/email";
 import { partnerTypeMeta } from "@/lib/enums";
+import { generateUniqueReferralCode, resolveReferrerId } from "@/lib/referral";
 import crypto from "crypto";
 
 export type ActionState = {
@@ -85,6 +86,11 @@ export async function registerAction(
     return { ok: false, error: "Un compte existe déjà avec cet email.", values };
   }
 
+  // Parrainage : code propre au nouveau compte + lien vers le parrain si un
+  // code valide a ete saisi (ou transmis via ?ref=).
+  const referralCode = await generateUniqueReferralCode();
+  const referredById = await resolveReferrerId(String(formData.get("referralCode") ?? ""));
+
   const passwordHash = await hashPassword(data.password);
   const user = await prisma.user.create({
     data: {
@@ -96,6 +102,8 @@ export async function registerAction(
       // Le type choisi a l'inscription devient le role du compte.
       role: data.accountType,
       status: "PENDING_EMAIL_VERIFICATION",
+      referralCode,
+      referredById,
     },
   });
 

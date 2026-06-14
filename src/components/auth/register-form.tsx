@@ -32,9 +32,11 @@ interface Props {
   lockType?: boolean;
   title?: string;
   subtitle?: string;
+  /** Code de parrainage pré-rempli (via ?ref=). */
+  defaultReferral?: string;
 }
 
-export function RegisterForm({ defaultType = "TRAVELER", lockType = false, title, subtitle }: Props) {
+export function RegisterForm({ defaultType = "TRAVELER", lockType = false, title, subtitle, defaultReferral = "" }: Props) {
   const [state, action, pending] = useActionState<ActionState, FormData>(registerAction, { ok: false });
   const [accountType, setAccountType] = useState<AccountType>(defaultType);
 
@@ -135,6 +137,19 @@ export function RegisterForm({ defaultType = "TRAVELER", lockType = false, title
         </Field>
         <Field label="Mot de passe" htmlFor="password" required hint="8 caractères minimum" error={state.fieldErrors?.password}>
           <Input id="password" name="password" type="password" placeholder="********" required autoComplete="new-password" />
+        </Field>
+        <Field
+          label="Code de parrainage"
+          htmlFor="referralCode"
+          hint={defaultReferral ? "Vous gagnez −5 % sur votre 1ʳᵉ réservation 🎁" : "Optionnel"}
+        >
+          <Input
+            id="referralCode"
+            name="referralCode"
+            placeholder="Ex : ABCD23X"
+            defaultValue={defaultReferral}
+            className="uppercase placeholder:normal-case"
+          />
         </Field>
 
         <label className="flex items-start gap-2.5 text-sm text-muted">

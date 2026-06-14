@@ -4,6 +4,7 @@ import { ChevronLeft, Users, CalendarDays, ShieldCheck } from "lucide-react";
 import { getResidenceBySlug } from "@/lib/queries";
 import { getCurrentUser } from "@/lib/auth";
 import { computeResidencePrice, stayDiscountRate } from "@/lib/pricing";
+import { referralDiscountRateFor } from "@/lib/referral";
 import { getPaymentSettings, resolveResidencePolicy, buildFinance, enabledPaymentMethods } from "@/lib/payment-rules";
 import { isMockPayments } from "@/lib/payments";
 import { paymentMethodMeta } from "@/lib/enums";
@@ -55,6 +56,7 @@ export default async function ReserverPage({
     serviceFeeMax: settings.serviceFeeMax,
   });
   const policy = resolveResidencePolicy(residence, price.nights, settings);
+  const referralRate = await referralDiscountRateFor(user.id);
   const finance = buildFinance({
     subtotal: price.subtotal,
     cleaningFee: price.cleaningFee,
@@ -63,6 +65,7 @@ export default async function ReserverPage({
     cautionEnabled: residence.cautionEnabled,
     cautionAmount: residence.depositAmount,
     stayDiscountRate: stayDiscountRate(price.nights),
+    referralDiscountRate: referralRate,
   });
   const methods = enabledPaymentMethods(settings).map((v) => ({
     value: v,
@@ -150,6 +153,12 @@ export default async function ReserverPage({
                 <div className="flex justify-between font-semibold text-success">
                   <span>Réduction séjour (−{Math.round(stayDiscountRate(price.nights) * 100)}%)</span>
                   <span>−{formatPrice(finance.stayDiscount)}</span>
+                </div>
+              )}
+              {finance.referralDiscount > 0 && (
+                <div className="flex justify-between font-semibold text-success">
+                  <span>Parrainage (−5%) 🎁</span>
+                  <span>−{formatPrice(finance.referralDiscount)}</span>
                 </div>
               )}
               <div className="flex justify-between border-t border-border pt-3 text-lg font-extrabold text-foreground">

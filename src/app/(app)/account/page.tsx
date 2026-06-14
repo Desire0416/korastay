@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { CalendarCheck, Heart, Star, CheckCircle2, ArrowRight, Compass, Home } from "lucide-react";
 import { requireUser } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { ensureReferralCode } from "@/lib/referral";
 import { getTravelerStats, getTravelerReservations } from "@/lib/account-queries";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { ReservationCard } from "@/components/dashboard/reservation-card";
+import { ReferralCard } from "@/components/dashboard/referral-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 
@@ -11,10 +14,13 @@ export const metadata = { title: "Mon espace" };
 
 export default async function AccountDashboard() {
   const user = await requireUser();
-  const [stats, reservations] = await Promise.all([
+  const [stats, reservations, referralCode, referralCount] = await Promise.all([
     getTravelerStats(user.id),
     getTravelerReservations(user.id),
+    ensureReferralCode(user.id),
+    prisma.user.count({ where: { referredById: user.id } }),
   ]);
+  const referralLink = `${process.env.NEXT_PUBLIC_APP_URL ?? "https://www.korastay.net"}/register?ref=${referralCode}`;
 
   const upcoming = reservations
     .filter((r) => ["CONFIRMED", "PENDING_PAYMENT", "CHECKED_IN"].includes(r.status) && r.startDate >= new Date())
@@ -80,6 +86,8 @@ export default async function AccountDashboard() {
           </Link>
         ))}
       </div>
+
+      <ReferralCard code={referralCode} link={referralLink} count={referralCount} />
     </div>
   );
 }

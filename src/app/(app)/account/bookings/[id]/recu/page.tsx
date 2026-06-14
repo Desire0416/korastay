@@ -22,7 +22,8 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
   const paid = r.payments.find((p) => p.status === "PAID");
   const balance = r.totalAmount - r.depositAmount;
   const statusMeta = metaFor(reservationStatusMeta, r.status);
-  const stayDiscount = Math.max(0, r.subtotalAmount + r.cleaningFeeAmount + r.serviceFeeAmount - r.totalAmount);
+  const referralDiscount = r.referralDiscountAmount;
+  const stayDiscount = Math.max(0, r.subtotalAmount + r.cleaningFeeAmount + r.serviceFeeAmount - r.totalAmount - referralDiscount);
   const stayDiscountPct = Math.round(stayDiscountRate(r.nights) * 100);
 
   return (
@@ -67,6 +68,9 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
             <Row label="Frais de service KoraStay" value={formatPrice(r.serviceFeeAmount)} />
             {stayDiscount > 0 && (
               <Row label={`Réduction séjour${stayDiscountPct > 0 ? ` (−${stayDiscountPct}%)` : ""}`} value={`−${formatPrice(stayDiscount)}`} tone="success" />
+            )}
+            {referralDiscount > 0 && (
+              <Row label="Parrainage (−5%)" value={`−${formatPrice(referralDiscount)}`} tone="success" />
             )}
             <Row label="Total du séjour" value={formatPrice(r.totalAmount)} strong />
             {r.depositAmount > 0 && (

@@ -18,6 +18,7 @@ import { generateReference, nightsBetween, formatPrice } from "@/lib/utils";
 import { getPaymentProviderForMethod } from "@/lib/payments";
 import { sendEmail, emailLayout } from "@/lib/email";
 import { paymentMethodMeta } from "@/lib/enums";
+import { referralDiscountRateFor } from "@/lib/referral";
 import { RESIDENCE_VALIDATION_HOURS, PACK_VALIDATION_DAYS, PAYMENT_DEADLINE_HOURS } from "@/lib/constants";
 
 export type ReservationResult = {
@@ -98,6 +99,9 @@ export async function createResidenceReservation(
     serviceFeeMax: settings.serviceFeeMax,
   });
   const policy = resolveResidencePolicy(residence, nights, settings);
+  // Remise parrainage : -5 % si le voyageur a ete parraine et que c'est sa
+  // toute premiere reservation (cout assume par KoraStay).
+  const referralRate = await referralDiscountRateFor(user.id);
   const finance = buildFinance({
     subtotal: price.subtotal,
     cleaningFee: price.cleaningFee,
@@ -106,6 +110,7 @@ export async function createResidenceReservation(
     cautionEnabled: residence.cautionEnabled,
     cautionAmount: residence.depositAmount,
     stayDiscountRate: stayDiscountRate(nights),
+    referralDiscountRate: referralRate,
   });
 
   let reservationId: string;
@@ -149,6 +154,7 @@ export async function createResidenceReservation(
           subtotalAmount: price.subtotal,
           serviceFeeAmount: price.serviceFee,
           cleaningFeeAmount: price.cleaningFee,
+          referralDiscountAmount: finance.referralDiscount,
           totalAmount: finance.total,
           depositAmount: finance.depositDue,
           balanceDueAmount: finance.balanceDue,

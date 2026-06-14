@@ -49,10 +49,12 @@ export default async function BookingDetailPage({
   const seed = reservation.residence?.slug ?? reservation.pack?.slug ?? reservation.activity?.slug ?? reservation.id;
   const placeLabel = reservation.residence?.city ?? reservation.pack?.destination?.name ?? reservation.activity?.city;
   const payment = reservation.payments[0];
-  // Remise duree de sejour : recalculee a partir des montants stockes.
+  // Remises : la remise parrainage est stockee ; la remise sejour est le reste
+  // (sous-total + menage + frais - total - parrainage).
+  const referralDiscount = reservation.referralDiscountAmount;
   const stayDiscount = Math.max(
     0,
-    reservation.subtotalAmount + reservation.cleaningFeeAmount + reservation.serviceFeeAmount - reservation.totalAmount,
+    reservation.subtotalAmount + reservation.cleaningFeeAmount + reservation.serviceFeeAmount - reservation.totalAmount - referralDiscount,
   );
   const stayDiscountPct = Math.round(stayDiscountRate(reservation.nights) * 100);
 
@@ -189,6 +191,12 @@ export default async function BookingDetailPage({
                 <div className="flex justify-between font-semibold text-success">
                   <span>Réduction séjour{stayDiscountPct > 0 ? ` (−${stayDiscountPct}%)` : ""}</span>
                   <span>−{formatPrice(stayDiscount)}</span>
+                </div>
+              )}
+              {referralDiscount > 0 && (
+                <div className="flex justify-between font-semibold text-success">
+                  <span>Parrainage (−5%)</span>
+                  <span>−{formatPrice(referralDiscount)}</span>
                 </div>
               )}
               <div className="flex justify-between border-t border-border pt-3 text-base font-extrabold text-foreground">
