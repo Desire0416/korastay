@@ -77,6 +77,8 @@ export interface ResidenceFilters {
   amenities?: string[];
   sort?: string;
   page?: number;
+  checkin?: string; // ISO (yyyy-mm-dd) — filtre de disponibilite
+  checkout?: string;
 }
 
 export async function getResidences(filters: ResidenceFilters) {
@@ -95,6 +97,34 @@ export async function getResidences(filters: ResidenceFilters) {
     where.AND = filters.amenities.map((slug) => ({
       amenities: { some: { amenity: { slug } } },
     }));
+  }
+
+  // Recherche par disponibilite : on exclut les residences ayant une
+  // reservation qui chevauche (ferme, ou hold en attente NON expire) ou un
+  // blocage proprietaire sur l'intervalle demande. Coherent avec la verif faite
+  // a la reservation (cf. createResidenceReservation).
+  if (filters.checkin && filters.checkout) {
+    const ci = new Date(filters.checkin);
+    const co = new Date(filters.checkout);
+    if (!Number.isNaN(ci.getTime()) && !Number.isNaN(co.getTime()) && co > ci) {
+      const now = new Date();
+      where.reservations = {
+        none: {
+          startDate: { lt: co },
+          endDate: { gt: ci },
+          OR: [
+            { status: { in: ["CONFIRMED", "CHECKED_IN"] } },
+            {
+              status: { in: ["PENDING_PAYMENT", "PENDING_APPROVAL"] },
+              OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+            },
+          ],
+        },
+      };
+      where.availabilityBlocks = {
+        none: { startDate: { lt: co }, endDate: { gt: ci } },
+      };
+    }
   }
 
   const orderBy: Prisma.ResidenceOrderByWithRelationInput[] = (() => {

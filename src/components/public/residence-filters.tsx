@@ -28,6 +28,8 @@ type Filters = {
   verified: boolean;
   amenities: string[];
   sort: string;
+  checkin: string;
+  checkout: string;
 };
 
 export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps) {
@@ -43,11 +45,13 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
     verified: params.get("verified") === "1",
     amenities: params.get("amenities")?.split(",").filter(Boolean) ?? [],
     sort: params.get("sort") ?? "featured",
+    checkin: params.get("checkin") ?? "",
+    checkout: params.get("checkout") ?? "",
   };
 
   const [draft, setDraft] = React.useState<Filters>(initial);
 
-  function apply(next: Filters, keepDates = true) {
+  function apply(next: Filters) {
     const sp = new URLSearchParams();
     if (next.city) sp.set("city", next.city);
     if (next.type !== "any") sp.set("type", next.type);
@@ -57,11 +61,9 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
     if (next.verified) sp.set("verified", "1");
     if (next.amenities.length) sp.set("amenities", next.amenities.join(","));
     if (next.sort !== "featured") sp.set("sort", next.sort);
-    if (keepDates) {
-      const ci = params.get("checkin");
-      const co = params.get("checkout");
-      if (ci) sp.set("checkin", ci);
-      if (co) sp.set("checkout", co);
+    if (next.checkin && next.checkout) {
+      sp.set("checkin", next.checkin);
+      sp.set("checkout", next.checkout);
     }
     router.push(`/residences?${sp.toString()}`);
   }
@@ -85,6 +87,41 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
 
   const filterBody = (
     <div className="space-y-6">
+      {/* Dates (disponibilite) */}
+      <div>
+        <p className="mb-2 text-sm font-bold text-foreground">Dates du séjour</p>
+        <div className="flex items-center gap-3">
+          <label className="flex-1">
+            <span className="mb-1 block text-2xs font-bold uppercase text-muted">Arrivée</span>
+            <input
+              type="date"
+              value={draft.checkin}
+              onChange={(e) => setDraft({ ...draft, checkin: e.target.value })}
+              className="h-11 w-full rounded-xl border border-border bg-surface px-3 text-sm focus-visible:border-brand-400 focus-visible:outline-none"
+            />
+          </label>
+          <label className="flex-1">
+            <span className="mb-1 block text-2xs font-bold uppercase text-muted">Départ</span>
+            <input
+              type="date"
+              value={draft.checkout}
+              min={draft.checkin || undefined}
+              onChange={(e) => setDraft({ ...draft, checkout: e.target.value })}
+              className="h-11 w-full rounded-xl border border-border bg-surface px-3 text-sm focus-visible:border-brand-400 focus-visible:outline-none"
+            />
+          </label>
+        </div>
+        {(draft.checkin || draft.checkout) && (
+          <button
+            type="button"
+            onClick={() => setDraft({ ...draft, checkin: "", checkout: "" })}
+            className="mt-1.5 text-xs font-semibold text-muted hover:text-foreground"
+          >
+            Effacer les dates
+          </button>
+        )}
+      </div>
+
       {/* Ville */}
       <div>
         <p className="mb-2 text-sm font-bold text-foreground">Ville</p>
@@ -193,7 +230,7 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
           <DrawerTitle className="px-1 pt-4 text-xl font-bold">Filtres</DrawerTitle>
           <div className="my-4 max-h-[60dvh] overflow-y-auto px-1">{filterBody}</div>
           <div className="flex gap-3">
-            <Button variant="ghost" className="flex-1" onClick={() => { const reset = { city: "", type: "any", minPrice: "", maxPrice: "", capacity: 0, verified: false, amenities: [], sort: draft.sort }; setDraft(reset); apply(reset); }}>
+            <Button variant="ghost" className="flex-1" onClick={() => { const reset = { city: "", type: "any", minPrice: "", maxPrice: "", capacity: 0, verified: false, amenities: [], sort: draft.sort, checkin: "", checkout: "" }; setDraft(reset); apply(reset); }}>
               Reinitialiser
             </Button>
             <DrawerClose asChild>
@@ -216,7 +253,7 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
           <PopoverContent align="start" className="max-h-[70vh] w-[26rem] overflow-y-auto">
             {filterBody}
             <div className="mt-5 flex gap-3 border-t border-border pt-4">
-              <Button variant="ghost" className="flex-1" onClick={() => { const reset = { city: "", type: "any", minPrice: "", maxPrice: "", capacity: 0, verified: false, amenities: [], sort: draft.sort }; setDraft(reset); apply(reset); }}>Reinitialiser</Button>
+              <Button variant="ghost" className="flex-1" onClick={() => { const reset = { city: "", type: "any", minPrice: "", maxPrice: "", capacity: 0, verified: false, amenities: [], sort: draft.sort, checkin: "", checkout: "" }; setDraft(reset); apply(reset); }}>Reinitialiser</Button>
               <Button className="flex-1" onClick={() => apply(draft)}>Appliquer</Button>
             </div>
           </PopoverContent>

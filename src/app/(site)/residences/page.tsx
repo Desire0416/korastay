@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { SearchX, ChevronLeft, ChevronRight } from "lucide-react";
+import { SearchX, ChevronLeft, ChevronRight, CalendarDays, X } from "lucide-react";
 import { getResidences, getAllDestinations } from "@/lib/queries";
 import { getUserFavoriteIds } from "@/server/actions/favorites";
 import { ResidenceCard } from "@/components/public/residence-card";
@@ -9,7 +9,7 @@ import { ResidenceFilters } from "@/components/public/residence-filters";
 import { ResidencesMap } from "@/components/public/residences-map";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 
 export const metadata = {
   title: "Locations meublées vérifiées",
@@ -40,6 +40,8 @@ export default async function ResidencesPage({
     verified: str(sp.verified) === "1",
     amenities: str(sp.amenities)?.split(",").filter(Boolean),
     sort: str(sp.sort),
+    checkin: str(sp.checkin),
+    checkout: str(sp.checkout),
     page,
   };
 
@@ -84,6 +86,17 @@ export default async function ResidencesPage({
     return `/residences?${params.toString()}`;
   }
 
+  // Lien identique sans le filtre de dates (retirer la disponibilite).
+  const withoutDatesHref = (() => {
+    const params = new URLSearchParams();
+    Object.entries(sp).forEach(([k, v]) => {
+      const value = str(v);
+      if (value && k !== "page" && k !== "checkin" && k !== "checkout") params.set(k, value);
+    });
+    const qs = params.toString();
+    return qs ? `/residences?${qs}` : "/residences";
+  })();
+
   return (
     <div className="container-page py-5 md:py-8">
       <div className="mb-4 md:mb-6">
@@ -94,6 +107,15 @@ export default async function ResidencesPage({
           {total} logement{total > 1 ? "s" : ""} disponible{total > 1 ? "s" : ""}
           {cityName ? "" : " en Côte d'Ivoire"}
         </p>
+        {filters.checkin && filters.checkout && (
+          <span className="mt-2 inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-sm font-medium text-brand-700">
+            <CalendarDays className="h-3.5 w-3.5" />
+            Disponibles du {formatDate(filters.checkin)} au {formatDate(filters.checkout)}
+            <Link href={withoutDatesHref} className="-mr-1 rounded-full p-0.5 text-brand-600 hover:bg-brand-100" aria-label="Retirer les dates">
+              <X className="h-3.5 w-3.5" />
+            </Link>
+          </span>
+        )}
       </div>
 
       <div className="sticky top-[var(--header-h)] z-30 -mx-5 mb-7 border-y border-border bg-background/90 px-5 py-3 backdrop-blur md:mx-0 md:rounded-2xl md:border md:px-4">
