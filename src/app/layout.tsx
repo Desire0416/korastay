@@ -40,19 +40,18 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
   robots: { index: true, follow: true },
   openGraph: {
+    // L'image og est fournie automatiquement par app/opengraph-image.tsx.
     title: `${APP_NAME} - Réservez votre séjour en Afrique de l'Ouest`,
     description: APP_DESCRIPTION,
     url: SITE_URL,
     type: "website",
     locale: "fr_FR",
     siteName: APP_NAME,
-    images: [{ url: "/hero.jpg", alt: `${APP_NAME} - hébergements vérifiés en Côte d'Ivoire` }],
   },
   twitter: {
     card: "summary_large_image",
     title: APP_NAME,
     description: APP_DESCRIPTION,
-    images: ["/hero.jpg"],
   },
   icons: {
     icon: "/icon.svg",
