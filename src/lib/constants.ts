@@ -7,6 +7,13 @@ export const APP_TAGLINE = "Réservez votre séjour, vivez l'Afrique de l'Ouest.
 export const APP_DESCRIPTION =
   "KoraStay reunit hébergements meublés vérifiés, packs touristiques et partenaires locaux pour voyager sans incertitude en Afrique de l'Ouest.";
 
+// URL canonique du site (SEO). Defaut sur le domaine de prod : ainsi le
+// sitemap, robots, canonical et Open Graph restent corrects meme si la variable
+// d'env Vercel NEXT_PUBLIC_APP_URL n'est pas posee.
+export const SITE_URL = (
+  process.env.NEXT_PUBLIC_APP_URL ?? "https://www.korastay.net"
+).replace(/\/+$/, "");
+
 export const CONTACT_EMAIL =
   process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "contact@korastay.com";
 export const CONTACT_PHONE =

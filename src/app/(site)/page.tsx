@@ -24,6 +24,8 @@ import { getUserFavoriteIds } from "@/server/actions/favorites";
 import { getI18n } from "@/lib/i18n.server";
 import { initials } from "@/lib/utils";
 import { MobileHome } from "@/components/public/mobile/mobile-home";
+import { JsonLd } from "@/components/seo/json-ld";
+import { APP_NAME, APP_DESCRIPTION, SITE_URL, CONTACT_EMAIL, CONTACT_PHONE } from "@/lib/constants";
 
 const CATEGORIES = [
   { label: "Location meublée", href: "/residences", icon: HomeIcon, desc: "Logements meublés contrôlés", color: "bg-brand-50 text-brand-600" },
@@ -60,8 +62,30 @@ export default async function HomePage() {
       getI18n(),
     ]);
 
+  const orgJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: APP_NAME,
+    url: SITE_URL,
+    logo: `${SITE_URL}/icon.svg`,
+    description: APP_DESCRIPTION,
+    email: CONTACT_EMAIL,
+    telephone: CONTACT_PHONE,
+    areaServed: { "@type": "Country", name: "Côte d'Ivoire" },
+  };
+  const websiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: APP_NAME,
+    url: SITE_URL,
+    inLanguage: "fr-FR",
+    description: APP_DESCRIPTION,
+  };
+
   return (
     <>
+      <JsonLd data={orgJsonLd} />
+      <JsonLd data={websiteJsonLd} />
       {/* ===== EXPERIENCE MOBILE (application) ===== */}
       <MobileHome
         residences={residences}

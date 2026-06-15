@@ -23,16 +23,26 @@ import { MapEmbed } from "@/components/public/map-embed";
 import { formatDate, initials } from "@/lib/utils";
 import { getWhatsAppNumber, buildWhatsAppLink } from "@/lib/whatsapp";
 import { residenceTypeMeta, qualityLevelMeta } from "@/lib/enums";
+import { SITE_URL } from "@/lib/constants";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+const APP_URL = SITE_URL;
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const residence = await getResidenceBySlug(slug);
   if (!residence) return { title: "Résidence introuvable" };
+  const description = residence.shortDescription ?? residence.description.slice(0, 150);
+  const image = residence.images[0]?.url;
   return {
     title: residence.name,
-    description: residence.shortDescription ?? residence.description.slice(0, 150),
+    description,
+    alternates: { canonical: `/residences/${slug}` },
+    openGraph: {
+      title: residence.name,
+      description,
+      type: "website",
+      images: image ? [{ url: image }] : undefined,
+    },
   };
 }
 

@@ -3,7 +3,7 @@ import { Plus_Jakarta_Sans, Fraunces } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { PwaRegister } from "@/components/pwa-register";
-import { APP_NAME, APP_DESCRIPTION } from "@/lib/constants";
+import { APP_NAME, APP_DESCRIPTION, SITE_URL } from "@/lib/constants";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -21,25 +21,46 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: `${APP_NAME} - Réservez votre séjour, vivez l'Afrique de l'Ouest`,
     template: `%s - ${APP_NAME}`,
   },
   description: APP_DESCRIPTION,
   applicationName: APP_NAME,
+  keywords: [
+    "KoraStay", "location meublée Côte d'Ivoire", "résidence meublée Abidjan",
+    "réservation hébergement Côte d'Ivoire", "packs touristiques Côte d'Ivoire",
+    "séjour Afrique de l'Ouest", "guide touristique Côte d'Ivoire", "Abidjan",
+  ],
+  authors: [{ name: APP_NAME }],
+  creator: APP_NAME,
+  publisher: APP_NAME,
   manifest: "/manifest.webmanifest",
+  alternates: { canonical: "/" },
+  robots: { index: true, follow: true },
   openGraph: {
-    title: APP_NAME,
+    title: `${APP_NAME} - Réservez votre séjour en Afrique de l'Ouest`,
     description: APP_DESCRIPTION,
+    url: SITE_URL,
     type: "website",
     locale: "fr_FR",
     siteName: APP_NAME,
+    images: [{ url: "/hero.jpg", alt: `${APP_NAME} - hébergements vérifiés en Côte d'Ivoire` }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: APP_NAME,
+    description: APP_DESCRIPTION,
+    images: ["/hero.jpg"],
   },
   icons: {
     icon: "/icon.svg",
     apple: "/icon.svg",
   },
+  verification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+    ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
+    : undefined,
 };
 
 export const viewport: Viewport = {
