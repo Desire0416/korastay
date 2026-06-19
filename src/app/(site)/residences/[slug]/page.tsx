@@ -23,19 +23,22 @@ import { MapEmbed } from "@/components/public/map-embed";
 import { formatDate, initials } from "@/lib/utils";
 import { residenceTypeMeta, qualityLevelMeta } from "@/lib/enums";
 import { SITE_URL } from "@/lib/constants";
+import { getI18n } from "@/lib/i18n.server";
+import { localePath } from "@/lib/i18n";
+import { alternatesFor } from "@/lib/seo";
 
 const APP_URL = SITE_URL;
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const residence = await getResidenceBySlug(slug);
-  if (!residence) return { title: "Résidence introuvable" };
+  const [residence, { dict }] = await Promise.all([getResidenceBySlug(slug), getI18n()]);
+  if (!residence) return { title: dict.residenceDetail.notFound };
   const description = residence.shortDescription ?? residence.description.slice(0, 150);
   const image = residence.images[0]?.url;
   return {
     title: residence.name,
     description,
-    alternates: { canonical: `/residences/${slug}` },
+    alternates: alternatesFor(`/residences/${slug}`),
     openGraph: {
       title: residence.name,
       description,
@@ -54,10 +57,11 @@ export default async function ResidenceDetailPage({
   const residence = await getResidenceBySlug(slug);
   if (!residence || residence.status !== "PUBLISHED") notFound();
 
-  const [favorites, similar, cityPacks] = await Promise.all([
+  const [favorites, similar, cityPacks, { locale, dict }] = await Promise.all([
     getUserFavoriteIds(),
     getSimilarResidences(residence.city, residence.id, 4),
     residence.destination?.slug ? getCityPacks(residence.destination.slug) : Promise.resolve([]),
+    getI18n(),
   ]);
 
   const type = residenceTypeMeta[residence.type];
@@ -75,10 +79,10 @@ export default async function ResidenceDetailPage({
   ];
 
   const subRatings = [
-    { label: "Propreté", key: "cleanlinessRating" as const },
-    { label: "Emplacement", key: "locationRating" as const },
-    { label: "Qualite/prix", key: "valueRating" as const },
-    { label: "Communication", key: "communicationRating" as const },
+    { label: dict.residenceDetail.ratingCleanliness, key: "cleanlinessRating" as const },
+    { label: dict.residenceDetail.ratingLocation, key: "locationRating" as const },
+    { label: dict.residenceDetail.ratingValue, key: "valueRating" as const },
+    { label: dict.residenceDetail.ratingCommunication, key: "communicationRating" as const },
   ].map((s) => {
     const vals = residence.reviews.map((r) => r[s.key]).filter((v): v is number => v != null);
     const avg = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : 0;
@@ -112,9 +116,9 @@ export default async function ResidenceDetailPage({
       {/* Bouton retour flottant (mobile) */}
       <div className="relative lg:hidden">
         <Link
-          href="/residences"
+          href={localePath("/residences", locale)}
           className="absolute left-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-ink shadow-soft backdrop-blur"
-          aria-label="Retour"
+          aria-label={dict.residenceDetail.back}
         >
           <ChevronLeft className="h-5 w-5" />
         </Link>
@@ -127,9 +131,9 @@ export default async function ResidenceDetailPage({
         {/* Fil d'ariane + titre (desktop) */}
         <div className="hidden lg:block">
           <nav className="mb-3 flex items-center gap-1 text-sm text-muted">
-            <Link href="/residences" className="hover:text-foreground">Résidences</Link>
+            <Link href={localePath("/residences", locale)} className="hover:text-foreground">{dict.residenceDetail.breadcrumbResidences}</Link>
             <span>/</span>
-            <Link href={`/residences?city=${residence.destination?.slug ?? ""}`} className="hover:text-foreground">{residence.city}</Link>
+            <Link href={localePath(`/residences?city=${residence.destination?.slug ?? ""}`, locale)} className="hover:text-foreground">{residence.city}</Link>
             <span>/</span>
             <span className="text-foreground">{residence.name}</span>
           </nav>
@@ -140,7 +144,7 @@ export default async function ResidenceDetailPage({
                 {residence.ratingCount > 0 && (
                   <span className="flex items-center gap-1 font-semibold">
                     <Star className="h-4 w-4 fill-gold-500 text-gold-500" />
-                    {residence.ratingAverage.toFixed(1)} ({residence.ratingCount} avis)
+                    {residence.ratingAverage.toFixed(1)} ({residence.ratingCount} {dict.residenceDetail.reviewsWord})
                   </span>
                 )}
                 <span className="flex items-center gap-1 text-muted">
@@ -183,14 +187,14 @@ export default async function ResidenceDetailPage({
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-border pb-6">
               <div>
                 <p className="text-lg font-bold text-foreground">{type?.label ?? residence.type}</p>
-                <p className="text-sm text-muted">Heberge par {residence.owner.firstName}</p>
+                <p className="text-sm text-muted">{dict.residenceDetail.hostedBy.replace("{name}", residence.owner.firstName)}</p>
               </div>
               <Separator orientation="vertical" className="hidden h-10 sm:block" />
               <div className="flex flex-wrap gap-x-5 gap-y-1 text-sm text-foreground">
-                <span className="flex items-center gap-1.5"><Users className="h-4 w-4 text-muted" /> {residence.capacity} voyageurs</span>
-                <span className="flex items-center gap-1.5"><BedDouble className="h-4 w-4 text-muted" /> {residence.bedrooms} chambres</span>
-                <span className="flex items-center gap-1.5"><Home className="h-4 w-4 text-muted" /> {residence.beds} lits</span>
-                <span className="flex items-center gap-1.5"><Bath className="h-4 w-4 text-muted" /> {residence.bathrooms} sdb</span>
+                <span className="flex items-center gap-1.5"><Users className="h-4 w-4 text-muted" /> {residence.capacity} {dict.residenceDetail.guestsUnit}</span>
+                <span className="flex items-center gap-1.5"><BedDouble className="h-4 w-4 text-muted" /> {residence.bedrooms} {dict.residenceDetail.bedroomsUnit}</span>
+                <span className="flex items-center gap-1.5"><Home className="h-4 w-4 text-muted" /> {residence.beds} {dict.residenceDetail.bedsUnit}</span>
+                <span className="flex items-center gap-1.5"><Bath className="h-4 w-4 text-muted" /> {residence.bathrooms} {dict.residenceDetail.bathroomsUnit}</span>
               </div>
             </div>
 
@@ -201,8 +205,8 @@ export default async function ResidenceDetailPage({
                   <div className="flex items-center gap-3 rounded-2xl bg-brand-50 px-4 py-3">
                     <ShieldCheck className="h-6 w-6 text-brand-600" />
                     <div>
-                      <p className="text-sm font-bold text-brand-800">Résidence vérifiée KoraStay</p>
-                      <p className="text-xs text-brand-700/70">Contrôlée par notre équipe qualité</p>
+                      <p className="text-sm font-bold text-brand-800">{dict.residenceDetail.verifiedTitle}</p>
+                      <p className="text-xs text-brand-700/70">{dict.residenceDetail.verifiedSubtitle}</p>
                     </div>
                   </div>
                 )}
@@ -210,7 +214,7 @@ export default async function ResidenceDetailPage({
                   <div className="flex items-center gap-3 rounded-2xl bg-gold-50 px-4 py-3">
                     <Award className="h-6 w-6 text-gold-600" />
                     <div>
-                      <p className="text-sm font-bold text-gold-700">Niveau {quality.label}</p>
+                      <p className="text-sm font-bold text-gold-700">{dict.residenceDetail.qualityLevel.replace("{level}", quality.label)}</p>
                       <p className="text-xs text-gold-700/70">{"★".repeat(quality.stars)}</p>
                     </div>
                   </div>
@@ -220,13 +224,13 @@ export default async function ResidenceDetailPage({
 
             {/* Description */}
             <section className="border-b border-border py-7">
-              <h2 className="mb-3 text-xl font-bold text-foreground">A propos de ce logement</h2>
+              <h2 className="mb-3 text-xl font-bold text-foreground">{dict.residenceDetail.aboutTitle}</h2>
               <p className="whitespace-pre-line leading-relaxed text-foreground/90">{residence.description}</p>
             </section>
 
             {/* Equipements */}
             <section className="border-b border-border py-7">
-              <h2 className="mb-4 text-xl font-bold text-foreground">Ce que proposé ce logement</h2>
+              <h2 className="mb-4 text-xl font-bold text-foreground">{dict.residenceDetail.amenitiesTitle}</h2>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {residence.amenities.map((ra) => (
                   <div key={ra.id} className="flex items-center gap-3 text-foreground/90">
@@ -240,11 +244,10 @@ export default async function ResidenceDetailPage({
             {/* Calendrier disponibilites */}
             <section className="border-b border-border py-7">
               <h2 className="mb-1 flex items-center gap-2 text-xl font-bold text-foreground">
-                <Clock className="h-5 w-5 text-brand-600" /> Disponibilités
+                <Clock className="h-5 w-5 text-brand-600" /> {dict.residenceDetail.availabilityTitle}
               </h2>
               <p className="mb-2 text-sm text-muted">
-                Arrivée à partir de {residence.checkInTime} - Départ avant {residence.checkOutTime}.
-                Les dates indisponibles sont desactivees lors de la réservation.
+                {dict.residenceDetail.availabilityText.replace("{in}", residence.checkInTime).replace("{out}", residence.checkOutTime)}
               </p>
             </section>
 
@@ -252,7 +255,7 @@ export default async function ResidenceDetailPage({
             {residence.houseRules && (
               <section className="border-b border-border py-7">
                 <h2 className="mb-3 flex items-center gap-2 text-xl font-bold text-foreground">
-                  <ScrollText className="h-5 w-5 text-brand-600" /> Règlement intérieur
+                  <ScrollText className="h-5 w-5 text-brand-600" /> {dict.residenceDetail.rulesTitle}
                 </h2>
                 <p className="whitespace-pre-line leading-relaxed text-foreground/90">{residence.houseRules}</p>
               </section>
@@ -263,8 +266,8 @@ export default async function ResidenceDetailPage({
               <h2 className="mb-4 flex items-center gap-2 text-xl font-bold text-foreground">
                 <Star className="h-5 w-5 fill-gold-500 text-gold-500" />
                 {residence.ratingCount > 0
-                  ? `${residence.ratingAverage.toFixed(1)} - ${residence.ratingCount} avis`
-                  : "Pas encore d'avis"}
+                  ? dict.residenceDetail.reviewsSummary.replace("{avg}", residence.ratingAverage.toFixed(1)).replace("{n}", String(residence.ratingCount))
+                  : dict.residenceDetail.noReviews}
               </h2>
 
               {residence.ratingCount > 0 && (
@@ -301,14 +304,14 @@ export default async function ResidenceDetailPage({
                 ))}
               </div>
               {residence.reviews.length === 0 && (
-                <p className="text-muted">Soyez le premier a partager votre expérience après votre séjour.</p>
+                <p className="text-muted">{dict.residenceDetail.beFirst}</p>
               )}
             </section>
 
             {/* Localisation */}
             <section className="py-7">
               <h2 className="mb-3 flex items-center gap-2 text-xl font-bold text-foreground">
-                <MapPin className="h-5 w-5 text-brand-600" /> Localisation
+                <MapPin className="h-5 w-5 text-brand-600" /> {dict.residenceDetail.locationTitle}
               </h2>
               {(() => {
                 const lat = residence.latitude ?? residence.destination?.latitude ?? null;
@@ -317,7 +320,7 @@ export default async function ResidenceDetailPage({
                   return (
                     <>
                       <MapEmbed latitude={lat} longitude={lng} label={`${residence.district ? residence.district + ", " : ""}${residence.city}`} heightClass="h-72" />
-                      <p className="mt-2 text-xs text-muted">Localisation approximative. L'adresse exacte est communiquee après réservation.</p>
+                      <p className="mt-2 text-xs text-muted">{dict.residenceDetail.locationApprox}</p>
                     </>
                   );
                 }
@@ -326,7 +329,7 @@ export default async function ResidenceDetailPage({
                     <div className="relative text-center">
                       <MapPin className="mx-auto h-8 w-8 text-gold-400" />
                       <p className="mt-2 font-bold">{residence.district ? `${residence.district}, ` : ""}{residence.city}</p>
-                      <p className="text-sm text-white/70">Localisation communiquee après réservation</p>
+                      <p className="text-sm text-white/70">{dict.residenceDetail.locationAfter}</p>
                     </div>
                   </div>
                 );
@@ -354,9 +357,9 @@ export default async function ResidenceDetailPage({
         {/* Packs & experiences de la ville */}
         <section className="border-t border-border py-10">
           <h2 className="font-display text-2xl font-semibold text-foreground">
-            Vivez {residence.city} : packs & expériences
+            {dict.residenceDetail.cityPacksTitle.replace("{city}", residence.city)}
           </h2>
-          <p className="mt-1 text-muted">Completez votre séjour avec un pack accompagné, ou composez le votre.</p>
+          <p className="mt-1 text-muted">{dict.residenceDetail.cityPacksSubtitle}</p>
 
           {cityPacks.length > 0 && (
             <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -368,14 +371,14 @@ export default async function ResidenceDetailPage({
 
           <div className="mt-5 flex flex-col items-start justify-between gap-4 rounded-3xl border-2 border-dashed border-brand-300 bg-brand-50/40 p-6 sm:flex-row sm:items-center">
             <div>
-              <p className="font-bold text-brand-900">Aucun pack ne vous convient ?</p>
-              <p className="text-sm text-brand-800/80">Composez votre propre pack avec les activités et partenaires de {residence.city}.</p>
+              <p className="font-bold text-brand-900">{dict.residenceDetail.noPackTitle}</p>
+              <p className="text-sm text-brand-800/80">{dict.residenceDetail.noPackText.replace("{city}", residence.city)}</p>
             </div>
             <Link
-              href={`/packs/custom${residence.destination?.slug ? `?city=${residence.destination.slug}` : ""}`}
+              href={localePath(`/packs/custom${residence.destination?.slug ? `?city=${residence.destination.slug}` : ""}`, locale)}
               className="inline-flex shrink-0 items-center gap-2 rounded-full bg-brand-500 px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition-colors hover:bg-brand-600"
             >
-              <Sparkles className="h-4 w-4" /> Composer mon pack
+              <Sparkles className="h-4 w-4" /> {dict.residenceDetail.composePack}
             </Link>
           </div>
         </section>
@@ -384,7 +387,7 @@ export default async function ResidenceDetailPage({
         {similar.length > 0 && (
           <section className="border-t border-border py-10">
             <h2 className="mb-6 font-display text-2xl font-semibold text-foreground">
-              Autres résidences a {residence.city}
+              {dict.residenceDetail.similarTitle.replace("{city}", residence.city)}
             </h2>
             <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
               {similar.map((r) => (

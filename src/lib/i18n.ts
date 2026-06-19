@@ -168,6 +168,56 @@ export interface Dictionary {
     show: string;
     viewListing: string;
   };
+  residenceDetail: {
+    notFound: string;
+    back: string;
+    breadcrumbResidences: string;
+    reviewsWord: string;
+    hostedBy: string; // {name}
+    guestsUnit: string;
+    bedroomsUnit: string;
+    bedsUnit: string;
+    bathroomsUnit: string;
+    verifiedTitle: string;
+    verifiedSubtitle: string;
+    qualityLevel: string; // {level}
+    aboutTitle: string;
+    amenitiesTitle: string;
+    availabilityTitle: string;
+    availabilityText: string; // {in} {out}
+    rulesTitle: string;
+    reviewsSummary: string; // {avg} {n}
+    noReviews: string;
+    beFirst: string;
+    ratingCleanliness: string;
+    ratingLocation: string;
+    ratingValue: string;
+    ratingCommunication: string;
+    locationTitle: string;
+    locationApprox: string;
+    locationAfter: string;
+    cityPacksTitle: string; // {city}
+    cityPacksSubtitle: string;
+    noPackTitle: string;
+    noPackText: string; // {city}
+    composePack: string;
+    similarTitle: string; // {city}
+  };
+  booking: {
+    addCleaning: string;
+    addDates: string;
+    nightSingular: string;
+    nightPlural: string;
+    cleaningFee: string;
+    serviceFee: string;
+    stayDiscount: string; // {p}
+    total: string;
+    maxCapacity: string; // {n}
+    reserve: string;
+    selectDates: string;
+    noChargeYet: string;
+    yourStay: string;
+  };
   // Libelles de navigation / pied de page, indexes par href.
   nav: Record<string, string>;
   // Titres des colonnes du pied de page (cle = libelle francais).
@@ -406,6 +456,56 @@ const FR: Dictionary = {
     show: "Afficher la carte",
     viewListing: "Voir le logement →",
   },
+  residenceDetail: {
+    notFound: "Résidence introuvable",
+    back: "Retour",
+    breadcrumbResidences: "Résidences",
+    reviewsWord: "avis",
+    hostedBy: "Hébergé par {name}",
+    guestsUnit: "voyageurs",
+    bedroomsUnit: "chambres",
+    bedsUnit: "lits",
+    bathroomsUnit: "sdb",
+    verifiedTitle: "Résidence vérifiée KoraStay",
+    verifiedSubtitle: "Contrôlée par notre équipe qualité",
+    qualityLevel: "Niveau {level}",
+    aboutTitle: "À propos de ce logement",
+    amenitiesTitle: "Ce que propose ce logement",
+    availabilityTitle: "Disponibilités",
+    availabilityText: "Arrivée à partir de {in} - Départ avant {out}. Les dates indisponibles sont désactivées lors de la réservation.",
+    rulesTitle: "Règlement intérieur",
+    reviewsSummary: "{avg} - {n} avis",
+    noReviews: "Pas encore d'avis",
+    beFirst: "Soyez le premier à partager votre expérience après votre séjour.",
+    ratingCleanliness: "Propreté",
+    ratingLocation: "Emplacement",
+    ratingValue: "Qualité/prix",
+    ratingCommunication: "Communication",
+    locationTitle: "Localisation",
+    locationApprox: "Localisation approximative. L'adresse exacte est communiquée après réservation.",
+    locationAfter: "Localisation communiquée après réservation",
+    cityPacksTitle: "Vivez {city} : packs & expériences",
+    cityPacksSubtitle: "Complétez votre séjour avec un pack accompagné, ou composez le vôtre.",
+    noPackTitle: "Aucun pack ne vous convient ?",
+    noPackText: "Composez votre propre pack avec les activités et partenaires de {city}.",
+    composePack: "Composer mon pack",
+    similarTitle: "Autres résidences à {city}",
+  },
+  booking: {
+    addCleaning: "Ajouter le ménage",
+    addDates: "Ajouter des dates",
+    nightSingular: "nuit",
+    nightPlural: "nuits",
+    cleaningFee: "Frais de ménage",
+    serviceFee: "Frais de service KoraStay",
+    stayDiscount: "Réduction séjour (−{p}%)",
+    total: "Total",
+    maxCapacity: "Capacité maximum : {n} voyageurs.",
+    reserve: "Réserver",
+    selectDates: "Sélectionnez vos dates",
+    noChargeYet: "Aucun montant ne sera débité à cette étape.",
+    yourStay: "Votre séjour",
+  },
   nav: {},
   footerColumns: {},
 };
@@ -614,6 +714,56 @@ const EN: Dictionary = {
     hide: "Hide map",
     show: "Show map",
     viewListing: "View listing →",
+  },
+  residenceDetail: {
+    notFound: "Listing not found",
+    back: "Back",
+    breadcrumbResidences: "Stays",
+    reviewsWord: "reviews",
+    hostedBy: "Hosted by {name}",
+    guestsUnit: "guests",
+    bedroomsUnit: "bedrooms",
+    bedsUnit: "beds",
+    bathroomsUnit: "baths",
+    verifiedTitle: "KoraStay verified home",
+    verifiedSubtitle: "Checked by our quality team",
+    qualityLevel: "{level} level",
+    aboutTitle: "About this home",
+    amenitiesTitle: "What this home offers",
+    availabilityTitle: "Availability",
+    availabilityText: "Check-in from {in} - Check-out before {out}. Unavailable dates are disabled when booking.",
+    rulesTitle: "House rules",
+    reviewsSummary: "{avg} - {n} reviews",
+    noReviews: "No reviews yet",
+    beFirst: "Be the first to share your experience after your stay.",
+    ratingCleanliness: "Cleanliness",
+    ratingLocation: "Location",
+    ratingValue: "Value",
+    ratingCommunication: "Communication",
+    locationTitle: "Location",
+    locationApprox: "Approximate location. The exact address is shared after booking.",
+    locationAfter: "Location shared after booking",
+    cityPacksTitle: "Experience {city}: packs & experiences",
+    cityPacksSubtitle: "Round out your stay with a guided pack, or build your own.",
+    noPackTitle: "No pack suits you?",
+    noPackText: "Build your own pack with {city}'s activities and partners.",
+    composePack: "Build my pack",
+    similarTitle: "Other homes in {city}",
+  },
+  booking: {
+    addCleaning: "Add cleaning",
+    addDates: "Add dates",
+    nightSingular: "night",
+    nightPlural: "nights",
+    cleaningFee: "Cleaning fee",
+    serviceFee: "KoraStay service fee",
+    stayDiscount: "Length-of-stay discount (−{p}%)",
+    total: "Total",
+    maxCapacity: "Maximum capacity: {n} guests.",
+    reserve: "Book",
+    selectDates: "Select your dates",
+    noChargeYet: "You won't be charged at this stage.",
+    yourStay: "Your stay",
   },
   nav: NAV_EN,
   footerColumns: FOOTER_COLUMNS_EN,
