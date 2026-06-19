@@ -13,8 +13,14 @@ import { ReservationCheckout } from "@/components/public/reservation-checkout";
 import { SmartImage } from "@/components/ui/smart-image";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { formatPrice, formatDate, nightsBetween } from "@/lib/utils";
+import { getI18n } from "@/lib/i18n.server";
+import { localePath } from "@/lib/i18n";
+import type { Metadata } from "next";
 
-export const metadata = { title: "Finaliser la réservation" };
+export async function generateMetadata(): Promise<Metadata> {
+  const { dict } = await getI18n();
+  return { title: dict.checkout.metaTitle };
+}
 
 type SP = Record<string, string | string[] | undefined>;
 const str = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
@@ -28,6 +34,7 @@ export default async function ReserverPage({
 }) {
   const { slug } = await params;
   const sp = await searchParams;
+  const { locale, dict } = await getI18n();
 
   const checkin = str(sp.checkin);
   const checkout = str(sp.checkout);
@@ -35,14 +42,14 @@ export default async function ReserverPage({
   const children = Number(str(sp.children) ?? 0);
   const cleaning = str(sp.cleaning) === "1";
 
-  const backUrl = `/residences/${slug}/reserver?checkin=${checkin}&checkout=${checkout}&adults=${adults}&children=${children}`;
+  const backUrl = localePath(`/residences/${slug}/reserver?checkin=${checkin}&checkout=${checkout}&adults=${adults}&children=${children}`, locale);
   const user = await getCurrentUser();
-  if (!user) redirect(`/login?redirectTo=${encodeURIComponent(backUrl)}`);
+  if (!user) redirect(`${localePath("/login", locale)}?redirectTo=${encodeURIComponent(backUrl)}`);
 
   const residence = await getResidenceBySlug(slug);
   if (!residence || residence.status !== "PUBLISHED") notFound();
   if (!checkin || !checkout || nightsBetween(checkin, checkout) < 1) {
-    redirect(`/residences/${slug}`);
+    redirect(localePath(`/residences/${slug}`, locale));
   }
 
   const settings = await getPaymentSettings();
@@ -75,12 +82,12 @@ export default async function ReserverPage({
 
   return (
     <div className="container-page py-8">
-      <Link href={`/residences/${slug}`} className="mb-5 inline-flex items-center gap-1 text-sm font-semibold text-muted hover:text-foreground">
-        <ChevronLeft className="h-4 w-4" /> Retour a la résidence
+      <Link href={localePath(`/residences/${slug}`, locale)} className="mb-5 inline-flex items-center gap-1 text-sm font-semibold text-muted hover:text-foreground">
+        <ChevronLeft className="h-4 w-4" /> {dict.checkout.backToResidence}
       </Link>
 
       <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground">
-        Finaliser votre réservation
+        {dict.checkout.title}
       </h1>
 
       <div className="mt-7 grid grid-cols-1 gap-10 lg:grid-cols-[1fr_400px]">
@@ -130,55 +137,55 @@ export default async function ReserverPage({
               </div>
               <div className="flex items-center gap-2 text-foreground">
                 <Users className="h-4 w-4 text-muted" />
-                {adults + children} voyageur{adults + children > 1 ? "s" : ""}
+                {adults + children} {adults + children > 1 ? dict.search.travelerPlural : dict.search.travelerSingular}
               </div>
             </div>
 
             <div className="mt-5 space-y-2.5 border-t border-border pt-5 text-sm">
               <div className="flex justify-between text-muted">
-                <span>{formatPrice(residence.pricePerNight)} x {price.nights} nuit{price.nights > 1 ? "s" : ""}</span>
+                <span>{formatPrice(residence.pricePerNight)} x {price.nights} {price.nights > 1 ? dict.booking.nightPlural : dict.booking.nightSingular}</span>
                 <span className="text-foreground">{formatPrice(price.subtotal)}</span>
               </div>
               {price.cleaningFee > 0 && (
                 <div className="flex justify-between text-muted">
-                  <span>Frais de ménage</span>
+                  <span>{dict.booking.cleaningFee}</span>
                   <span className="text-foreground">{formatPrice(price.cleaningFee)}</span>
                 </div>
               )}
               <div className="flex justify-between text-muted">
-                <span>Frais de service KoraStay</span>
+                <span>{dict.booking.serviceFee}</span>
                 <span className="text-foreground">{formatPrice(finance.serviceFee)}</span>
               </div>
               {finance.stayDiscount > 0 && (
                 <div className="flex justify-between font-semibold text-success">
-                  <span>Réduction séjour (−{Math.round(stayDiscountRate(price.nights) * 100)}%)</span>
+                  <span>{dict.booking.stayDiscount.replace("{p}", String(Math.round(stayDiscountRate(price.nights) * 100)))}</span>
                   <span>−{formatPrice(finance.stayDiscount)}</span>
                 </div>
               )}
               {finance.referralDiscount > 0 && (
                 <div className="flex justify-between font-semibold text-success">
-                  <span>Parrainage (−5%) 🎁</span>
+                  <span>{dict.checkout.referral}</span>
                   <span>−{formatPrice(finance.referralDiscount)}</span>
                 </div>
               )}
               <div className="flex justify-between border-t border-border pt-3 text-lg font-extrabold text-foreground">
-                <span>Total</span>
+                <span>{dict.booking.total}</span>
                 <span>{formatPrice(finance.total)}</span>
               </div>
               <div className="mt-1 space-y-1 rounded-2xl bg-brand-50/60 px-3 py-2.5 text-sm">
                 <div className="flex justify-between font-semibold text-brand-800">
-                  <span>A payer maintenant{policy === "FULL" ? " (100%)" : " (acompte)"}</span>
+                  <span>{dict.checkout.payNow}{policy === "FULL" ? dict.checkout.payNowFull : dict.checkout.payNowDeposit}</span>
                   <span>{formatPrice(finance.depositDue)}</span>
                 </div>
                 {finance.balanceDue > 0 && (
                   <div className="flex justify-between text-muted">
-                    <span>Solde restant</span>
+                    <span>{dict.checkout.balanceRemaining}</span>
                     <span>{formatPrice(finance.balanceDue)}</span>
                   </div>
                 )}
                 {finance.cautionAmount > 0 && (
                   <div className="flex justify-between text-muted">
-                    <span>Caution éventuelle</span>
+                    <span>{dict.checkout.possibleDeposit}</span>
                     <span>{formatPrice(finance.cautionAmount)}</span>
                   </div>
                 )}
@@ -187,7 +194,7 @@ export default async function ReserverPage({
 
             <p className="mt-4 flex items-center gap-1.5 text-xs text-muted">
               <ShieldCheck className="h-4 w-4 text-brand-500" />
-              Paiement sécurisé via KoraStay - Annulation selon conditions
+              {dict.checkout.securePayment}
             </p>
           </div>
         </aside>

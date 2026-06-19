@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Field } from "@/components/ui/field";
 import { cn } from "@/lib/utils";
 import { PAYMENT_METHOD_OPTIONS } from "@/lib/payments";
+import { useI18n } from "@/components/i18n/provider";
+import { localePath } from "@/lib/i18n";
 import type { ReservationResult } from "@/server/actions/reservations";
 
 type Action = (prev: ReservationResult, formData: FormData) => Promise<ReservationResult>;
@@ -47,6 +49,7 @@ export function ReservationCheckout({
   methods,
   koraStayNote,
 }: ReservationCheckoutProps) {
+  const dict = useI18n();
   const [state, formAction, pending] = useActionState<ReservationResult, FormData>(
     action,
     { ok: false }
@@ -63,15 +66,15 @@ export function ReservationCheckout({
 
       {/* Coordonnees */}
       <section>
-        <h2 className="mb-4 text-lg font-bold text-foreground">Vos coordonnees</h2>
+        <h2 className="mb-4 text-lg font-bold text-foreground">{dict.checkout.yourDetails}</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="Nom complet" htmlFor="guestName" required className="sm:col-span-2">
+          <Field label={dict.checkout.fullName} htmlFor="guestName" required className="sm:col-span-2">
             <Input id="guestName" name="guestName" defaultValue={defaultName} required />
           </Field>
           <Field label="Email" htmlFor="guestEmail" required>
             <Input id="guestEmail" name="guestEmail" type="email" defaultValue={defaultEmail} required />
           </Field>
-          <Field label="Téléphone" htmlFor="guestPhone">
+          <Field label={dict.checkout.phone} htmlFor="guestPhone">
             <Input id="guestPhone" name="guestPhone" defaultValue={defaultPhone} placeholder="+225 ..." />
           </Field>
         </div>
@@ -79,14 +82,13 @@ export function ReservationCheckout({
 
       {/* Validation & acompte */}
       <section>
-        <h2 className="mb-2 text-lg font-bold text-foreground">Validation de votre demande</h2>
+        <h2 className="mb-2 text-lg font-bold text-foreground">{dict.checkout.validationTitle}</h2>
         <div className="mb-4 flex items-start gap-2 rounded-2xl bg-brand-50/70 px-4 py-3 text-sm text-brand-800">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-brand-600" />
           <span>
-            Aucun montant n'est debite maintenant. Votre demande est validée sous <strong>{validationLabel}</strong>,
-            puis vous reglez <strong>{depositLabel ? depositLabel : "l'acompte"}</strong> pour confirmer.
-            {balanceLabel ? ` Solde restant : ${balanceLabel}.` : ""}
-            {cautionLabel ? ` Une caution de ${cautionLabel} pourra être demandée.` : ""}
+            {dict.checkout.validationP1}<strong>{validationLabel}</strong>{dict.checkout.validationP2}<strong>{depositLabel ? depositLabel : dict.checkout.depositFallback}</strong>{dict.checkout.validationP3}
+            {balanceLabel ? dict.checkout.balanceLine.replace("{x}", balanceLabel) : ""}
+            {cautionLabel ? dict.checkout.cautionLine.replace("{x}", cautionLabel) : ""}
           </span>
         </div>
         {koraStayNote && (
@@ -96,9 +98,9 @@ export function ReservationCheckout({
           </p>
         )}
         {isMock && (
-          <p className="mb-4 text-xs text-muted">Mode démonstration : le paiement de l'acompte est simule.</p>
+          <p className="mb-4 text-xs text-muted">{dict.checkout.demoMode}</p>
         )}
-        <p className="mb-3 text-sm font-semibold text-foreground">Moyen de paiement préféré (pour l'acompte)</p>
+        <p className="mb-3 text-sm font-semibold text-foreground">{dict.checkout.preferredMethod}</p>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {methodOptions.map((opt) => (
             <button
@@ -126,10 +128,10 @@ export function ReservationCheckout({
       <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border p-4">
         <input type="checkbox" name="acceptTerms" value="1" required className="mt-0.5 h-5 w-5 rounded border-border text-brand-500 focus:ring-brand-400" />
         <span className="text-sm text-foreground/90">
-          J'accepte les{" "}
-          <a href="/conditions-generales" target="_blank" className="font-semibold text-brand-600 underline">conditions générales de réservation</a>{" "}
-          et la{" "}
-          <a href="/politique-annulation" target="_blank" className="font-semibold text-brand-600 underline">politique d'annulation</a>.
+          {dict.checkout.acceptPrefix}
+          <a href={localePath("/conditions-generales", dict.locale)} target="_blank" className="font-semibold text-brand-600 underline">{dict.checkout.termsLink}</a>
+          {dict.checkout.and}
+          <a href={localePath("/politique-annulation", dict.locale)} target="_blank" className="font-semibold text-brand-600 underline">{dict.checkout.cancellationLink}</a>.
         </span>
       </label>
 
@@ -142,7 +144,7 @@ export function ReservationCheckout({
 
       <Button type="submit" size="lg" loading={pending} className="w-full">
         <Lock className="h-4 w-4" />
-        Envoyer ma demande de réservation
+        {dict.checkout.submit}
       </Button>
     </form>
   );

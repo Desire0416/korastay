@@ -218,6 +218,35 @@ export interface Dictionary {
     noChargeYet: string;
     yourStay: string;
   };
+  checkout: {
+    metaTitle: string;
+    backToResidence: string;
+    title: string;
+    referral: string;
+    payNow: string;
+    payNowFull: string;
+    payNowDeposit: string;
+    balanceRemaining: string;
+    possibleDeposit: string;
+    securePayment: string;
+    yourDetails: string;
+    fullName: string;
+    phone: string;
+    validationTitle: string;
+    validationP1: string;
+    validationP2: string;
+    validationP3: string;
+    depositFallback: string;
+    balanceLine: string; // {x}
+    cautionLine: string; // {x}
+    demoMode: string;
+    preferredMethod: string;
+    acceptPrefix: string;
+    termsLink: string;
+    and: string;
+    cancellationLink: string;
+    submit: string;
+  };
   // Libelles de navigation / pied de page, indexes par href.
   nav: Record<string, string>;
   // Titres des colonnes du pied de page (cle = libelle francais).
@@ -506,6 +535,35 @@ const FR: Dictionary = {
     noChargeYet: "Aucun montant ne sera débité à cette étape.",
     yourStay: "Votre séjour",
   },
+  checkout: {
+    metaTitle: "Finaliser la réservation",
+    backToResidence: "Retour à la résidence",
+    title: "Finaliser votre réservation",
+    referral: "Parrainage (−5%) 🎁",
+    payNow: "À payer maintenant",
+    payNowFull: " (100%)",
+    payNowDeposit: " (acompte)",
+    balanceRemaining: "Solde restant",
+    possibleDeposit: "Caution éventuelle",
+    securePayment: "Paiement sécurisé via KoraStay - Annulation selon conditions",
+    yourDetails: "Vos coordonnées",
+    fullName: "Nom complet",
+    phone: "Téléphone",
+    validationTitle: "Validation de votre demande",
+    validationP1: "Aucun montant n'est débité maintenant. Votre demande est validée sous ",
+    validationP2: ", puis vous réglez ",
+    validationP3: " pour confirmer.",
+    depositFallback: "l'acompte",
+    balanceLine: " Solde restant : {x}.",
+    cautionLine: " Une caution de {x} pourra être demandée.",
+    demoMode: "Mode démonstration : le paiement de l'acompte est simulé.",
+    preferredMethod: "Moyen de paiement préféré (pour l'acompte)",
+    acceptPrefix: "J'accepte les ",
+    termsLink: "conditions générales de réservation",
+    and: " et la ",
+    cancellationLink: "politique d'annulation",
+    submit: "Envoyer ma demande de réservation",
+  },
   nav: {},
   footerColumns: {},
 };
@@ -764,6 +822,35 @@ const EN: Dictionary = {
     selectDates: "Select your dates",
     noChargeYet: "You won't be charged at this stage.",
     yourStay: "Your stay",
+  },
+  checkout: {
+    metaTitle: "Complete your booking",
+    backToResidence: "Back to the listing",
+    title: "Complete your booking",
+    referral: "Referral (−5%) 🎁",
+    payNow: "Due now",
+    payNowFull: " (100%)",
+    payNowDeposit: " (deposit)",
+    balanceRemaining: "Remaining balance",
+    possibleDeposit: "Possible security deposit",
+    securePayment: "Secure payment via KoraStay - Cancellation per terms",
+    yourDetails: "Your details",
+    fullName: "Full name",
+    phone: "Phone",
+    validationTitle: "Request validation",
+    validationP1: "No amount is charged now. Your request is validated within ",
+    validationP2: ", then you pay ",
+    validationP3: " to confirm.",
+    depositFallback: "the deposit",
+    balanceLine: " Remaining balance: {x}.",
+    cautionLine: " A security deposit of {x} may be requested.",
+    demoMode: "Demo mode: the deposit payment is simulated.",
+    preferredMethod: "Preferred payment method (for the deposit)",
+    acceptPrefix: "I accept the ",
+    termsLink: "booking terms & conditions",
+    and: " and the ",
+    cancellationLink: "cancellation policy",
+    submit: "Send my booking request",
   },
   nav: NAV_EN,
   footerColumns: FOOTER_COLUMNS_EN,
