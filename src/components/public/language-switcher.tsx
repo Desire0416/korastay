@@ -9,19 +9,25 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { setLocale } from "@/server/actions/i18n";
-import { LOCALES, LOCALE_LABELS, type Locale } from "@/lib/i18n";
+import { LOCALES, LOCALE_LABELS, switchLocalePath, type Locale } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
-export function LanguageSwitcher({ locale, className }: { locale: Locale; className?: string }) {
+export function LanguageSwitcher({
+  locale,
+  currentPath,
+  className,
+}: {
+  locale: Locale;
+  currentPath: string;
+  className?: string;
+}) {
   const router = useRouter();
   const [pending, start] = React.useTransition();
 
   function choose(next: Locale) {
     if (next === locale) return;
-    start(async () => {
-      await setLocale(next);
-      router.refresh();
+    start(() => {
+      router.push(switchLocalePath(currentPath, next));
     });
   }
 

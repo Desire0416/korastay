@@ -2,14 +2,14 @@ import Link from "next/link";
 import { Logo } from "@/components/brand/logo";
 import { FOOTER_NAV } from "@/lib/navigation";
 import { CONTACT_EMAIL, CONTACT_PHONE } from "@/lib/constants";
-import { navLabel, footerColumnLabel } from "@/lib/i18n";
+import { navLabel, footerColumnLabel, localePath } from "@/lib/i18n";
 import { getI18n } from "@/lib/i18n.server";
 import { Mail, Phone, ShieldCheck, Smartphone, Headset } from "lucide-react";
 
 const REASSURANCE_ICONS = [ShieldCheck, Smartphone, Headset];
 
 export async function PublicFooter() {
-  const { dict } = await getI18n();
+  const { locale, dict } = await getI18n();
 
   return (
     <footer className="mt-20 border-t border-border bg-surface">
@@ -53,7 +53,7 @@ export async function PublicFooter() {
                 {col.links.map((link) => (
                   <li key={link.href}>
                     <Link
-                      href={link.href}
+                      href={localePath(link.href, locale)}
                       className="text-sm text-muted transition-colors hover:text-brand-600"
                     >
                       {navLabel(dict, link.href, link.label)}

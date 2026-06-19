@@ -1,9 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import { Clock, Users, MapPin, ArrowRight } from "lucide-react";
 import { SmartImage } from "@/components/ui/smart-image";
 import { FavoriteButton } from "./favorite-button";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/utils";
+import { useI18n } from "@/components/i18n/provider";
+import { localePath } from "@/lib/i18n";
 
 interface PackCardProps {
   pack: {
@@ -22,9 +26,10 @@ interface PackCardProps {
 }
 
 export function PackCard({ pack, favorited }: PackCardProps) {
+  const dict = useI18n();
   return (
     <Link
-      href={`/packs/${pack.slug}`}
+      href={localePath(`/packs/${pack.slug}`, dict.locale)}
       className="group relative block overflow-hidden rounded-3xl border border-border bg-surface shadow-soft transition-shadow hover:shadow-card-hover"
     >
       <div className="relative aspect-[16/11] overflow-hidden">
@@ -41,7 +46,7 @@ export function PackCard({ pack, favorited }: PackCardProps) {
         <div className="absolute left-3 top-3 flex gap-2">
           <Badge tone="gold" className="bg-white/95">
             <Clock className="h-3 w-3" />
-            {pack.durationDays}j / {pack.durationNights}n
+            {pack.durationDays}{dict.card.dayShort} / {pack.durationNights}{dict.card.nightShort}
           </Badge>
         </div>
         <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
@@ -57,7 +62,7 @@ export function PackCard({ pack, favorited }: PackCardProps) {
       <div className="flex items-center justify-between gap-3 p-4">
         <div>
           <p className="flex items-center gap-1 text-xs text-muted">
-            <Users className="h-3.5 w-3.5" /> Des {pack.basePersons} personnes
+            <Users className="h-3.5 w-3.5" /> {dict.card.fromPeople.replace("{n}", String(pack.basePersons))}
           </p>
           <p className="mt-0.5">
             <span className="text-base font-extrabold text-foreground">

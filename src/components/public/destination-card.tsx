@@ -1,6 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import { SmartImage } from "@/components/ui/smart-image";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/components/i18n/provider";
+import { localePath } from "@/lib/i18n";
 
 interface DestinationCardProps {
   destination: {
@@ -14,10 +18,11 @@ interface DestinationCardProps {
 }
 
 export function DestinationCard({ destination, size = "sm" }: DestinationCardProps) {
+  const dict = useI18n();
   const count = destination._count?.residences ?? 0;
   return (
     <Link
-      href={`/destinations/${destination.slug}`}
+      href={localePath(`/destinations/${destination.slug}`, dict.locale)}
       className="group relative block overflow-hidden rounded-3xl shadow-soft"
     >
       <div className={cn("relative", size === "lg" ? "aspect-[3/4]" : "aspect-[4/5]")}>
@@ -35,7 +40,7 @@ export function DestinationCard({ destination, size = "sm" }: DestinationCardPro
           )}
           {count > 0 && (
             <p className="mt-1 text-xs font-medium text-white/90">
-              {count} résidence{count > 1 ? "s" : ""}
+              {count} {count > 1 ? dict.card.homePlural : dict.card.homeSingular}
             </p>
           )}
         </div>

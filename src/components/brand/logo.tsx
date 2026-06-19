@@ -1,5 +1,9 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { useLocale } from "@/components/i18n/provider";
+import { localePath } from "@/lib/i18n";
 
 interface LogoProps {
   className?: string;
@@ -19,6 +23,7 @@ export function Logo({
   withText = true,
   href = "/",
 }: LogoProps) {
+  const locale = useLocale();
   const isLight = variant === "light";
   const src = withText
     ? isLight
@@ -37,7 +42,7 @@ export function Logo({
 
   if (href) {
     return (
-      <Link href={href} aria-label="KoraStay - accueil" className="inline-flex items-center">
+      <Link href={localePath(href, locale)} aria-label="KoraStay - accueil" className="inline-flex items-center">
         {content}
       </Link>
     );

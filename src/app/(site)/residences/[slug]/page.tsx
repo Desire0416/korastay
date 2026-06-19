@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
   Star, MapPin, Users, BedDouble, Bath, Home, ChevronLeft, ShieldCheck,
-  Clock, ScrollText, CheckCircle2, MessageCircle, Award, Sparkles,
+  Clock, ScrollText, CheckCircle2, Award, Sparkles,
 } from "lucide-react";
 import { getResidenceBySlug, getSimilarResidences } from "@/lib/queries";
 import { getCityPacks } from "@/lib/custom-pack-queries";
@@ -21,7 +21,6 @@ import { RatingStars } from "@/components/ui/rating-stars";
 import { JsonLd } from "@/components/seo/json-ld";
 import { MapEmbed } from "@/components/public/map-embed";
 import { formatDate, initials } from "@/lib/utils";
-import { getWhatsAppNumber, buildWhatsAppLink } from "@/lib/whatsapp";
 import { residenceTypeMeta, qualityLevelMeta } from "@/lib/enums";
 import { SITE_URL } from "@/lib/constants";
 
@@ -55,17 +54,11 @@ export default async function ResidenceDetailPage({
   const residence = await getResidenceBySlug(slug);
   if (!residence || residence.status !== "PUBLISHED") notFound();
 
-  const [favorites, similar, cityPacks, waNumber] = await Promise.all([
+  const [favorites, similar, cityPacks] = await Promise.all([
     getUserFavoriteIds(),
     getSimilarResidences(residence.city, residence.id, 4),
     residence.destination?.slug ? getCityPacks(residence.destination.slug) : Promise.resolve([]),
-    getWhatsAppNumber(),
   ]);
-
-  const waLink = buildWhatsAppLink(
-    waNumber,
-    `Bonjour KoraStay, je suis intéressé par la résidence "${residence.name}" (${APP_URL}/residences/${residence.slug}). Est-elle disponible ?`,
-  );
 
   const type = residenceTypeMeta[residence.type];
   const quality = residence.qualityLevel ? qualityLevelMeta[residence.qualityLevel] : null;
@@ -354,16 +347,6 @@ export default async function ResidenceDetailPage({
                 ratingCount={residence.ratingCount}
                 disabledRanges={disabledRanges}
               />
-              {waLink && (
-                <a
-                  href={waLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl border border-[#25D366] bg-[#25D366]/10 py-3 text-sm font-semibold text-[#128C4A] transition-colors hover:bg-[#25D366]/20"
-                >
-                  <MessageCircle className="h-4 w-4" /> Une question ? Discuter sur WhatsApp
-                </a>
-              )}
             </div>
           </aside>
         </div>

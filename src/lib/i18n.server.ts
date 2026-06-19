@@ -1,18 +1,26 @@
-import { cookies } from "next/headers";
+import { headers } from "next/headers";
 import {
   DEFAULT_LOCALE,
-  LOCALE_COOKIE,
   getDictionary,
   isLocale,
   type Dictionary,
   type Locale,
 } from "./i18n";
 
-/** Lit la locale courante depuis le cookie (cote serveur). */
+/**
+ * Lit la locale courante depuis l'en-tete pose par le middleware (x-locale).
+ * La source de verite est l'URL : /en/... -> en, sinon fr.
+ */
 export async function getLocale(): Promise<Locale> {
-  const store = await cookies();
-  const value = store.get(LOCALE_COOKIE)?.value;
+  const store = await headers();
+  const value = store.get("x-locale");
   return isLocale(value) ? value : DEFAULT_LOCALE;
+}
+
+/** Chemin d'origine de la requete (avec eventuel prefixe /en) — pour la bascule de langue. */
+export async function getPathname(): Promise<string> {
+  const store = await headers();
+  return store.get("x-pathname") ?? "/";
 }
 
 /** Raccourci : renvoie locale + dictionnaire. */

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Menu, ChevronRight, LogOut, Shield } from "lucide-react";
 import {
   Sheet,
@@ -22,9 +23,8 @@ import {
   ADMIN_NAV,
 } from "@/lib/navigation";
 import { logoutAction } from "@/server/actions/auth";
-import { setLocale } from "@/server/actions/i18n";
 import { initials, cn } from "@/lib/utils";
-import { navLabel, LOCALES, LOCALE_LABELS, type Locale, type Dictionary } from "@/lib/i18n";
+import { navLabel, localePath, switchLocalePath, LOCALES, LOCALE_LABELS, type Locale, type Dictionary } from "@/lib/i18n";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { SessionUser } from "@/lib/auth";
 
@@ -35,7 +35,8 @@ const ROLE_NAV: Record<string, typeof ACCOUNT_NAV> = {
   BUSINESS: BUSINESS_NAV,
 };
 
-export function MobileNavSheet({ user, locale, dict }: { user: SessionUser | null; locale: Locale; dict: Dictionary }) {
+export function MobileNavSheet({ user, locale, currentPath, dict }: { user: SessionUser | null; locale: Locale; currentPath: string; dict: Dictionary }) {
+  const router = useRouter();
   const [open, setOpen] = React.useState(false);
   const [, startLang] = React.useTransition();
   const roleNav = user ? ROLE_NAV[user.role] : null;
@@ -43,7 +44,8 @@ export function MobileNavSheet({ user, locale, dict }: { user: SessionUser | nul
 
   function chooseLang(next: Locale) {
     if (next === locale) return;
-    startLang(async () => { await setLocale(next); });
+    setOpen(false);
+    startLang(() => { router.push(switchLocalePath(currentPath, next)); });
   }
 
   return (
@@ -65,7 +67,7 @@ export function MobileNavSheet({ user, locale, dict }: { user: SessionUser | nul
         <div className="flex-1 overflow-y-auto p-2.5">
           {user && (
             <Link
-              href={isAdmin ? "/admin" : roleNav ? roleNav[0].href : "/account"}
+              href={localePath(isAdmin ? "/admin" : roleNav ? roleNav[0].href : "/account", locale)}
               onClick={() => setOpen(false)}
               className="mb-2 flex items-center gap-2.5 rounded-2xl bg-surface-soft p-2.5 transition-colors active:bg-border"
             >
@@ -87,7 +89,7 @@ export function MobileNavSheet({ user, locale, dict }: { user: SessionUser | nul
             {PUBLIC_NAV.map((item) => (
               <SheetClose key={item.href} asChild>
                 <Link
-                  href={item.href}
+                  href={localePath(item.href, locale)}
                   className="flex items-center justify-between rounded-xl px-3 py-2.5 text-[14px] font-semibold text-foreground transition-colors hover:bg-surface-soft"
                 >
                   {navLabel(dict, item.href, item.label)}
@@ -112,7 +114,7 @@ export function MobileNavSheet({ user, locale, dict }: { user: SessionUser | nul
                     {group.items.map((item) => (
                       <SheetClose key={item.href} asChild>
                         <Link
-                          href={item.href}
+                          href={localePath(item.href, locale)}
                           className="flex items-center gap-3 rounded-xl px-3 py-2 text-[14px] font-medium text-foreground transition-colors hover:bg-surface-soft"
                         >
                           <Icon name={item.icon} className="h-4 w-4 text-muted" />
@@ -136,7 +138,7 @@ export function MobileNavSheet({ user, locale, dict }: { user: SessionUser | nul
                 {roleNav.map((item) => (
                   <SheetClose key={item.href} asChild>
                     <Link
-                      href={item.href}
+                      href={localePath(item.href, locale)}
                       className="flex items-center gap-3 rounded-xl px-3 py-2 text-[14px] font-medium text-foreground transition-colors hover:bg-surface-soft"
                     >
                       <Icon name={item.icon} className="h-4 w-4 text-muted" />
@@ -184,19 +186,19 @@ export function MobileNavSheet({ user, locale, dict }: { user: SessionUser | nul
             <div className="grid grid-cols-2 gap-2">
               <SheetClose asChild>
                 <Button asChild variant="outline">
-                  <Link href="/login">{dict.header.login}</Link>
+                  <Link href={localePath("/login", locale)}>{dict.header.login}</Link>
                 </Button>
               </SheetClose>
               <SheetClose asChild>
                 <Button asChild>
-                  <Link href="/register">{dict.header.register}</Link>
+                  <Link href={localePath("/register", locale)}>{dict.header.register}</Link>
                 </Button>
               </SheetClose>
             </div>
           )}
           <SheetClose asChild>
             <Link
-              href="/devenir-proprietaire"
+              href={localePath("/devenir-proprietaire", locale)}
               className="mt-3 block text-center text-sm font-semibold text-brand-600"
             >
               {dict.header.becomeHost} &rarr;

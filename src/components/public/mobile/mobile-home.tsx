@@ -15,6 +15,8 @@ import { CountUp } from "../count-up";
 import { SmartImage } from "@/components/ui/smart-image";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { activityCategoryMeta } from "@/lib/enums";
+import { useI18n } from "@/components/i18n/provider";
+import { localePath } from "@/lib/i18n";
 import { cn, initials, formatPrice } from "@/lib/utils";
 import type { ResidenceCardData, CommunityStats } from "@/lib/queries";
 import type { ActivityCardData } from "@/lib/activity-queries";
@@ -41,19 +43,16 @@ interface MobileHomeProps {
 }
 
 type TabKey = "residences" | "packs" | "activites";
-const TABS: { key: TabKey; label: string; icon: LucideIcon; color: string; badge?: string }[] = [
-  { key: "residences", label: "Location meublée", icon: HomeIcon, color: "text-brand-600" },
-  { key: "packs", label: "Packs", icon: Compass, color: "text-gold-600", badge: "Populaire" },
-  { key: "activites", label: "Activités", icon: Sparkles, color: "text-success" },
+const TABS: { key: TabKey; icon: LucideIcon; color: string; badge?: boolean }[] = [
+  { key: "residences", icon: HomeIcon, color: "text-brand-600" },
+  { key: "packs", icon: Compass, color: "text-gold-600", badge: true },
+  { key: "activites", icon: Sparkles, color: "text-success" },
 ];
 
-const TRUST = [
-  { icon: ShieldCheck, title: "Locations meublées vérifiées", text: "Contrôlées par KoraStay." },
-  { icon: Smartphone, title: "Paiement mobile", text: "Orange Money, Wave, carte." },
-  { icon: Headset, title: "Assistance locale", text: "Avant, pendant, après." },
-];
+const TRUST_ICONS = [ShieldCheck, Smartphone, Headset];
 
 function SectionHead({ title, subtitle, href }: { title: string; subtitle?: string; href?: string }) {
+  const dict = useI18n();
   return (
     <div className="mb-3 flex items-end justify-between gap-3 px-5">
       <div className="min-w-0">
@@ -61,7 +60,7 @@ function SectionHead({ title, subtitle, href }: { title: string; subtitle?: stri
         {subtitle && <p className="truncate text-[13px] text-muted">{subtitle}</p>}
       </div>
       {href && (
-        <Link href={href} aria-label={`Voir : ${title}`} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border text-foreground active:scale-95">
+        <Link href={href} aria-label={dict.mobileHome.viewAria.replace("{title}", title)} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border text-foreground active:scale-95">
           <ArrowRight className="h-4 w-4" />
         </Link>
       )}
@@ -70,17 +69,18 @@ function SectionHead({ title, subtitle, href }: { title: string; subtitle?: stri
 }
 
 export function MobileHome({ residences, destinations, packs, activities, reviews, stats, community, favorites }: MobileHomeProps) {
+  const dict = useI18n();
   const [tab, setTab] = React.useState<TabKey>("residences");
 
   // Tuiles de stats (affichees seulement si l'admin a active la section).
   const communityTiles = community
     ? [
-        { value: community.visits, icon: Eye, label: "Visites" },
-        { value: community.travelers, icon: Users, label: "Voyageurs" },
-        { value: community.owners, icon: KeyRound, label: "Propriétaires" },
-        { value: community.guides, icon: Compass, label: "Guides" },
-        { value: community.partners, icon: Handshake, label: "Partenaires" },
-        { value: stats.residences, icon: BedDouble, label: "Locations" },
+        { value: community.visits, icon: Eye, label: dict.mobileHome.tiles.visits },
+        { value: community.travelers, icon: Users, label: dict.mobileHome.tiles.travelers },
+        { value: community.owners, icon: KeyRound, label: dict.mobileHome.tiles.owners },
+        { value: community.guides, icon: Compass, label: dict.mobileHome.tiles.guides },
+        { value: community.partners, icon: Handshake, label: dict.mobileHome.tiles.partners },
+        { value: stats.residences, icon: BedDouble, label: dict.mobileHome.tiles.stays },
       ]
     : [];
 
@@ -114,11 +114,13 @@ export function MobileHome({ residences, destinations, packs, activities, review
                 <t.icon className={cn("h-[26px] w-[26px]", t.color)} strokeWidth={1.7} />
                 {t.badge && (
                   <span className="absolute -right-5 -top-1.5 rounded-md bg-brand-600 px-1 py-px text-[8px] font-bold uppercase tracking-wide text-white shadow-soft">
-                    {t.badge}
+                    {dict.mobileHome.badgePopular}
                   </span>
                 )}
               </motion.span>
-              <span className="whitespace-nowrap">{t.label}</span>
+              <span className="whitespace-nowrap">
+                {t.key === "residences" ? dict.mobileHome.tabResidences : t.key === "packs" ? dict.mobileHome.tabPacks : dict.mobileHome.tabActivities}
+              </span>
               {active && <motion.span layoutId="mh-tab-underline" className="absolute inset-x-3 -bottom-px h-[2.5px] rounded-full bg-foreground" />}
             </button>
           );
@@ -130,7 +132,7 @@ export function MobileHome({ residences, destinations, packs, activities, review
         <div>
           {residences.length > 0 && (
             <section className="pt-5">
-              <SectionHead title="Locations meublées populaires" subtitle="Les mieux notées, vérifiées KoraStay" href="/residences" />
+              <SectionHead title={dict.mobileHome.residencesTitle} subtitle={dict.mobileHome.residencesSubtitle} href={localePath("/residences", dict.locale)} />
               <div className="no-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1">
                 {residences.map((r, i) => (
                   <div key={r.id} className="w-[52vw] max-w-[195px] shrink-0 snap-start">
@@ -143,7 +145,7 @@ export function MobileHome({ residences, destinations, packs, activities, review
 
           {destinations.length > 0 && (
             <section className="pt-7">
-              <SectionHead title="Destinations" subtitle="Ou KoraStay vous accueille" href="/destinations" />
+              <SectionHead title={dict.mobileHome.destinationsTitle} subtitle={dict.mobileHome.destinationsSubtitle} href={localePath("/destinations", dict.locale)} />
               <div className="no-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1">
                 {destinations.map((d) => (
                   <div key={d.slug} className="w-28 shrink-0 snap-start">
@@ -156,7 +158,7 @@ export function MobileHome({ residences, destinations, packs, activities, review
 
           {packs.length > 0 && (
             <section className="pt-7">
-              <SectionHead title="Packs Découverte" subtitle="Séjours clé en main, guide inclus" href="/packs" />
+              <SectionHead title={dict.mobileHome.packsTitle} subtitle={dict.mobileHome.packsSubtitle} href={localePath("/packs", dict.locale)} />
               <div className="no-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1">
                 {packs.slice(0, 6).map((p) => (
                   <div key={p.id} className="w-[46vw] max-w-[170px] shrink-0 snap-start">
@@ -170,30 +172,33 @@ export function MobileHome({ residences, destinations, packs, activities, review
           {/* Confiance */}
           <section className="px-5 pt-8">
             <div className="rounded-3xl border border-border bg-surface p-4 shadow-soft">
-              <h2 className="mb-3 text-[16px] font-bold text-foreground">Voyagez l&apos;esprit tranquille</h2>
+              <h2 className="mb-3 text-[16px] font-bold text-foreground">{dict.home.sections.whyTitle}</h2>
               <div className="space-y-3">
-                {TRUST.map((t) => (
+                {dict.mobileHome.trust.map((t, i) => {
+                  const TrustIcon = TRUST_ICONS[i] ?? ShieldCheck;
+                  return (
                   <div key={t.title} className="flex items-center gap-3">
                     <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
-                      <t.icon className="h-[18px] w-[18px]" />
+                      <TrustIcon className="h-[18px] w-[18px]" />
                     </span>
                     <div className="min-w-0">
                       <p className="text-[13px] font-bold text-foreground">{t.title}</p>
                       <p className="text-[12px] text-muted">{t.text}</p>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </section>
 
           {/* CTA proprietaire */}
           <section className="px-5 pt-7">
-            <Link href="/devenir-proprietaire" className="relative flex items-center justify-between gap-3 overflow-hidden rounded-3xl border border-border bg-brand-50 p-4 active:scale-[0.99]">
+            <Link href={localePath("/devenir-proprietaire", dict.locale)} className="relative flex items-center justify-between gap-3 overflow-hidden rounded-3xl border border-border bg-brand-50 p-4 active:scale-[0.99]">
               <div className="min-w-0">
                 <HomeIcon className="h-6 w-6 text-brand-600" />
-                <h3 className="mt-2 font-display text-[16px] font-semibold text-brand-900">Vous etes propriétaire ?</h3>
-                <p className="text-[12px] text-brand-800/80">Publiez votre résidence et recevez des réservations.</p>
+                <h3 className="mt-2 font-display text-[16px] font-semibold text-brand-900">{dict.home.ownerCard.title}</h3>
+                <p className="text-[12px] text-brand-800/80">{dict.mobileHome.ownerCtaText}</p>
               </div>
               <ArrowUpRight className="h-5 w-5 shrink-0 text-brand-600" />
             </Link>
@@ -202,7 +207,7 @@ export function MobileHome({ residences, destinations, packs, activities, review
           {/* Temoignages */}
           {reviews.length > 0 && (
             <section className="pt-8">
-              <SectionHead title="Ils ont voyage avec KoraStay" />
+              <SectionHead title={dict.home.sections.testimonialsTitle} />
               <div className="no-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1">
                 {reviews.map((r) => (
                   <div key={r.id} className="w-[76vw] max-w-[290px] shrink-0 snap-start rounded-3xl border border-border bg-surface p-4 shadow-soft">
@@ -227,7 +232,7 @@ export function MobileHome({ residences, destinations, packs, activities, review
           <section className="px-5 pb-4 pt-8">
             {community && (
               <>
-                <h2 className="mb-3 px-1 text-[16px] font-bold text-foreground">KoraStay en chiffres</h2>
+                <h2 className="mb-3 px-1 text-[16px] font-bold text-foreground">{dict.mobileHome.statsTitle}</h2>
                 <div className="mb-4 grid grid-cols-3 gap-2.5 text-center">
                   {communityTiles.map((s) => (
                     <div key={s.label} className="rounded-2xl border border-border bg-surface py-3">
@@ -242,8 +247,8 @@ export function MobileHome({ residences, destinations, packs, activities, review
                 </div>
               </>
             )}
-            <Link href="/faq" className="flex items-center justify-between rounded-2xl border border-border bg-surface px-4 py-3 text-[14px] font-semibold text-foreground active:bg-surface-soft">
-              Questions frequentes
+            <Link href={localePath("/faq", dict.locale)} className="flex items-center justify-between rounded-2xl border border-border bg-surface px-4 py-3 text-[14px] font-semibold text-foreground active:bg-surface-soft">
+              {dict.home.sections.faqTitle}
               <ArrowRight className="h-4 w-4 text-muted" />
             </Link>
           </section>
@@ -254,11 +259,11 @@ export function MobileHome({ residences, destinations, packs, activities, review
       {tab === "packs" && (
         <section className="px-5 pb-4 pt-5">
           <div className="mb-3">
-            <h2 className="text-[19px] font-bold tracking-tight text-foreground">Packs Découverte</h2>
-            <p className="text-[13px] text-muted">Séjours clé en main : hébergement, transport et guide local.</p>
+            <h2 className="text-[19px] font-bold tracking-tight text-foreground">{dict.mobileHome.packsTitle}</h2>
+            <p className="text-[13px] text-muted">{dict.mobileHome.packsTabSubtitle}</p>
           </div>
           {packs.length === 0 ? (
-            <p className="py-10 text-center text-sm text-muted">Aucun pack disponible pour le moment.</p>
+            <p className="py-10 text-center text-sm text-muted">{dict.mobileHome.noPacks}</p>
           ) : (
             <div className="grid grid-cols-2 gap-3">
               {packs.map((p) => (
@@ -266,8 +271,8 @@ export function MobileHome({ residences, destinations, packs, activities, review
               ))}
             </div>
           )}
-          <Link href="/packs" className="mt-4 flex items-center justify-between rounded-2xl border border-border bg-surface px-4 py-3 text-[14px] font-semibold text-foreground active:bg-surface-soft">
-            Voir tous les packs
+          <Link href={localePath("/packs", dict.locale)} className="mt-4 flex items-center justify-between rounded-2xl border border-border bg-surface px-4 py-3 text-[14px] font-semibold text-foreground active:bg-surface-soft">
+            {dict.mobileHome.seeAllPacks}
             <ArrowRight className="h-4 w-4 text-muted" />
           </Link>
         </section>
@@ -277,17 +282,17 @@ export function MobileHome({ residences, destinations, packs, activities, review
       {tab === "activites" && (
         <section className="px-5 pb-4 pt-5">
           <div className="mb-3">
-            <h2 className="text-[19px] font-bold tracking-tight text-foreground">Activités &amp; expériences</h2>
-            <p className="text-[13px] text-muted">Excursions, visites et sorties nature, avec guide certifié.</p>
+            <h2 className="text-[19px] font-bold tracking-tight text-foreground">{dict.mobileHome.activitiesTitle}</h2>
+            <p className="text-[13px] text-muted">{dict.mobileHome.activitiesSubtitle}</p>
           </div>
           {activities.length === 0 ? (
-            <p className="py-10 text-center text-sm text-muted">Aucune activité disponible pour le moment.</p>
+            <p className="py-10 text-center text-sm text-muted">{dict.mobileHome.noActivities}</p>
           ) : (
             <div className="grid grid-cols-2 gap-3">
               {activities.map((a) => (
                 <Link
                   key={a.id}
-                  href={`/activites/${a.slug}`}
+                  href={localePath(`/activites/${a.slug}`, dict.locale)}
                   className="group block overflow-hidden rounded-3xl border border-border bg-surface shadow-soft active:scale-[0.99]"
                 >
                   <div className="relative aspect-[4/3] overflow-hidden">
@@ -307,15 +312,15 @@ export function MobileHome({ residences, destinations, packs, activities, review
                     </div>
                     <p className="mt-1.5 text-[13.5px]">
                       <span className="font-extrabold text-foreground">{formatPrice(a.pricePerPerson)}</span>
-                      <span className="text-muted"> / pers.</span>
+                      <span className="text-muted"> {dict.card.perPerson}</span>
                     </p>
                   </div>
                 </Link>
               ))}
             </div>
           )}
-          <Link href="/activites" className="mt-4 flex items-center justify-between rounded-2xl border border-border bg-surface px-4 py-3 text-[14px] font-semibold text-foreground active:bg-surface-soft">
-            Voir toutes les activités
+          <Link href={localePath("/activites", dict.locale)} className="mt-4 flex items-center justify-between rounded-2xl border border-border bg-surface px-4 py-3 text-[14px] font-semibold text-foreground active:bg-surface-soft">
+            {dict.mobileHome.seeAllActivities}
             <ArrowRight className="h-4 w-4 text-muted" />
           </Link>
         </section>

@@ -5,7 +5,6 @@ export const SETTING_DEFAULTS: Record<string, string> = {
   service_fee_rate: String(SERVICE_FEE_RATE),
   contact_email: CONTACT_EMAIL,
   contact_phone: CONTACT_PHONE,
-  whatsapp_number: "",
   announcement: "",
   // Section publique "KoraStay en chiffres" : masquee par defaut (chiffres faibles).
   community_stats_visible: "false",

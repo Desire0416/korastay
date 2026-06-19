@@ -22,34 +22,27 @@ import {
 import { getFeaturedActivities } from "@/lib/activity-queries";
 import { getUserFavoriteIds } from "@/server/actions/favorites";
 import { getI18n } from "@/lib/i18n.server";
+import { localePath } from "@/lib/i18n";
 import { initials } from "@/lib/utils";
 import { MobileHome } from "@/components/public/mobile/mobile-home";
 import { JsonLd } from "@/components/seo/json-ld";
 import { APP_NAME, APP_DESCRIPTION, SITE_URL, CONTACT_EMAIL, CONTACT_PHONE } from "@/lib/constants";
+import { alternatesFor } from "@/lib/seo";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { alternates: alternatesFor("/") };
 
 const CATEGORIES = [
-  { label: "Location meublée", href: "/residences", icon: HomeIcon, desc: "Logements meublés contrôlés", color: "bg-brand-50 text-brand-600" },
-  { label: "Packs Découverte", href: "/packs", icon: Compass, desc: "Séjours clE en main", color: "bg-gold-50 text-gold-600" },
-  { label: "KoraStay Business", href: "/business", icon: Briefcase, desc: "Missions & entreprises", color: "bg-sky-50 text-info" },
-  { label: "Devenir partenaire", href: "/partners", icon: Handshake, desc: "Guides, transport, resto", color: "bg-emerald-50 text-success" },
-];
+  { key: "residences", href: "/residences", icon: HomeIcon, color: "bg-brand-50 text-brand-600" },
+  { key: "packs", href: "/packs", icon: Compass, color: "bg-gold-50 text-gold-600" },
+  { key: "business", href: "/business", icon: Briefcase, color: "bg-sky-50 text-info" },
+  { key: "partners", href: "/partners", icon: Handshake, color: "bg-emerald-50 text-success" },
+] as const;
 
-const WHY = [
-  { icon: ShieldCheck, title: "Locations meublées vérifiées", text: "Chaque logement est contrôle selon des standards stricts de propreté, sécurité et équipement avant publication." },
-  { icon: Smartphone, title: "Paiement mobile", text: "Réservez et payez en toute simplicité via Orange Money, Wave ou carte bancaire." },
-  { icon: Headset, title: "Assistance locale", text: "Une équipe disponible avant, pendant et après votre séjour, partout en Côte d'Ivoire." },
-  { icon: MapPinned, title: "Partenaires locaux", text: "Guides, transporteurs et restaurants sélectionnés pour une expérience authentique." },
-];
-
-const FAQ = [
-  { q: "Comment savoir si une résidence est fiable ?", a: "Chaque résidence affichant le badge \"Résidence vérifiée KoraStay\" a ete contrôlée par notre équipe selon des critères de propreté, sécurité, équipement et conformite." },
-  { q: "Quels moyens de paiement sont acceptes ?", a: "Orange Money, Wave, carte bancaire Visa/Mastercard et bientot MTN MoMo. Le paiement est securise et la reservation confirmee immediatement." },
-  { q: "Puis-je annuler ma réservation ?", a: "Oui. Pour les résidences : remboursement intégral a plus de 72h du check-in, 50% entre 24 et 72h. Les conditions detaillees sont sur chaque fiche." },
-  { q: "Qu'est-ce qu'un Pack Découverte ?", a: "Un séjour clE en main incluant hébergement vérifié, petit dejeuner, transport en ville et guide local certifie, pour découvrir une destination sans rien organiser." },
-];
+const WHY_ICONS = [ShieldCheck, Smartphone, Headset, MapPinned];
 
 export default async function HomePage() {
-  const [residences, destinations, packs, activities, reviews, stats, community, favorites, { dict }] =
+  const [residences, destinations, packs, activities, reviews, stats, community, favorites, { locale, dict }] =
     await Promise.all([
       getFeaturedResidences(6),
       getPopularDestinations(6),
@@ -78,7 +71,7 @@ export default async function HomePage() {
     "@type": "WebSite",
     name: APP_NAME,
     url: SITE_URL,
-    inLanguage: "fr-FR",
+    inLanguage: locale === "en" ? "en-US" : "fr-FR",
     description: APP_DESCRIPTION,
   };
 
@@ -135,9 +128,9 @@ export default async function HomePage() {
 
           <div className="mx-auto mt-10 flex max-w-lg items-center justify-center gap-8 text-center">
             {[
-              { value: `${stats.residences}+`, label: "Locations" },
-              { value: stats.destinations, label: "Destinations" },
-              { value: `${stats.packs}+`, label: "Packs" },
+              { value: `${stats.residences}+`, label: dict.home.heroStats.stays },
+              { value: stats.destinations, label: dict.home.heroStats.destinations },
+              { value: `${stats.packs}+`, label: dict.home.heroStats.packs },
             ].map((s) => (
               <div key={s.label}>
                 <p className="font-display text-2xl font-semibold text-white">{s.value}</p>
@@ -154,15 +147,15 @@ export default async function HomePage() {
           {CATEGORIES.map((cat, i) => (
             <Reveal key={cat.href} delay={i * 0.05}>
               <Link
-                href={cat.href}
+                href={localePath(cat.href, locale)}
                 className="group flex h-full flex-col gap-3 rounded-3xl border border-border bg-surface p-5 shadow-soft transition-all hover:-translate-y-0.5 hover:shadow-card-hover"
               >
                 <span className={`flex h-12 w-12 items-center justify-center rounded-2xl ${cat.color}`}>
                   <cat.icon className="h-6 w-6" />
                 </span>
                 <div>
-                  <p className="font-bold text-foreground">{cat.label}</p>
-                  <p className="text-sm text-muted">{cat.desc}</p>
+                  <p className="font-bold text-foreground">{dict.home.categories[cat.key].label}</p>
+                  <p className="text-sm text-muted">{dict.home.categories[cat.key].desc}</p>
                 </div>
                 <ArrowRight className="mt-auto h-4 w-4 text-brand-500 transition-transform group-hover:translate-x-1" />
               </Link>
@@ -177,10 +170,11 @@ export default async function HomePage() {
       {/* ===== DESTINATIONS ===== */}
       <section className="container-page py-10">
         <SectionHeading
-          eyebrow="Explorer"
-          title="Destinations populaires"
-          description="De Daloa a Assinie, découvrez les villes ou KoraStay vous accueille."
-          href="/destinations"
+          eyebrow={dict.home.sections.destinationsEyebrow}
+          title={dict.home.sections.destinationsTitle}
+          description={dict.home.sections.destinationsDesc}
+          href={localePath("/destinations", locale)}
+          hrefLabel={dict.common.seeAll}
         />
         <div className="no-scrollbar -mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 md:mx-0 md:grid md:grid-cols-6 md:overflow-visible md:px-0">
           {destinations.map((d) => (
@@ -194,10 +188,11 @@ export default async function HomePage() {
       {/* ===== RESIDENCES VEDETTES ===== */}
       <section className="container-page py-10">
         <SectionHeading
-          eyebrow="Sélection"
-          title="Locations meublées vedettes"
-          description="Les logements les mieux notes, vérifiés par KoraStay."
-          href="/residences"
+          eyebrow={dict.home.sections.residencesEyebrow}
+          title={dict.home.sections.residencesTitle}
+          description={dict.home.sections.residencesDesc}
+          href={localePath("/residences", locale)}
+          hrefLabel={dict.common.seeAll}
         />
         <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
           {residences.map((r, i) => (
@@ -214,10 +209,11 @@ export default async function HomePage() {
       {/* ===== PACKS ===== */}
       <section className="container-page py-10">
         <SectionHeading
-          eyebrow="KoraStay Découverte"
-          title="Packs touristiques accompagnes"
-          description="Des séjours clE en main avec hébergement, transport et guide local."
-          href="/packs"
+          eyebrow={dict.home.sections.packsEyebrow}
+          title={dict.home.sections.packsTitle}
+          description={dict.home.sections.packsDesc}
+          href={localePath("/packs", locale)}
+          hrefLabel={dict.common.seeAll}
         />
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {packs.slice(0, 3).map((p) => (
@@ -231,22 +227,25 @@ export default async function HomePage() {
         <div className="container-page">
           <SectionHeading
             align="center"
-            eyebrow="Pourquoi KoraStay"
-            title="Voyagez l'esprit tranquille"
-            description="Une plateforme pensee pour la confiance, du premier clic au retour de séjour."
+            eyebrow={dict.home.sections.whyEyebrow}
+            title={dict.home.sections.whyTitle}
+            description={dict.home.sections.whyDesc}
           />
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {WHY.map((item, i) => (
+            {dict.home.why.map((item, i) => {
+              const WhyIcon = WHY_ICONS[i] ?? ShieldCheck;
+              return (
               <Reveal key={item.title} delay={i * 0.06}>
                 <div className="h-full rounded-3xl border border-border bg-background p-6">
                   <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-500 text-white">
-                    <item.icon className="h-6 w-6" />
+                    <WhyIcon className="h-6 w-6" />
                   </span>
                   <h3 className="mt-4 font-bold text-foreground">{item.title}</h3>
                   <p className="mt-1.5 text-sm text-muted">{item.text}</p>
                 </div>
               </Reveal>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -257,27 +256,25 @@ export default async function HomePage() {
           <div className="gradient-hero absolute inset-0 opacity-40" />
           <div className="relative">
             <Briefcase className="h-9 w-9 text-gold-400" />
-            <h3 className="mt-4 font-display text-2xl font-semibold">KoraStay Business</h3>
+            <h3 className="mt-4 font-display text-2xl font-semibold">{dict.home.businessCard.title}</h3>
             <p className="mt-2 max-w-sm text-white/80">
-              Hébergements fiables et facturables pour vos équipes en mission.
-              Contrats cadres, assistance dediee et rapports mensuels.
+              {dict.home.businessCard.text}
             </p>
             <Button asChild variant="accent" className="mt-6">
-              <Link href="/business">Demander un devis <ArrowRight className="h-4 w-4" /></Link>
+              <Link href={localePath("/business", locale)}>{dict.home.businessCard.cta} <ArrowRight className="h-4 w-4" /></Link>
             </Button>
           </div>
         </div>
         <div className="relative overflow-hidden rounded-4xl border border-border bg-brand-50 p-8 sm:p-10">
           <HomeIcon className="h-9 w-9 text-brand-600" />
           <h3 className="mt-4 font-display text-2xl font-semibold text-brand-900">
-            Vous etes propriétaire ?
+            {dict.home.ownerCard.title}
           </h3>
           <p className="mt-2 max-w-sm text-brand-800/80">
-            Publiez votre résidence, gérez votre calendrier et vos revenus, et
-            recevez des réservations vérifiées partout en Côte d'Ivoire.
+            {dict.home.ownerCard.text}
           </p>
           <Button asChild className="mt-6">
-            <Link href="/devenir-proprietaire">Rejoindre le réseau <ArrowRight className="h-4 w-4" /></Link>
+            <Link href={localePath("/devenir-proprietaire", locale)}>{dict.home.ownerCard.cta} <ArrowRight className="h-4 w-4" /></Link>
           </Button>
         </div>
       </section>
@@ -287,8 +284,8 @@ export default async function HomePage() {
         <section className="container-page py-10">
           <SectionHeading
             align="center"
-            eyebrow="Temoignages"
-            title="Ils ont voyage avec KoraStay"
+            eyebrow={dict.home.sections.testimonialsEyebrow}
+            title={dict.home.sections.testimonialsTitle}
           />
           <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
             {reviews.map((r) => (
@@ -318,9 +315,9 @@ export default async function HomePage() {
       {/* ===== FAQ ===== */}
       <section className="container-page py-14">
         <div className="mx-auto max-w-3xl">
-          <SectionHeading align="center" eyebrow="FAQ" title="Questions frequentes" />
+          <SectionHeading align="center" eyebrow={dict.home.sections.faqEyebrow} title={dict.home.sections.faqTitle} />
           <Accordion type="single" collapsible className="space-y-3">
-            {FAQ.map((item, i) => (
+            {dict.home.faq.map((item, i) => (
               <AccordionItem key={i} value={`faq-${i}`}>
                 <AccordionTrigger>{item.q}</AccordionTrigger>
                 <AccordionContent>{item.a}</AccordionContent>
@@ -328,8 +325,8 @@ export default async function HomePage() {
             ))}
           </Accordion>
           <p className="mt-6 text-center text-sm text-muted">
-            Une autre question ?{" "}
-            <Link href="/contact" className="font-semibold text-brand-600">Contactez-nous</Link>
+            {dict.home.faqMore}{" "}
+            <Link href={localePath("/contact", locale)} className="font-semibold text-brand-600">{dict.home.faqMoreLink}</Link>
           </p>
         </div>
       </section>

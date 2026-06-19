@@ -10,12 +10,19 @@ import { ResidencesMap } from "@/components/public/residences-map";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { cn, formatDate } from "@/lib/utils";
+import { getI18n } from "@/lib/i18n.server";
+import { localePath } from "@/lib/i18n";
+import { alternatesFor } from "@/lib/seo";
+import type { Metadata } from "next";
 
-export const metadata = {
-  title: "Locations meublées vérifiées",
-  description:
-    "Parcourez les locations meublées vérifiées KoraStay en Côte d'Ivoire : studios, appartements et villas.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { dict } = await getI18n();
+  return {
+    title: dict.residences.metaTitle,
+    description: dict.residences.metaDescription,
+    alternates: alternatesFor("/residences"),
+  };
+}
 
 type SP = Record<string, string | string[] | undefined>;
 
@@ -45,11 +52,12 @@ export default async function ResidencesPage({
     page,
   };
 
-  const [{ items, total, pageCount }, destinations, favorites] =
+  const [{ items, total, pageCount }, destinations, favorites, { locale, dict }] =
     await Promise.all([
       getResidences(filters),
       getAllDestinations(),
       getUserFavoriteIds(),
+      getI18n(),
     ]);
 
   const cityName = destinations.find((d) => d.slug === filters.city)?.name;
@@ -83,7 +91,7 @@ export default async function ResidencesPage({
       if (value && k !== "page") params.set(k, value);
     });
     params.set("page", String(p));
-    return `/residences?${params.toString()}`;
+    return `${localePath("/residences", locale)}?${params.toString()}`;
   }
 
   // Lien identique sans le filtre de dates (retirer la disponibilite).
@@ -94,24 +102,24 @@ export default async function ResidencesPage({
       if (value && k !== "page" && k !== "checkin" && k !== "checkout") params.set(k, value);
     });
     const qs = params.toString();
-    return qs ? `/residences?${qs}` : "/residences";
+    return qs ? `${localePath("/residences", locale)}?${qs}` : localePath("/residences", locale);
   })();
 
   return (
     <div className="container-page py-5 md:py-8">
       <div className="mb-4 md:mb-6">
         <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
-          {cityName ? `Locations meublées à ${cityName}` : "Locations meublées vérifiées"}
+          {cityName ? dict.residences.titleIn.replace("{city}", cityName) : dict.residences.titleDefault}
         </h1>
         <p className="mt-1 text-sm text-muted md:text-base">
-          {total} logement{total > 1 ? "s" : ""} disponible{total > 1 ? "s" : ""}
-          {cityName ? "" : " en Côte d'Ivoire"}
+          {(total > 1 ? dict.residences.countPlural : dict.residences.countSingular).replace("{n}", String(total))}
+          {cityName ? "" : dict.residences.inCotedivoire}
         </p>
         {filters.checkin && filters.checkout && (
           <span className="mt-2 inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-sm font-medium text-brand-700">
             <CalendarDays className="h-3.5 w-3.5" />
-            Disponibles du {formatDate(filters.checkin)} au {formatDate(filters.checkout)}
-            <Link href={withoutDatesHref} className="-mr-1 rounded-full p-0.5 text-brand-600 hover:bg-brand-100" aria-label="Retirer les dates">
+            {dict.residences.availableFromTo.replace("{from}", formatDate(filters.checkin)).replace("{to}", formatDate(filters.checkout))}
+            <Link href={withoutDatesHref} className="-mr-1 rounded-full p-0.5 text-brand-600 hover:bg-brand-100" aria-label={dict.residences.removeDates}>
               <X className="h-3.5 w-3.5" />
             </Link>
           </span>
@@ -132,11 +140,11 @@ export default async function ResidencesPage({
       {items.length === 0 ? (
         <EmptyState
           icon={SearchX}
-          title="Aucune résidence ne correspond"
-          description="Essayez d'elargir votre recherche ou de modifier vos filtres."
+          title={dict.residences.emptyTitle}
+          description={dict.residences.emptyDesc}
           action={
             <Button asChild>
-              <Link href="/residences">Reinitialiser la recherche</Link>
+              <Link href={localePath("/residences", locale)}>{dict.residences.resetSearch}</Link>
             </Button>
           }
         />
@@ -171,7 +179,7 @@ export default async function ResidencesPage({
       {pageCount > 1 && (
         <div className="mt-12 flex items-center justify-center gap-2">
           <Button asChild variant="outline" size="icon" disabled={page <= 1}>
-            <Link href={pageHref(Math.max(1, page - 1))} aria-label="Page précédente">
+            <Link href={pageHref(Math.max(1, page - 1))} aria-label={dict.residences.prevPage}>
               <ChevronLeft className="h-4 w-4" />
             </Link>
           </Button>
@@ -190,7 +198,7 @@ export default async function ResidencesPage({
             </Link>
           ))}
           <Button asChild variant="outline" size="icon" disabled={page >= pageCount}>
-            <Link href={pageHref(Math.min(pageCount, page + 1))} aria-label="Page suivante">
+            <Link href={pageHref(Math.min(pageCount, page + 1))} aria-label={dict.residences.nextPage}>
               <ChevronRight className="h-4 w-4" />
             </Link>
           </Button>

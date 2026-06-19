@@ -10,6 +10,8 @@ import { Stepper } from "@/components/ui/stepper";
 import { Button } from "@/components/ui/button";
 import { cn, formatDateShort } from "@/lib/utils";
 import { STAY_TYPES } from "@/lib/constants";
+import { useI18n } from "@/components/i18n/provider";
+import { localePath } from "@/lib/i18n";
 
 interface HeroSearchProps {
   destinations: { name: string; slug: string }[];
@@ -20,6 +22,7 @@ interface HeroSearchProps {
 
 export function HeroSearch({ destinations, variant = "hero", pill = false }: HeroSearchProps) {
   const router = useRouter();
+  const dict = useI18n();
   const [city, setCity] = React.useState<string>("");
   const [range, setRange] = React.useState<DateRange>({ start: null, end: null });
   const [adults, setAdults] = React.useState(2);
@@ -27,13 +30,13 @@ export function HeroSearch({ destinations, variant = "hero", pill = false }: Her
   const [type, setType] = React.useState("any");
 
   const cityName = destinations.find((d) => d.slug === city)?.name;
-  const guestsLabel = `${adults + children} voyageur${adults + children > 1 ? "s" : ""}`;
+  const guestsLabel = `${adults + children} ${adults + children > 1 ? dict.search.travelerPlural : dict.search.travelerSingular}`;
   const datesLabel =
     range.start && range.end
       ? `${formatDateShort(range.start)} - ${formatDateShort(range.end)}`
       : range.start
         ? `${formatDateShort(range.start)} - ...`
-        : "Quand ?";
+        : dict.search.when;
 
   function submit() {
     const params = new URLSearchParams();
@@ -42,7 +45,7 @@ export function HeroSearch({ destinations, variant = "hero", pill = false }: Her
     if (range.end) params.set("checkout", range.end.toISOString().slice(0, 10));
     params.set("guests", String(adults + children));
     if (type !== "any") params.set("type", type);
-    router.push(`/residences?${params.toString()}`);
+    router.push(`${localePath("/residences", dict.locale)}?${params.toString()}`);
   }
 
   // ---- Desktop -------------------------------------------------------------
@@ -51,9 +54,9 @@ export function HeroSearch({ destinations, variant = "hero", pill = false }: Her
       <Popover>
         <PopoverTrigger asChild>
           <button className="flex flex-1 flex-col items-start rounded-full px-5 py-2 text-left transition-colors hover:bg-surface-soft">
-            <span className="text-2xs font-bold uppercase tracking-wide text-muted">Destination</span>
+            <span className="text-2xs font-bold uppercase tracking-wide text-muted">{dict.search.destination}</span>
             <span className={cn("text-sm font-semibold", cityName ? "text-foreground" : "text-muted")}>
-              {cityName ?? "Toutes les villes"}
+              {cityName ?? dict.search.allCities}
             </span>
           </button>
         </PopoverTrigger>
@@ -62,7 +65,7 @@ export function HeroSearch({ destinations, variant = "hero", pill = false }: Her
             onClick={() => setCity("")}
             className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-medium hover:bg-surface-soft"
           >
-            <MapPin className="h-4 w-4 text-muted" /> Toutes les villes
+            <MapPin className="h-4 w-4 text-muted" /> {dict.search.allCities}
           </button>
           {destinations.map((d) => (
             <button
@@ -84,7 +87,7 @@ export function HeroSearch({ destinations, variant = "hero", pill = false }: Her
       <Popover>
         <PopoverTrigger asChild>
           <button className="flex flex-1 flex-col items-start rounded-full px-5 py-2 text-left transition-colors hover:bg-surface-soft">
-            <span className="text-2xs font-bold uppercase tracking-wide text-muted">Dates</span>
+            <span className="text-2xs font-bold uppercase tracking-wide text-muted">{dict.search.dates}</span>
             <span className={cn("text-sm font-semibold", range.start ? "text-foreground" : "text-muted")}>
               {datesLabel}
             </span>
@@ -100,23 +103,23 @@ export function HeroSearch({ destinations, variant = "hero", pill = false }: Her
       <Popover>
         <PopoverTrigger asChild>
           <button className="flex flex-1 flex-col items-start rounded-full px-5 py-2 text-left transition-colors hover:bg-surface-soft">
-            <span className="text-2xs font-bold uppercase tracking-wide text-muted">Voyageurs</span>
+            <span className="text-2xs font-bold uppercase tracking-wide text-muted">{dict.search.guests}</span>
             <span className="text-sm font-semibold text-foreground">{guestsLabel}</span>
           </button>
         </PopoverTrigger>
         <PopoverContent align="end" className="w-72">
-          <Stepper label="Adultes" value={adults} onChange={setAdults} min={1} />
-          <Stepper label="Enfants" hint="Moins de 12 ans" value={children} onChange={setChildren} />
+          <Stepper label={dict.search.adults} value={adults} onChange={setAdults} min={1} />
+          <Stepper label={dict.search.children} hint={dict.search.childrenHint} value={children} onChange={setChildren} />
         </PopoverContent>
       </Popover>
 
       <button
         onClick={submit}
-        aria-label="Rechercher"
+        aria-label={dict.search.search}
         className="ml-1 flex shrink-0 items-center gap-2 rounded-full bg-brand-500 px-6 font-semibold text-white shadow-soft transition-colors hover:bg-brand-600"
       >
         <Search className="h-5 w-5" />
-        <span className="hidden lg:inline">Rechercher</span>
+        <span className="hidden lg:inline">{dict.search.search}</span>
       </button>
     </div>
   );
@@ -130,7 +133,7 @@ export function HeroSearch({ destinations, variant = "hero", pill = false }: Her
             <button className="flex w-full items-center justify-center gap-2.5 rounded-full border border-border bg-surface px-5 py-3.5 text-center shadow-card active:scale-[0.99]">
               <Search className="h-[18px] w-[18px] text-foreground" />
               <span className="text-[15px] font-semibold text-foreground">
-                {cityName ? (range.start ? `${cityName} · ${datesLabel}` : cityName) : "Commencer ma recherche"}
+                {cityName ? (range.start ? `${cityName} · ${datesLabel}` : cityName) : dict.search.startSearch}
               </span>
             </button>
           ) : (
@@ -138,10 +141,10 @@ export function HeroSearch({ destinations, variant = "hero", pill = false }: Her
               <Search className="h-5 w-5 text-brand-500" />
               <span className="flex-1">
                 <span className="block text-sm font-bold text-foreground">
-                  {cityName ?? "Ou allez-vous ?"}
+                  {cityName ?? dict.search.whereTo}
                 </span>
                 <span className="block text-xs text-muted">
-                  {range.start ? datesLabel : "Dates - Voyageurs"}
+                  {range.start ? datesLabel : dict.search.datesGuests}
                 </span>
               </span>
             </button>
@@ -149,9 +152,9 @@ export function HeroSearch({ destinations, variant = "hero", pill = false }: Her
         </DrawerTrigger>
         <DrawerContent className="px-5 pb-8">
           <div className="overflow-y-auto px-1 pt-4">
-            <h2 className="text-xl font-bold text-foreground">Rechercher un séjour</h2>
+            <h2 className="text-xl font-bold text-foreground">{dict.search.searchStay}</h2>
 
-            <p className="mb-2 mt-5 text-sm font-bold text-foreground">Destination</p>
+            <p className="mb-2 mt-5 text-sm font-bold text-foreground">{dict.search.destination}</p>
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setCity("")}
@@ -160,7 +163,7 @@ export function HeroSearch({ destinations, variant = "hero", pill = false }: Her
                   !city ? "border-brand-500 bg-brand-50 text-brand-700" : "border-border"
                 )}
               >
-                Toutes
+                {dict.search.all}
               </button>
               {destinations.map((d) => (
                 <button
@@ -176,22 +179,22 @@ export function HeroSearch({ destinations, variant = "hero", pill = false }: Her
               ))}
             </div>
 
-            <p className="mb-2 mt-6 text-sm font-bold text-foreground">Dates</p>
+            <p className="mb-2 mt-6 text-sm font-bold text-foreground">{dict.search.dates}</p>
             <div className="rounded-3xl border border-border p-3">
               <Calendar value={range} onChange={setRange} numMonths={1} />
             </div>
 
-            <p className="mb-1 mt-6 text-sm font-bold text-foreground">Voyageurs</p>
+            <p className="mb-1 mt-6 text-sm font-bold text-foreground">{dict.search.guests}</p>
             <div className="divide-y divide-border rounded-3xl border border-border px-4">
-              <Stepper label="Adultes" value={adults} onChange={setAdults} min={1} />
-              <Stepper label="Enfants" hint="Moins de 12 ans" value={children} onChange={setChildren} />
+              <Stepper label={dict.search.adults} value={adults} onChange={setAdults} min={1} />
+              <Stepper label={dict.search.children} hint={dict.search.childrenHint} value={children} onChange={setChildren} />
             </div>
           </div>
 
           <DrawerClose asChild>
             <Button onClick={submit} size="lg" className="mt-5 w-full">
               <Search className="h-5 w-5" />
-              Rechercher
+              {dict.search.search}
             </Button>
           </DrawerClose>
         </DrawerContent>

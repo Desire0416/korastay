@@ -5,6 +5,7 @@ import {
 import { SectionHeading } from "@/components/public/section-heading";
 import { CountUp } from "@/components/public/count-up";
 import { cn } from "@/lib/utils";
+import { getI18n } from "@/lib/i18n.server";
 import type { CommunityStats } from "@/lib/queries";
 
 type OfferStats = { residences: number; destinations: number; packs: number };
@@ -12,22 +13,24 @@ type Tile = { value: number; icon: LucideIcon; label: string; highlight?: boolea
 
 // Bandeau public "KoraStay en chiffres" : compteur de visites + comptes crees
 // par type (voyageurs, propriétaires, guides, partenaires) + indicateurs d'offre.
-export function PlatformStats({
+export async function PlatformStats({
   community,
   offer,
 }: {
   community: CommunityStats;
   offer: OfferStats;
 }) {
+  const { dict } = await getI18n();
+  const s = dict.platformStats;
   const tiles: Tile[] = [
-    { value: community.visits, icon: Eye, label: "Visites de la plateforme", highlight: true },
-    { value: community.travelers, icon: Users, label: "Voyageurs inscrits" },
-    { value: community.owners, icon: KeyRound, label: "Propriétaires" },
-    { value: community.guides, icon: Compass, label: "Guides touristiques" },
-    { value: community.partners, icon: Handshake, label: "Partenaires locaux" },
-    { value: offer.residences, icon: BedDouble, label: "Locations meublées" },
-    { value: offer.destinations, icon: MapPin, label: "Destinations" },
-    { value: offer.packs, icon: Sparkles, label: "Packs Découverte" },
+    { value: community.visits, icon: Eye, label: s.visits, highlight: true },
+    { value: community.travelers, icon: Users, label: s.travelers },
+    { value: community.owners, icon: KeyRound, label: s.owners },
+    { value: community.guides, icon: Compass, label: s.guides },
+    { value: community.partners, icon: Handshake, label: s.partners },
+    { value: offer.residences, icon: BedDouble, label: s.residences },
+    { value: offer.destinations, icon: MapPin, label: s.destinations },
+    { value: offer.packs, icon: Sparkles, label: s.packs },
   ];
 
   return (
@@ -35,9 +38,9 @@ export function PlatformStats({
       <div className="container-page">
         <SectionHeading
           align="center"
-          eyebrow="La communauté grandit"
-          title="KoraStay en chiffres"
-          description="La confiance se construit chaque jour : visiteurs, hôtes et partenaires qui font vivre la plateforme."
+          eyebrow={s.eyebrow}
+          title={s.title}
+          description={s.description}
         />
         <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           {tiles.map((tile) => {

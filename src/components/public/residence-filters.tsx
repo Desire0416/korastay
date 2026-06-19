@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Stepper } from "@/components/ui/stepper";
 import { cn, formatPrice } from "@/lib/utils";
 import { STAY_TYPES, SORT_OPTIONS, AMENITIES } from "@/lib/constants";
+import { useI18n } from "@/components/i18n/provider";
+import { localePath } from "@/lib/i18n";
 
 interface ResidenceFiltersProps {
   destinations: { name: string; slug: string }[];
@@ -35,6 +37,7 @@ type Filters = {
 export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps) {
   const router = useRouter();
   const params = useSearchParams();
+  const dict = useI18n();
 
   const initial: Filters = {
     city: params.get("city") ?? "",
@@ -65,7 +68,7 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
       sp.set("checkin", next.checkin);
       sp.set("checkout", next.checkout);
     }
-    router.push(`/residences?${sp.toString()}`);
+    router.push(`${localePath("/residences", dict.locale)}?${sp.toString()}`);
   }
 
   function toggleAmenity(slug: string) {
@@ -89,10 +92,10 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
     <div className="space-y-6">
       {/* Dates (disponibilite) */}
       <div>
-        <p className="mb-2 text-sm font-bold text-foreground">Dates du séjour</p>
+        <p className="mb-2 text-sm font-bold text-foreground">{dict.filters.stayDates}</p>
         <div className="flex items-center gap-3">
           <label className="flex-1">
-            <span className="mb-1 block text-2xs font-bold uppercase text-muted">Arrivée</span>
+            <span className="mb-1 block text-2xs font-bold uppercase text-muted">{dict.filters.checkinLabel}</span>
             <input
               type="date"
               value={draft.checkin}
@@ -101,7 +104,7 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
             />
           </label>
           <label className="flex-1">
-            <span className="mb-1 block text-2xs font-bold uppercase text-muted">Départ</span>
+            <span className="mb-1 block text-2xs font-bold uppercase text-muted">{dict.filters.checkoutLabel}</span>
             <input
               type="date"
               value={draft.checkout}
@@ -117,17 +120,17 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
             onClick={() => setDraft({ ...draft, checkin: "", checkout: "" })}
             className="mt-1.5 text-xs font-semibold text-muted hover:text-foreground"
           >
-            Effacer les dates
+            {dict.filters.clearDates}
           </button>
         )}
       </div>
 
       {/* Ville */}
       <div>
-        <p className="mb-2 text-sm font-bold text-foreground">Ville</p>
+        <p className="mb-2 text-sm font-bold text-foreground">{dict.filters.city}</p>
         <div className="flex flex-wrap gap-2">
           <Chip active={!draft.city} onClick={() => setDraft({ ...draft, city: "" })}>
-            Toutes
+            {dict.search.all}
           </Chip>
           {destinations.map((d) => (
             <Chip key={d.slug} active={draft.city === d.slug} onClick={() => setDraft({ ...draft, city: d.slug })}>
@@ -139,7 +142,7 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
 
       {/* Type */}
       <div>
-        <p className="mb-2 text-sm font-bold text-foreground">Type de logement</p>
+        <p className="mb-2 text-sm font-bold text-foreground">{dict.filters.type}</p>
         <div className="flex flex-wrap gap-2">
           {STAY_TYPES.map((t) => (
             <Chip key={t.value} active={draft.type === t.value} onClick={() => setDraft({ ...draft, type: t.value })}>
@@ -151,16 +154,16 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
 
       {/* Prix */}
       <div>
-        <p className="mb-2 text-sm font-bold text-foreground">Prix par nuit (F CFA)</p>
+        <p className="mb-2 text-sm font-bold text-foreground">{dict.filters.pricePerNight}</p>
         <div className="flex items-center gap-3">
           <input
-            type="number" inputMode="numeric" placeholder="Min" value={draft.minPrice}
+            type="number" inputMode="numeric" placeholder={dict.filters.min} value={draft.minPrice}
             onChange={(e) => setDraft({ ...draft, minPrice: e.target.value })}
             className="h-11 w-full rounded-xl border border-border bg-surface px-3 text-sm focus-visible:border-brand-400 focus-visible:outline-none"
           />
           <span className="text-muted">-</span>
           <input
-            type="number" inputMode="numeric" placeholder="Max" value={draft.maxPrice}
+            type="number" inputMode="numeric" placeholder={dict.filters.max} value={draft.maxPrice}
             onChange={(e) => setDraft({ ...draft, maxPrice: e.target.value })}
             className="h-11 w-full rounded-xl border border-border bg-surface px-3 text-sm focus-visible:border-brand-400 focus-visible:outline-none"
           />
@@ -169,7 +172,7 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
 
       {/* Capacite */}
       <div className="border-t border-border pt-2">
-        <Stepper label="Voyageurs" hint="Capacité minimum" value={draft.capacity} onChange={(v) => setDraft({ ...draft, capacity: v })} min={0} max={16} />
+        <Stepper label={dict.search.guests} hint={dict.filters.minCapacity} value={draft.capacity} onChange={(v) => setDraft({ ...draft, capacity: v })} min={0} max={16} />
       </div>
 
       {/* Verifie */}
@@ -178,7 +181,7 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
         onClick={() => setDraft({ ...draft, verified: !draft.verified })}
         className="flex w-full items-center justify-between border-t border-border pt-4"
       >
-        <span className="text-sm font-bold text-foreground">Locations vérifiées uniquement</span>
+        <span className="text-sm font-bold text-foreground">{dict.filters.verifiedOnly}</span>
         <span className={cn("relative h-6 w-11 rounded-full transition-colors", draft.verified ? "bg-brand-500" : "bg-border")}>
           <span className={cn("absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all", draft.verified ? "left-[22px]" : "left-0.5")} />
         </span>
@@ -186,7 +189,7 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
 
       {/* Equipements */}
       <div className="border-t border-border pt-4">
-        <p className="mb-2 text-sm font-bold text-foreground">Équipements</p>
+        <p className="mb-2 text-sm font-bold text-foreground">{dict.filters.amenities}</p>
         <div className="grid grid-cols-2 gap-2">
           {AMENITIES.slice(0, 10).map((a) => (
             <button
@@ -218,7 +221,7 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
         <DrawerTrigger asChild>
           <Button variant="outline" size="sm" className="md:hidden">
             <SlidersHorizontal className="h-4 w-4" />
-            Filtres
+            {dict.filters.filters}
             {activeCount > 0 && (
               <span className="ml-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-500 px-1 text-2xs text-white">
                 {activeCount}
@@ -227,14 +230,14 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
           </Button>
         </DrawerTrigger>
         <DrawerContent className="px-5 pb-6">
-          <DrawerTitle className="px-1 pt-4 text-xl font-bold">Filtres</DrawerTitle>
+          <DrawerTitle className="px-1 pt-4 text-xl font-bold">{dict.filters.filters}</DrawerTitle>
           <div className="my-4 max-h-[60dvh] overflow-y-auto px-1">{filterBody}</div>
           <div className="flex gap-3">
             <Button variant="ghost" className="flex-1" onClick={() => { const reset = { city: "", type: "any", minPrice: "", maxPrice: "", capacity: 0, verified: false, amenities: [], sort: draft.sort, checkin: "", checkout: "" }; setDraft(reset); apply(reset); }}>
-              Reinitialiser
+              {dict.filters.reset}
             </Button>
             <DrawerClose asChild>
-              <Button className="flex-1" onClick={() => apply(draft)}>Afficher {total} resultat{total > 1 ? "s" : ""}</Button>
+              <Button className="flex-1" onClick={() => apply(draft)}>{dict.filters.showResults.replace("{n}", String(total))}</Button>
             </DrawerClose>
           </div>
         </DrawerContent>
@@ -246,15 +249,15 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
           <PopoverTrigger asChild>
             <Button variant="outline" size="sm">
               <SlidersHorizontal className="h-4 w-4" />
-              Filtres
+              {dict.filters.filters}
               {activeCount > 0 && <span className="ml-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-500 px-1 text-2xs text-white">{activeCount}</span>}
             </Button>
           </PopoverTrigger>
           <PopoverContent align="start" className="max-h-[70vh] w-[26rem] overflow-y-auto">
             {filterBody}
             <div className="mt-5 flex gap-3 border-t border-border pt-4">
-              <Button variant="ghost" className="flex-1" onClick={() => { const reset = { city: "", type: "any", minPrice: "", maxPrice: "", capacity: 0, verified: false, amenities: [], sort: draft.sort, checkin: "", checkout: "" }; setDraft(reset); apply(reset); }}>Reinitialiser</Button>
-              <Button className="flex-1" onClick={() => apply(draft)}>Appliquer</Button>
+              <Button variant="ghost" className="flex-1" onClick={() => { const reset = { city: "", type: "any", minPrice: "", maxPrice: "", capacity: 0, verified: false, amenities: [], sort: draft.sort, checkin: "", checkout: "" }; setDraft(reset); apply(reset); }}>{dict.filters.reset}</Button>
+              <Button className="flex-1" onClick={() => apply(draft)}>{dict.filters.apply}</Button>
             </div>
           </PopoverContent>
         </Popover>
@@ -265,7 +268,7 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
           size="sm"
           onClick={() => apply({ ...initial, verified: !initial.verified })}
         >
-          <Check className="h-4 w-4" /> Vérifiées
+          <Check className="h-4 w-4" /> {dict.filters.verified}
         </Button>
       </div>
 
@@ -273,7 +276,7 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
       <Popover>
         <PopoverTrigger asChild>
           <Button variant="outline" size="sm">
-            Trier : {SORT_OPTIONS.find((s) => s.value === initial.sort)?.label}
+            {dict.filters.sortBy} {SORT_OPTIONS.find((s) => s.value === initial.sort)?.label}
           </Button>
         </PopoverTrigger>
         <PopoverContent align="end" className="w-56 p-2">

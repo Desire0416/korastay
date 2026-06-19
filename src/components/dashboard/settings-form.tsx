@@ -13,12 +13,11 @@ import { saveSettings, type SettingsResult } from "@/server/actions/settings";
 interface Props {
   contactEmail: string;
   contactPhone: string;
-  whatsappNumber: string;
   announcement: string;
   statsVisible: boolean;
 }
 
-export function SettingsForm({ contactEmail, contactPhone, whatsappNumber, announcement, statsVisible }: Props) {
+export function SettingsForm({ contactEmail, contactPhone, announcement, statsVisible }: Props) {
   const [state, action, pending] = useActionState<SettingsResult, FormData>(saveSettings, { ok: false });
 
   useEffect(() => {
@@ -72,9 +71,6 @@ export function SettingsForm({ contactEmail, contactPhone, whatsappNumber, annou
           </Field>
           <Field label="Téléphone de contact" htmlFor="contact_phone">
             <Input id="contact_phone" name="contact_phone" defaultValue={contactPhone} />
-          </Field>
-          <Field label="Numéro WhatsApp" htmlFor="whatsapp_number" hint="Format international (ex : +225 07 ...). Vide = téléphone de contact." className="sm:col-span-2">
-            <Input id="whatsapp_number" name="whatsapp_number" defaultValue={whatsappNumber} placeholder="+225 07 00 00 00 00" />
           </Field>
         </div>
       </div>

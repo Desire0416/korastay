@@ -10,6 +10,8 @@ export default function robots(): MetadataRoute.Robots {
         disallow: [
           "/account", "/owner", "/partner", "/business", "/admin", "/api",
           "/reset-password", "/verify-email", "/unauthorized",
+          "/en/account", "/en/owner", "/en/partner", "/en/business", "/en/admin",
+          "/en/reset-password", "/en/verify-email", "/en/unauthorized",
         ],
       },
     ],

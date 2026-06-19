@@ -6,6 +6,8 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { formatPrice } from "@/lib/utils";
+import { useI18n } from "@/components/i18n/provider";
+import { localePath } from "@/lib/i18n";
 
 export interface MapResidence {
   id: string;
@@ -44,6 +46,7 @@ function FitBounds({ points }: { points: [number, number][] }) {
 }
 
 export default function ResidencesMapInner({ residences }: { residences: MapResidence[] }) {
+  const dict = useI18n();
   const points = residences.map((r) => [r.latitude, r.longitude] as [number, number]);
 
   return (
@@ -63,9 +66,9 @@ export default function ResidencesMapInner({ residences }: { residences: MapResi
             <div style={{ minWidth: 150 }}>
               <strong style={{ fontSize: 14 }}>{r.name}</strong>
               <div style={{ color: "#5F6B66", fontSize: 12 }}>{r.city}</div>
-              <div style={{ marginTop: 2, fontWeight: 700 }}>{formatPrice(r.pricePerNight)} / nuit</div>
-              <Link href={`/residences/${r.slug}`} style={{ color: "#0F8A5F", fontWeight: 600 }}>
-                Voir le logement →
+              <div style={{ marginTop: 2, fontWeight: 700 }}>{formatPrice(r.pricePerNight)} {dict.card.perNight}</div>
+              <Link href={localePath(`/residences/${r.slug}`, dict.locale)} style={{ color: "#0F8A5F", fontWeight: 600 }}>
+                {dict.map.viewListing}
               </Link>
             </div>
           </Popup>

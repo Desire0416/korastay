@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { Star, Users, BedDouble, MapPin } from "lucide-react";
 import { CardImageCarousel } from "./card-image-carousel";
@@ -5,6 +7,8 @@ import { FavoriteButton } from "./favorite-button";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { formatPrice } from "@/lib/utils";
 import { qualityLevelMeta } from "@/lib/enums";
+import { useI18n } from "@/components/i18n/provider";
+import { localePath } from "@/lib/i18n";
 import type { ResidenceCardData } from "@/lib/queries";
 
 interface ResidenceCardProps {
@@ -14,12 +18,13 @@ interface ResidenceCardProps {
 }
 
 export function ResidenceCard({ residence, favorited, priority }: ResidenceCardProps) {
+  const dict = useI18n();
   const quality = residence.qualityLevel
     ? qualityLevelMeta[residence.qualityLevel]
     : null;
 
   return (
-    <Link href={`/residences/${residence.slug}`} className="group block">
+    <Link href={localePath(`/residences/${residence.slug}`, dict.locale)} className="group block">
       <div className="relative">
         <CardImageCarousel
           images={residence.images}
@@ -55,10 +60,10 @@ export function ResidenceCard({ residence, favorited, priority }: ResidenceCardP
 
         <div className="mt-1.5 flex items-center gap-3 text-xs text-muted">
           <span className="flex items-center gap-1">
-            <Users className="h-3.5 w-3.5" /> {residence.capacity} pers.
+            <Users className="h-3.5 w-3.5" /> {residence.capacity} {dict.card.guestsUnit}
           </span>
           <span className="flex items-center gap-1">
-            <BedDouble className="h-3.5 w-3.5" /> {residence.bedrooms} ch.
+            <BedDouble className="h-3.5 w-3.5" /> {residence.bedrooms} {dict.card.bedroomsUnit}
           </span>
           {quality && (
             <span className="font-medium text-brand-600">{quality.label}</span>
@@ -69,7 +74,7 @@ export function ResidenceCard({ residence, favorited, priority }: ResidenceCardP
           <span className="text-[15px] font-extrabold">
             {formatPrice(residence.pricePerNight)}
           </span>
-          <span className="text-sm text-muted"> / nuit</span>
+          <span className="text-sm text-muted"> {dict.card.perNight}</span>
         </p>
       </div>
     </Link>

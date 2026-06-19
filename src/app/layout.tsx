@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { PwaRegister } from "@/components/pwa-register";
 import { APP_NAME, APP_DESCRIPTION, SITE_URL } from "@/lib/constants";
+import { getLocale } from "@/lib/i18n.server";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -69,13 +70,14 @@ export const viewport: Viewport = {
   maximumScale: 5,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const locale = await getLocale();
   return (
-    <html lang="fr" className={`${jakarta.variable} ${fraunces.variable}`}>
+    <html lang={locale} className={`${jakarta.variable} ${fraunces.variable}`}>
       <body className="min-h-dvh bg-background font-sans">
         {children}
         <Toaster />
