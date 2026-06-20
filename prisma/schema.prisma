@@ -351,12 +351,17 @@ model Reservation {
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
 
+  // Negociation de prix (systeme type InDrive, actif pour 2+ nuits)
+  negotiationStatus String       @default("NONE") // NegotiationStatus
+  negotiatedPrice   Int?         // sous-total convenu apres negociation (hors frais de service)
+
   payments       Payment[]
   refunds        Refund[]
   payouts        Payout[]
   review         Review?
   conversations  Conversation[]
   partnerMissions PartnerMission[]
+  priceOffers    PriceOffer[]
 
   @@index([travelerId])
   @@index([residenceId])
@@ -740,6 +745,26 @@ model BusinessRequest {
   conversations Conversation[]
 
   @@index([status])
+}
+
+// ------------------------------------------------------------
+// Negociation de prix (offres / contre-offres, type InDrive)
+// ------------------------------------------------------------
+model PriceOffer {
+  id            String      @id @default(cuid())
+  reservationId String
+  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  amount        Int         // montant propose (sous-total, hors frais de service)
+  proposedBy    String      // OfferParty: TRAVELER | OWNER
+  message       String?     // message optionnel accompagnant l'offre
+  status        String      @default("PENDING") // OfferStatus
+  expiresAt     DateTime    // expiration 24h apres creation
+  createdAt     DateTime    @default(now())
+  respondedAt   DateTime?   // date de la reponse (acceptation/refus/contre-offre)
+
+  @@index([reservationId])
+  @@index([status])
+  @@index([expiresAt])
 }
 
 // ------------------------------------------------------------

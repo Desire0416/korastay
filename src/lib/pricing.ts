@@ -98,6 +98,40 @@ export function computePackPrice(input: PackPriceInput): PriceBreakdown {
 }
 
 // ------------------------------------------------------------
+// Prix negocie : le voyageur et le proprietaire se sont accordes
+// sur un sous-total. On calcule juste les frais de service dessus.
+// Pas de remise sejour (le montant negocie est deja le prix final).
+// ------------------------------------------------------------
+export interface NegotiatedPriceBreakdown {
+  subtotal: number;    // montant convenu (sous-total negocie)
+  cleaningFee: number;
+  serviceFee: number;
+  total: number;
+}
+
+export function computeNegotiatedPrice(input: {
+  negotiatedSubtotal: number;
+  cleaningFee?: number;
+  serviceFeeRate?: number;
+  serviceFeeMin?: number;
+  serviceFeeMax?: number;
+}): NegotiatedPriceBreakdown {
+  const serviceFee = clampServiceFee(
+    input.negotiatedSubtotal,
+    input.serviceFeeRate ?? SERVICE_FEE_RATE,
+    input.serviceFeeMin ?? 0,
+    input.serviceFeeMax ?? Number.MAX_SAFE_INTEGER
+  );
+  const cleaningFee = input.cleaningFee ?? 0;
+  return {
+    subtotal: input.negotiatedSubtotal,
+    serviceFee,
+    cleaningFee,
+    total: input.negotiatedSubtotal + serviceFee + cleaningFee,
+  };
+}
+
+// ------------------------------------------------------------
 // Politique d'annulation (cf. specification section 10)
 // ------------------------------------------------------------
 export interface RefundEstimate {

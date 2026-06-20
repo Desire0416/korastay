@@ -81,6 +81,7 @@ export type ReservationType =
 
 export const ReservationStatus = {
   DRAFT: "DRAFT",
+  NEGOTIATING: "NEGOTIATING",         // negociation de prix en cours (2+ nuits)
   PENDING_APPROVAL: "PENDING_APPROVAL",
   PENDING_PAYMENT: "PENDING_PAYMENT",
   PARTIALLY_PAID: "PARTIALLY_PAID",
@@ -96,6 +97,34 @@ export const ReservationStatus = {
 } as const;
 export type ReservationStatus =
   (typeof ReservationStatus)[keyof typeof ReservationStatus];
+
+// Statut de la negociation de prix (champ separe de ReservationStatus)
+export const NegotiationStatus = {
+  NONE: "NONE",         // pas de negociation (1 nuit, prix fixe)
+  OPEN: "OPEN",         // negociation en cours
+  AGREED: "AGREED",     // accord trouve
+  REJECTED: "REJECTED", // refus definitif
+  EXPIRED: "EXPIRED",   // offre expiree sans reponse
+} as const;
+export type NegotiationStatus =
+  (typeof NegotiationStatus)[keyof typeof NegotiationStatus];
+
+// Auteur d'une offre de prix
+export const OfferParty = {
+  TRAVELER: "TRAVELER",
+  OWNER: "OWNER",
+} as const;
+export type OfferParty = (typeof OfferParty)[keyof typeof OfferParty];
+
+// Statut d'une offre individuelle
+export const OfferStatus = {
+  PENDING: "PENDING",       // en attente de reponse
+  ACCEPTED: "ACCEPTED",     // acceptee
+  REJECTED: "REJECTED",     // refusee
+  COUNTERED: "COUNTERED",   // contre-offre emise (remplace cette offre)
+  EXPIRED: "EXPIRED",       // 24h ecoules sans reponse
+} as const;
+export type OfferStatus = (typeof OfferStatus)[keyof typeof OfferStatus];
 
 export const PaymentStatus = {
   PENDING: "PENDING",
@@ -192,6 +221,7 @@ type LabelMap = Record<string, { label: string; tone: BadgeTone }>;
 
 export const reservationStatusMeta: LabelMap = {
   DRAFT: { label: "Brouillon", tone: "neutral" },
+  NEGOTIATING: { label: "Négociation en cours", tone: "info" },
   PENDING_APPROVAL: { label: "En attente de validation", tone: "warning" },
   PENDING_PAYMENT: { label: "A payer (acompte)", tone: "warning" },
   PARTIALLY_PAID: { label: "Acompte regle", tone: "info" },
@@ -319,6 +349,22 @@ export const partnerTypeMeta: Record<
   RESTAURANT: { label: "Restaurant", plural: "Restaurants" },
   ACTIVITY: { label: "Prestataire d'activité", plural: "Activités" },
   OTHER: { label: "Autre prestataire", plural: "Autres" },
+};
+
+export const negotiationStatusMeta: LabelMap = {
+  NONE: { label: "Prix fixe", tone: "neutral" },
+  OPEN: { label: "En négociation", tone: "info" },
+  AGREED: { label: "Accord trouvé", tone: "success" },
+  REJECTED: { label: "Refusée", tone: "danger" },
+  EXPIRED: { label: "Expirée", tone: "neutral" },
+};
+
+export const offerStatusMeta: LabelMap = {
+  PENDING: { label: "En attente", tone: "warning" },
+  ACCEPTED: { label: "Acceptée", tone: "success" },
+  REJECTED: { label: "Refusée", tone: "danger" },
+  COUNTERED: { label: "Contre-offre envoyée", tone: "info" },
+  EXPIRED: { label: "Expirée", tone: "neutral" },
 };
 
 export const userRoleMeta: Record<string, { label: string; tone: BadgeTone }> = {
