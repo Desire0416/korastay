@@ -217,6 +217,13 @@ export interface Dictionary {
     selectDates: string;
     noChargeYet: string;
     yourStay: string;
+    // Négociation de prix
+    negotiateTitle: string;
+    negotiateHint: string;
+    referencePrice: string;
+    estimatedTotal: string;
+    negotiate24h: string;
+    sendOffer: string;
   };
   checkout: {
     metaTitle: string;
@@ -563,6 +570,12 @@ const FR: Dictionary = {
     selectDates: "Sélectionnez vos dates",
     noChargeYet: "Aucun montant ne sera débité à cette étape.",
     yourStay: "Votre séjour",
+    negotiateTitle: "Proposez votre prix",
+    negotiateHint: "Négociez librement avec le propriétaire. Il a 24h pour accepter ou vous faire une contre-offre.",
+    referencePrice: "Prix de référence",
+    estimatedTotal: "Total estimé",
+    negotiate24h: "Le propriétaire a 24h pour répondre. Sans réponse, l'offre expire.",
+    sendOffer: "Envoyer mon offre",
   },
   checkout: {
     metaTitle: "Finaliser la réservation",
@@ -880,6 +893,12 @@ const EN: Dictionary = {
     selectDates: "Select your dates",
     noChargeYet: "You won't be charged at this stage.",
     yourStay: "Your stay",
+    negotiateTitle: "Propose your price",
+    negotiateHint: "Negotiate freely with the host. They have 24h to accept or make a counter-offer.",
+    referencePrice: "Reference price",
+    estimatedTotal: "Estimated total",
+    negotiate24h: "The host has 24h to respond. If no reply, the offer expires.",
+    sendOffer: "Send my offer",
   },
   checkout: {
     metaTitle: "Complete your booking",

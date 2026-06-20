@@ -2,14 +2,14 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Star, ChevronDown } from "lucide-react";
+import { Star, ChevronDown, Handshake } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Drawer, DrawerContent, DrawerTrigger, DrawerClose, DrawerTitle } from "@/components/ui/drawer";
 import { Calendar, type DateRange } from "@/components/ui/calendar";
 import { Stepper } from "@/components/ui/stepper";
 import { Button } from "@/components/ui/button";
 import { formatPrice, formatDateShort, cn } from "@/lib/utils";
-import { computeResidencePrice } from "@/lib/pricing";
+import { computeResidencePrice, computeNegotiatedPrice } from "@/lib/pricing";
 import { useI18n } from "@/components/i18n/provider";
 import { localePath } from "@/lib/i18n";
 
@@ -42,6 +42,21 @@ export function BookingWidget(props: BookingWidgetProps) {
       })
     : null;
 
+  // Negociation : actif pour 2+ nuits
+  const isNegotiationMode = !!price && price.nights >= 2;
+  const [proposedAmount, setProposedAmount] = React.useState<number>(0);
+  // Synchro montant propose avec le sous-total de base quand les dates changent
+  React.useEffect(() => {
+    if (price) setProposedAmount(price.subtotal);
+  }, [price?.subtotal]);
+
+  const negotiatedPreview = isNegotiationMode && proposedAmount > 0
+    ? computeNegotiatedPrice({
+        negotiatedSubtotal: proposedAmount,
+        cleaningFee: cleaning ? props.cleaningFee : 0,
+      })
+    : null;
+
   function reserve() {
     if (!hasRange) return;
     const params = new URLSearchParams({
@@ -51,6 +66,10 @@ export function BookingWidget(props: BookingWidgetProps) {
       children: String(children),
       cleaning: cleaning ? "1" : "0",
     });
+    if (isNegotiationMode) {
+      params.set("proposedAmount", String(proposedAmount));
+      params.set("mode", "negotiate");
+    }
     router.push(`${localePath(`/residences/${props.slug}/reserver`, dict.locale)}?${params.toString()}`);
   }
 
@@ -74,7 +93,8 @@ export function BookingWidget(props: BookingWidgetProps) {
     ? `${formatDateShort(range.start!)} - ${formatDateShort(range.end!)}`
     : dict.booking.addDates;
 
-  const priceRows = price && (
+  // Section prix fixe (1 nuit)
+  const priceRows = price && !isNegotiationMode && (
     <div className="space-y-2.5 text-sm">
       <div className="flex justify-between text-muted">
         <span className="underline-offset-2 hover:underline">
@@ -102,6 +122,53 @@ export function BookingWidget(props: BookingWidgetProps) {
         <span>{dict.booking.total}</span>
         <span>{formatPrice(price.total)}</span>
       </div>
+    </div>
+  );
+
+  // Section négociation (2+ nuits)
+  const negotiateSection = isNegotiationMode && (
+    <div className="space-y-3 rounded-2xl border border-brand-200 bg-brand-50/40 p-4">
+      <div className="flex items-center gap-2">
+        <Handshake className="h-4 w-4 text-brand-600" />
+        <span className="text-sm font-bold text-brand-900">{dict.booking.negotiateTitle}</span>
+      </div>
+      <p className="text-xs text-brand-800/80">{dict.booking.negotiateHint}</p>
+      <div>
+        <p className="mb-1 text-xs text-muted">
+          {dict.booking.referencePrice} : {formatPrice(props.pricePerNight)} × {price.nights} {price.nights > 1 ? dict.booking.nightPlural : dict.booking.nightSingular} = {formatPrice(price.subtotal)}
+        </p>
+        <div className="flex items-center gap-2 rounded-xl border border-brand-300 bg-white px-3 py-2">
+          <input
+            type="number"
+            min={1}
+            step={500}
+            value={proposedAmount || ""}
+            onChange={(e) => setProposedAmount(Math.max(0, Number(e.target.value)))}
+            placeholder={String(price.subtotal)}
+            className="w-full bg-transparent text-sm font-semibold text-foreground outline-none placeholder:text-muted"
+          />
+          <span className="shrink-0 text-xs font-medium text-muted">FCFA</span>
+        </div>
+      </div>
+      {negotiatedPreview && (
+        <div className="space-y-1.5 text-xs text-muted">
+          {negotiatedPreview.cleaningFee > 0 && (
+            <div className="flex justify-between">
+              <span>{dict.booking.cleaningFee}</span>
+              <span className="text-foreground">{formatPrice(negotiatedPreview.cleaningFee)}</span>
+            </div>
+          )}
+          <div className="flex justify-between">
+            <span>{dict.booking.serviceFee}</span>
+            <span className="text-foreground">{formatPrice(negotiatedPreview.serviceFee)}</span>
+          </div>
+          <div className="flex justify-between border-t border-brand-200 pt-1.5 text-sm font-bold text-foreground">
+            <span>{dict.booking.estimatedTotal}</span>
+            <span>{formatPrice(negotiatedPreview.total)}</span>
+          </div>
+        </div>
+      )}
+      <p className="text-xs text-muted">{dict.booking.negotiate24h}</p>
     </div>
   );
 
@@ -161,12 +228,23 @@ export function BookingWidget(props: BookingWidgetProps) {
           {cleaningToggle}
         </div>
 
-        <Button onClick={reserve} disabled={!hasRange} size="lg" className="mt-4 w-full">
-          {hasRange ? dict.booking.reserve : dict.booking.selectDates}
+        <Button
+          onClick={reserve}
+          disabled={!hasRange || (isNegotiationMode && proposedAmount < 1)}
+          size="lg"
+          className="mt-4 w-full"
+        >
+          {!hasRange
+            ? dict.booking.selectDates
+            : isNegotiationMode
+              ? dict.booking.sendOffer
+              : dict.booking.reserve}
         </Button>
-        <p className="mt-2 text-center text-xs text-muted">{dict.booking.noChargeYet}</p>
+        <p className="mt-2 text-center text-xs text-muted">
+          {isNegotiationMode ? dict.booking.negotiate24h : dict.booking.noChargeYet}
+        </p>
 
-        {price && <div className="mt-5">{priceRows}</div>}
+        {price && <div className="mt-5">{negotiateSection ?? priceRows}</div>}
       </div>
 
       {/* ===== Mobile : barre collante ===== */}
@@ -203,11 +281,21 @@ export function BookingWidget(props: BookingWidgetProps) {
                   <Stepper label={dict.search.children} hint={dict.search.childrenHint} value={children} onChange={setChildren} max={props.maxCapacity} />
                 </div>
                 {cleaningToggle}
-                {price && <div className="rounded-3xl bg-surface-soft p-4">{priceRows}</div>}
               </div>
+              {negotiateSection && <div className="px-1 pb-3">{negotiateSection}</div>}
+              {price && !isNegotiationMode && <div className="rounded-3xl bg-surface-soft p-4">{priceRows}</div>}
               <DrawerClose asChild>
-                <Button onClick={reserve} disabled={!hasRange} size="lg" className="w-full">
-                  {hasRange ? `${dict.booking.reserve} - ${formatPrice(price!.total)}` : dict.booking.selectDates}
+                <Button
+                  onClick={reserve}
+                  disabled={!hasRange || (isNegotiationMode && proposedAmount < 1)}
+                  size="lg"
+                  className="w-full"
+                >
+                  {!hasRange
+                    ? dict.booking.selectDates
+                    : isNegotiationMode
+                      ? `${dict.booking.sendOffer} — ${negotiatedPreview ? formatPrice(negotiatedPreview.total) : ""}`.trim()
+                      : `${dict.booking.reserve} - ${formatPrice(price!.total)}`}
                 </Button>
               </DrawerClose>
             </DrawerContent>

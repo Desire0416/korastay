@@ -1,15 +1,16 @@
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft, Users, CalendarDays, ShieldCheck } from "lucide-react";
+import { ChevronLeft, Users, CalendarDays, ShieldCheck, Handshake } from "lucide-react";
 import { getResidenceBySlug } from "@/lib/queries";
 import { getCurrentUser } from "@/lib/auth";
-import { computeResidencePrice, stayDiscountRate } from "@/lib/pricing";
+import { computeResidencePrice, computeNegotiatedPrice, stayDiscountRate } from "@/lib/pricing";
 import { referralDiscountRateFor } from "@/lib/referral";
 import { getPaymentSettings, resolveResidencePolicy, buildFinance, enabledPaymentMethods } from "@/lib/payment-rules";
 import { isMockPayments } from "@/lib/payments";
 import { paymentMethodMeta } from "@/lib/enums";
 import { createResidenceReservation } from "@/server/actions/reservations";
 import { ReservationCheckout } from "@/components/public/reservation-checkout";
+import { NegotiationOfferForm } from "@/components/public/negotiation-offer-form";
 import { SmartImage } from "@/components/ui/smart-image";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { formatPrice, formatDate, nightsBetween } from "@/lib/utils";
@@ -41,6 +42,8 @@ export default async function ReserverPage({
   const adults = Number(str(sp.adults) ?? 2);
   const children = Number(str(sp.children) ?? 0);
   const cleaning = str(sp.cleaning) === "1";
+  const isNegotiateMode = str(sp.mode) === "negotiate";
+  const proposedAmount = isNegotiateMode ? Number(str(sp.proposedAmount) ?? 0) : 0;
 
   const backUrl = localePath(`/residences/${slug}/reserver?checkin=${checkin}&checkout=${checkout}&adults=${adults}&children=${children}`, locale);
   const user = await getCurrentUser();
@@ -49,6 +52,12 @@ export default async function ReserverPage({
   const residence = await getResidenceBySlug(slug);
   if (!residence || residence.status !== "PUBLISHED") notFound();
   if (!checkin || !checkout || nightsBetween(checkin, checkout) < 1) {
+    redirect(localePath(`/residences/${slug}`, locale));
+  }
+
+  // Mode négociation : proposedAmount obligatoire et 2+ nuits
+  const nights = nightsBetween(checkin, checkout);
+  if (isNegotiateMode && (proposedAmount < 1 || nights < 2)) {
     redirect(localePath(`/residences/${slug}`, locale));
   }
 
@@ -62,6 +71,19 @@ export default async function ReserverPage({
     serviceFeeMin: settings.serviceFeeMin,
     serviceFeeMax: settings.serviceFeeMax,
   });
+
+  // Prix négocié (pour le recap en mode négociation)
+  const cleaningFeeAmount = cleaning ? residence.cleaningFee : 0;
+  const negotiatedPrice = isNegotiateMode
+    ? computeNegotiatedPrice({
+        negotiatedSubtotal: proposedAmount,
+        cleaningFee: cleaningFeeAmount,
+        serviceFeeRate: settings.serviceFeePercent / 100,
+        serviceFeeMin: settings.serviceFeeMin,
+        serviceFeeMax: settings.serviceFeeMax,
+      })
+    : null;
+
   const policy = resolveResidencePolicy(residence, price.nights, settings);
   const referralRate = await referralDiscountRateFor(user.id);
   const finance = buildFinance({
@@ -87,33 +109,60 @@ export default async function ReserverPage({
       </Link>
 
       <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground">
-        {dict.checkout.title}
+        {isNegotiateMode ? (
+          <span className="flex items-center gap-2">
+            <Handshake className="h-7 w-7 text-brand-600" />
+            Confirmer votre offre
+          </span>
+        ) : dict.checkout.title}
       </h1>
 
       <div className="mt-7 grid grid-cols-1 gap-10 lg:grid-cols-[1fr_400px]">
         {/* Formulaire */}
         <div className="order-2 lg:order-1">
-          <ReservationCheckout
-            action={createResidenceReservation}
-            isMock={isMockPayments()}
-            validationLabel="24h"
-            depositLabel={formatPrice(finance.depositDue)}
-            balanceLabel={finance.balanceDue > 0 ? formatPrice(finance.balanceDue) : undefined}
-            cautionLabel={finance.cautionAmount > 0 ? formatPrice(finance.cautionAmount) : undefined}
-            methods={methods}
-            koraStayNote={settings.payViaKoraStayNote}
-            hidden={{
-              residenceId: residence.id,
-              checkin: checkin!,
-              checkout: checkout!,
-              adults: String(adults),
-              children: String(children),
-              cleaning: cleaning ? "1" : "0",
-            }}
-            defaultName={`${user.firstName} ${user.lastName}`}
-            defaultEmail={user.email}
-            defaultPhone={user.phone ?? ""}
-          />
+          {isNegotiateMode ? (
+            <NegotiationOfferForm
+              residenceId={residence.id}
+              residenceName={residence.name}
+              slug={slug}
+              startDate={checkin!}
+              endDate={checkout!}
+              nights={price.nights}
+              adults={adults}
+              children={children}
+              cleaningFeeAmount={cleaningFeeAmount}
+              proposedAmount={proposedAmount}
+              estimatedServiceFee={negotiatedPrice!.serviceFee}
+              estimatedTotal={negotiatedPrice!.total}
+              pricePerNight={residence.pricePerNight}
+              baseSubtotal={price.subtotal}
+              defaultName={`${user.firstName} ${user.lastName}`}
+              defaultEmail={user.email}
+              defaultPhone={user.phone ?? ""}
+            />
+          ) : (
+            <ReservationCheckout
+              action={createResidenceReservation}
+              isMock={isMockPayments()}
+              validationLabel="24h"
+              depositLabel={formatPrice(finance.depositDue)}
+              balanceLabel={finance.balanceDue > 0 ? formatPrice(finance.balanceDue) : undefined}
+              cautionLabel={finance.cautionAmount > 0 ? formatPrice(finance.cautionAmount) : undefined}
+              methods={methods}
+              koraStayNote={settings.payViaKoraStayNote}
+              hidden={{
+                residenceId: residence.id,
+                checkin: checkin!,
+                checkout: checkout!,
+                adults: String(adults),
+                children: String(children),
+                cleaning: cleaning ? "1" : "0",
+              }}
+              defaultName={`${user.firstName} ${user.lastName}`}
+              defaultEmail={user.email}
+              defaultPhone={user.phone ?? ""}
+            />
+          )}
         </div>
 
         {/* Recapitulatif */}
@@ -142,59 +191,91 @@ export default async function ReserverPage({
             </div>
 
             <div className="mt-5 space-y-2.5 border-t border-border pt-5 text-sm">
-              <div className="flex justify-between text-muted">
-                <span>{formatPrice(residence.pricePerNight)} x {price.nights} {price.nights > 1 ? dict.booking.nightPlural : dict.booking.nightSingular}</span>
-                <span className="text-foreground">{formatPrice(price.subtotal)}</span>
-              </div>
-              {price.cleaningFee > 0 && (
-                <div className="flex justify-between text-muted">
-                  <span>{dict.booking.cleaningFee}</span>
-                  <span className="text-foreground">{formatPrice(price.cleaningFee)}</span>
-                </div>
-              )}
-              <div className="flex justify-between text-muted">
-                <span>{dict.booking.serviceFee}</span>
-                <span className="text-foreground">{formatPrice(finance.serviceFee)}</span>
-              </div>
-              {finance.stayDiscount > 0 && (
-                <div className="flex justify-between font-semibold text-success">
-                  <span>{dict.booking.stayDiscount.replace("{p}", String(Math.round(stayDiscountRate(price.nights) * 100)))}</span>
-                  <span>−{formatPrice(finance.stayDiscount)}</span>
-                </div>
-              )}
-              {finance.referralDiscount > 0 && (
-                <div className="flex justify-between font-semibold text-success">
-                  <span>{dict.checkout.referral}</span>
-                  <span>−{formatPrice(finance.referralDiscount)}</span>
-                </div>
-              )}
-              <div className="flex justify-between border-t border-border pt-3 text-lg font-extrabold text-foreground">
-                <span>{dict.booking.total}</span>
-                <span>{formatPrice(finance.total)}</span>
-              </div>
-              <div className="mt-1 space-y-1 rounded-2xl bg-brand-50/60 px-3 py-2.5 text-sm">
-                <div className="flex justify-between font-semibold text-brand-800">
-                  <span>{dict.checkout.payNow}{policy === "FULL" ? dict.checkout.payNowFull : dict.checkout.payNowDeposit}</span>
-                  <span>{formatPrice(finance.depositDue)}</span>
-                </div>
-                {finance.balanceDue > 0 && (
+              {isNegotiateMode && negotiatedPrice ? (
+                <>
                   <div className="flex justify-between text-muted">
-                    <span>{dict.checkout.balanceRemaining}</span>
-                    <span>{formatPrice(finance.balanceDue)}</span>
+                    <span>Prix de référence ({price.nights} nuits)</span>
+                    <span className="text-foreground">{formatPrice(price.subtotal)}</span>
                   </div>
-                )}
-                {finance.cautionAmount > 0 && (
+                  <div className="flex justify-between font-semibold text-brand-800">
+                    <span>Votre proposition</span>
+                    <span>{formatPrice(proposedAmount)}</span>
+                  </div>
+                  {negotiatedPrice.cleaningFee > 0 && (
+                    <div className="flex justify-between text-muted">
+                      <span>{dict.booking.cleaningFee}</span>
+                      <span className="text-foreground">{formatPrice(negotiatedPrice.cleaningFee)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-muted">
-                    <span>{dict.checkout.possibleDeposit}</span>
-                    <span>{formatPrice(finance.cautionAmount)}</span>
+                    <span>{dict.booking.serviceFee}</span>
+                    <span className="text-foreground">{formatPrice(negotiatedPrice.serviceFee)}</span>
                   </div>
-                )}
-              </div>
+                  <div className="flex justify-between border-t border-border pt-3 text-lg font-extrabold text-foreground">
+                    <span>Total estimé</span>
+                    <span>{formatPrice(negotiatedPrice.total)}</span>
+                  </div>
+                  <p className="mt-1 rounded-2xl bg-brand-50/60 px-3 py-2.5 text-xs text-brand-800">
+                    Aucun paiement n&apos;est requis maintenant. Le propriétaire a 24h pour répondre.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="flex justify-between text-muted">
+                    <span>{formatPrice(residence.pricePerNight)} x {price.nights} {price.nights > 1 ? dict.booking.nightPlural : dict.booking.nightSingular}</span>
+                    <span className="text-foreground">{formatPrice(price.subtotal)}</span>
+                  </div>
+                  {price.cleaningFee > 0 && (
+                    <div className="flex justify-between text-muted">
+                      <span>{dict.booking.cleaningFee}</span>
+                      <span className="text-foreground">{formatPrice(price.cleaningFee)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-muted">
+                    <span>{dict.booking.serviceFee}</span>
+                    <span className="text-foreground">{formatPrice(finance.serviceFee)}</span>
+                  </div>
+                  {finance.stayDiscount > 0 && (
+                    <div className="flex justify-between font-semibold text-success">
+                      <span>{dict.booking.stayDiscount.replace("{p}", String(Math.round(stayDiscountRate(price.nights) * 100)))}</span>
+                      <span>−{formatPrice(finance.stayDiscount)}</span>
+                    </div>
+                  )}
+                  {finance.referralDiscount > 0 && (
+                    <div className="flex justify-between font-semibold text-success">
+                      <span>{dict.checkout.referral}</span>
+                      <span>−{formatPrice(finance.referralDiscount)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between border-t border-border pt-3 text-lg font-extrabold text-foreground">
+                    <span>{dict.booking.total}</span>
+                    <span>{formatPrice(finance.total)}</span>
+                  </div>
+                  <div className="mt-1 space-y-1 rounded-2xl bg-brand-50/60 px-3 py-2.5 text-sm">
+                    <div className="flex justify-between font-semibold text-brand-800">
+                      <span>{dict.checkout.payNow}{policy === "FULL" ? dict.checkout.payNowFull : dict.checkout.payNowDeposit}</span>
+                      <span>{formatPrice(finance.depositDue)}</span>
+                    </div>
+                    {finance.balanceDue > 0 && (
+                      <div className="flex justify-between text-muted">
+                        <span>{dict.checkout.balanceRemaining}</span>
+                        <span>{formatPrice(finance.balanceDue)}</span>
+                      </div>
+                    )}
+                    {finance.cautionAmount > 0 && (
+                      <div className="flex justify-between text-muted">
+                        <span>{dict.checkout.possibleDeposit}</span>
+                        <span>{formatPrice(finance.cautionAmount)}</span>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
 
             <p className="mt-4 flex items-center gap-1.5 text-xs text-muted">
               <ShieldCheck className="h-4 w-4 text-brand-500" />
-              {dict.checkout.securePayment}
+              {isNegotiateMode ? "Offre sécurisée — aucun débit avant accord" : dict.checkout.securePayment}
             </p>
           </div>
         </aside>
