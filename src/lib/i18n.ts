@@ -247,6 +247,35 @@ export interface Dictionary {
     cancellationLink: string;
     submit: string;
   };
+  packs: {
+    metaTitle: string;
+    metaDescription: string;
+    heroTitle: string;
+    heroSubtitle: string;
+    allDestinations: string;
+    customTitle: string;
+    customTextShort: string;
+    customTextLong: string;
+    metaFallback: string;
+    personsRange: string; // {base} {max}
+    aboutTitle: string;
+    notSuited: string; // {city}
+    included: string;
+    notIncluded: string;
+    program: string;
+    practicalInfo: string;
+    physicalLevel: string;
+    clothing: string;
+    toBring: string;
+    meetingPoint: string;
+    cancellation: string;
+    departureDate: string;
+    chooseDate: string;
+    packLine: string; // {n}
+    extraPersons: string;
+    perPack: string;
+    reservePack: string;
+  };
   // Libelles de navigation / pied de page, indexes par href.
   nav: Record<string, string>;
   // Titres des colonnes du pied de page (cle = libelle francais).
@@ -564,6 +593,35 @@ const FR: Dictionary = {
     cancellationLink: "politique d'annulation",
     submit: "Envoyer ma demande de réservation",
   },
+  packs: {
+    metaTitle: "Packs Découverte",
+    metaDescription: "Des séjours touristiques accompagnés clé en main : hébergement, transport et guide local certifié KoraStay.",
+    heroTitle: "Des séjours clé en main, sans rien organiser",
+    heroSubtitle: "Hébergement vérifié, transport en ville et guide local certifié : il ne vous reste qu'à profiter.",
+    allDestinations: "Toutes les destinations",
+    customTitle: "Pack personnalisé",
+    customTextShort: "Composez votre séjour sur mesure.",
+    customTextLong: "Composez votre séjour sur mesure : destination, activités, options. Nous nous occupons du reste.",
+    metaFallback: "Pack",
+    personsRange: "{base} à {max} personnes",
+    aboutTitle: "À propos de ce pack",
+    notSuited: "Ce pack ne vous convient pas ? Composez le vôtre à {city}.",
+    included: "Inclus",
+    notIncluded: "Non inclus",
+    program: "Programme jour par jour",
+    practicalInfo: "Informations pratiques",
+    physicalLevel: "Niveau physique",
+    clothing: "Tenue conseillée",
+    toBring: "À apporter",
+    meetingPoint: "Point de rendez-vous",
+    cancellation: "Conditions d'annulation",
+    departureDate: "Date de départ",
+    chooseDate: "Choisir une date",
+    packLine: "Pack ({n} pers.)",
+    extraPersons: "Personnes supplémentaires",
+    perPack: "/ pack",
+    reservePack: "Réserver ce pack",
+  },
   nav: {},
   footerColumns: {},
 };
@@ -851,6 +909,35 @@ const EN: Dictionary = {
     and: " and the ",
     cancellationLink: "cancellation policy",
     submit: "Send my booking request",
+  },
+  packs: {
+    metaTitle: "Discovery packs",
+    metaDescription: "Guided, all-inclusive getaways: accommodation, transport and a certified KoraStay local guide.",
+    heroTitle: "All-inclusive getaways, nothing to organize",
+    heroSubtitle: "Verified accommodation, in-town transport and a certified local guide: all that's left is to enjoy.",
+    allDestinations: "All destinations",
+    customTitle: "Custom pack",
+    customTextShort: "Build your tailor-made stay.",
+    customTextLong: "Build your tailor-made stay: destination, activities, options. We handle the rest.",
+    metaFallback: "Pack",
+    personsRange: "{base} to {max} people",
+    aboutTitle: "About this pack",
+    notSuited: "This pack doesn't suit you? Build your own in {city}.",
+    included: "Included",
+    notIncluded: "Not included",
+    program: "Day-by-day itinerary",
+    practicalInfo: "Practical information",
+    physicalLevel: "Physical level",
+    clothing: "Recommended clothing",
+    toBring: "What to bring",
+    meetingPoint: "Meeting point",
+    cancellation: "Cancellation terms",
+    departureDate: "Departure date",
+    chooseDate: "Choose a date",
+    packLine: "Pack ({n} guests)",
+    extraPersons: "Extra people",
+    perPack: "/ pack",
+    reservePack: "Book this pack",
   },
   nav: NAV_EN,
   footerColumns: FOOTER_COLUMNS_EN,

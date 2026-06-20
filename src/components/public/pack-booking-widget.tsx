@@ -10,6 +10,8 @@ import { Stepper } from "@/components/ui/stepper";
 import { Button } from "@/components/ui/button";
 import { formatPrice, formatDate, cn } from "@/lib/utils";
 import { computePackPrice } from "@/lib/pricing";
+import { useI18n } from "@/components/i18n/provider";
+import { localePath } from "@/lib/i18n";
 
 interface PackBookingWidgetProps {
   packId: string;
@@ -22,6 +24,7 @@ interface PackBookingWidgetProps {
 
 export function PackBookingWidget(props: PackBookingWidgetProps) {
   const router = useRouter();
+  const dict = useI18n();
   const [range, setRange] = React.useState<DateRange>({ start: null, end: null });
   const [persons, setPersons] = React.useState(props.basePersons);
 
@@ -38,7 +41,7 @@ export function PackBookingWidget(props: PackBookingWidgetProps) {
       startDate: range.start.toISOString().slice(0, 10),
       persons: String(persons),
     });
-    router.push(`/packs/${props.slug}/reserver?${params.toString()}`);
+    router.push(`${localePath(`/packs/${props.slug}/reserver`, dict.locale)}?${params.toString()}`);
   }
 
   const body = (
@@ -47,9 +50,9 @@ export function PackBookingWidget(props: PackBookingWidgetProps) {
         <PopoverTrigger asChild>
           <button className="flex w-full items-center justify-between rounded-2xl border border-border px-4 py-3 text-left text-sm">
             <span>
-              <span className="block text-2xs font-bold uppercase text-muted">Date de départ</span>
+              <span className="block text-2xs font-bold uppercase text-muted">{dict.packs.departureDate}</span>
               <span className={cn("font-semibold", range.start ? "text-foreground" : "text-muted")}>
-                {range.start ? formatDate(range.start) : "Choisir une date"}
+                {range.start ? formatDate(range.start) : dict.packs.chooseDate}
               </span>
             </span>
             <CalendarDays className="h-4 w-4 text-muted" />
@@ -61,26 +64,26 @@ export function PackBookingWidget(props: PackBookingWidgetProps) {
       </Popover>
 
       <div className="rounded-2xl border border-border px-4">
-        <Stepper label="Voyageurs" value={persons} onChange={setPersons} min={1} max={props.maxPersons} />
+        <Stepper label={dict.search.guests} value={persons} onChange={setPersons} min={1} max={props.maxPersons} />
       </div>
 
       <div className="space-y-2 rounded-2xl bg-surface-soft p-4 text-sm">
         <div className="flex justify-between text-muted">
-          <span>Pack ({props.basePersons} pers.)</span>
+          <span>{dict.packs.packLine.replace("{n}", String(props.basePersons))}</span>
           <span className="text-foreground">{formatPrice(props.price)}</span>
         </div>
         {price.extras > 0 && (
           <div className="flex justify-between text-muted">
-            <span>Personnes supplémentaires</span>
+            <span>{dict.packs.extraPersons}</span>
             <span className="text-foreground">{formatPrice(price.extras)}</span>
           </div>
         )}
         <div className="flex justify-between text-muted">
-          <span>Frais de service</span>
+          <span>{dict.booking.serviceFee}</span>
           <span className="text-foreground">{formatPrice(price.serviceFee)}</span>
         </div>
         <div className="flex justify-between border-t border-border pt-2 text-base font-extrabold text-foreground">
-          <span>Total</span><span>{formatPrice(price.total)}</span>
+          <span>{dict.booking.total}</span><span>{formatPrice(price.total)}</span>
         </div>
       </div>
     </>
@@ -92,11 +95,11 @@ export function PackBookingWidget(props: PackBookingWidgetProps) {
       <div className="hidden rounded-3xl border border-border bg-surface p-6 shadow-card lg:block">
         <p className="mb-4">
           <span className="text-2xl font-extrabold text-foreground">{formatPrice(props.price)}</span>
-          <span className="text-muted"> / pack</span>
+          <span className="text-muted"> {dict.packs.perPack}</span>
         </p>
         <div className="space-y-3">{body}</div>
         <Button onClick={reserve} disabled={!range.start} size="lg" className="mt-4 w-full">
-          {range.start ? "Réserver ce pack" : "Choisir une date"}
+          {range.start ? dict.packs.reservePack : dict.packs.chooseDate}
         </Button>
       </div>
 
@@ -104,16 +107,16 @@ export function PackBookingWidget(props: PackBookingWidgetProps) {
       <div className="safe-bottom fixed inset-x-0 bottom-[var(--bottom-nav-h)] z-30 border-t border-border bg-surface/95 px-4 py-3 backdrop-blur lg:hidden">
         <div className="flex items-center justify-between gap-3">
           <p className="text-base font-extrabold text-foreground">
-            {formatPrice(props.price)}<span className="text-sm font-normal text-muted"> / pack</span>
+            {formatPrice(props.price)}<span className="text-sm font-normal text-muted"> {dict.packs.perPack}</span>
           </p>
           <Drawer>
-            <DrawerTrigger asChild><Button size="lg">Réserver</Button></DrawerTrigger>
+            <DrawerTrigger asChild><Button size="lg">{dict.booking.reserve}</Button></DrawerTrigger>
             <DrawerContent className="px-5 pb-6">
-              <DrawerTitle className="px-1 pt-4 text-xl font-bold">Réserver ce pack</DrawerTitle>
+              <DrawerTitle className="px-1 pt-4 text-xl font-bold">{dict.packs.reservePack}</DrawerTitle>
               <div className="my-4 space-y-3 px-1">{body}</div>
               <DrawerClose asChild>
                 <Button onClick={reserve} disabled={!range.start} size="lg" className="w-full">
-                  {range.start ? `Réserver - ${formatPrice(price.total)}` : "Choisir une date"}
+                  {range.start ? `${dict.booking.reserve} - ${formatPrice(price.total)}` : dict.packs.chooseDate}
                 </Button>
               </DrawerClose>
             </DrawerContent>

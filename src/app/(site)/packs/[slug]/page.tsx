@@ -11,18 +11,21 @@ import { PackBookingWidget } from "@/components/public/pack-booking-widget";
 import { FavoriteButton } from "@/components/public/favorite-button";
 import { JsonLd } from "@/components/seo/json-ld";
 import { Badge } from "@/components/ui/badge";
+import { getI18n } from "@/lib/i18n.server";
+import { localePath } from "@/lib/i18n";
+import { alternatesFor } from "@/lib/seo";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const pack = await getPackBySlug(slug);
-  return { title: pack?.name ?? "Pack", description: pack?.subtitle ?? "" };
+  const [pack, { dict }] = await Promise.all([getPackBySlug(slug), getI18n()]);
+  return { title: pack?.name ?? dict.packs.metaFallback, description: pack?.subtitle ?? "", alternates: alternatesFor(`/packs/${slug}`) };
 }
 
 export default async function PackDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const pack = await getPackBySlug(slug);
+  const [pack, { locale, dict }] = await Promise.all([getPackBySlug(slug), getI18n()]);
   if (!pack || pack.status !== "PUBLISHED") notFound();
 
   const favorites = await getUserFavoriteIds();
@@ -44,7 +47,7 @@ export default async function PackDetailPage({ params }: { params: Promise<{ slu
     <div className="pb-24 lg:pb-0">
       <JsonLd data={jsonLd} />
       <div className="relative lg:hidden">
-        <Link href="/packs" className="absolute left-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-ink shadow-soft backdrop-blur" aria-label="Retour">
+        <Link href={localePath("/packs", locale)} className="absolute left-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-ink shadow-soft backdrop-blur" aria-label={dict.residenceDetail.back}>
           <ChevronLeft className="h-5 w-5" />
         </Link>
         <div className="absolute right-4 top-4 z-10">
@@ -56,14 +59,14 @@ export default async function PackDetailPage({ params }: { params: Promise<{ slu
         <div className="mb-4 hidden items-end justify-between lg:flex">
           <div>
             <nav className="mb-2 flex items-center gap-1 text-sm text-muted">
-              <Link href="/packs" className="hover:text-foreground">Packs Découverte</Link>
+              <Link href={localePath("/packs", locale)} className="hover:text-foreground">{dict.packs.metaTitle}</Link>
               <span>/</span><span className="text-foreground">{pack.name}</span>
             </nav>
             <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground">{pack.name}</h1>
             <div className="mt-1.5 flex flex-wrap items-center gap-3 text-sm text-muted">
               {pack.destination && <span className="flex items-center gap-1"><MapPin className="h-4 w-4" /> {pack.destination.name}</span>}
-              <span className="flex items-center gap-1"><Clock className="h-4 w-4" /> {pack.durationDays}j / {pack.durationNights}n</span>
-              <span className="flex items-center gap-1"><Users className="h-4 w-4" /> {pack.basePersons} a {pack.maxPersons} personnes</span>
+              <span className="flex items-center gap-1"><Clock className="h-4 w-4" /> {pack.durationDays}{dict.card.dayShort} / {pack.durationNights}{dict.card.nightShort}</span>
+              <span className="flex items-center gap-1"><Users className="h-4 w-4" /> {dict.packs.personsRange.replace("{base}", String(pack.basePersons)).replace("{max}", String(pack.maxPersons))}</span>
               {pack.ratingCount > 0 && <span className="flex items-center gap-1"><Star className="h-4 w-4 fill-gold-500 text-gold-500" /> {pack.ratingAverage.toFixed(1)}</span>}
             </div>
           </div>
@@ -77,7 +80,7 @@ export default async function PackDetailPage({ params }: { params: Promise<{ slu
         <div className="mt-4 lg:hidden">
           <h1 className="text-2xl font-bold text-foreground">{pack.name}</h1>
           <div className="mt-1.5 flex flex-wrap items-center gap-2 text-sm text-muted">
-            <Badge tone="gold"><Clock className="h-3 w-3" /> {pack.durationDays}j / {pack.durationNights}n</Badge>
+            <Badge tone="gold"><Clock className="h-3 w-3" /> {pack.durationDays}{dict.card.dayShort} / {pack.durationNights}{dict.card.nightShort}</Badge>
             {pack.destination && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {pack.destination.name}</span>}
           </div>
         </div>
@@ -85,13 +88,13 @@ export default async function PackDetailPage({ params }: { params: Promise<{ slu
         <div className="mt-8 grid grid-cols-1 gap-10 lg:grid-cols-[1fr_380px]">
           <div className="min-w-0">
             <section className="border-b border-border pb-7">
-              <h2 className="mb-3 text-xl font-bold text-foreground">A propos de ce pack</h2>
+              <h2 className="mb-3 text-xl font-bold text-foreground">{dict.packs.aboutTitle}</h2>
               <p className="leading-relaxed text-foreground/90">{pack.description}</p>
               {pack.destination?.slug && (
                 <div className="mt-5 flex flex-col items-start justify-between gap-3 rounded-3xl border-2 border-dashed border-brand-300 bg-brand-50/40 p-5 sm:flex-row sm:items-center">
-                  <p className="text-sm font-medium text-brand-900">Ce pack ne vous convient pas ? Composez le votre a {pack.destination.name}.</p>
-                  <Link href={`/packs/custom?city=${pack.destination.slug}`} className="inline-flex shrink-0 items-center gap-2 rounded-full bg-brand-500 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-600">
-                    <Sparkles className="h-4 w-4" /> Composer mon pack
+                  <p className="text-sm font-medium text-brand-900">{dict.packs.notSuited.replace("{city}", pack.destination.name)}</p>
+                  <Link href={localePath(`/packs/custom?city=${pack.destination.slug}`, locale)} className="inline-flex shrink-0 items-center gap-2 rounded-full bg-brand-500 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-600">
+                    <Sparkles className="h-4 w-4" /> {dict.residenceDetail.composePack}
                   </Link>
                 </div>
               )}
@@ -101,7 +104,7 @@ export default async function PackDetailPage({ params }: { params: Promise<{ slu
             <section className="grid grid-cols-1 gap-6 border-b border-border py-7 sm:grid-cols-2">
               <div>
                 <h3 className="mb-3 flex items-center gap-2 font-bold text-foreground">
-                  <CheckCircle2 className="h-5 w-5 text-success" /> Inclus
+                  <CheckCircle2 className="h-5 w-5 text-success" /> {dict.packs.included}
                 </h3>
                 <ul className="space-y-2">
                   {included.map((i) => (
@@ -115,7 +118,7 @@ export default async function PackDetailPage({ params }: { params: Promise<{ slu
               {notIncluded.length > 0 && (
                 <div>
                   <h3 className="mb-3 flex items-center gap-2 font-bold text-foreground">
-                    <XCircle className="h-5 w-5 text-muted" /> Non inclus
+                    <XCircle className="h-5 w-5 text-muted" /> {dict.packs.notIncluded}
                   </h3>
                   <ul className="space-y-2">
                     {notIncluded.map((i) => (
@@ -131,7 +134,7 @@ export default async function PackDetailPage({ params }: { params: Promise<{ slu
             {/* Programme */}
             <section className="border-b border-border py-7">
               <h2 className="mb-5 flex items-center gap-2 text-xl font-bold text-foreground">
-                <Calendar className="h-5 w-5 text-brand-600" /> Programme jour par jour
+                <Calendar className="h-5 w-5 text-brand-600" /> {dict.packs.program}
               </h2>
               <div className="space-y-6">
                 {pack.programDays.map((day) => (
@@ -155,12 +158,12 @@ export default async function PackDetailPage({ params }: { params: Promise<{ slu
 
             {/* Infos pratiques */}
             <section className="border-b border-border py-7">
-              <h2 className="mb-4 text-xl font-bold text-foreground">Informations pratiques</h2>
+              <h2 className="mb-4 text-xl font-bold text-foreground">{dict.packs.practicalInfo}</h2>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {pack.physicalLevel && <Practical icon={Backpack} label="Niveau physique" value={pack.physicalLevel} />}
-                {pack.clothingRecommendations && <Practical icon={Shirt} label="Tenue conseillee" value={pack.clothingRecommendations} />}
-                {pack.documentsToBring && <Practical icon={FileText} label="A apporter" value={pack.documentsToBring} />}
-                {pack.meetingPoint && <Practical icon={MapPin} label="Point de rendez-vous" value={pack.meetingPoint} />}
+                {pack.physicalLevel && <Practical icon={Backpack} label={dict.packs.physicalLevel} value={pack.physicalLevel} />}
+                {pack.clothingRecommendations && <Practical icon={Shirt} label={dict.packs.clothing} value={pack.clothingRecommendations} />}
+                {pack.documentsToBring && <Practical icon={FileText} label={dict.packs.toBring} value={pack.documentsToBring} />}
+                {pack.meetingPoint && <Practical icon={MapPin} label={dict.packs.meetingPoint} value={pack.meetingPoint} />}
               </div>
             </section>
 
@@ -168,7 +171,7 @@ export default async function PackDetailPage({ params }: { params: Promise<{ slu
             {pack.cancellationPolicy && (
               <section className="py-7">
                 <h2 className="mb-3 flex items-center gap-2 text-xl font-bold text-foreground">
-                  <Info className="h-5 w-5 text-brand-600" /> Conditions d'annulation
+                  <Info className="h-5 w-5 text-brand-600" /> {dict.packs.cancellation}
                 </h2>
                 <p className="text-sm text-foreground/90">{pack.cancellationPolicy}</p>
               </section>
