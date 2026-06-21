@@ -129,7 +129,7 @@ export default async function ReserverPage({
               endDate={checkout!}
               nights={price.nights}
               adults={adults}
-              children={children}
+              childGuests={children}
               cleaningFeeAmount={cleaningFeeAmount}
               proposedAmount={proposedAmount}
               estimatedServiceFee={negotiatedPrice!.serviceFee}

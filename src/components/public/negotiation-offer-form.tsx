@@ -17,7 +17,7 @@ interface NegotiationOfferFormProps {
   endDate: string;
   nights: number;
   adults: number;
-  children: number;
+  childGuests: number;
   cleaningFeeAmount: number;
   proposedAmount: number;
   estimatedServiceFee: number;
@@ -52,7 +52,7 @@ export function NegotiationOfferForm(props: NegotiationOfferFormProps) {
         endDate: props.endDate,
         nights: props.nights,
         adults: props.adults,
-        children: props.children,
+        children: props.childGuests,
         guestName,
         guestEmail,
         guestPhone: guestPhone || undefined,
