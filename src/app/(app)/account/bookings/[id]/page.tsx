@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
   CheckCircle2, CalendarDays, Users, MapPin, ChevronLeft, Receipt,
-  ShieldCheck, Phone, Star, Package, Ticket, Clock, Send,
+  ShieldCheck, Phone, Star, Package, Ticket, Clock, Send, Handshake, XCircle, AlertCircle,
 } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { getReservationDetail } from "@/lib/account-queries";
@@ -11,11 +11,12 @@ import { getPaymentSettings, enabledPaymentMethods } from "@/lib/payment-rules";
 import { CancelReservationButton } from "@/components/dashboard/cancel-reservation-button";
 import { ValidationCountdown } from "@/components/dashboard/validation-countdown";
 import { ManualPaymentPanel } from "@/components/dashboard/manual-payment-panel";
+import { TravelerOfferPanel } from "@/components/dashboard/traveler-offer-panel";
 import { ContactButton } from "@/components/messaging/contact-button";
 import { SmartImage } from "@/components/ui/smart-image";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
-import { reservationStatusMeta, paymentStatusMeta, cautionStatusMeta, paymentMethodMeta } from "@/lib/enums";
+import { reservationStatusMeta, paymentStatusMeta, cautionStatusMeta, paymentMethodMeta, offerStatusMeta } from "@/lib/enums";
 import { formatPrice, formatDate } from "@/lib/utils";
 
 type SP = Record<string, string | string[] | undefined>;
@@ -35,6 +36,7 @@ export default async function BookingDetailPage({
 
   const justConfirmed = sp.confirmed === "1";
   const justRequested = sp.requested === "1";
+  const justOffered = sp.offered === "1";
   const pendingValidation = sp.pending_validation === "1";
   const paySettings = await getPaymentSettings();
   const recvNumbers = paySettings.receivingNumbers ?? {};
@@ -66,11 +68,35 @@ export default async function BookingDetailPage({
   const canReview = reservation.status === "COMPLETED" && !reservation.review;
   const hasReceipt = ["CONFIRMED", "CHECKED_IN", "COMPLETED"].includes(reservation.status);
 
+  // Négociation
+  const negotiationStatus = reservation.negotiationStatus ?? "NONE";
+  const isNegotiating = negotiationStatus !== "NONE";
+  const offerHistory = reservation.priceOffers ?? [];
+  const pendingOfferFromOwner = offerHistory.find(
+    (o) => o.status === "PENDING" && o.proposedBy === "OWNER",
+  );
+  const waitingForOwner =
+    negotiationStatus === "OPEN" &&
+    offerHistory.some((o) => o.status === "PENDING" && o.proposedBy === "TRAVELER");
+
   return (
     <div className="mx-auto max-w-4xl">
       <Link href="/account/bookings" className="mb-5 inline-flex items-center gap-1 text-sm font-semibold text-muted hover:text-foreground">
         <ChevronLeft className="h-4 w-4" /> Mes réservations
       </Link>
+
+      {/* Offre envoyée */}
+      {justOffered && reservation.status === "NEGOTIATING" && (
+        <div className="mb-6 flex items-start gap-3 rounded-3xl border border-brand-200 bg-brand-50 p-5">
+          <Handshake className="mt-0.5 h-6 w-6 shrink-0 text-brand-600" />
+          <div>
+            <p className="font-bold text-brand-800">Offre envoyée !</p>
+            <p className="text-sm text-brand-700/80">
+              Votre offre a été transmise au propriétaire. Il dispose de <strong>24 heures</strong> pour vous répondre.
+            </p>
+          </div>
+        </div>
+      )}
 
       {justConfirmed && reservation.status === "CONFIRMED" && (
         <div className="mb-6 flex items-start gap-3 rounded-3xl border border-success/30 bg-emerald-50 p-5">
@@ -133,6 +159,95 @@ export default async function BookingDetailPage({
         </div>
       </div>
 
+      {/* ── Section négociation ── */}
+      {isNegotiating && (
+        <div className="mt-6 rounded-3xl border border-border bg-surface p-5 shadow-soft">
+          <h2 className="mb-4 flex items-center gap-2 font-bold text-foreground">
+            <Handshake className="h-5 w-5 text-brand-600" /> Négociation de prix
+          </h2>
+
+          {/* Historique des offres */}
+          {offerHistory.length > 0 && (
+            <div className="mb-4 space-y-2">
+              {offerHistory.map((offer) => (
+                <div key={offer.id} className="flex items-center justify-between rounded-xl bg-surface-soft px-3 py-2.5 text-sm">
+                  <span className="text-muted">
+                    {offer.proposedBy === "TRAVELER" ? "Votre offre" : "Contre-offre du propriétaire"}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-foreground">{formatPrice(offer.amount)}</span>
+                    <StatusBadge status={offer.status} map={offerStatusMeta} size="sm" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* États de la négociation */}
+          {negotiationStatus === "OPEN" && waitingForOwner && (
+            <div className="flex items-start gap-3 rounded-2xl bg-brand-50/60 px-4 py-3">
+              <Clock className="mt-0.5 h-5 w-5 shrink-0 text-brand-600" />
+              <div>
+                <p className="text-sm font-semibold text-brand-800">En attente du propriétaire</p>
+                <p className="text-xs text-brand-700/80">Le propriétaire a 24h pour accepter, refuser ou faire une contre-offre.</p>
+              </div>
+            </div>
+          )}
+
+          {negotiationStatus === "OPEN" && pendingOfferFromOwner && (
+            <div className="space-y-4">
+              <div className="flex items-start gap-3 rounded-2xl border border-warning-200 bg-warning-50/60 px-4 py-3">
+                <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-warning-600" />
+                <div>
+                  <p className="text-sm font-semibold text-warning-800">Contre-offre reçue !</p>
+                  <p className="text-xs text-warning-700/80">
+                    Le propriétaire propose {formatPrice(pendingOfferFromOwner.amount)}.
+                    {pendingOfferFromOwner.message && ` Message : "${pendingOfferFromOwner.message}"`}
+                  </p>
+                </div>
+              </div>
+              <TravelerOfferPanel
+                offerId={pendingOfferFromOwner.id}
+                counterAmount={pendingOfferFromOwner.amount}
+              />
+            </div>
+          )}
+
+          {negotiationStatus === "AGREED" && (
+            <div className="flex items-start gap-3 rounded-2xl bg-emerald-50 px-4 py-3">
+              <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-success" />
+              <div>
+                <p className="text-sm font-semibold text-success">Accord trouvé !</p>
+                <p className="text-xs text-emerald-700/80">
+                  Prix négocié : <strong>{formatPrice(reservation.negotiatedPrice ?? reservation.subtotalAmount)}</strong>.
+                  La réservation est en cours de traitement.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {negotiationStatus === "REJECTED" && (
+            <div className="flex items-start gap-3 rounded-2xl bg-danger-50/60 px-4 py-3">
+              <XCircle className="mt-0.5 h-5 w-5 shrink-0 text-danger-600" />
+              <div>
+                <p className="text-sm font-semibold text-danger-700">Négociation refusée</p>
+                <p className="text-xs text-danger-600/80">La négociation n&apos;a pas abouti. Vous pouvez proposer une nouvelle offre.</p>
+              </div>
+            </div>
+          )}
+
+          {negotiationStatus === "EXPIRED" && (
+            <div className="flex items-start gap-3 rounded-2xl bg-surface-soft px-4 py-3">
+              <Clock className="mt-0.5 h-5 w-5 shrink-0 text-muted" />
+              <div>
+                <p className="text-sm font-semibold text-foreground">Offre expirée</p>
+                <p className="text-xs text-muted">Le délai de 24h est dépassé sans réponse du propriétaire.</p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* En attente de validation : compte a rebours */}
       {reservation.status === "PENDING_APPROVAL" && reservation.expiresAt && (
         <div className="mt-6 rounded-3xl border border-gold-200 bg-gold-50/50 p-5 shadow-soft">
@@ -184,7 +299,7 @@ export default async function BookingDetailPage({
               <Receipt className="h-5 w-5 text-brand-600" /> Détail du paiement
             </h2>
             <div className="space-y-2.5 text-sm">
-              <Row label="Prix du séjour" value={formatPrice(reservation.subtotalAmount)} />
+              <Row label={isNegotiating ? "Montant négocié" : "Prix du séjour"} value={formatPrice(reservation.subtotalAmount)} />
               {reservation.cleaningFeeAmount > 0 && <Row label="Frais de ménage" value={formatPrice(reservation.cleaningFeeAmount)} />}
               <Row label="Frais de service KoraStay" value={formatPrice(reservation.serviceFeeAmount)} />
               {stayDiscount > 0 && (
@@ -210,7 +325,7 @@ export default async function BookingDetailPage({
                   <span className="font-semibold">{formatPrice(reservation.cautionAmount)}</span>
                 </div>
               )}
-              {reservation.depositAmount > 0 && reservation.status !== "PENDING_APPROVAL" && (
+              {reservation.depositAmount > 0 && reservation.status !== "PENDING_APPROVAL" && reservation.status !== "NEGOTIATING" && (
                 <div className="mt-1 space-y-1 rounded-2xl bg-brand-50/60 px-3 py-2.5">
                   <div className="flex justify-between text-brand-800">
                     <span className="font-semibold">Montant {hasReceipt ? "regle" : "a payer maintenant"}</span>

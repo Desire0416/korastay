@@ -28,6 +28,7 @@ export async function getReservationDetail(userId: string, id: string) {
       payments: { orderBy: { createdAt: "desc" } },
       refunds: true,
       review: true,
+      priceOffers: { orderBy: { createdAt: "asc" } },
     },
   });
 }

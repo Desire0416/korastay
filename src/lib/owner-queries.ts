@@ -97,3 +97,37 @@ export async function getOwnerCalendarData(ownerId: string) {
     },
   });
 }
+
+// Offres de prix en cours / recentes pour toutes les residences du proprietaire.
+export async function getOwnerPriceOffers(ownerId: string) {
+  return prisma.priceOffer.findMany({
+    where: {
+      reservation: { residence: { ownerId } },
+      status: { in: ["PENDING", "COUNTERED"] },
+    },
+    include: {
+      reservation: {
+        include: {
+          residence: {
+            select: { id: true, name: true, slug: true, pricePerNight: true, images: { take: 1, orderBy: { sortOrder: "asc" } } },
+          },
+          traveler: { select: { id: true, firstName: true, lastName: true, email: true, phone: true } },
+          // historique complet des offres de cette négociation
+          priceOffers: { orderBy: { createdAt: "asc" } },
+        },
+      },
+    },
+    orderBy: { expiresAt: "asc" }, // plus urgentes en premier
+  });
+}
+
+// Compteur d'offres en attente de réponse du propriétaire (pour le badge nav).
+export async function getOwnerPendingOffersCount(ownerId: string): Promise<number> {
+  return prisma.priceOffer.count({
+    where: {
+      status: "PENDING",
+      proposedBy: "TRAVELER",
+      reservation: { residence: { ownerId } },
+    },
+  });
+}

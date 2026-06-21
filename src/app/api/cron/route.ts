@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { expireStaleOffers } from "@/server/actions/negotiation";
 
 /**
  * Taches planifiees KoraStay. A appeler periodiquement (ex: toutes les 15 min)
@@ -15,7 +16,7 @@ export async function GET(req: NextRequest) {
   }
 
   const now = new Date();
-  const result = { approvalExpired: 0, expiredReleased: 0, autoCompleted: 0, checkinReminders: 0, reviewInvites: 0 };
+  const result = { approvalExpired: 0, expiredReleased: 0, autoCompleted: 0, checkinReminders: 0, reviewInvites: 0, offersExpired: 0 };
 
   // 0) Annuler les demandes non validees dans le delai (24h residence / 7j pack)
   const staleApproval = await prisma.reservation.findMany({
@@ -101,6 +102,10 @@ export async function GET(req: NextRequest) {
       result.reviewInvites++;
     }
   }
+
+  // 5) Expirer les offres de prix sans réponse
+  const { expired: offersExpired } = await expireStaleOffers();
+  result.offersExpired = offersExpired;
 
   return NextResponse.json({ ok: true, ranAt: now.toISOString(), ...result });
 }
