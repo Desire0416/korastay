@@ -80,10 +80,10 @@ export const ACCOUNT_NAV: NavItem[] = [
 
 export const OWNER_NAV: NavItem[] = [
   { label: "Tableau de bord", href: "/owner", icon: "LayoutDashboard" },
-  { label: "Mes résidences", href: "/owner/residences", icon: "Home" },
-  { label: "Calendrier", href: "/owner/calendar", icon: "Calendar" },
   { label: "Réservations", href: "/owner/bookings", icon: "CalendarCheck" },
   { label: "Offres reçues", href: "/owner/offers", icon: "Handshake" },
+  { label: "Calendrier", href: "/owner/calendar", icon: "Calendar" },
+  { label: "Mes résidences", href: "/owner/residences", icon: "Home" },
   { label: "Revenus", href: "/owner/revenues", icon: "Wallet" },
   { label: "Avis", href: "/owner/reviews", icon: "Star" },
   { label: "Messages", href: "/owner/messages", icon: "MessageCircle" },
