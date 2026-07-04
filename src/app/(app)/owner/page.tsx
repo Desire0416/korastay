@@ -14,11 +14,10 @@ export const metadata = { title: "Tableau de bord propriétaire" };
 
 export default async function OwnerDashboard() {
   const user = await requireRole(["OWNER", "ADMIN", "SUPER_ADMIN"]);
-  const [stats, bookings] = await Promise.all([
+  const [stats, recent] = await Promise.all([
     getOwnerStats(user.id),
-    getOwnerBookings(user.id),
+    getOwnerBookings(user.id, 5),
   ]);
-  const recent = bookings.slice(0, 5);
 
   return (
     <div className="mx-auto max-w-6xl">

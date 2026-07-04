@@ -19,6 +19,7 @@ export function TravelerOfferPanel({ offerId, counterAmount }: TravelerOfferPane
   const router = useRouter();
   const [mode, setMode] = React.useState<Mode>("idle");
   const [pending, setPending] = React.useState(false);
+  const [done, setDone] = React.useState<null | "ACCEPT" | "REJECT" | "COUNTER">(null);
   const [myAmount, setMyAmount] = React.useState<number>(counterAmount);
   const [message, setMessage] = React.useState("");
 
@@ -38,12 +39,27 @@ export function TravelerOfferPanel({ offerId, counterAmount }: TravelerOfferPane
       if (action === "ACCEPT") toast.success("Offre acceptée ! Votre réservation est en attente de confirmation.");
       else if (action === "REJECT") toast.success("Contre-offre refusée. Le propriétaire a été notifié.");
       else toast.success("Votre contre-offre a été envoyée. Le propriétaire a 24h pour répondre.");
+      // Optimiste : affiche l'issue immediatement ; router.refresh() reconcilie en fond.
+      setDone(action);
       router.refresh();
     } catch {
       toast.error("Une erreur est survenue. Veuillez réessayer.");
     } finally {
       setPending(false);
     }
+  }
+
+  // Etat resolu optimiste (avant que le refresh serveur ne mette a jour la page).
+  if (done) {
+    const label =
+      done === "ACCEPT" ? "Offre acceptée" : done === "REJECT" ? "Contre-offre refusée" : "Contre-offre envoyée";
+    const Icon = done === "REJECT" ? XCircle : done === "COUNTER" ? ArrowLeftRight : CheckCircle2;
+    const tone = done === "REJECT" ? "text-danger-700" : "text-success";
+    return (
+      <p className={`flex items-center gap-2 rounded-2xl bg-surface-soft px-4 py-3 text-sm font-semibold ${tone}`}>
+        <Icon className="h-4 w-4" /> {label}
+      </p>
+    );
   }
 
   if (mode === "countering") {

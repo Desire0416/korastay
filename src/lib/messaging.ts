@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "./prisma";
 import type { SessionUser } from "./auth";
 
@@ -60,36 +61,54 @@ type RawConvo = Awaited<ReturnType<typeof prisma.conversation.findMany>>[number]
   messages: { body: string; senderId: string; createdAt: Date; isInternal: boolean }[];
 };
 
+// Compte les messages non lus par conversation en UNE requete groupee
+// (au lieu d'un count() par conversation -> N+1 qui saturait le pool).
+// LEFT JOIN sur la participation de l'utilisateur : si absent (cas staff non
+// participant), lastReadAt vaut NULL et tous les messages comptent — semantique
+// identique a l'ancienne boucle.
+async function unreadByConversation(
+  userId: string,
+  conversationIds: string[],
+  staff: boolean,
+): Promise<Map<string, number>> {
+  if (conversationIds.length === 0) return new Map();
+  const rows = await prisma.$queryRaw<{ conversationId: string; unread: number }[]>`
+    SELECT c.id AS "conversationId",
+      COUNT(m.id) FILTER (
+        WHERE m."senderId" <> ${userId}
+          AND (${staff}::boolean OR m."isInternal" = false)
+          AND (cp."lastReadAt" IS NULL OR m."createdAt" > cp."lastReadAt")
+      )::int AS "unread"
+    FROM "Conversation" c
+    LEFT JOIN "ConversationParticipant" cp
+      ON cp."conversationId" = c.id AND cp."userId" = ${userId}
+    LEFT JOIN "Message" m ON m."conversationId" = c.id
+    WHERE c.id IN (${Prisma.join(conversationIds)})
+    GROUP BY c.id
+  `;
+  const map = new Map<string, number>();
+  for (const r of rows) map.set(r.conversationId, Number(r.unread));
+  return map;
+}
+
 async function buildSummaries(convos: unknown[], user: SessionUser, staff = false): Promise<ConversationSummary[]> {
   const list = convos as RawConvo[];
-  const summaries = await Promise.all(
-    list.map(async (c) => {
-      const me = c.participants.find((p) => p.userId === user.id);
-      const lastReadAt = me?.lastReadAt ?? null;
-      const unread = await prisma.message.count({
-        where: {
-          conversationId: c.id,
-          senderId: { not: user.id },
-          ...(staff ? {} : { isInternal: false }),
-          ...(lastReadAt ? { createdAt: { gt: lastReadAt } } : {}),
-        },
-      });
-      const last = c.messages[0] ?? null;
-      return {
-        id: c.id,
-        subject: c.subject,
-        contextType: c.contextType,
-        lastMessageAt: c.lastMessageAt,
-        updatedAt: c.updatedAt,
-        otherParticipants: c.participants
-          .filter((p) => p.userId !== user.id)
-          .map((p) => ({ id: p.user.id, name: `${p.user.firstName} ${p.user.lastName}`, roleLabel: p.roleLabel ?? roleLabelFor(p.user.role) })),
-        lastMessage: last ? { body: last.body, senderId: last.senderId, createdAt: last.createdAt, isInternal: last.isInternal } : null,
-        unread,
-      };
-    })
-  );
-  return summaries;
+  const unreadMap = await unreadByConversation(user.id, list.map((c) => c.id), staff);
+  return list.map((c) => {
+    const last = c.messages[0] ?? null;
+    return {
+      id: c.id,
+      subject: c.subject,
+      contextType: c.contextType,
+      lastMessageAt: c.lastMessageAt,
+      updatedAt: c.updatedAt,
+      otherParticipants: c.participants
+        .filter((p) => p.userId !== user.id)
+        .map((p) => ({ id: p.user.id, name: `${p.user.firstName} ${p.user.lastName}`, roleLabel: p.roleLabel ?? roleLabelFor(p.user.role) })),
+      lastMessage: last ? { body: last.body, senderId: last.senderId, createdAt: last.createdAt, isInternal: last.isInternal } : null,
+      unread: unreadMap.get(c.id) ?? 0,
+    };
+  });
 }
 
 /** Detail d'une conversation avec controle d'acces. Marque comme lue. */
@@ -125,21 +144,18 @@ export async function getConversationForUser(conversationId: string, user: Sessi
   return { ...convo, messages, staff, isParticipant };
 }
 
+// Total de messages non lus (badge du header) en UNE requete au lieu d'un
+// count() par conversation. L'utilisateur est toujours participant de ses
+// conversations -> semantique identique a l'ancienne boucle.
 export async function getUnreadMessageCount(user: SessionUser): Promise<number> {
-  const parts = await prisma.conversationParticipant.findMany({
-    where: { userId: user.id },
-    select: { conversationId: true, lastReadAt: true },
-  });
-  let total = 0;
-  for (const p of parts) {
-    total += await prisma.message.count({
-      where: {
-        conversationId: p.conversationId,
-        senderId: { not: user.id },
-        isInternal: false,
-        ...(p.lastReadAt ? { createdAt: { gt: p.lastReadAt } } : {}),
-      },
-    });
-  }
-  return total;
+  const rows = await prisma.$queryRaw<{ total: number }[]>`
+    SELECT COUNT(m.id)::int AS "total"
+    FROM "ConversationParticipant" cp
+    JOIN "Message" m ON m."conversationId" = cp."conversationId"
+    WHERE cp."userId" = ${user.id}
+      AND m."senderId" <> ${user.id}
+      AND m."isInternal" = false
+      AND (cp."lastReadAt" IS NULL OR m."createdAt" > cp."lastReadAt")
+  `;
+  return Number(rows[0]?.total ?? 0);
 }

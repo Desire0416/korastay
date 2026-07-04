@@ -51,7 +51,7 @@ export async function getOwnerResidence(ownerId: string, id: string) {
   });
 }
 
-export async function getOwnerBookings(ownerId: string) {
+export async function getOwnerBookings(ownerId: string, limit?: number) {
   return prisma.reservation.findMany({
     where: { residence: { ownerId } },
     include: {
@@ -59,6 +59,7 @@ export async function getOwnerBookings(ownerId: string) {
       payments: { orderBy: { createdAt: "desc" }, take: 1 },
     },
     orderBy: { createdAt: "desc" },
+    ...(limit ? { take: limit } : {}),
   });
 }
 
