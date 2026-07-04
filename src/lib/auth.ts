@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import crypto from "crypto";
@@ -91,14 +92,33 @@ export type SessionUser = {
   emailVerifiedAt: Date | null;
 };
 
-export async function getCurrentUser(): Promise<SessionUser | null> {
+// Memoise par requete (React cache) : la session n'est lue qu'une fois par
+// rendu meme si layout + page + header appellent getCurrentUser. Ne selectionne
+// que les champs de SessionUser (evite de charger passwordHash & co a chaque page).
+export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
   const store = await cookies();
   const token = store.get(SESSION_COOKIE)?.value;
   if (!token) return null;
 
   const session = await prisma.session.findUnique({
     where: { token },
-    include: { user: true },
+    select: {
+      expiresAt: true,
+      user: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          phone: true,
+          role: true,
+          status: true,
+          avatarUrl: true,
+          city: true,
+          emailVerifiedAt: true,
+        },
+      },
+    },
   });
 
   if (!session || session.expiresAt < new Date()) {
@@ -118,7 +138,7 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
     city: u.city,
     emailVerifiedAt: u.emailVerifiedAt,
   };
-}
+});
 
 // ------------------------------------------------------------
 // Gardes

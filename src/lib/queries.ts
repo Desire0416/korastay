@@ -35,14 +35,20 @@ const residenceCardSelect = {
   },
 } satisfies Prisma.ResidenceSelect;
 
-export async function getFeaturedResidences(limit = 6) {
-  return prisma.residence.findMany({
-    where: { status: "PUBLISHED", isVerified: true },
-    select: residenceCardSelect,
-    orderBy: [{ ratingAverage: "desc" }, { ratingCount: "desc" }],
-    take: limit,
-  });
-}
+// Mis en cache (revalidation 2 min) : liste marketing stable, lue a chaque
+// visite de l'accueil. Evite ~1 requete/visite sur le pool.
+export const getFeaturedResidences = unstable_cache(
+  async (limit = 6) => {
+    return prisma.residence.findMany({
+      where: { status: "PUBLISHED", isVerified: true },
+      select: residenceCardSelect,
+      orderBy: [{ ratingAverage: "desc" }, { ratingCount: "desc" }],
+      take: limit,
+    });
+  },
+  ["featured-residences"],
+  { revalidate: 120, tags: ["residences"] },
+);
 
 // Residences regroupees par ville (sections facon "Logements a {ville}" Airbnb mobile).
 export async function getResidencesByCity(maxCities = 3, perCity = 8) {
@@ -209,20 +215,24 @@ export async function getResidenceSlugs() {
 // ------------------------------------------------------------
 // Packs
 // ------------------------------------------------------------
-export async function getPacks(filters?: { destination?: string }) {
-  return prisma.pack.findMany({
-    where: {
-      status: "PUBLISHED",
-      ...(filters?.destination ? { destination: { slug: filters.destination } } : {}),
-    },
-    include: {
-      destination: { select: { name: true, slug: true } },
-      images: { orderBy: { sortOrder: "asc" }, take: 1 },
-      _count: { select: { includedItems: true } },
-    },
-    orderBy: { createdAt: "asc" },
-  });
-}
+export const getPacks = unstable_cache(
+  async (filters?: { destination?: string }) => {
+    return prisma.pack.findMany({
+      where: {
+        status: "PUBLISHED",
+        ...(filters?.destination ? { destination: { slug: filters.destination } } : {}),
+      },
+      include: {
+        destination: { select: { name: true, slug: true } },
+        images: { orderBy: { sortOrder: "asc" }, take: 1 },
+        _count: { select: { includedItems: true } },
+      },
+      orderBy: { createdAt: "asc" },
+    });
+  },
+  ["packs-list"],
+  { revalidate: 120, tags: ["packs"] },
+);
 
 export async function getPackBySlug(slug: string) {
   return prisma.pack.findUnique({
@@ -242,15 +252,18 @@ export async function getPackBySlug(slug: string) {
 // ------------------------------------------------------------
 // Destinations
 // ------------------------------------------------------------
-export async function getPopularDestinations(limit = 6) {
-  const destinations = await prisma.destination.findMany({
-    where: { isActive: true },
-    orderBy: { priority: "asc" },
-    take: limit,
-    include: { _count: { select: { residences: true, packs: true } } },
-  });
-  return destinations;
-}
+export const getPopularDestinations = unstable_cache(
+  async (limit = 6) => {
+    return prisma.destination.findMany({
+      where: { isActive: true },
+      orderBy: { priority: "asc" },
+      take: limit,
+      include: { _count: { select: { residences: true, packs: true } } },
+    });
+  },
+  ["popular-destinations"],
+  { revalidate: 300, tags: ["destinations"] },
+);
 
 export async function getAllDestinations() {
   return prisma.destination.findMany({
@@ -277,17 +290,21 @@ export async function getDestinationBySlug(slug: string) {
 // ------------------------------------------------------------
 // Avis (home testimonials)
 // ------------------------------------------------------------
-export async function getRecentReviews(limit = 6) {
-  return prisma.review.findMany({
-    where: { status: "PUBLISHED", comment: { not: null } },
-    include: {
-      author: { select: { firstName: true, lastName: true, avatarUrl: true } },
-      residence: { select: { name: true, city: true } },
-    },
-    orderBy: { createdAt: "desc" },
-    take: limit,
-  });
-}
+export const getRecentReviews = unstable_cache(
+  async (limit = 6) => {
+    return prisma.review.findMany({
+      where: { status: "PUBLISHED", comment: { not: null } },
+      include: {
+        author: { select: { firstName: true, lastName: true, avatarUrl: true } },
+        residence: { select: { name: true, city: true } },
+      },
+      orderBy: { createdAt: "desc" },
+      take: limit,
+    });
+  },
+  ["recent-reviews"],
+  { revalidate: 300, tags: ["reviews"] },
+);
 
 // ------------------------------------------------------------
 // Contenu
@@ -299,14 +316,18 @@ export async function getContentPage(slug: string) {
 // ------------------------------------------------------------
 // Stats accueil
 // ------------------------------------------------------------
-export async function getPlatformStats() {
-  const [residences, destinations, packs] = await Promise.all([
-    prisma.residence.count({ where: { status: "PUBLISHED" } }),
-    prisma.destination.count({ where: { isActive: true } }),
-    prisma.pack.count({ where: { status: "PUBLISHED" } }),
-  ]);
-  return { residences, destinations, packs };
-}
+export const getPlatformStats = unstable_cache(
+  async () => {
+    const [residences, destinations, packs] = await Promise.all([
+      prisma.residence.count({ where: { status: "PUBLISHED" } }),
+      prisma.destination.count({ where: { isActive: true } }),
+      prisma.pack.count({ where: { status: "PUBLISHED" } }),
+    ]);
+    return { residences, destinations, packs };
+  },
+  ["platform-stats"],
+  { revalidate: 300, tags: ["stats"] },
+);
 
 // ------------------------------------------------------------
 // Statistiques communaute (compteur public) : nombre de visites

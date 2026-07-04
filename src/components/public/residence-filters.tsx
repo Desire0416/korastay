@@ -53,6 +53,7 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
   };
 
   const [draft, setDraft] = React.useState<Filters>(initial);
+  const [pending, startTransition] = React.useTransition();
 
   function apply(next: Filters) {
     const sp = new URLSearchParams();
@@ -68,7 +69,9 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
       sp.set("checkin", next.checkin);
       sp.set("checkout", next.checkout);
     }
-    router.push(`${localePath("/residences", dict.locale)}?${sp.toString()}`);
+    startTransition(() => {
+      router.push(`${localePath("/residences", dict.locale)}?${sp.toString()}`);
+    });
   }
 
   function toggleAmenity(slug: string) {
@@ -237,7 +240,7 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
               {dict.filters.reset}
             </Button>
             <DrawerClose asChild>
-              <Button className="flex-1" onClick={() => apply(draft)}>{dict.filters.showResults.replace("{n}", String(total))}</Button>
+              <Button className="flex-1" loading={pending} onClick={() => apply(draft)}>{dict.filters.showResults.replace("{n}", String(total))}</Button>
             </DrawerClose>
           </div>
         </DrawerContent>
@@ -257,7 +260,7 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
             {filterBody}
             <div className="mt-5 flex gap-3 border-t border-border pt-4">
               <Button variant="ghost" className="flex-1" onClick={() => { const reset = { city: "", type: "any", minPrice: "", maxPrice: "", capacity: 0, verified: false, amenities: [], sort: draft.sort, checkin: "", checkout: "" }; setDraft(reset); apply(reset); }}>{dict.filters.reset}</Button>
-              <Button className="flex-1" onClick={() => apply(draft)}>{dict.filters.apply}</Button>
+              <Button className="flex-1" loading={pending} onClick={() => apply(draft)}>{dict.filters.apply}</Button>
             </div>
           </PopoverContent>
         </Popover>

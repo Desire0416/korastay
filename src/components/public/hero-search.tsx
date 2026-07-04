@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Search, MapPin, CalendarDays, Users } from "lucide-react";
+import { Search, MapPin, CalendarDays, Users, Loader2 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Drawer, DrawerContent, DrawerTrigger, DrawerClose } from "@/components/ui/drawer";
 import { Calendar, type DateRange } from "@/components/ui/calendar";
@@ -28,6 +28,7 @@ export function HeroSearch({ destinations, variant = "hero", pill = false }: Her
   const [adults, setAdults] = React.useState(2);
   const [children, setChildren] = React.useState(0);
   const [type, setType] = React.useState("any");
+  const [pending, startTransition] = React.useTransition();
 
   const cityName = destinations.find((d) => d.slug === city)?.name;
   const guestsLabel = `${adults + children} ${adults + children > 1 ? dict.search.travelerPlural : dict.search.travelerSingular}`;
@@ -45,7 +46,9 @@ export function HeroSearch({ destinations, variant = "hero", pill = false }: Her
     if (range.end) params.set("checkout", range.end.toISOString().slice(0, 10));
     params.set("guests", String(adults + children));
     if (type !== "any") params.set("type", type);
-    router.push(`${localePath("/residences", dict.locale)}?${params.toString()}`);
+    startTransition(() => {
+      router.push(`${localePath("/residences", dict.locale)}?${params.toString()}`);
+    });
   }
 
   // ---- Desktop -------------------------------------------------------------
@@ -115,10 +118,11 @@ export function HeroSearch({ destinations, variant = "hero", pill = false }: Her
 
       <button
         onClick={submit}
+        disabled={pending}
         aria-label={dict.search.search}
-        className="ml-1 flex shrink-0 items-center gap-2 rounded-full bg-brand-500 px-6 font-semibold text-white shadow-soft transition-colors hover:bg-brand-600"
+        className="ml-1 flex shrink-0 items-center gap-2 rounded-full bg-brand-500 px-6 font-semibold text-white shadow-soft transition-colors hover:bg-brand-600 disabled:opacity-70"
       >
-        <Search className="h-5 w-5" />
+        {pending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Search className="h-5 w-5" />}
         <span className="hidden lg:inline">{dict.search.search}</span>
       </button>
     </div>

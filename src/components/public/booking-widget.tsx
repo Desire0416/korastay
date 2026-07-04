@@ -31,6 +31,7 @@ export function BookingWidget(props: BookingWidgetProps) {
   const [adults, setAdults] = React.useState(2);
   const [children, setChildren] = React.useState(0);
   const [cleaning, setCleaning] = React.useState(false);
+  const [pending, startTransition] = React.useTransition();
 
   const hasRange = range.start && range.end;
   const price = hasRange
@@ -70,7 +71,9 @@ export function BookingWidget(props: BookingWidgetProps) {
       params.set("proposedAmount", String(proposedAmount));
       params.set("mode", "negotiate");
     }
-    router.push(`${localePath(`/residences/${props.slug}/reserver`, dict.locale)}?${params.toString()}`);
+    startTransition(() => {
+      router.push(`${localePath(`/residences/${props.slug}/reserver`, dict.locale)}?${params.toString()}`);
+    });
   }
 
   const cleaningToggle = props.cleaningFee > 0 && (
@@ -230,6 +233,7 @@ export function BookingWidget(props: BookingWidgetProps) {
 
         <Button
           onClick={reserve}
+          loading={pending}
           disabled={!hasRange || (isNegotiationMode && proposedAmount < 1)}
           size="lg"
           className="mt-4 w-full"

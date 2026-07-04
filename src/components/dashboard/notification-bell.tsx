@@ -61,8 +61,8 @@ export function NotificationBell({ initialUnread, allHref }: { initialUnread: nu
   async function markAll() {
     setItems((p) => p.map((n) => ({ ...n, read: true })));
     setUnread(0);
+    // Etat local optimiste : pas de router.refresh() (evite un re-render serveur inutile).
     await fetch("/api/notifications", { method: "POST", body: JSON.stringify({}) }).catch(() => {});
-    router.refresh();
   }
 
   async function onItem(n: Notif) {
@@ -71,8 +71,8 @@ export function NotificationBell({ initialUnread, allHref }: { initialUnread: nu
       setUnread((u) => Math.max(0, u - 1));
       await fetch("/api/notifications", { method: "POST", body: JSON.stringify({ id: n.id }) }).catch(() => {});
     }
+    // La navigation (router.push) rafraichit deja la cible ; pas de refresh redondant.
     if (n.url) router.push(n.url);
-    router.refresh();
   }
 
   return (

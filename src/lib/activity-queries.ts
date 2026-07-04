@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { prisma } from "./prisma";
 import type { Prisma } from "@prisma/client";
 
@@ -38,14 +39,18 @@ export async function getActivityBySlug(slug: string) {
   });
 }
 
-export async function getFeaturedActivities(limit = 6) {
-  return prisma.activity.findMany({
-    where: { status: "PUBLISHED" },
-    select: activityCardSelect,
-    orderBy: [{ ratingAverage: "desc" }, { ratingCount: "desc" }],
-    take: limit,
-  });
-}
+export const getFeaturedActivities = unstable_cache(
+  async (limit = 6) => {
+    return prisma.activity.findMany({
+      where: { status: "PUBLISHED" },
+      select: activityCardSelect,
+      orderBy: [{ ratingAverage: "desc" }, { ratingCount: "desc" }],
+      take: limit,
+    });
+  },
+  ["featured-activities"],
+  { revalidate: 120, tags: ["activities"] },
+);
 
 /** Guides touristiques verifies d'une ville (pour l'accompagnement obligatoire).
  *  Repli sur tous les guides verifies si aucun dans la ville (ils peuvent se deplacer). */
