@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { ScrollText } from "lucide-react";
+import { ScrollText, ChevronDown } from "lucide-react";
 import { getContentPage } from "@/lib/queries";
 import { formatDate } from "@/lib/utils";
 
@@ -71,6 +71,32 @@ export async function ContentPageView({ slug }: { slug: string }) {
 
         {/* Corps du document */}
         <article className="min-w-0">
+          {/* Sommaire repliable (mobile uniquement) */}
+          {toc.length > 1 && (
+            <details className="group mb-6 rounded-2xl border border-border bg-surface-soft/50 lg:hidden">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-3 text-sm font-bold text-foreground [&::-webkit-details-marker]:hidden">
+                <span className="flex items-center gap-1.5">
+                  <ScrollText className="h-4 w-4 text-brand-600" /> Sommaire
+                </span>
+                <ChevronDown className="h-4 w-4 text-muted transition-transform group-open:rotate-180" />
+              </summary>
+              <nav aria-label="Sommaire" className="border-t border-border p-2">
+                <ul className="space-y-0.5">
+                  {toc.map((s) => (
+                    <li key={s.id}>
+                      <a
+                        href={`#${s.id}`}
+                        className="block rounded-lg px-3 py-2 text-sm text-muted transition-colors hover:bg-surface hover:text-foreground"
+                      >
+                        {s.text}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            </details>
+          )}
+
           {isHtml ? (
             <div
               className="prose prose-sm sm:prose-base max-w-none scroll-mt-28 prose-headings:scroll-mt-28 prose-h2:mt-10 prose-h2:border-t prose-h2:border-border prose-h2:pt-8 prose-h2:text-xl sm:prose-h2:text-2xl prose-h2:first:mt-0 prose-h2:first:border-0 prose-h2:first:pt-0 prose-table:overflow-hidden prose-table:rounded-xl prose-table:border prose-table:border-border prose-th:px-4 prose-th:py-2.5 prose-td:px-4 prose-td:py-2.5 prose-li:marker:text-brand-400"
