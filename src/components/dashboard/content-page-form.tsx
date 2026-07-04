@@ -22,8 +22,8 @@ export function ContentPageForm({ id, title, body }: { id: string; title: string
       <Field label="Titre" htmlFor="title" required>
         <Input id="title" name="title" defaultValue={title} required />
       </Field>
-      <Field label="Contenu" htmlFor="body" required hint="Separez les paragraphes par une ligne vide.">
-        <Textarea id="body" name="body" defaultValue={body} rows={16} required />
+      <Field label="Contenu" htmlFor="body" required hint="HTML (titres <h2>, listes <ul>, tableaux <table>...) — rendu avec la mise en forme KoraStay. Ancien format texte encore accepté.">
+        <Textarea id="body" name="body" defaultValue={body} rows={20} required className="font-mono text-xs" />
       </Field>
       <Button type="submit" loading={pending}>Enregistrer</Button>
     </form>

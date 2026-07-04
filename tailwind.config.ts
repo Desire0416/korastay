@@ -1,5 +1,6 @@
 import type { Config } from "tailwindcss";
 import tailwindcssAnimate from "tailwindcss-animate";
+import typography from "@tailwindcss/typography";
 
 const config: Config = {
   darkMode: ["class"],
@@ -76,6 +77,32 @@ const config: Config = {
       fontSize: {
         "2xs": ["0.6875rem", { lineHeight: "1rem" }],
       },
+      // Typographie des pages legales (prose) aux couleurs KoraStay.
+      typography: ({ theme }: { theme: (path: string) => string }) => ({
+        DEFAULT: {
+          css: {
+            maxWidth: "none",
+            "--tw-prose-body": theme("colors.foreground"),
+            "--tw-prose-headings": theme("colors.brand.700"),
+            "--tw-prose-links": theme("colors.brand.600"),
+            "--tw-prose-bold": theme("colors.foreground"),
+            "--tw-prose-bullets": theme("colors.brand.400"),
+            "--tw-prose-counters": theme("colors.muted"),
+            "--tw-prose-hr": theme("colors.border"),
+            "--tw-prose-quotes": theme("colors.foreground"),
+            "--tw-prose-quote-borders": theme("colors.brand.200"),
+            "--tw-prose-captions": theme("colors.muted"),
+            "--tw-prose-th-borders": theme("colors.border"),
+            "--tw-prose-td-borders": theme("colors.border"),
+            h2: { fontFamily: theme("fontFamily.display"), letterSpacing: "-0.01em" },
+            h3: { fontFamily: theme("fontFamily.display") },
+            "h2 strong, h3 strong": { fontWeight: "inherit" },
+            a: { textUnderlineOffset: "2px" },
+            "thead th": { backgroundColor: theme("colors.surface-soft") },
+            table: { fontSize: "0.925em" },
+          },
+        },
+      }),
       maxWidth: {
         "8xl": "88rem",
       },
@@ -114,7 +141,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [tailwindcssAnimate],
+  plugins: [tailwindcssAnimate, typography],
 };
 
 export default config;

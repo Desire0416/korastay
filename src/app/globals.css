@@ -120,6 +120,19 @@
   }
 }
 
+/* Marqueur "a completer par KoraStay" dans les pages legales.
+   Hors @layer (jamais purge : la classe n'apparait que dans du HTML dynamique)
+   et selecteur mark.x pour passer devant le style mark de @tailwindcss/typography. */
+mark.content-todo {
+  border-radius: 0.375rem;
+  background-color: #FDEACB;
+  padding: 0.125rem 0.375rem;
+  font-weight: 500;
+  color: #925214;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
 @keyframes accordion-down {
   from {
     height: 0;
