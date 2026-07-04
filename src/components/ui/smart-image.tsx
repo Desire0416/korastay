@@ -1,8 +1,21 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 // Active les images distantes (ex: Picsum/Cloudinary) si la variable est "true".
 // Par defaut : illustrations locales (instantanees, sans reseau, fiables).
 const USE_REMOTE = process.env.NEXT_PUBLIC_USE_REMOTE_IMAGES === "true";
+
+// Hotes distants autorises par next.config (images.remotePatterns). Toute autre
+// source distante retombe sur un <img> brut pour ne jamais planter a l'execution.
+const ALLOWED_REMOTE_HOSTS = ["images.unsplash.com", "res.cloudinary.com", "picsum.photos"];
+
+function isAllowlistedRemote(url: string): boolean {
+  try {
+    return ALLOWED_REMOTE_HOSTS.some((h) => new URL(url).hostname.endsWith(h));
+  } catch {
+    return false;
+  }
+}
 
 const PALETTES: { from: string; to: string; accent: string }[] = [
   { from: "#0F6B4F", to: "#0A4836", accent: "#F2A23A" },
@@ -79,7 +92,12 @@ interface SmartImageProps {
   className?: string;
   imgClassName?: string;
   priority?: boolean;
+  /** Indice de dimension pour next/image (srcset responsive). Cf. attribut sizes HTML. */
+  sizes?: string;
 }
+
+// Valeur par defaut : carte dans une grille (100vw mobile -> 50vw tablette -> 25vw desktop).
+const DEFAULT_SIZES = "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw";
 
 export function SmartImage({
   src,
@@ -88,6 +106,7 @@ export function SmartImage({
   className,
   imgClassName,
   priority,
+  sizes = DEFAULT_SIZES,
 }: SmartImageProps) {
   const key = seed ?? src ?? alt;
   const h = hash(key);
@@ -99,6 +118,8 @@ export function SmartImage({
   const isLocal = !!src && src.startsWith("/");
   const isBlob = !!src && src.includes(".blob.vercel-storage.com");
   const showImg = !!src && (isLocal || isBlob || USE_REMOTE);
+  // Optimisable par next/image seulement si l'hote est connu de next.config.
+  const canOptimize = !!src && (isLocal || isBlob || isAllowlistedRemote(src));
 
   return (
     <div className={cn("relative h-full w-full overflow-hidden bg-surface-soft", className)}>
@@ -118,7 +139,19 @@ export function SmartImage({
         <Scene variant={variant} p={p} />
       </svg>
 
-      {showImg && (
+      {showImg && canOptimize && (
+        <Image
+          src={src!}
+          alt={alt}
+          fill
+          sizes={sizes}
+          priority={priority}
+          className={cn("object-cover", imgClassName)}
+        />
+      )}
+      {showImg && !canOptimize && (
+        // Repli : hote distant non allowliste (demo). Pas d'optimisation mais ne plante pas.
+        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={src!}
           alt={alt}

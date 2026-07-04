@@ -2,16 +2,38 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { expireStaleOffers } from "@/server/actions/negotiation";
 
+export const dynamic = "force-dynamic";
+
+// Plafond par tache : evite qu'un seul passage ne traite un volume illimite
+// (et ne monopolise le pool de connexions au detriment des pages utilisateur).
+const BATCH = 200;
+
 /**
- * Taches planifiees KoraStay. A appeler periodiquement (ex: toutes les 15 min)
- * via un planificateur (Vercel Cron, GitHub Actions, cron-job.org...).
- *   GET /api/cron?secret=XXX   (XXX = process.env.CRON_SECRET si defini)
+ * Taches planifiees KoraStay. A appeler periodiquement (ex: toutes les 15 min).
+ * Auth : header "Authorization: Bearer <CRON_SECRET>" (envoye automatiquement
+ * par Vercel Cron quand CRON_SECRET est defini) ou ?secret=<CRON_SECRET>.
+ *
+ * Fail-closed : en production, refuse si CRON_SECRET n'est pas configure
+ * (sinon l'endpoint serait ouvert et ses boucles DB declenchables par n'importe qui).
  *
  * Idempotent : peut etre appele plusieurs fois sans effets indesirables.
  */
 export async function GET(req: NextRequest) {
   const secret = process.env.CRON_SECRET;
-  if (secret && req.nextUrl.searchParams.get("secret") !== secret) {
+  const provided =
+    req.nextUrl.searchParams.get("secret") ??
+    req.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ??
+    null;
+
+  if (!secret) {
+    if (process.env.NODE_ENV === "production") {
+      return NextResponse.json(
+        { error: "CRON_SECRET non configure - endpoint desactive." },
+        { status: 503 },
+      );
+    }
+    // Hors production : tolere l'absence de secret pour les tests locaux.
+  } else if (provided !== secret) {
     return NextResponse.json({ error: "Non autorise." }, { status: 401 });
   }
 
@@ -22,6 +44,7 @@ export async function GET(req: NextRequest) {
   const staleApproval = await prisma.reservation.findMany({
     where: { status: "PENDING_APPROVAL", expiresAt: { lt: now } },
     select: { id: true, travelerId: true, reference: true },
+    take: BATCH,
   });
   for (const r of staleApproval) {
     await prisma.$transaction([
@@ -43,6 +66,7 @@ export async function GET(req: NextRequest) {
       payments: { none: { status: { in: ["PENDING", "PAID"] } } },
     },
     select: { id: true, travelerId: true, reference: true },
+    take: BATCH,
   });
   for (const r of expired) {
     await prisma.$transaction([
@@ -65,6 +89,7 @@ export async function GET(req: NextRequest) {
   const toComplete = await prisma.reservation.findMany({
     where: { status: { in: ["CONFIRMED", "CHECKED_IN"] }, endDate: { lt: now } },
     select: { id: true },
+    take: BATCH,
   });
   for (const r of toComplete) {
     await prisma.reservation.update({ where: { id: r.id }, data: { status: "COMPLETED" } });
@@ -76,6 +101,7 @@ export async function GET(req: NextRequest) {
   const upcoming = await prisma.reservation.findMany({
     where: { status: "CONFIRMED", startDate: { gte: now, lte: soon } },
     select: { id: true, travelerId: true, reference: true },
+    take: BATCH,
   });
   for (const r of upcoming) {
     const already = await prisma.notification.count({ where: { userId: r.travelerId, type: "CHECKIN_REMINDER", url: `/account/bookings/${r.id}` } });
@@ -91,7 +117,7 @@ export async function GET(req: NextRequest) {
   const completed = await prisma.reservation.findMany({
     where: { status: "COMPLETED", review: null },
     select: { id: true, travelerId: true },
-    take: 200,
+    take: BATCH,
   });
   for (const r of completed) {
     const already = await prisma.notification.count({ where: { userId: r.travelerId, type: "REVIEW_INVITE", url: `/account/bookings/${r.id}` } });
