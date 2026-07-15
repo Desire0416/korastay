@@ -60,9 +60,6 @@
 - Cron fail-closed en prod : renvoie 503 si `CRON_SECRET` absent
 - `finalizeReservationPayment` JAMAIS dans un fichier `"use server"`
 
-## Compte de démo
-- Partenaire restaurant : `resto@korastay.com` / `Password123!` (VERIFIED, non onboardé)
-
 ## Commandes utiles
 ```bash
 npm run dev          # Serveur de développement
