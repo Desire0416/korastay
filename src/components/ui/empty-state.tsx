@@ -10,6 +10,7 @@ interface EmptyStateProps {
   className?: string;
 }
 
+// Etat vide v2 : cadre pointille sable, icone dans une arche, titre serif.
 export function EmptyState({
   icon: Icon,
   title,
@@ -20,20 +21,20 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center rounded-3xl border border-dashed border-border bg-surface-soft/40 px-6 py-14 text-center",
+        "relative flex flex-col items-center justify-center overflow-hidden rounded-[1.75rem] border border-dashed border-sand-400/70 bg-sand-50/70 px-6 py-14 text-center",
         className
       )}
     >
       {Icon && (
-        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-50 text-brand-500">
-          <Icon className="h-7 w-7" />
+        <div className="mb-5 flex h-16 w-14 items-center justify-center rounded-arch-sm bg-surface text-terracotta shadow-soft ring-1 ring-sand-300/60">
+          <Icon className="h-6 w-6" strokeWidth={1.6} />
         </div>
       )}
-      <h3 className="text-lg font-bold text-foreground">{title}</h3>
+      <h3 className="font-display text-xl text-foreground">{title}</h3>
       {description && (
-        <p className="mt-1.5 max-w-sm text-sm text-muted">{description}</p>
+        <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted">{description}</p>
       )}
-      {action && <div className="mt-5">{action}</div>}
+      {action && <div className="mt-6">{action}</div>}
     </div>
   );
 }

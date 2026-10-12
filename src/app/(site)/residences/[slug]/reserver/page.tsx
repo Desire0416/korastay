@@ -13,6 +13,7 @@ import { ReservationCheckout } from "@/components/public/reservation-checkout";
 import { NegotiationOfferForm } from "@/components/public/negotiation-offer-form";
 import { SmartImage } from "@/components/ui/smart-image";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
+import { Ornament } from "@/components/brand/motif";
 import { formatPrice, formatDate, nightsBetween } from "@/lib/utils";
 import { getI18n } from "@/lib/i18n.server";
 import { localePath } from "@/lib/i18n";
@@ -98,26 +99,27 @@ export default async function ReserverPage({
   });
   const methods = enabledPaymentMethods(settings).map((v) => ({
     value: v,
-    label: paymentMethodMeta[v]?.label ?? v,
-    hint: paymentMethodMeta[v]?.hint,
+    label: dict.enums.paymentMethod[v]?.label ?? paymentMethodMeta[v]?.label ?? v,
+    hint: dict.enums.paymentMethod[v]?.hint ?? paymentMethodMeta[v]?.hint,
   }));
+  const n = dict.negotiation;
 
   return (
-    <div className="container-page py-8">
-      <Link href={localePath(`/residences/${slug}`, locale)} className="mb-5 inline-flex items-center gap-1 text-sm font-semibold text-muted hover:text-foreground">
+    <div className="container-page py-8 md:py-12">
+      <Link href={localePath(`/residences/${slug}`, locale)} className="mb-6 inline-flex items-center gap-1.5 text-sm font-semibold text-muted hover:text-ink">
         <ChevronLeft className="h-4 w-4" /> {dict.checkout.backToResidence}
       </Link>
 
-      <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground">
-        {isNegotiateMode ? (
-          <span className="flex items-center gap-2">
-            <Handshake className="h-7 w-7 text-brand-600" />
-            Confirmer votre offre
-          </span>
-        ) : dict.checkout.title}
+      <p className="eyebrow flex items-center gap-3 text-[11px] text-terracotta">
+        <Ornament side="left" />
+        {dict.checkout.eyebrow}
+      </p>
+      <h1 className="mt-3 flex items-center gap-3 font-display text-[2.2rem] font-normal leading-tight tracking-[-0.02em] text-foreground md:text-[2.75rem]">
+        {isNegotiateMode && <Handshake className="h-8 w-8 text-terracotta" strokeWidth={1.6} />}
+        {isNegotiateMode ? n.confirmTitle : dict.checkout.title}
       </h1>
 
-      <div className="mt-7 grid grid-cols-1 gap-10 lg:grid-cols-[1fr_400px]">
+      <div className="mt-10 grid grid-cols-1 gap-12 lg:grid-cols-[1fr_420px]">
         {/* Formulaire */}
         <div className="order-2 lg:order-1">
           {isNegotiateMode ? (
@@ -167,15 +169,18 @@ export default async function ReserverPage({
 
         {/* Recapitulatif */}
         <aside className="order-1 lg:order-2">
-          <div className="rounded-3xl border border-border bg-surface p-5 shadow-soft lg:sticky lg:top-[calc(var(--header-h)+1.5rem)]">
+          <div className="relative overflow-hidden rounded-[1.75rem] border border-border bg-surface p-6 pt-7 shadow-card lg:sticky lg:top-[calc(var(--header-h)+1.5rem)]">
+            <div aria-hidden="true" className="absolute inset-x-0 top-0 h-2 overflow-hidden">
+              <div className="motif motif-kente text-terracotta/70" />
+            </div>
             <div className="flex gap-4">
-              <div className="h-20 w-24 shrink-0 overflow-hidden rounded-2xl">
+              <div className="h-24 w-20 shrink-0 overflow-hidden rounded-arch-sm">
                 <SmartImage src={residence.images[0]?.url} alt={residence.name} seed={`${residence.slug}-0`} />
               </div>
               <div className="min-w-0">
-                <p className="line-clamp-2 font-bold text-foreground">{residence.name}</p>
+                <p className="line-clamp-2 font-display text-lg leading-snug text-foreground">{residence.name}</p>
                 <p className="text-sm text-muted">{residence.city}</p>
-                {residence.isVerified && <VerifiedBadge size="sm" className="mt-1" />}
+                {residence.isVerified && <VerifiedBadge size="sm" label={dict.card.verified} className="mt-1.5" />}
               </div>
             </div>
 
@@ -194,11 +199,11 @@ export default async function ReserverPage({
               {isNegotiateMode && negotiatedPrice ? (
                 <>
                   <div className="flex justify-between text-muted">
-                    <span>Prix de référence ({price.nights} nuits)</span>
+                    <span>{n.referenceShort.replace("{n}", String(price.nights))}</span>
                     <span className="text-foreground">{formatPrice(price.subtotal)}</span>
                   </div>
-                  <div className="flex justify-between font-semibold text-brand-800">
-                    <span>Votre proposition</span>
+                  <div className="flex justify-between font-semibold text-terracotta-700">
+                    <span>{n.yourProposal}</span>
                     <span>{formatPrice(proposedAmount)}</span>
                   </div>
                   {negotiatedPrice.cleaningFee > 0 && (
@@ -211,12 +216,12 @@ export default async function ReserverPage({
                     <span>{dict.booking.serviceFee}</span>
                     <span className="text-foreground">{formatPrice(negotiatedPrice.serviceFee)}</span>
                   </div>
-                  <div className="flex justify-between border-t border-border pt-3 text-lg font-extrabold text-foreground">
-                    <span>Total estimé</span>
-                    <span>{formatPrice(negotiatedPrice.total)}</span>
+                  <div className="flex items-baseline justify-between border-t border-border pt-3 font-bold text-foreground">
+                    <span>{dict.booking.estimatedTotal}</span>
+                    <span className="font-display text-2xl font-normal">{formatPrice(negotiatedPrice.total)}</span>
                   </div>
-                  <p className="mt-1 rounded-2xl bg-brand-50/60 px-3 py-2.5 text-xs text-brand-800">
-                    Aucun paiement n&apos;est requis maintenant. Le propriétaire a 24h pour répondre.
+                  <p className="mt-1 rounded-xl bg-sand-50 px-3 py-2.5 text-xs leading-relaxed text-foreground/80 ring-1 ring-inset ring-sand-300/70">
+                    {n.noPaymentNow}
                   </p>
                 </>
               ) : (
@@ -247,11 +252,11 @@ export default async function ReserverPage({
                       <span>−{formatPrice(finance.referralDiscount)}</span>
                     </div>
                   )}
-                  <div className="flex justify-between border-t border-border pt-3 text-lg font-extrabold text-foreground">
+                  <div className="flex items-baseline justify-between border-t border-border pt-3 font-bold text-foreground">
                     <span>{dict.booking.total}</span>
-                    <span>{formatPrice(finance.total)}</span>
+                    <span className="font-display text-2xl font-normal">{formatPrice(finance.total)}</span>
                   </div>
-                  <div className="mt-1 space-y-1 rounded-2xl bg-brand-50/60 px-3 py-2.5 text-sm">
+                  <div className="mt-1 space-y-1 rounded-xl bg-brand-50 px-3.5 py-3 text-sm ring-1 ring-inset ring-brand-200/60">
                     <div className="flex justify-between font-semibold text-brand-800">
                       <span>{dict.checkout.payNow}{policy === "FULL" ? dict.checkout.payNowFull : dict.checkout.payNowDeposit}</span>
                       <span>{formatPrice(finance.depositDue)}</span>
@@ -274,8 +279,8 @@ export default async function ReserverPage({
             </div>
 
             <p className="mt-4 flex items-center gap-1.5 text-xs text-muted">
-              <ShieldCheck className="h-4 w-4 text-brand-500" />
-              {isNegotiateMode ? "Offre sécurisée — aucun débit avant accord" : dict.checkout.securePayment}
+              <ShieldCheck className="h-4 w-4 shrink-0 text-brand-500" />
+              {isNegotiateMode ? n.secureOffer : dict.checkout.securePayment}
             </p>
           </div>
         </aside>

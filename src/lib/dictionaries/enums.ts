@@ -8,6 +8,10 @@ export interface EnumsDict {
   quality: Record<string, string>;
   activityCategory: Record<string, string>;
   stayType: Record<string, string>;
+  sort: Record<string, string>;
+  amenity: Record<string, string>;
+  residenceType: Record<string, string>;
+  paymentMethod: Record<string, { label: string; hint?: string }>;
 }
 
 export const enumsFr: EnumsDict = {
@@ -20,7 +24,44 @@ export const enumsFr: EnumsDict = {
     AVENTURE: "Aventure",
     GASTRONOMIE: "Gastronomie",
   },
+  paymentMethod: {
+    WAVE: { label: "Wave", hint: "Sans frais" },
+    ORANGE_MONEY: { label: "Orange Money", hint: "Côte d'Ivoire" },
+    MTN_MOMO: { label: "MTN MoMo", hint: "Mobile Money" },
+    MOOV_MONEY: { label: "Moov Money", hint: "Mobile Money" },
+    CARD: { label: "Carte bancaire", hint: "Visa / Mastercard" },
+    BANK_TRANSFER: { label: "Virement bancaire", hint: "Validation manuelle" },
+    CASH: { label: "Espèces", hint: "À l'agence" },
+    MANUAL: { label: "Validation manuelle", hint: "Hors ligne" },
+    MOCK: { label: "Démo", hint: "Simulation" },
+  },
+  residenceType: { STUDIO: "Studio meublé", T2: "Appartement T2", T3: "Appartement T3", VILLA: "Villa / Maison" },
   stayType: { any: "Tout type", STUDIO: "Studio", T2: "Appartement T2", T3: "Appartement T3", VILLA: "Villa / Maison" },
+  sort: {
+    featured: "Pertinence",
+    price_asc: "Prix croissant",
+    price_desc: "Prix décroissant",
+    rating: "Mieux notés",
+    recent: "Plus récents",
+  },
+  amenity: {
+    wifi: "Wi-Fi",
+    climatisation: "Climatisation",
+    cuisine: "Cuisine équipée",
+    "eau-chaude": "Eau chaude",
+    parking: "Parking",
+    television: "Télévision",
+    "petit-dejeuner": "Petit-déjeuner",
+    menage: "Ménage",
+    balcon: "Balcon",
+    terrasse: "Terrasse",
+    securite: "Sécurité 24h/24",
+    "groupe-electrogene": "Groupe électrogène",
+    piscine: "Piscine",
+    "lave-linge": "Lave-linge",
+    bureau: "Espace bureau",
+    ascenseur: "Ascenseur",
+  },
 };
 
 export const enumsEn: EnumsDict = {
@@ -33,7 +74,44 @@ export const enumsEn: EnumsDict = {
     AVENTURE: "Adventure",
     GASTRONOMIE: "Food & drink",
   },
+  paymentMethod: {
+    WAVE: { label: "Wave", hint: "No fees" },
+    ORANGE_MONEY: { label: "Orange Money", hint: "Côte d'Ivoire" },
+    MTN_MOMO: { label: "MTN MoMo", hint: "Mobile Money" },
+    MOOV_MONEY: { label: "Moov Money", hint: "Mobile Money" },
+    CARD: { label: "Bank card", hint: "Visa / Mastercard" },
+    BANK_TRANSFER: { label: "Bank transfer", hint: "Manual validation" },
+    CASH: { label: "Cash", hint: "At the office" },
+    MANUAL: { label: "Manual validation", hint: "Offline" },
+    MOCK: { label: "Demo", hint: "Simulation" },
+  },
+  residenceType: { STUDIO: "Furnished studio", T2: "1-bedroom flat", T3: "2-bedroom flat", VILLA: "Villa / House" },
   stayType: { any: "Any type", STUDIO: "Studio", T2: "1-bedroom flat", T3: "2-bedroom flat", VILLA: "Villa / House" },
+  sort: {
+    featured: "Relevance",
+    price_asc: "Price: low to high",
+    price_desc: "Price: high to low",
+    rating: "Top rated",
+    recent: "Newest",
+  },
+  amenity: {
+    wifi: "Wi-Fi",
+    climatisation: "Air conditioning",
+    cuisine: "Equipped kitchen",
+    "eau-chaude": "Hot water",
+    parking: "Parking",
+    television: "TV",
+    "petit-dejeuner": "Breakfast",
+    menage: "Cleaning",
+    balcon: "Balcony",
+    terrasse: "Terrace",
+    securite: "24/7 security",
+    "groupe-electrogene": "Backup generator",
+    piscine: "Swimming pool",
+    "lave-linge": "Washing machine",
+    bureau: "Workspace",
+    ascenseur: "Lift",
+  },
 };
 
 /** Libelle d'un enum dans la locale courante, avec repli sur la valeur brute. */

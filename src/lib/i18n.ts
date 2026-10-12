@@ -7,6 +7,7 @@
 
 import { type HomeDict, homeFr, homeEn } from "./dictionaries/home";
 import { type EnumsDict, enumsFr, enumsEn } from "./dictionaries/enums";
+import { type NegotiationDict, negotiationFr, negotiationEn } from "./dictionaries/negotiation";
 
 export type Locale = "fr" | "en";
 export const LOCALES: Locale[] = ["fr", "en"];
@@ -18,6 +19,7 @@ export interface Dictionary {
   locale: Locale;
   home: HomeDict;
   enums: EnumsDict;
+  negotiation: NegotiationDict;
   header: {
     becomeHost: string;
     login: string;
@@ -91,6 +93,11 @@ export interface Dictionary {
   residences: {
     metaTitle: string;
     metaDescription: string;
+    eyebrow: string;
+    heroTitle: string;
+    heroAccent: string;
+    heroTitleIn: string;
+    heroDesc: string;
     titleIn: string; // gabarit avec {city}
     titleDefault: string;
     countSingular: string; // gabarit avec {n}
@@ -164,6 +171,15 @@ export interface Dictionary {
     noPackText: string; // {city}
     composePack: string;
     similarTitle: string; // {city}
+    photosCount: string; // {n}
+    mainPhoto: string;
+    checkInLabel: string;
+    checkOutLabel: string;
+    fromTime: string; // {t}
+    beforeTime: string; // {t}
+    hostLabel: string;
+    reviewsTitle: string;
+    outOf: string;
   };
   booking: {
     addCleaning: string;
@@ -189,6 +205,7 @@ export interface Dictionary {
   };
   checkout: {
     metaTitle: string;
+    eyebrow: string;
     backToResidence: string;
     title: string;
     referral: string;
@@ -283,6 +300,7 @@ const FR: Dictionary = {
   locale: "fr",
   home: homeFr,
   enums: enumsFr,
+  negotiation: negotiationFr,
   header: {
     becomeHost: "Devenir propriétaire",
     login: "Connexion",
@@ -361,6 +379,11 @@ const FR: Dictionary = {
   residences: {
     metaTitle: "Locations meublées vérifiées",
     metaDescription: "Parcourez les locations meublées vérifiées KoraStay en Côte d'Ivoire : studios, appartements et villas.",
+    eyebrow: "Location meublée",
+    heroTitle: "Nos logements",
+    heroAccent: "vérifiés.",
+    heroTitleIn: "Logements à",
+    heroDesc: "Studios, appartements et villas contrôlés par l'équipe KoraStay. Filtrez par ville, dates et équipements.",
     titleIn: "Locations meublées à {city}",
     titleDefault: "Locations meublées vérifiées",
     countSingular: "{n} logement disponible",
@@ -368,7 +391,7 @@ const FR: Dictionary = {
     inCotedivoire: " en Côte d'Ivoire",
     availableFromTo: "Disponibles du {from} au {to}",
     removeDates: "Retirer les dates",
-    emptyTitle: "Aucune résidence ne correspond",
+    emptyTitle: "Aucun logement ne correspond",
     emptyDesc: "Essayez d'élargir votre recherche ou de modifier vos filtres.",
     resetSearch: "Réinitialiser la recherche",
     prevPage: "Page précédente",
@@ -401,16 +424,16 @@ const FR: Dictionary = {
     viewListing: "Voir le logement →",
   },
   residenceDetail: {
-    notFound: "Résidence introuvable",
+    notFound: "Logement introuvable",
     back: "Retour",
-    breadcrumbResidences: "Résidences",
+    breadcrumbResidences: "Logements",
     reviewsWord: "avis",
     hostedBy: "Hébergé par {name}",
     guestsUnit: "voyageurs",
     bedroomsUnit: "chambres",
     bedsUnit: "lits",
-    bathroomsUnit: "sdb",
-    verifiedTitle: "Résidence vérifiée KoraStay",
+    bathroomsUnit: "salles de bain",
+    verifiedTitle: "Logement vérifié KoraStay",
     verifiedSubtitle: "Contrôlée par notre équipe qualité",
     qualityLevel: "Niveau {level}",
     aboutTitle: "À propos de ce logement",
@@ -433,7 +456,16 @@ const FR: Dictionary = {
     noPackTitle: "Aucun pack ne vous convient ?",
     noPackText: "Composez votre propre pack avec les activités et partenaires de {city}.",
     composePack: "Composer mon pack",
-    similarTitle: "Autres résidences à {city}",
+    similarTitle: "Autres logements à {city}",
+    photosCount: "Voir les {n} photos",
+    mainPhoto: "photo principale",
+    checkInLabel: "Arrivée",
+    checkOutLabel: "Départ",
+    fromTime: "à partir de {t}",
+    beforeTime: "avant {t}",
+    hostLabel: "Votre hôte",
+    reviewsTitle: "Avis des voyageurs",
+    outOf: "sur 5",
   },
   booking: {
     addCleaning: "Ajouter le ménage",
@@ -458,7 +490,8 @@ const FR: Dictionary = {
   },
   checkout: {
     metaTitle: "Finaliser la réservation",
-    backToResidence: "Retour à la résidence",
+    eyebrow: "Réservation",
+    backToResidence: "Retour au logement",
     title: "Finaliser votre réservation",
     referral: "Parrainage (−5%) 🎁",
     payNow: "À payer maintenant",
@@ -522,6 +555,7 @@ const EN: Dictionary = {
   locale: "en",
   home: homeEn,
   enums: enumsEn,
+  negotiation: negotiationEn,
   header: {
     becomeHost: "Become a host",
     login: "Log in",
@@ -601,6 +635,11 @@ const EN: Dictionary = {
   residences: {
     metaTitle: "Verified furnished rentals",
     metaDescription: "Browse KoraStay's verified furnished rentals in Côte d'Ivoire: studios, apartments and villas.",
+    eyebrow: "Furnished rentals",
+    heroTitle: "Our",
+    heroAccent: "verified homes.",
+    heroTitleIn: "Homes in",
+    heroDesc: "Studios, flats and villas vetted by the KoraStay team. Filter by city, dates and amenities.",
     titleIn: "Furnished rentals in {city}",
     titleDefault: "Verified furnished rentals",
     countSingular: "{n} home available",
@@ -643,13 +682,13 @@ const EN: Dictionary = {
   residenceDetail: {
     notFound: "Listing not found",
     back: "Back",
-    breadcrumbResidences: "Stays",
+    breadcrumbResidences: "Homes",
     reviewsWord: "reviews",
     hostedBy: "Hosted by {name}",
     guestsUnit: "guests",
     bedroomsUnit: "bedrooms",
     bedsUnit: "beds",
-    bathroomsUnit: "baths",
+    bathroomsUnit: "bathrooms",
     verifiedTitle: "KoraStay verified home",
     verifiedSubtitle: "Checked by our quality team",
     qualityLevel: "{level} level",
@@ -674,6 +713,15 @@ const EN: Dictionary = {
     noPackText: "Build your own pack with {city}'s activities and partners.",
     composePack: "Build my pack",
     similarTitle: "Other homes in {city}",
+    photosCount: "Show all {n} photos",
+    mainPhoto: "main photo",
+    checkInLabel: "Check-in",
+    checkOutLabel: "Check-out",
+    fromTime: "from {t}",
+    beforeTime: "before {t}",
+    hostLabel: "Your host",
+    reviewsTitle: "Guest reviews",
+    outOf: "out of 5",
   },
   booking: {
     addCleaning: "Add cleaning",
@@ -698,6 +746,7 @@ const EN: Dictionary = {
   },
   checkout: {
     metaTitle: "Complete your booking",
+    eyebrow: "Booking",
     backToResidence: "Back to the listing",
     title: "Complete your booking",
     referral: "Referral (−5%) 🎁",

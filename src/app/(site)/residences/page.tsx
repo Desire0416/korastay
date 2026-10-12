@@ -7,6 +7,7 @@ import { ResidenceCard } from "@/components/public/residence-card";
 import { MobileResidenceCard } from "@/components/public/mobile/mobile-cards";
 import { ResidenceFilters } from "@/components/public/residence-filters";
 import { ResidencesMap } from "@/components/public/residences-map";
+import { PageHero } from "@/components/public/page-hero";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { cn, formatDate } from "@/lib/utils";
@@ -105,105 +106,152 @@ export default async function ResidencesPage({
     return qs ? `${localePath("/residences", locale)}?${qs}` : localePath("/residences", locale);
   })();
 
+  // Puces de ville : conserve les autres filtres, remplace la ville.
+  function cityHref(slug?: string) {
+    const params = new URLSearchParams();
+    Object.entries(sp).forEach(([k, v]) => {
+      const value = str(v);
+      if (value && k !== "page" && k !== "city") params.set(k, value);
+    });
+    if (slug) params.set("city", slug);
+    const qs = params.toString();
+    return qs ? `${localePath("/residences", locale)}?${qs}` : localePath("/residences", locale);
+  }
+
+  const countLabel =
+    (total > 1 ? dict.residences.countPlural : dict.residences.countSingular).replace("{n}", String(total)) +
+    (cityName ? "" : dict.residences.inCotedivoire);
+
   return (
-    <div className="container-page py-5 md:py-8">
-      <div className="mb-4 md:mb-6">
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
-          {cityName ? dict.residences.titleIn.replace("{city}", cityName) : dict.residences.titleDefault}
-        </h1>
-        <p className="mt-1 text-sm text-muted md:text-base">
-          {(total > 1 ? dict.residences.countPlural : dict.residences.countSingular).replace("{n}", String(total))}
-          {cityName ? "" : dict.residences.inCotedivoire}
-        </p>
-        {filters.checkin && filters.checkout && (
-          <span className="mt-2 inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-sm font-medium text-brand-700">
-            <CalendarDays className="h-3.5 w-3.5" />
-            {dict.residences.availableFromTo.replace("{from}", formatDate(filters.checkin)).replace("{to}", formatDate(filters.checkout))}
-            <Link href={withoutDatesHref} className="-mr-1 rounded-full p-0.5 text-brand-600 hover:bg-brand-100" aria-label={dict.residences.removeDates}>
-              <X className="h-3.5 w-3.5" />
-            </Link>
-          </span>
-        )}
-      </div>
-
-      <div className="sticky top-[var(--header-h)] z-30 -mx-5 mb-7 border-y border-border bg-background/90 px-5 py-3 backdrop-blur md:mx-0 md:rounded-2xl md:border md:px-4">
-        <Suspense fallback={<div className="h-9" />}>
-          <ResidenceFilters
-            destinations={destinations.map((d) => ({ name: d.name, slug: d.slug }))}
-            total={total}
-          />
-        </Suspense>
-      </div>
-
-      <ResidencesMap residences={mapData} />
-
-      {items.length === 0 ? (
-        <EmptyState
-          icon={SearchX}
-          title={dict.residences.emptyTitle}
-          description={dict.residences.emptyDesc}
-          action={
-            <Button asChild>
-              <Link href={localePath("/residences", locale)}>{dict.residences.resetSearch}</Link>
-            </Button>
-          }
-        />
-      ) : (
-        <>
-          {/* Mobile : grille compacte 2 colonnes (app) */}
-          <div className="grid grid-cols-2 gap-x-3 gap-y-5 md:hidden">
-            {items.map((r, i) => (
-              <MobileResidenceCard
-                key={r.id}
-                residence={r}
-                favorited={favorites.residences.has(r.id)}
-                priority={i < 4}
-              />
-            ))}
-          </div>
-          {/* Desktop : grille existante (inchangee) */}
-          <div className="hidden gap-x-5 gap-y-8 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {items.map((r, i) => (
-              <ResidenceCard
-                key={r.id}
-                residence={r}
-                favorited={favorites.residences.has(r.id)}
-                priority={i < 4}
-              />
-            ))}
-          </div>
-        </>
-      )}
-
-      {/* Pagination */}
-      {pageCount > 1 && (
-        <div className="mt-12 flex items-center justify-center gap-2">
-          <Button asChild variant="outline" size="icon" disabled={page <= 1}>
-            <Link href={pageHref(Math.max(1, page - 1))} aria-label={dict.residences.prevPage}>
-              <ChevronLeft className="h-4 w-4" />
-            </Link>
-          </Button>
-          {Array.from({ length: pageCount }).map((_, i) => (
+    <>
+      <PageHero
+        eyebrow={dict.residences.eyebrow}
+        title={cityName ? dict.residences.heroTitleIn : dict.residences.heroTitle}
+        accent={cityName ? `${cityName}.` : dict.residences.heroAccent}
+        description={
+          <>
+            <p>{dict.residences.heroDesc}</p>
+            <p className="mt-3 flex flex-wrap items-center gap-3">
+              <span className="font-semibold text-foreground">{countLabel}</span>
+              {filters.checkin && filters.checkout && (
+                <span className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-sm font-medium text-brand-700">
+                  <CalendarDays className="h-3.5 w-3.5" />
+                  {dict.residences.availableFromTo.replace("{from}", formatDate(filters.checkin)).replace("{to}", formatDate(filters.checkout))}
+                  <Link href={withoutDatesHref} className="-mr-1 rounded-full p-0.5 text-brand-600 hover:bg-brand-100" aria-label={dict.residences.removeDates}>
+                    <X className="h-3.5 w-3.5" />
+                  </Link>
+                </span>
+              )}
+            </p>
+          </>
+        }
+      >
+        {/* Villes */}
+        <div className="no-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5 md:mx-0 md:flex-wrap md:px-0">
+          <Link
+            href={cityHref()}
+            className={cn(
+              "shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition-colors",
+              !filters.city ? "border-ink bg-ink text-white" : "border-ink/15 bg-white/60 text-foreground hover:border-ink/40"
+            )}
+          >
+            {dict.search.allCities}
+          </Link>
+          {destinations.map((d) => (
             <Link
-              key={i}
-              href={pageHref(i + 1)}
+              key={d.slug}
+              href={cityHref(d.slug)}
               className={cn(
-                "flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold transition-colors",
-                page === i + 1
-                  ? "bg-brand-500 text-white"
-                  : "border border-border text-foreground hover:border-brand-300"
+                "shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition-colors",
+                filters.city === d.slug ? "border-ink bg-ink text-white" : "border-ink/15 bg-white/60 text-foreground hover:border-ink/40"
               )}
             >
-              {i + 1}
+              {d.name}
             </Link>
           ))}
-          <Button asChild variant="outline" size="icon" disabled={page >= pageCount}>
-            <Link href={pageHref(Math.min(pageCount, page + 1))} aria-label={dict.residences.nextPage}>
-              <ChevronRight className="h-4 w-4" />
-            </Link>
-          </Button>
         </div>
-      )}
-    </div>
+      </PageHero>
+
+      <div className="container-page pb-6">
+        <div className="sticky top-[var(--header-h)] z-30 -mx-5 mb-8 border-b border-border bg-background/90 px-5 py-3 backdrop-blur md:mx-0 md:-mt-6 md:rounded-full md:border md:bg-white/90 md:px-3 md:py-2 md:shadow-card">
+          <Suspense fallback={<div className="h-9" />}>
+            <ResidenceFilters
+              destinations={destinations.map((d) => ({ name: d.name, slug: d.slug }))}
+              total={total}
+            />
+          </Suspense>
+        </div>
+
+        <ResidencesMap residences={mapData} />
+
+        {items.length === 0 ? (
+          <EmptyState
+            icon={SearchX}
+            title={dict.residences.emptyTitle}
+            description={dict.residences.emptyDesc}
+            action={
+              <Button asChild>
+                <Link href={localePath("/residences", locale)}>{dict.residences.resetSearch}</Link>
+              </Button>
+            }
+          />
+        ) : (
+          <>
+            {/* Mobile : grille compacte 2 colonnes (app) */}
+            <div className="grid grid-cols-2 gap-x-3 gap-y-6 md:hidden">
+              {items.map((r, i) => (
+                <MobileResidenceCard
+                  key={r.id}
+                  residence={r}
+                  favorited={favorites.residences.has(r.id)}
+                  priority={i < 4}
+                />
+              ))}
+            </div>
+            <div className="hidden gap-x-6 gap-y-12 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {items.map((r, i) => (
+                <ResidenceCard
+                  key={r.id}
+                  residence={r}
+                  favorited={favorites.residences.has(r.id)}
+                  priority={i < 4}
+                />
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Pagination */}
+        {pageCount > 1 && (
+          <nav className="mt-16 flex items-center justify-center gap-2" aria-label="Pagination">
+            <Button asChild variant="outline" size="icon" disabled={page <= 1}>
+              <Link href={pageHref(Math.max(1, page - 1))} aria-label={dict.residences.prevPage}>
+                <ChevronLeft className="h-4 w-4" />
+              </Link>
+            </Button>
+            {Array.from({ length: pageCount }).map((_, i) => (
+              <Link
+                key={i}
+                href={pageHref(i + 1)}
+                aria-current={page === i + 1 ? "page" : undefined}
+                className={cn(
+                  "flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold transition-colors",
+                  page === i + 1
+                    ? "bg-ink text-white"
+                    : "border border-ink/15 text-foreground hover:border-ink/40"
+                )}
+              >
+                {i + 1}
+              </Link>
+            ))}
+            <Button asChild variant="outline" size="icon" disabled={page >= pageCount}>
+              <Link href={pageHref(Math.min(pageCount, page + 1))} aria-label={dict.residences.nextPage}>
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </nav>
+        )}
+      </div>
+    </>
   );
 }

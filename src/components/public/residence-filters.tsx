@@ -15,6 +15,7 @@ import { cn, formatPrice } from "@/lib/utils";
 import { STAY_TYPES, SORT_OPTIONS, AMENITIES } from "@/lib/constants";
 import { useI18n } from "@/components/i18n/provider";
 import { localePath } from "@/lib/i18n";
+import { enumLabel } from "@/lib/dictionaries/enums";
 
 interface ResidenceFiltersProps {
   destinations: { name: string; slug: string }[];
@@ -95,7 +96,7 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
     <div className="space-y-6">
       {/* Dates (disponibilite) */}
       <div>
-        <p className="mb-2 text-sm font-bold text-foreground">{dict.filters.stayDates}</p>
+        <p className="eyebrow mb-3 text-[10.5px] text-muted">{dict.filters.stayDates}</p>
         <div className="flex items-center gap-3">
           <label className="flex-1">
             <span className="mb-1 block text-2xs font-bold uppercase text-muted">{dict.filters.checkinLabel}</span>
@@ -103,7 +104,7 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
               type="date"
               value={draft.checkin}
               onChange={(e) => setDraft({ ...draft, checkin: e.target.value })}
-              className="h-11 w-full rounded-xl border border-border bg-surface px-3 text-sm focus-visible:border-brand-400 focus-visible:outline-none"
+              className="h-11 w-full rounded-xl border border-border bg-surface px-3 text-sm focus-visible:border-ink/40 focus-visible:outline-none"
             />
           </label>
           <label className="flex-1">
@@ -113,7 +114,7 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
               value={draft.checkout}
               min={draft.checkin || undefined}
               onChange={(e) => setDraft({ ...draft, checkout: e.target.value })}
-              className="h-11 w-full rounded-xl border border-border bg-surface px-3 text-sm focus-visible:border-brand-400 focus-visible:outline-none"
+              className="h-11 w-full rounded-xl border border-border bg-surface px-3 text-sm focus-visible:border-ink/40 focus-visible:outline-none"
             />
           </label>
         </div>
@@ -130,7 +131,7 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
 
       {/* Ville */}
       <div>
-        <p className="mb-2 text-sm font-bold text-foreground">{dict.filters.city}</p>
+        <p className="eyebrow mb-3 text-[10.5px] text-muted">{dict.filters.city}</p>
         <div className="flex flex-wrap gap-2">
           <Chip active={!draft.city} onClick={() => setDraft({ ...draft, city: "" })}>
             {dict.search.all}
@@ -145,11 +146,11 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
 
       {/* Type */}
       <div>
-        <p className="mb-2 text-sm font-bold text-foreground">{dict.filters.type}</p>
+        <p className="eyebrow mb-3 text-[10.5px] text-muted">{dict.filters.type}</p>
         <div className="flex flex-wrap gap-2">
           {STAY_TYPES.map((t) => (
             <Chip key={t.value} active={draft.type === t.value} onClick={() => setDraft({ ...draft, type: t.value })}>
-              {t.label}
+              {enumLabel(dict.enums.stayType, t.value)}
             </Chip>
           ))}
         </div>
@@ -157,18 +158,18 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
 
       {/* Prix */}
       <div>
-        <p className="mb-2 text-sm font-bold text-foreground">{dict.filters.pricePerNight}</p>
+        <p className="eyebrow mb-3 text-[10.5px] text-muted">{dict.filters.pricePerNight}</p>
         <div className="flex items-center gap-3">
           <input
             type="number" inputMode="numeric" placeholder={dict.filters.min} value={draft.minPrice}
             onChange={(e) => setDraft({ ...draft, minPrice: e.target.value })}
-            className="h-11 w-full rounded-xl border border-border bg-surface px-3 text-sm focus-visible:border-brand-400 focus-visible:outline-none"
+            className="h-11 w-full rounded-xl border border-border bg-surface px-3 text-sm focus-visible:border-ink/40 focus-visible:outline-none"
           />
           <span className="text-muted">-</span>
           <input
             type="number" inputMode="numeric" placeholder={dict.filters.max} value={draft.maxPrice}
             onChange={(e) => setDraft({ ...draft, maxPrice: e.target.value })}
-            className="h-11 w-full rounded-xl border border-border bg-surface px-3 text-sm focus-visible:border-brand-400 focus-visible:outline-none"
+            className="h-11 w-full rounded-xl border border-border bg-surface px-3 text-sm focus-visible:border-ink/40 focus-visible:outline-none"
           />
         </div>
       </div>
@@ -184,7 +185,7 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
         onClick={() => setDraft({ ...draft, verified: !draft.verified })}
         className="flex w-full items-center justify-between border-t border-border pt-4"
       >
-        <span className="text-sm font-bold text-foreground">{dict.filters.verifiedOnly}</span>
+        <span className="eyebrow text-[10.5px] text-muted">{dict.filters.verifiedOnly}</span>
         <span className={cn("relative h-6 w-11 rounded-full transition-colors", draft.verified ? "bg-brand-500" : "bg-border")}>
           <span className={cn("absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all", draft.verified ? "left-[22px]" : "left-0.5")} />
         </span>
@@ -192,7 +193,7 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
 
       {/* Equipements */}
       <div className="border-t border-border pt-4">
-        <p className="mb-2 text-sm font-bold text-foreground">{dict.filters.amenities}</p>
+        <p className="eyebrow mb-3 text-[10.5px] text-muted">{dict.filters.amenities}</p>
         <div className="grid grid-cols-2 gap-2">
           {AMENITIES.slice(0, 10).map((a) => (
             <button
@@ -202,14 +203,14 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
               className={cn(
                 "flex items-center gap-2 rounded-xl border px-3 py-2 text-left text-sm transition-colors",
                 draft.amenities.includes(a.slug)
-                  ? "border-brand-500 bg-brand-50 text-brand-700"
-                  : "border-border hover:border-brand-300"
+                  ? "border-ink bg-ink/[0.04] text-ink"
+                  : "border-border hover:border-ink/30"
               )}
             >
-              <span className={cn("flex h-4 w-4 items-center justify-center rounded border", draft.amenities.includes(a.slug) ? "border-brand-500 bg-brand-500 text-white" : "border-border")}>
+              <span className={cn("flex h-4 w-4 items-center justify-center rounded border", draft.amenities.includes(a.slug) ? "border-ink bg-ink text-white" : "border-border")}>
                 {draft.amenities.includes(a.slug) && <Check className="h-3 w-3" />}
               </span>
-              {a.name}
+              {enumLabel(dict.enums.amenity, a.slug)}
             </button>
           ))}
         </div>
@@ -226,14 +227,14 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
             <SlidersHorizontal className="h-4 w-4" />
             {dict.filters.filters}
             {activeCount > 0 && (
-              <span className="ml-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-500 px-1 text-2xs text-white">
+              <span className="ml-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-terracotta px-1 text-2xs text-white">
                 {activeCount}
               </span>
             )}
           </Button>
         </DrawerTrigger>
         <DrawerContent className="px-5 pb-6">
-          <DrawerTitle className="px-1 pt-4 text-xl font-bold">{dict.filters.filters}</DrawerTitle>
+          <DrawerTitle className="px-1 pt-4 font-display text-2xl font-normal">{dict.filters.filters}</DrawerTitle>
           <div className="my-4 max-h-[60dvh] overflow-y-auto px-1">{filterBody}</div>
           <div className="flex gap-3">
             <Button variant="ghost" className="flex-1" onClick={() => { const reset = { city: "", type: "any", minPrice: "", maxPrice: "", capacity: 0, verified: false, amenities: [], sort: draft.sort, checkin: "", checkout: "" }; setDraft(reset); apply(reset); }}>
@@ -253,7 +254,7 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
             <Button variant="outline" size="sm">
               <SlidersHorizontal className="h-4 w-4" />
               {dict.filters.filters}
-              {activeCount > 0 && <span className="ml-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-500 px-1 text-2xs text-white">{activeCount}</span>}
+              {activeCount > 0 && <span className="ml-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-terracotta px-1 text-2xs text-white">{activeCount}</span>}
             </Button>
           </PopoverTrigger>
           <PopoverContent align="start" className="max-h-[70vh] w-[26rem] overflow-y-auto">
@@ -267,7 +268,7 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
 
         {/* Toggle verifie rapide */}
         <Button
-          variant={initial.verified ? "soft" : "outline"}
+          variant={initial.verified ? "dark" : "outline"}
           size="sm"
           onClick={() => apply({ ...initial, verified: !initial.verified })}
         >
@@ -279,7 +280,7 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
       <Popover>
         <PopoverTrigger asChild>
           <Button variant="outline" size="sm">
-            {dict.filters.sortBy} {SORT_OPTIONS.find((s) => s.value === initial.sort)?.label}
+            {dict.filters.sortBy} {enumLabel(dict.enums.sort, initial.sort)}
           </Button>
         </PopoverTrigger>
         <PopoverContent align="end" className="w-56 p-2">
@@ -288,11 +289,11 @@ export function ResidenceFilters({ destinations, total }: ResidenceFiltersProps)
               key={s.value}
               onClick={() => apply({ ...initial, sort: s.value })}
               className={cn(
-                "flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm font-medium hover:bg-surface-soft",
-                initial.sort === s.value && "text-brand-700"
+                "flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm font-medium hover:bg-sand-50",
+                initial.sort === s.value && "text-terracotta"
               )}
             >
-              {s.label}
+              {enumLabel(dict.enums.sort, s.value)}
               {initial.sort === s.value && <Check className="h-4 w-4" />}
             </button>
           ))}
@@ -309,7 +310,7 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
       onClick={onClick}
       className={cn(
         "rounded-full border px-4 py-2 text-sm font-medium transition-colors",
-        active ? "border-brand-500 bg-brand-50 text-brand-700" : "border-border hover:border-brand-300"
+        active ? "border-ink bg-ink text-white" : "border-ink/15 hover:border-ink/40"
       )}
     >
       {children}

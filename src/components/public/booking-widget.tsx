@@ -77,13 +77,13 @@ export function BookingWidget(props: BookingWidgetProps) {
   }
 
   const cleaningToggle = props.cleaningFee > 0 && (
-    <label className="flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-border px-4 py-3 text-sm">
+    <label className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-ink/15 px-4 py-3 text-sm transition-colors hover:border-ink/35">
       <span className="flex items-center gap-2">
         <input
           type="checkbox"
           checked={cleaning}
           onChange={(e) => setCleaning(e.target.checked)}
-          className="h-5 w-5 rounded border-border text-brand-500 focus:ring-brand-400"
+          className="h-5 w-5 rounded border-ink/30 text-brand-500 focus:ring-brand-400"
         />
         <span className="font-medium text-foreground">{dict.booking.addCleaning}</span>
       </span>
@@ -121,7 +121,7 @@ export function BookingWidget(props: BookingWidgetProps) {
           <span>−{formatPrice(price.stayDiscount)}</span>
         </div>
       )}
-      <div className="flex justify-between border-t border-border pt-3 text-base font-bold text-foreground">
+      <div className="flex items-baseline justify-between border-t border-border pt-3.5 text-base font-bold text-foreground">
         <span>{dict.booking.total}</span>
         <span>{formatPrice(price.total)}</span>
       </div>
@@ -130,17 +130,17 @@ export function BookingWidget(props: BookingWidgetProps) {
 
   // Section négociation (2+ nuits)
   const negotiateSection = isNegotiationMode && (
-    <div className="space-y-3 rounded-2xl border border-brand-200 bg-brand-50/40 p-4">
+    <div className="space-y-3 rounded-[1.25rem] bg-sand-50 p-4 ring-1 ring-inset ring-sand-300/70">
       <div className="flex items-center gap-2">
-        <Handshake className="h-4 w-4 text-brand-600" />
-        <span className="text-sm font-bold text-brand-900">{dict.booking.negotiateTitle}</span>
+        <Handshake className="h-4 w-4 text-terracotta" />
+        <span className="font-display text-[17px] text-foreground">{dict.booking.negotiateTitle}</span>
       </div>
-      <p className="text-xs text-brand-800/80">{dict.booking.negotiateHint}</p>
+      <p className="text-xs leading-relaxed text-muted">{dict.booking.negotiateHint}</p>
       <div>
         <p className="mb-1 text-xs text-muted">
           {dict.booking.referencePrice} : {formatPrice(props.pricePerNight)} × {price.nights} {price.nights > 1 ? dict.booking.nightPlural : dict.booking.nightSingular} = {formatPrice(price.subtotal)}
         </p>
-        <div className="flex items-center gap-2 rounded-xl border border-brand-300 bg-white px-3 py-2">
+        <div className="flex items-center gap-2 rounded-xl border border-ink/20 bg-white px-3 py-2.5 focus-within:border-terracotta">
           <input
             type="number"
             min={1}
@@ -165,7 +165,7 @@ export function BookingWidget(props: BookingWidgetProps) {
             <span>{dict.booking.serviceFee}</span>
             <span className="text-foreground">{formatPrice(negotiatedPreview.serviceFee)}</span>
           </div>
-          <div className="flex justify-between border-t border-brand-200 pt-1.5 text-sm font-bold text-foreground">
+          <div className="flex justify-between border-t border-sand-300 pt-2 text-sm font-bold text-foreground">
             <span>{dict.booking.estimatedTotal}</span>
             <span>{formatPrice(negotiatedPreview.total)}</span>
           </div>
@@ -178,9 +178,9 @@ export function BookingWidget(props: BookingWidgetProps) {
   const guestPopover = (
     <Popover>
       <PopoverTrigger asChild>
-        <button className="flex w-full items-center justify-between rounded-2xl border border-border px-4 py-3 text-left text-sm">
+        <button className="flex w-full items-center justify-between rounded-xl border border-ink/15 px-4 py-3 text-left text-sm transition-colors hover:border-ink/35">
           <span>
-            <span className="block text-2xs font-bold uppercase text-muted">{dict.search.guests}</span>
+            <span className="eyebrow block text-[9.5px] text-muted">{dict.search.guests}</span>
             <span className="font-semibold text-foreground">{guestsLabel}</span>
           </span>
           <ChevronDown className="h-4 w-4 text-muted" />
@@ -197,10 +197,13 @@ export function BookingWidget(props: BookingWidgetProps) {
   return (
     <>
       {/* ===== Desktop : carte sticky ===== */}
-      <div className="hidden rounded-3xl border border-border bg-surface p-6 shadow-card lg:block">
+      <div className="relative hidden overflow-hidden rounded-[1.75rem] border border-border bg-surface p-7 pt-8 shadow-card lg:block">
+        <div aria-hidden="true" className="absolute inset-x-0 top-0 h-2 overflow-hidden">
+          <div className="motif motif-kente text-terracotta/70" />
+        </div>
         <div className="flex items-baseline justify-between">
           <p>
-            <span className="text-2xl font-extrabold text-foreground">{formatPrice(props.pricePerNight)}</span>
+            <span className="font-display text-[2rem] leading-none text-foreground">{formatPrice(props.pricePerNight)}</span>
             <span className="text-muted"> {dict.card.perNight}</span>
           </p>
           {props.ratingCount > 0 && (
@@ -212,12 +215,12 @@ export function BookingWidget(props: BookingWidgetProps) {
           )}
         </div>
 
-        <div className="mt-4 space-y-2.5">
+        <div className="mt-6 space-y-2.5">
           <Popover>
             <PopoverTrigger asChild>
-              <button className="flex w-full items-center justify-between rounded-2xl border border-border px-4 py-3 text-left text-sm">
+              <button className="flex w-full items-center justify-between rounded-xl border border-ink/15 px-4 py-3 text-left text-sm transition-colors hover:border-ink/35">
                 <span>
-                  <span className="block text-2xs font-bold uppercase text-muted">{dict.search.dates}</span>
+                  <span className="eyebrow block text-[9.5px] text-muted">{dict.search.dates}</span>
                   <span className={cn("font-semibold", hasRange ? "text-foreground" : "text-muted")}>{datesLabel}</span>
                 </span>
                 <ChevronDown className="h-4 w-4 text-muted" />
@@ -236,7 +239,7 @@ export function BookingWidget(props: BookingWidgetProps) {
           loading={pending}
           disabled={!hasRange || (isNegotiationMode && proposedAmount < 1)}
           size="lg"
-          className="mt-4 w-full"
+          className="mt-5 w-full"
         >
           {!hasRange
             ? dict.booking.selectDates
@@ -252,10 +255,10 @@ export function BookingWidget(props: BookingWidgetProps) {
       </div>
 
       {/* ===== Mobile : barre collante ===== */}
-      <div className="safe-bottom fixed inset-x-0 bottom-[var(--bottom-nav-h)] z-30 border-t border-border bg-surface/95 px-4 py-3 backdrop-blur lg:hidden">
+      <div className="safe-bottom fixed inset-x-0 bottom-[var(--bottom-nav-h)] z-30 border-t border-border bg-background/95 px-4 py-3 backdrop-blur lg:hidden">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-base font-extrabold text-foreground">
+            <p className="font-display text-xl leading-tight text-foreground">
               {formatPrice(props.pricePerNight)}
               <span className="text-sm font-normal text-muted"> {dict.card.perNight}</span>
             </p>
@@ -275,19 +278,19 @@ export function BookingWidget(props: BookingWidgetProps) {
               <Button size="lg">{dict.booking.reserve}</Button>
             </DrawerTrigger>
             <DrawerContent className="px-5 pb-6">
-              <DrawerTitle className="px-1 pt-4 text-xl font-bold">{dict.booking.yourStay}</DrawerTitle>
+              <DrawerTitle className="px-1 pt-4 font-display text-2xl font-normal">{dict.booking.yourStay}</DrawerTitle>
               <div className="my-4 max-h-[64dvh] space-y-5 overflow-y-auto px-1">
-                <div className="rounded-3xl border border-border p-3">
+                <div className="rounded-[1.25rem] border border-border p-3">
                   <Calendar value={range} onChange={setRange} numMonths={1} disabledRanges={props.disabledRanges} />
                 </div>
-                <div className="divide-y divide-border rounded-3xl border border-border px-4">
+                <div className="divide-y divide-border rounded-[1.25rem] border border-border px-4">
                   <Stepper label={dict.search.adults} value={adults} onChange={setAdults} min={1} max={props.maxCapacity} />
                   <Stepper label={dict.search.children} hint={dict.search.childrenHint} value={children} onChange={setChildren} max={props.maxCapacity} />
                 </div>
                 {cleaningToggle}
               </div>
               {negotiateSection && <div className="px-1 pb-3">{negotiateSection}</div>}
-              {price && !isNegotiationMode && <div className="rounded-3xl bg-surface-soft p-4">{priceRows}</div>}
+              {price && !isNegotiationMode && <div className="rounded-[1.25rem] bg-sand-50 p-4 ring-1 ring-inset ring-sand-200">{priceRows}</div>}
               <DrawerClose asChild>
                 <Button
                   onClick={reserve}

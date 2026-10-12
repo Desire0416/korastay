@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { PAYMENT_METHOD_OPTIONS } from "@/lib/payments";
 import { useI18n } from "@/components/i18n/provider";
 import { localePath } from "@/lib/i18n";
+import { StepHeading } from "./step-heading";
 import type { ReservationResult } from "@/server/actions/reservations";
 
 type Action = (prev: ReservationResult, formData: FormData) => Promise<ReservationResult>;
@@ -58,7 +59,7 @@ export function ReservationCheckout({
   const [method, setMethod] = React.useState(methodOptions[0].value);
 
   return (
-    <form action={formAction} className="space-y-7">
+    <form action={formAction} className="space-y-10">
       {Object.entries(hidden).map(([k, v]) => (
         <input key={k} type="hidden" name={k} value={v} />
       ))}
@@ -66,7 +67,7 @@ export function ReservationCheckout({
 
       {/* Coordonnees */}
       <section>
-        <h2 className="mb-4 text-lg font-bold text-foreground">{dict.checkout.yourDetails}</h2>
+        <StepHeading step={1} title={dict.checkout.yourDetails} />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label={dict.checkout.fullName} htmlFor="guestName" required className="sm:col-span-2">
             <Input id="guestName" name="guestName" defaultValue={defaultName} required />
@@ -82,9 +83,9 @@ export function ReservationCheckout({
 
       {/* Validation & acompte */}
       <section>
-        <h2 className="mb-2 text-lg font-bold text-foreground">{dict.checkout.validationTitle}</h2>
-        <div className="mb-4 flex items-start gap-2 rounded-2xl bg-brand-50/70 px-4 py-3 text-sm text-brand-800">
-          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-brand-600" />
+        <StepHeading step={2} title={dict.checkout.validationTitle} />
+        <div className="mb-4 flex items-start gap-3 rounded-[1.25rem] bg-sand-50 px-4 py-4 text-sm leading-relaxed text-foreground/85 ring-1 ring-inset ring-sand-300/70">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-terracotta" />
           <span>
             {dict.checkout.validationP1}<strong>{validationLabel}</strong>{dict.checkout.validationP2}<strong>{depositLabel ? depositLabel : dict.checkout.depositFallback}</strong>{dict.checkout.validationP3}
             {balanceLabel ? dict.checkout.balanceLine.replace("{x}", balanceLabel) : ""}
@@ -92,7 +93,7 @@ export function ReservationCheckout({
           </span>
         </div>
         {koraStayNote && (
-          <p className="mb-4 flex items-start gap-2 rounded-2xl bg-emerald-50/70 px-4 py-3 text-xs text-emerald-800">
+          <p className="mb-4 flex items-start gap-2 rounded-xl bg-brand-50 px-4 py-3 text-xs leading-relaxed text-brand-800 ring-1 ring-inset ring-brand-200/60">
             <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-success" />
             {koraStayNote}
           </p>
@@ -100,7 +101,7 @@ export function ReservationCheckout({
         {isMock && (
           <p className="mb-4 text-xs text-muted">{dict.checkout.demoMode}</p>
         )}
-        <p className="mb-3 text-sm font-semibold text-foreground">{dict.checkout.preferredMethod}</p>
+        <p className="eyebrow mb-3 text-[10.5px] text-muted">{dict.checkout.preferredMethod}</p>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {methodOptions.map((opt) => (
             <button
@@ -108,15 +109,15 @@ export function ReservationCheckout({
               type="button"
               onClick={() => setMethod(opt.value)}
               className={cn(
-                "flex items-center justify-between rounded-2xl border px-4 py-3 text-left transition-colors",
-                method === opt.value ? "border-brand-500 bg-brand-50" : "border-border hover:border-brand-300"
+                "flex items-center justify-between rounded-xl border px-4 py-3.5 text-left transition-all",
+                method === opt.value ? "border-ink bg-white shadow-soft ring-1 ring-ink" : "border-ink/15 bg-white hover:border-ink/35"
               )}
             >
               <span>
                 <span className="block font-semibold text-foreground">{opt.label}</span>
                 <span className="block text-xs text-muted">{opt.hint}</span>
               </span>
-              <span className={cn("flex h-5 w-5 items-center justify-center rounded-full border", method === opt.value ? "border-brand-500 bg-brand-500 text-white" : "border-border")}>
+              <span className={cn("flex h-5 w-5 items-center justify-center rounded-full border", method === opt.value ? "border-ink bg-ink text-white" : "border-ink/25")}>
                 {method === opt.value && <CheckCircle2 className="h-4 w-4" />}
               </span>
             </button>
@@ -125,18 +126,18 @@ export function ReservationCheckout({
       </section>
 
       {/* Conditions */}
-      <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border p-4">
-        <input type="checkbox" name="acceptTerms" value="1" required className="mt-0.5 h-5 w-5 rounded border-border text-brand-500 focus:ring-brand-400" />
-        <span className="text-sm text-foreground/90">
+      <label className="flex cursor-pointer items-start gap-3 rounded-[1.25rem] border border-border bg-surface p-4">
+        <input type="checkbox" name="acceptTerms" value="1" required className="mt-0.5 h-5 w-5 rounded border-ink/30 text-brand-500 focus:ring-brand-400" />
+        <span className="text-sm leading-relaxed text-foreground/90">
           {dict.checkout.acceptPrefix}
-          <a href={localePath("/conditions-generales", dict.locale)} target="_blank" className="font-semibold text-brand-600 underline">{dict.checkout.termsLink}</a>
+          <a href={localePath("/conditions-generales", dict.locale)} target="_blank" className="font-semibold text-terracotta underline underline-offset-2">{dict.checkout.termsLink}</a>
           {dict.checkout.and}
-          <a href={localePath("/politique-annulation", dict.locale)} target="_blank" className="font-semibold text-brand-600 underline">{dict.checkout.cancellationLink}</a>.
+          <a href={localePath("/politique-annulation", dict.locale)} target="_blank" className="font-semibold text-terracotta underline underline-offset-2">{dict.checkout.cancellationLink}</a>.
         </span>
       </label>
 
       {state.error && (
-        <div className="flex items-center gap-2 rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-danger">
+        <div role="alert" className="flex items-center gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-danger ring-1 ring-inset ring-red-200/70">
           <AlertCircle className="h-4 w-4" />
           {state.error}
         </div>

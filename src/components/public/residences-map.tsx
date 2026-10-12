@@ -31,17 +31,17 @@ export function ResidencesMap({ residences }: { residences: MapResidence[] }) {
       <button
         type="button"
         onClick={() => setShow((s) => !s)}
-        className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-sm font-semibold text-foreground shadow-soft transition-colors hover:border-brand-300"
+        className="inline-flex items-center gap-2 rounded-full border border-ink/15 bg-surface px-4 py-2 text-sm font-semibold text-foreground shadow-soft transition-colors hover:border-ink/40"
         aria-expanded={show}
       >
         {show ? (
           <><X className="h-4 w-4" /> {dict.map.hide}</>
         ) : (
-          <><MapPinned className="h-4 w-4 text-brand-600" /> {dict.map.show} ({residences.length})</>
+          <><MapPinned className="h-4 w-4 text-terracotta" /> {dict.map.show} ({residences.length})</>
         )}
       </button>
       {show && (
-        <div className="mt-3 h-[60vh] overflow-hidden rounded-3xl border border-border shadow-soft">
+        <div className="mt-3 h-[60vh] overflow-hidden rounded-[1.75rem] border border-border shadow-card">
           <MapInner residences={residences} />
         </div>
       )}

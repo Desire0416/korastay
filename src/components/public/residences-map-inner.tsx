@@ -28,7 +28,7 @@ function priceIcon(price: number): L.DivIcon {
     className: "",
     iconSize: [0, 0],
     iconAnchor: [0, 0],
-    html: `<span style="display:inline-block;transform:translate(-50%,-100%);white-space:nowrap;background:#fff;color:#0B3B2E;font-weight:700;font-size:12px;line-height:1;padding:6px 10px;border-radius:9999px;box-shadow:0 2px 6px rgba(0,0,0,.25);border:1.5px solid #0F8A5F;">${formatPrice(price)}</span>`,
+    html: `<span style="display:inline-block;transform:translate(-50%,-100%);white-space:nowrap;background:#fff;color:#12343B;font-weight:700;font-size:12px;line-height:1;padding:7px 11px;border-radius:9999px;box-shadow:0 4px 12px -2px rgba(18,52,59,.35);border:1.5px solid #B9562F;">${formatPrice(price)}</span>`,
   });
 }
 
@@ -65,9 +65,9 @@ export default function ResidencesMapInner({ residences }: { residences: MapResi
           <Popup>
             <div style={{ minWidth: 150 }}>
               <strong style={{ fontSize: 14 }}>{r.name}</strong>
-              <div style={{ color: "#5F6B66", fontSize: 12 }}>{r.city}</div>
+              <div style={{ color: "#6A6259", fontSize: 12 }}>{r.city}</div>
               <div style={{ marginTop: 2, fontWeight: 700 }}>{formatPrice(r.pricePerNight)} {dict.card.perNight}</div>
-              <Link href={localePath(`/residences/${r.slug}`, dict.locale)} style={{ color: "#0F8A5F", fontWeight: 600 }}>
+              <Link href={localePath(`/residences/${r.slug}`, dict.locale)} style={{ color: "#B9562F", fontWeight: 700 }}>
                 {dict.map.viewListing}
               </Link>
             </div>
