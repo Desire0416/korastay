@@ -62,11 +62,11 @@ export async function getMonthlyStats(monthsBack = 6) {
     select: { createdAt: true, totalAmount: true },
   });
 
-  const buckets: { label: string; count: number; revenue: number }[] = [];
+  const buckets: { label: string; month: number; count: number; revenue: number }[] = [];
   for (let i = 0; i < monthsBack; i++) {
     const d = new Date(start);
     d.setMonth(start.getMonth() + i);
-    buckets.push({ label: MONTHS_FR[d.getMonth()], count: 0, revenue: 0 });
+    buckets.push({ label: MONTHS_FR[d.getMonth()], month: d.getMonth(), count: 0, revenue: 0 });
   }
   for (const r of reservations) {
     const idx = (r.createdAt.getFullYear() - start.getFullYear()) * 12 + (r.createdAt.getMonth() - start.getMonth());

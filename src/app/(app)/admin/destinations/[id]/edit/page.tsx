@@ -5,22 +5,30 @@ import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { DestinationForm } from "@/components/dashboard/destination-form";
+import { card } from "@/components/dashboard/styles";
+import { getI18n } from "@/lib/i18n.server";
+import { localePath } from "@/lib/i18n";
+import type { Metadata } from "next";
 
-export const metadata = { title: "Modifier la destination - Admin" };
+export async function generateMetadata(): Promise<Metadata> {
+  const { dict } = await getI18n();
+  return { title: dict.dashAdmin.catalog.destination.editMeta };
+}
 
 export default async function EditDestinationPage({ params }: { params: Promise<{ id: string }> }) {
   await requireRole(["ADMIN", "SUPER_ADMIN"]);
   const { id } = await params;
-  const dest = await prisma.destination.findUnique({ where: { id } });
+  const [dest, { locale, dict }] = await Promise.all([prisma.destination.findUnique({ where: { id } }), getI18n()]);
   if (!dest) notFound();
+  const t = dict.dashAdmin.catalog.destination;
 
   return (
     <div className="mx-auto max-w-3xl">
-      <Link href="/admin/destinations" className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-muted hover:text-foreground">
-        <ChevronLeft className="h-4 w-4" /> Destinations
+      <Link href={localePath("/admin/destinations", locale)} className="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-muted hover:text-ink">
+        <ChevronLeft className="h-4 w-4" /> {t.back}
       </Link>
-      <PageHeader title="Modifier la destination" description={dest.name} />
-      <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
+      <PageHeader title={t.editTitle} description={dest.name} />
+      <div className={`${card} p-6 sm:p-8`}>
         <DestinationForm
           id={dest.id}
           defaults={{

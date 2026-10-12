@@ -5,24 +5,37 @@ import { prisma } from "@/lib/prisma";
 import { createResidence } from "@/server/actions/owner";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ResidenceForm } from "@/components/dashboard/residence-form";
+import { card } from "@/components/dashboard/styles";
+import { getI18n } from "@/lib/i18n.server";
+import { localePath } from "@/lib/i18n";
+import type { Metadata } from "next";
 
-export const metadata = { title: "Nouvelle résidence - Admin" };
+export async function generateMetadata(): Promise<Metadata> {
+  const { dict } = await getI18n();
+  return { title: dict.dashAdmin.catalog.residence.newMeta };
+}
 
 export default async function AdminNewResidencePage() {
   await requireRole(["ADMIN", "SUPER_ADMIN"]);
-  const [amenities, destinations, owners] = await Promise.all([
+  const [amenities, destinations, owners, { locale, dict }] = await Promise.all([
     prisma.amenity.findMany({ where: { isActive: true }, orderBy: { name: "asc" } }),
     prisma.destination.findMany({ where: { isActive: true }, select: { name: true }, orderBy: { name: "asc" } }),
-    prisma.user.findMany({ where: { role: { in: ["OWNER", "ADMIN", "SUPER_ADMIN"] } }, select: { id: true, firstName: true, lastName: true, email: true }, orderBy: { firstName: "asc" } }),
+    prisma.user.findMany({
+      where: { role: { in: ["OWNER", "ADMIN", "SUPER_ADMIN"] } },
+      select: { id: true, firstName: true, lastName: true, email: true },
+      orderBy: { firstName: "asc" },
+    }),
+    getI18n(),
   ]);
+  const t = dict.dashAdmin.catalog.residence;
 
   return (
     <div className="mx-auto max-w-3xl">
-      <Link href="/admin/residences" className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-muted hover:text-foreground">
-        <ChevronLeft className="h-4 w-4" /> Résidences
+      <Link href={localePath("/admin/residences", locale)} className="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-muted hover:text-ink">
+        <ChevronLeft className="h-4 w-4" /> {t.back}
       </Link>
-      <PageHeader title="Nouvelle résidence" description="Créez une résidence et attribuez-la a un propriétaire." />
-      <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
+      <PageHeader title={t.newTitle} description={t.newSubtitle} />
+      <div className={`${card} p-6 sm:p-8`}>
         <ResidenceForm
           action={createResidence}
           amenities={amenities}
@@ -30,7 +43,7 @@ export default async function AdminNewResidencePage() {
           scope="admin"
           defaultStatus="PUBLISHED"
           owners={owners.map((o) => ({ id: o.id, name: `${o.firstName} ${o.lastName} (${o.email})` }))}
-          submitLabel="Créer la résidence"
+          submitLabel={dict.dashOwner.newResidence.submit}
         />
       </div>
     </div>

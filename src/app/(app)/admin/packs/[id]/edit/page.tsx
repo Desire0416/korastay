@@ -1,20 +1,28 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft, ExternalLink } from "lucide-react";
+import { ChevronLeft, ExternalLink, Images } from "lucide-react";
 import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { PackEditor } from "@/components/dashboard/pack-editor";
 import { DeletePackButton } from "@/components/dashboard/delete-pack-button";
 import { PhotosManager } from "@/components/dashboard/photos-manager";
+import { Button } from "@/components/ui/button";
+import { card, cardTitle } from "@/components/dashboard/styles";
 import { addPackImage, deletePackImage, setPackCoverImage } from "@/server/actions/admin";
+import { getI18n } from "@/lib/i18n.server";
+import { localePath } from "@/lib/i18n";
+import type { Metadata } from "next";
 
-export const metadata = { title: "Modifier le pack" };
+export async function generateMetadata(): Promise<Metadata> {
+  const { dict } = await getI18n();
+  return { title: dict.dashAdmin.catalog.pack.editMeta };
+}
 
 export default async function EditPackPage({ params }: { params: Promise<{ id: string }> }) {
   await requireRole(["ADMIN", "SUPER_ADMIN"]);
   const { id } = await params;
-  const [pack, destinations] = await Promise.all([
+  const [pack, destinations, { locale, dict }] = await Promise.all([
     prisma.pack.findUnique({
       where: { id },
       include: {
@@ -24,36 +32,34 @@ export default async function EditPackPage({ params }: { params: Promise<{ id: s
       },
     }),
     prisma.destination.findMany({ where: { isActive: true }, select: { id: true, name: true }, orderBy: { name: "asc" } }),
+    getI18n(),
   ]);
   if (!pack) notFound();
+  const t = dict.dashAdmin.catalog.pack;
 
   return (
     <div className="mx-auto max-w-3xl">
-      <Link href="/admin/packs" className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-muted hover:text-foreground">
-        <ChevronLeft className="h-4 w-4" /> Packs
+      <Link href={localePath("/admin/packs", locale)} className="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-muted hover:text-ink">
+        <ChevronLeft className="h-4 w-4" /> {t.backPacks}
       </Link>
       <PageHeader
-        title="Modifier le pack"
+        title={t.editTitle}
         description={pack.name}
         actions={
-          <div className="flex gap-2">
-            <Link href={`/packs/${pack.slug}`} target="_blank" className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-4 py-2 text-sm font-semibold text-foreground hover:bg-surface-soft">
-              <ExternalLink className="h-4 w-4" /> Voir
-            </Link>
+          <>
+            <Button asChild variant="outline" size="sm">
+              <Link href={localePath(`/packs/${pack.slug}`, locale)} target="_blank"><ExternalLink className="h-4 w-4" /> {t.view}</Link>
+            </Button>
             <DeletePackButton id={pack.id} />
-          </div>
+          </>
         }
       />
-      <section className="mb-6 rounded-3xl border border-border bg-surface p-5 shadow-soft">
-        <h2 className="mb-1 font-bold text-foreground">Photos du pack</h2>
-        <p className="mb-4 text-sm text-muted">Importez des photos (la première sert de couverture).</p>
-        <PhotosManager
-          entityId={pack.id}
-          images={pack.images}
-          onAdd={addPackImage}
-          onDelete={deletePackImage}
-          onSetCover={setPackCoverImage}
-        />
+      <section className={`${card} mb-6 p-5 sm:p-6`}>
+        <h2 className={`${cardTitle} mb-1`}>
+          <Images className="h-5 w-5 text-terracotta" strokeWidth={1.7} /> {t.photosTitle}
+        </h2>
+        <p className="mb-5 text-sm text-muted">{t.photosText}</p>
+        <PhotosManager entityId={pack.id} images={pack.images} onAdd={addPackImage} onDelete={deletePackImage} onSetCover={setPackCoverImage} />
       </section>
 
       <PackEditor

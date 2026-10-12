@@ -8,19 +8,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Field } from "@/components/ui/field";
+import { NativeSelect } from "@/components/ui/native-select";
 import { recordManualPayment, type PayAdminResult } from "@/server/actions/payments-admin";
 import { paymentMethodMeta } from "@/lib/enums";
+import { useI18n } from "@/components/i18n/provider";
 
 const METHODS = ["WAVE", "ORANGE_MONEY", "MTN_MOMO", "MOOV_MONEY", "CARD", "BANK_TRANSFER", "MANUAL"];
 
-export function ManualPaymentForm({
-  reservationId,
-  defaultAmount,
-}: {
-  reservationId: string;
-  defaultAmount: number;
-}) {
+export function ManualPaymentForm({ reservationId, defaultAmount }: { reservationId: string; defaultAmount: number }) {
   const router = useRouter();
+  const dict = useI18n();
+  const t = dict.dashAdmin.ops.manualPayment;
   const [state, action, pending] = useActionState<PayAdminResult, FormData>(recordManualPayment, { ok: false });
 
   useEffect(() => {
@@ -32,35 +30,35 @@ export function ManualPaymentForm({
   }, [state, router]);
 
   return (
-    <form action={action} className="space-y-3">
+    <form action={action} className="space-y-4">
       <input type="hidden" name="reservationId" value={reservationId} />
-      <div className="flex items-start gap-2 rounded-xl bg-gold-50 px-3 py-2 text-xs text-gold-800">
+      <div className="flex items-start gap-2 rounded-xl bg-warning-50 px-3.5 py-2.5 text-xs leading-relaxed text-warning-800 ring-1 ring-inset ring-warning-200/70">
         <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-        Une capture d&apos;écran ne vaut pas paiement : ne validez qu&apos;un encaissement reellement reçu.
+        {t.warning}
       </div>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <Field label="Montant reçu (F CFA)" htmlFor="amount" required>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Field label={t.amount} htmlFor="amount" required>
           <Input id="amount" name="amount" type="number" min={1} step="100" defaultValue={defaultAmount} required />
         </Field>
-        <Field label="Moyen de paiement" htmlFor="method">
-          <select id="method" name="method" defaultValue="MANUAL" className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm font-medium text-foreground focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100">
+        <Field label={t.method} htmlFor="method">
+          <NativeSelect id="method" name="method" defaultValue="MANUAL">
             {METHODS.map((m) => (
-              <option key={m} value={m}>{paymentMethodMeta[m]?.label ?? m}</option>
+              <option key={m} value={m}>{dict.enums.paymentMethod[m]?.label ?? paymentMethodMeta[m]?.label ?? m}</option>
             ))}
-          </select>
+          </NativeSelect>
         </Field>
-        <Field label="Référence transaction" htmlFor="reference">
-          <Input id="reference" name="reference" placeholder="Ex: WAVE-123456" />
+        <Field label={t.reference} htmlFor="reference">
+          <Input id="reference" name="reference" placeholder={t.referencePh} />
         </Field>
-        <Field label="Date du paiement" htmlFor="paidAt">
+        <Field label={t.paidAt} htmlFor="paidAt">
           <Input id="paidAt" name="paidAt" type="date" />
         </Field>
       </div>
-      <Field label="Commentaire admin" htmlFor="comment">
-        <Textarea id="comment" name="comment" rows={2} placeholder="Contexte, justificatif reçu..." />
+      <Field label={t.comment} htmlFor="comment">
+        <Textarea id="comment" name="comment" rows={2} placeholder={t.commentPh} />
       </Field>
       <Button type="submit" loading={pending} className="w-full">
-        <CheckCircle2 className="h-4 w-4" /> Valider le paiement
+        <CheckCircle2 className="h-4 w-4" /> {t.submit}
       </Button>
     </form>
   );

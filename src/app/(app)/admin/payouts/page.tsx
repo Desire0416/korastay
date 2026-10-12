@@ -1,23 +1,29 @@
 import Link from "next/link";
 import type { Prisma } from "@prisma/client";
-import { Banknote } from "lucide-react";
+import { Banknote, Hourglass, BadgeCheck } from "lucide-react";
 import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { releasePayout, blockPayout } from "@/server/actions/payments-admin";
 import { PageHeader } from "@/components/dashboard/page-header";
+import { KpiCard } from "@/components/dashboard/kpi-card";
 import { FilterBar } from "@/components/dashboard/filter-bar";
 import { AdminActions } from "@/components/dashboard/admin-actions";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import { table, card } from "@/components/dashboard/styles";
 import { payoutStatusMeta, toFilterOptions } from "@/lib/enums";
-import { formatPrice, formatDate } from "@/lib/utils";
+import { formatPrice } from "@/lib/utils";
+import { getI18n } from "@/lib/i18n.server";
+import { localePath } from "@/lib/i18n";
+import type { Metadata } from "next";
 
-export const metadata = { title: "Reversements - Admin" };
+export async function generateMetadata(): Promise<Metadata> {
+  const { dict } = await getI18n();
+  return { title: dict.dashAdmin.ops.payouts.metaTitle };
+}
 
 type SP = Record<string, string | string[] | undefined>;
 const str = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
-
-const TRIGGER_LABELS: Record<string, string> = { CHECK_IN: "Après arrivée", CHECK_OUT: "Après départ" };
 
 export default async function AdminPayoutsPage({ searchParams }: { searchParams: Promise<SP> }) {
   await requireRole(["ADMIN", "SUPER_ADMIN"]);
@@ -27,7 +33,7 @@ export default async function AdminPayoutsPage({ searchParams }: { searchParams:
   const where: Prisma.PayoutWhereInput = {};
   if (status) where.status = status;
 
-  const [payouts, scheduled, released] = await Promise.all([
+  const [payouts, scheduled, released, { locale, dict }] = await Promise.all([
     prisma.payout.findMany({
       where,
       include: {
@@ -39,7 +45,12 @@ export default async function AdminPayoutsPage({ searchParams }: { searchParams:
     }),
     prisma.payout.aggregate({ where: { status: "SCHEDULED" }, _sum: { amount: true } }),
     prisma.payout.aggregate({ where: { status: "RELEASED" }, _sum: { amount: true } }),
+    getI18n(),
   ]);
+  const t = dict.dashAdmin.ops.payouts;
+  const th = dict.dashAdmin.ops.table;
+  const r = dict.dashAdmin.ops.reservation;
+  const triggerLabel = (trigger: string) => (trigger === "CHECK_IN" ? r.afterCheckIn : r.afterCheckOut);
 
   function rowActions(p: (typeof payouts)[number]) {
     if (p.status !== "SCHEDULED") return null;
@@ -47,73 +58,84 @@ export default async function AdminPayoutsPage({ searchParams }: { searchParams:
     return (
       <AdminActions
         actions={[
-          ...(blocked ? [] : [{ label: "Libérer", icon: "Banknote", fn: releasePayout.bind(null, p.id), variant: "primary" as const, confirm: `Libérer ${formatPrice(p.amount)} ?` }]),
-          { label: "Bloquer", fn: blockPayout.bind(null, p.id), variant: "ghost" as const },
+          ...(blocked
+            ? []
+            : [{ label: t.release, icon: "Banknote", fn: releasePayout.bind(null, p.id), variant: "primary" as const, confirm: t.confirmRelease.replace("{amount}", formatPrice(p.amount)) }]),
+          { label: t.block, fn: blockPayout.bind(null, p.id), variant: "ghost" as const },
         ]}
       />
     );
   }
 
+  const ownerName = (p: (typeof payouts)[number]) => (
+    <>
+      {p.owner.firstName} {p.owner.lastName}
+      {p.owner.payoutTier === "RELIABLE" && <BadgeCheck className="ml-1 inline h-3.5 w-3.5 text-brand-600" aria-label={t.reliable} />}
+    </>
+  );
+
   return (
     <div className="mx-auto max-w-5xl">
-      <PageHeader title="Reversements propriétaires" description="Versements echelonnes selon la fiabilite de l'hote (70/30 ou 100%)." />
+      <PageHeader title={t.title} description={t.subtitle} />
 
-      <div className="mb-5 grid grid-cols-2 gap-3">
-        <div className="rounded-2xl border border-border bg-surface p-4 shadow-soft">
-          <p className="text-xs uppercase text-muted">A libérer</p>
-          <p className="mt-1 text-xl font-extrabold text-gold-700">{formatPrice(scheduled._sum.amount ?? 0)}</p>
-        </div>
-        <div className="rounded-2xl border border-border bg-surface p-4 shadow-soft">
-          <p className="text-xs uppercase text-muted">Déjà verse</p>
-          <p className="mt-1 text-xl font-extrabold text-success">{formatPrice(released._sum.amount ?? 0)}</p>
-        </div>
+      <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4">
+        <KpiCard label={t.toRelease} value={formatPrice(scheduled._sum.amount ?? 0)} icon={Hourglass} tone="gold" href="/admin/payouts?status=SCHEDULED" />
+        <KpiCard label={t.released} value={formatPrice(released._sum.amount ?? 0)} icon={Banknote} tone="brand" href="/admin/payouts?status=RELEASED" />
       </div>
 
-      <FilterBar fields={[{ type: "select", name: "status", label: "Tous les statuts", options: toFilterOptions(payoutStatusMeta) }]} />
+      <FilterBar fields={[{ type: "select", name: "status", label: t.allStatuses, options: toFilterOptions(payoutStatusMeta) }]} />
 
       {payouts.length === 0 ? (
-        <EmptyState icon={Banknote} title="Aucun reversement" description="Les reversements apparaissent ici après confirmation d'une réservation résidence." />
+        <EmptyState icon={Banknote} title={t.emptyTitle} description={t.emptyText} />
       ) : (
         <>
           {/* Mobile */}
           <div className="space-y-2.5 md:hidden">
             {payouts.map((p) => (
-              <div key={p.id} className="rounded-2xl border border-border bg-surface p-3.5 shadow-soft">
+              <div key={p.id} className={`${card} p-4`}>
                 <div className="flex items-center justify-between gap-2">
-                  <Link href={`/admin/reservations/${p.reservation.id}`} className="text-[13px] font-semibold text-brand-600">{p.reservation.reference}</Link>
+                  <Link href={localePath(`/admin/reservations/${p.reservation.id}`, locale)} className="text-[13px] font-semibold text-terracotta">
+                    {p.reservation.reference}
+                  </Link>
                   <StatusBadge status={p.status} map={payoutStatusMeta} size="sm" />
                 </div>
-                <div className="mt-1 flex items-center justify-between gap-2 text-[12px] text-muted">
-                  <span>{p.owner.firstName} {p.owner.lastName} · {TRIGGER_LABELS[p.trigger]} ({p.percentage}%)</span>
+                <div className="mt-1.5 flex items-center justify-between gap-2 text-[12.5px] text-muted">
+                  <span>
+                    {ownerName(p)} · {triggerLabel(p.trigger)} ({p.percentage} %)
+                  </span>
                   <span className="text-[14px] font-bold text-foreground">{formatPrice(p.amount)}</span>
                 </div>
-                <div className="mt-2">{rowActions(p)}</div>
+                <div className="mt-3">{rowActions(p)}</div>
               </div>
             ))}
           </div>
           {/* Desktop */}
-          <div className="hidden overflow-hidden rounded-3xl border border-border bg-surface shadow-soft md:block">
+          <div className={`${table.wrap} hidden md:block`}>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[720px] text-sm">
-                <thead className="border-b border-border bg-surface-soft/50 text-left text-xs uppercase text-muted">
+              <table className={`${table.table} min-w-[720px]`}>
+                <thead className={table.head}>
                   <tr>
-                    <th className="px-5 py-3 font-semibold">Réservation</th>
-                    <th className="px-5 py-3 font-semibold">Hôte</th>
-                    <th className="px-5 py-3 font-semibold">Declencheur</th>
-                    <th className="px-5 py-3 font-semibold">Statut</th>
-                    <th className="px-5 py-3 text-right font-semibold">Montant</th>
-                    <th className="px-5 py-3 text-right font-semibold">Action</th>
+                    <th className={table.th}>{th.booking}</th>
+                    <th className={table.th}>{th.host}</th>
+                    <th className={table.th}>{th.trigger}</th>
+                    <th className={table.th}>{th.status}</th>
+                    <th className={`${table.th} text-right`}>{th.amount}</th>
+                    <th className={`${table.th} text-right`}>{th.action}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border">
+                <tbody className={table.body}>
                   {payouts.map((p) => (
-                    <tr key={p.id} className="hover:bg-surface-soft/40">
-                      <td className="px-5 py-3"><Link href={`/admin/reservations/${p.reservation.id}`} className="font-semibold text-brand-600">{p.reservation.reference}</Link></td>
-                      <td className="px-5 py-3 text-foreground">{p.owner.firstName} {p.owner.lastName}{p.owner.payoutTier === "RELIABLE" ? " ✓" : ""}</td>
-                      <td className="px-5 py-3 text-muted">{TRIGGER_LABELS[p.trigger]} ({p.percentage}%)</td>
-                      <td className="px-5 py-3"><StatusBadge status={p.status} map={payoutStatusMeta} size="sm" /></td>
-                      <td className="px-5 py-3 text-right font-semibold text-foreground">{formatPrice(p.amount)}</td>
-                      <td className="px-5 py-3 text-right">{rowActions(p)}</td>
+                    <tr key={p.id} className={table.row}>
+                      <td className={table.td}>
+                        <Link href={localePath(`/admin/reservations/${p.reservation.id}`, locale)} className={table.link}>{p.reservation.reference}</Link>
+                      </td>
+                      <td className={`${table.td} text-foreground`}>{ownerName(p)}</td>
+                      <td className={`${table.td} text-muted`}>{triggerLabel(p.trigger)} ({p.percentage} %)</td>
+                      <td className={table.td}><StatusBadge status={p.status} map={payoutStatusMeta} size="sm" /></td>
+                      <td className={`${table.td} text-right font-semibold text-foreground`}>{formatPrice(p.amount)}</td>
+                      <td className={`${table.td} text-right`}>
+                        <div className="flex justify-end">{rowActions(p)}</div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

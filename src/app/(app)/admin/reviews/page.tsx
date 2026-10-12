@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { Star } from "lucide-react";
 import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { moderateReview } from "@/server/actions/admin";
@@ -8,11 +9,16 @@ import { AdminActions } from "@/components/dashboard/admin-actions";
 import { RatingStars } from "@/components/ui/rating-stars";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Star } from "lucide-react";
-import { formatDate, initials } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { card } from "@/components/dashboard/styles";
+import { formatDate, initials } from "@/lib/utils";
+import { getI18n } from "@/lib/i18n.server";
+import type { Metadata } from "next";
 
-export const metadata = { title: "Avis - Admin" };
+export async function generateMetadata(): Promise<Metadata> {
+  const { dict } = await getI18n();
+  return { title: dict.dashAdmin.catalog.reviews.metaTitle };
+}
 
 type SP = Record<string, string | string[] | undefined>;
 const str = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
@@ -36,55 +42,72 @@ export default async function AdminReviewsPage({ searchParams }: { searchParams:
     ];
   }
 
-  const reviews = await prisma.review.findMany({
-    where,
-    include: { author: { select: { firstName: true, lastName: true } }, residence: { select: { name: true } }, pack: { select: { name: true } } },
-    orderBy: { createdAt: "desc" },
-    take: 100,
-  });
+  const [reviews, { locale, dict }] = await Promise.all([
+    prisma.review.findMany({
+      where,
+      include: { author: { select: { firstName: true, lastName: true } }, residence: { select: { name: true } }, pack: { select: { name: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 100,
+    }),
+    getI18n(),
+  ]);
+  const t = dict.dashAdmin.catalog.reviews;
+  const statusLabel = (s: string) => (s === "PUBLISHED" ? t.published : s === "HIDDEN" ? t.hidden : t.deleted);
 
   return (
     <div className="mx-auto max-w-4xl">
-      <PageHeader title="Moderation des avis" description="Masquez ou supprimez les avis inappropries." />
+      <PageHeader title={t.title} description={t.subtitle} />
 
       <FilterBar
         fields={[
-          { type: "search", name: "q", placeholder: "Auteur, commentaire, résidence..." },
-          { type: "select", name: "status", label: "Tous les statuts", options: [{ value: "PUBLISHED", label: "Publié" }, { value: "HIDDEN", label: "Masque" }, { value: "DELETED", label: "Supprimé" }] },
-          { type: "select", name: "rating", label: "Toutes les notes", options: [5, 4, 3, 2, 1].map((n) => ({ value: String(n), label: `${n} etoile${n > 1 ? "s" : ""}` })) },
+          { type: "search", name: "q", placeholder: t.searchPlaceholder },
+          {
+            type: "select",
+            name: "status",
+            label: t.allStatuses,
+            options: [{ value: "PUBLISHED", label: t.published }, { value: "HIDDEN", label: t.hidden }, { value: "DELETED", label: t.deleted }],
+          },
+          {
+            type: "select",
+            name: "rating",
+            label: t.allRatings,
+            options: [5, 4, 3, 2, 1].map((n) => ({ value: String(n), label: (n > 1 ? t.stars : t.star).replace("{n}", String(n)) })),
+          },
         ]}
       />
 
       {reviews.length === 0 ? (
-        <EmptyState icon={Star} title="Aucun avis" />
+        <EmptyState icon={Star} title={t.emptyTitle} />
       ) : (
         <div className="space-y-3">
           {reviews.map((r) => (
-            <div key={r.id} className="rounded-3xl border border-border bg-surface p-5 shadow-soft">
-              <div className="flex items-center gap-3">
-                <Avatar><AvatarFallback>{initials(r.author.firstName, r.author.lastName)}</AvatarFallback></Avatar>
-                <div className="flex-1">
-                  <p className="font-bold text-foreground">{r.author.firstName} {r.author.lastName}</p>
-                  <p className="text-xs text-muted">{r.residence?.name ?? r.pack?.name} - {formatDate(r.createdAt)}</p>
+            <figure key={r.id} className={`${card} p-5 sm:p-6`}>
+              <figcaption className="flex flex-wrap items-center gap-3">
+                <Avatar>
+                  <AvatarFallback>{initials(r.author.firstName, r.author.lastName)}</AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                  <p className="font-display text-lg leading-tight text-foreground">{r.author.firstName} {r.author.lastName}</p>
+                  <p className="truncate text-xs text-muted">{r.residence?.name ?? r.pack?.name} · {formatDate(r.createdAt, locale)}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <RatingStars value={r.rating} showValue={false} size="sm" />
-                  <Badge tone={r.status === "PUBLISHED" ? "success" : r.status === "HIDDEN" ? "warning" : "danger"}>
-                    {r.status === "PUBLISHED" ? "Publié" : r.status === "HIDDEN" ? "Masque" : "Supprimé"}
-                  </Badge>
+                  <Badge tone={r.status === "PUBLISHED" ? "success" : r.status === "HIDDEN" ? "warning" : "danger"} size="sm">{statusLabel(r.status)}</Badge>
                 </div>
-              </div>
-              {r.comment && <p className="mt-3 text-sm text-foreground/90">{r.comment}</p>}
+              </figcaption>
+              {r.comment && <blockquote className="mt-3 text-[15px] leading-relaxed text-foreground/85">{r.comment}</blockquote>}
               <div className="mt-4">
                 <AdminActions
                   actions={[
-                    ...(r.status !== "PUBLISHED" ? [{ label: "Publier", fn: moderateReview.bind(null, r.id, "PUBLISHED"), variant: "soft" as const }] : []),
-                    ...(r.status !== "HIDDEN" ? [{ label: "Masquer", fn: moderateReview.bind(null, r.id, "HIDDEN"), variant: "outline" as const }] : []),
-                    ...(r.status !== "DELETED" ? [{ label: "Supprimer", fn: moderateReview.bind(null, r.id, "DELETED"), variant: "outline" as const, confirm: "Supprimer cet avis ?" }] : []),
+                    ...(r.status !== "PUBLISHED" ? [{ label: t.publish, fn: moderateReview.bind(null, r.id, "PUBLISHED"), variant: "soft" as const }] : []),
+                    ...(r.status !== "HIDDEN" ? [{ label: t.hide, fn: moderateReview.bind(null, r.id, "HIDDEN"), variant: "outline" as const }] : []),
+                    ...(r.status !== "DELETED"
+                      ? [{ label: t.delete, fn: moderateReview.bind(null, r.id, "DELETED"), variant: "outline" as const, confirm: t.confirmDelete }]
+                      : []),
                   ]}
                 />
               </div>
-            </div>
+            </figure>
           ))}
         </div>
       )}

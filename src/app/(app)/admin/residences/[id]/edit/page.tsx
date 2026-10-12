@@ -6,29 +6,42 @@ import { prisma } from "@/lib/prisma";
 import { updateResidence } from "@/server/actions/owner";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ResidenceForm } from "@/components/dashboard/residence-form";
+import { card } from "@/components/dashboard/styles";
+import { getI18n } from "@/lib/i18n.server";
+import { localePath } from "@/lib/i18n";
+import type { Metadata } from "next";
 
-export const metadata = { title: "Modifier la résidence - Admin" };
+export async function generateMetadata(): Promise<Metadata> {
+  const { dict } = await getI18n();
+  return { title: dict.dashAdmin.catalog.residence.editMeta };
+}
 
 export default async function AdminEditResidencePage({ params }: { params: Promise<{ id: string }> }) {
   await requireRole(["ADMIN", "SUPER_ADMIN"]);
   const { id } = await params;
-  const [residence, amenities, destinations, owners] = await Promise.all([
+  const [residence, amenities, destinations, owners, { locale, dict }] = await Promise.all([
     prisma.residence.findUnique({ where: { id }, include: { amenities: true } }),
     prisma.amenity.findMany({ where: { isActive: true }, orderBy: { name: "asc" } }),
     prisma.destination.findMany({ where: { isActive: true }, select: { name: true }, orderBy: { name: "asc" } }),
-    prisma.user.findMany({ where: { role: { in: ["OWNER", "ADMIN", "SUPER_ADMIN"] } }, select: { id: true, firstName: true, lastName: true, email: true }, orderBy: { firstName: "asc" } }),
+    prisma.user.findMany({
+      where: { role: { in: ["OWNER", "ADMIN", "SUPER_ADMIN"] } },
+      select: { id: true, firstName: true, lastName: true, email: true },
+      orderBy: { firstName: "asc" },
+    }),
+    getI18n(),
   ]);
   if (!residence) notFound();
+  const t = dict.dashAdmin.catalog.residence;
 
   const boundUpdate = updateResidence.bind(null, id);
 
   return (
     <div className="mx-auto max-w-3xl">
-      <Link href={`/admin/residences/${id}`} className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-muted hover:text-foreground">
-        <ChevronLeft className="h-4 w-4" /> Retour a la résidence
+      <Link href={localePath(`/admin/residences/${id}`, locale)} className="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-muted hover:text-ink">
+        <ChevronLeft className="h-4 w-4" /> {t.backToResidence}
       </Link>
-      <PageHeader title="Modifier la résidence" description={residence.name} />
-      <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
+      <PageHeader title={t.editTitle} description={residence.name} />
+      <div className={`${card} p-6 sm:p-8`}>
         <ResidenceForm
           action={boundUpdate}
           amenities={amenities}
@@ -49,7 +62,7 @@ export default async function AdminEditResidencePage({ params }: { params: Promi
             isHighDemand: residence.isHighDemand,
             checkOutTime: residence.checkOutTime, houseRules: residence.houseRules ?? "",
           }}
-          submitLabel="Enregistrer les modifications"
+          submitLabel={dict.dashOwner.editResidence.submit}
         />
       </div>
     </div>
