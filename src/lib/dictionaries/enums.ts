@@ -11,6 +11,8 @@ export interface EnumsDict {
   sort: Record<string, string>;
   amenity: Record<string, string>;
   residenceType: Record<string, string>;
+  /** Traduction des libelles FR des *Meta (statuts, roles...), cle = libelle FR. Vide en FR. */
+  statusLabel: Record<string, string>;
   paymentMethod: Record<string, { label: string; hint?: string }>;
 }
 
@@ -35,6 +37,7 @@ export const enumsFr: EnumsDict = {
     MANUAL: { label: "Validation manuelle", hint: "Hors ligne" },
     MOCK: { label: "Démo", hint: "Simulation" },
   },
+  statusLabel: {},
   residenceType: { STUDIO: "Studio meublé", T2: "Appartement T2", T3: "Appartement T3", VILLA: "Villa / Maison" },
   stayType: { any: "Tout type", STUDIO: "Studio", T2: "Appartement T2", T3: "Appartement T3", VILLA: "Villa / Maison" },
   sort: {
@@ -85,6 +88,85 @@ export const enumsEn: EnumsDict = {
     MANUAL: { label: "Manual validation", hint: "Offline" },
     MOCK: { label: "Demo", hint: "Simulation" },
   },
+  statusLabel: {
+    // Reservations
+    "Brouillon": "Draft",
+    "Négociation en cours": "Negotiating",
+    "En attente de validation": "Awaiting approval",
+    "À payer (acompte)": "To pay (deposit)",
+    "Acompte réglé": "Deposit paid",
+    "Intégralement payée": "Fully paid",
+    "Confirmée": "Confirmed",
+    "Séjour en cours": "Stay in progress",
+    "Terminée": "Completed",
+    "Annulation demandée": "Cancellation requested",
+    "Annulée": "Cancelled",
+    "No-show": "No-show",
+    "Litige": "Dispute",
+    "Remboursée": "Refunded",
+    // Reversements
+    "Planifié": "Scheduled",
+    "Versé": "Paid out",
+    "Bloqué (litige)": "Blocked (dispute)",
+    "Annulé": "Cancelled",
+    // Caution
+    "Sans caution": "No deposit",
+    "Caution requise": "Deposit required",
+    "Caution bloquée": "Deposit held",
+    "Caution restituée": "Deposit returned",
+    "Caution retenue": "Deposit retained",
+    // Paiements
+    "En attente": "Pending",
+    "En cours": "Processing",
+    "Payé": "Paid",
+    "Échoué": "Failed",
+    "Expiré": "Expired",
+    "Remboursé": "Refunded",
+    "Remboursé partiel": "Partly refunded",
+    // Logements
+    "Publiée": "Published",
+    "Dépubliée": "Unpublished",
+    "Suspendue": "Suspended",
+    "Archivée": "Archived",
+    // Verification
+    "Corrections demandées": "Changes requested",
+    "Vérifié": "Verified",
+    "Refusé": "Rejected",
+    "Suspendu": "Suspended",
+    // Missions
+    "Proposée": "Proposed",
+    "Acceptée": "Accepted",
+    "Refusée": "Declined",
+    // Demandes Business
+    "Nouvelle": "New",
+    "En traitement": "In review",
+    "Devis envoyé": "Quote sent",
+    "Clôturée": "Closed",
+    // Negociation / offres
+    "Prix fixe": "Fixed price",
+    "En négociation": "Negotiating",
+    "Accord trouvé": "Agreed",
+    "Expirée": "Expired",
+    "Contre-offre envoyée": "Counter-offer sent",
+    // Roles
+    "Voyageur": "Traveller",
+    "Propriétaire": "Host",
+    "Partenaire": "Partner",
+    "Business": "Business",
+    "Support": "Support",
+    "Admin": "Admin",
+    "Super Admin": "Super Admin",
+    // Types de partenaire
+    "Guide touristique": "Tour guide",
+    "Transporteur": "Driver",
+    "Restaurant": "Restaurant",
+    "Prestataire d'activité": "Activity provider",
+    "Autre prestataire": "Other provider",
+    // Qualite
+    "Essentiel": "Essential",
+    "Confort": "Comfort",
+    "Premium": "Premium",
+  },
   residenceType: { STUDIO: "Furnished studio", T2: "1-bedroom flat", T3: "2-bedroom flat", VILLA: "Villa / House" },
   stayType: { any: "Any type", STUDIO: "Studio", T2: "1-bedroom flat", T3: "2-bedroom flat", VILLA: "Villa / House" },
   sort: {
@@ -118,4 +200,9 @@ export const enumsEn: EnumsDict = {
 export function enumLabel(map: Record<string, string>, value: string | null | undefined): string {
   if (!value) return "";
   return map[value] ?? value;
+}
+
+/** Libelle d'un *Meta (FR source) dans la locale courante. */
+export function statusText(dict: { enums: EnumsDict }, frLabel: string): string {
+  return dict.enums.statusLabel[frLabel] ?? frLabel;
 }

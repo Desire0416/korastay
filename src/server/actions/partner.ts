@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
+import { tr } from "@/lib/action-i18n";
 
 export type PartnerResult = { ok: boolean; error?: string; message?: string; values?: Record<string, string> };
 
@@ -23,7 +24,7 @@ const toJsonList = (raw: FormDataEntryValue | null) => {
 export async function completePartnerOnboarding(_prev: PartnerResult, formData: FormData): Promise<PartnerResult> {
   const user = await requireRole(["PARTNER", "ADMIN", "SUPER_ADMIN"]);
   const profile = await getProfile(user.id);
-  if (!profile) return { ok: false, error: "Profil partenaire introuvable." };
+  if (!profile) return { ok: false, error: await tr("Profil partenaire introuvable.") };
 
   const values = Object.fromEntries(formData) as Record<string, string>;
   const idDocumentUrl = String(formData.get("idDocumentUrl") ?? "").trim();
@@ -31,10 +32,10 @@ export async function completePartnerOnboarding(_prev: PartnerResult, formData: 
   const phone = String(formData.get("phone") ?? "").trim();
   const city = String(formData.get("city") ?? "").trim();
 
-  if (!idDocumentUrl) return { ok: false, error: "La pièce d'identité est obligatoire.", values };
-  if (description.length < 20) return { ok: false, error: "Decrivez votre activité (20 caractères minimum).", values };
-  if (!phone) return { ok: false, error: "Un numéro de téléphone est requis.", values };
-  if (!city) return { ok: false, error: "Indiquez votre ville.", values };
+  if (!idDocumentUrl) return { ok: false, error: await tr("La pièce d'identité est obligatoire."), values };
+  if (description.length < 20) return { ok: false, error: await tr("Décrivez votre activité (20 caractères minimum)."), values };
+  if (!phone) return { ok: false, error: await tr("Un numéro de téléphone est requis."), values };
+  if (!city) return { ok: false, error: await tr("Indiquez votre ville."), values };
 
   const data: Record<string, unknown> = {
     idDocumentUrl,
@@ -52,8 +53,8 @@ export async function completePartnerOnboarding(_prev: PartnerResult, formData: 
   if (profile.type === "TRANSPORT") {
     const drivingLicenseUrl = String(formData.get("drivingLicenseUrl") ?? "").trim();
     const vehicleType = String(formData.get("vehicleType") ?? "").trim();
-    if (!drivingLicenseUrl) return { ok: false, error: "Le permis de conduire est obligatoire pour un chauffeur.", values };
-    if (!vehicleType) return { ok: false, error: "Indiquez le type de véhicule.", values };
+    if (!drivingLicenseUrl) return { ok: false, error: await tr("Le permis de conduire est obligatoire pour un chauffeur."), values };
+    if (!vehicleType) return { ok: false, error: await tr("Indiquez le type de véhicule."), values };
     data.drivingLicenseUrl = drivingLicenseUrl;
     data.vehicleType = vehicleType;
     data.vehicleBrand = String(formData.get("vehicleBrand") ?? "").trim() || null;
@@ -83,11 +84,11 @@ export async function completePartnerOnboarding(_prev: PartnerResult, formData: 
 export async function savePartnerVehicle(_prev: PartnerResult, formData: FormData): Promise<PartnerResult> {
   const user = await requireRole(["PARTNER", "ADMIN", "SUPER_ADMIN"]);
   const profile = await getProfile(user.id);
-  if (!profile) return { ok: false, error: "Profil introuvable." };
-  if (profile.type !== "TRANSPORT") return { ok: false, error: "Reserve aux chauffeurs." };
+  if (!profile) return { ok: false, error: await tr("Profil introuvable.") };
+  if (profile.type !== "TRANSPORT") return { ok: false, error: await tr("Réservé aux chauffeurs.") };
 
   const vehicleType = String(formData.get("vehicleType") ?? "").trim();
-  if (!vehicleType) return { ok: false, error: "Le type de véhicule est requis." };
+  if (!vehicleType) return { ok: false, error: await tr("Le type de véhicule est requis.") };
   const seats = Number(formData.get("vehicleSeats"));
 
   await prisma.partnerProfile.update({
@@ -102,7 +103,7 @@ export async function savePartnerVehicle(_prev: PartnerResult, formData: FormDat
   });
   revalidatePath("/partner/vehicle");
   revalidatePath("/partner");
-  return { ok: true, message: "Véhicule mis a jour." };
+  return { ok: true, message: await tr("Véhicule mis à jour.") };
 }
 
 // ============================================================
@@ -111,8 +112,8 @@ export async function savePartnerVehicle(_prev: PartnerResult, formData: FormDat
 export async function saveMenuItem(_prev: PartnerResult, formData: FormData): Promise<PartnerResult> {
   const user = await requireRole(["PARTNER", "ADMIN", "SUPER_ADMIN"]);
   const profile = await getProfile(user.id);
-  if (!profile) return { ok: false, error: "Profil introuvable." };
-  if (profile.type !== "RESTAURANT") return { ok: false, error: "Reserve aux restaurants." };
+  if (!profile) return { ok: false, error: await tr("Profil introuvable.") };
+  if (profile.type !== "RESTAURANT") return { ok: false, error: await tr("Réservé aux restaurants.") };
 
   const schema = z.object({
     id: z.string().optional(),
@@ -128,7 +129,7 @@ export async function saveMenuItem(_prev: PartnerResult, formData: FormData): Pr
 
   if (d.id) {
     const existing = await prisma.partnerMenuItem.findFirst({ where: { id: d.id, partnerProfileId: profile.id }, select: { id: true } });
-    if (!existing) return { ok: false, error: "Plat introuvable." };
+    if (!existing) return { ok: false, error: await tr("Plat introuvable.") };
     await prisma.partnerMenuItem.update({
       where: { id: d.id },
       data: { name: d.name, description: d.description || null, price: d.price, category: d.category || null, imageUrl: d.imageUrl || null },
@@ -140,26 +141,26 @@ export async function saveMenuItem(_prev: PartnerResult, formData: FormData): Pr
     });
   }
   revalidatePath("/partner/menu");
-  return { ok: true, message: "Menu enregistré." };
+  return { ok: true, message: await tr("Menu enregistré.") };
 }
 
 export async function deleteMenuItem(itemId: string): Promise<PartnerResult> {
   const user = await requireRole(["PARTNER", "ADMIN", "SUPER_ADMIN"]);
   const profile = await getProfile(user.id);
-  if (!profile) return { ok: false, error: "Profil introuvable." };
+  if (!profile) return { ok: false, error: await tr("Profil introuvable.") };
   const item = await prisma.partnerMenuItem.findFirst({ where: { id: itemId, partnerProfileId: profile.id }, select: { id: true } });
-  if (!item) return { ok: false, error: "Plat introuvable." };
+  if (!item) return { ok: false, error: await tr("Plat introuvable.") };
   await prisma.partnerMenuItem.delete({ where: { id: itemId } });
   revalidatePath("/partner/menu");
-  return { ok: true, message: "Plat supprimé." };
+  return { ok: true, message: await tr("Plat supprimé.") };
 }
 
 export async function toggleMenuItem(itemId: string): Promise<PartnerResult> {
   const user = await requireRole(["PARTNER", "ADMIN", "SUPER_ADMIN"]);
   const profile = await getProfile(user.id);
-  if (!profile) return { ok: false, error: "Profil introuvable." };
+  if (!profile) return { ok: false, error: await tr("Profil introuvable.") };
   const item = await prisma.partnerMenuItem.findFirst({ where: { id: itemId, partnerProfileId: profile.id }, select: { id: true, isAvailable: true } });
-  if (!item) return { ok: false, error: "Plat introuvable." };
+  if (!item) return { ok: false, error: await tr("Plat introuvable.") };
   await prisma.partnerMenuItem.update({ where: { id: itemId }, data: { isAvailable: !item.isAvailable } });
   revalidatePath("/partner/menu");
   return { ok: true };
@@ -168,7 +169,7 @@ export async function toggleMenuItem(itemId: string): Promise<PartnerResult> {
 export async function createPartnerService(_prev: PartnerResult, formData: FormData): Promise<PartnerResult> {
   const user = await requireRole(["PARTNER", "ADMIN", "SUPER_ADMIN"]);
   const profile = await getProfile(user.id);
-  if (!profile) return { ok: false, error: "Completez d'abord votre profil partenaire." };
+  if (!profile) return { ok: false, error: await tr("Complétez d'abord votre profil partenaire.") };
 
   const schema = z.object({
     title: z.string().min(2, "Titre requis"),
@@ -199,7 +200,7 @@ export async function toggleService(serviceId: string): Promise<PartnerResult> {
     where: { id: serviceId },
     include: { partnerProfile: { select: { userId: true } } },
   });
-  if (!service || service.partnerProfile.userId !== user.id) return { ok: false, error: "Introuvable." };
+  if (!service || service.partnerProfile.userId !== user.id) return { ok: false, error: await tr("Introuvable.") };
   await prisma.partnerService.update({ where: { id: serviceId }, data: { isActive: !service.isActive } });
   revalidatePath("/partner/services");
   return { ok: true };
@@ -211,7 +212,7 @@ export async function respondToMission(missionId: string, accept: boolean): Prom
     where: { id: missionId },
     include: { partnerProfile: { select: { userId: true } } },
   });
-  if (!mission || mission.partnerProfile.userId !== user.id) return { ok: false, error: "Introuvable." };
+  if (!mission || mission.partnerProfile.userId !== user.id) return { ok: false, error: await tr("Introuvable.") };
   await prisma.partnerMission.update({
     where: { id: missionId },
     data: { status: accept ? "ACCEPTED" : "REFUSED" },

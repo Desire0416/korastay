@@ -50,7 +50,7 @@ export async function ContentPageView({ slug }: { slug: string }) {
           <p className="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm text-muted">
             {version && <span className="font-medium text-foreground/70">{version}</span>}
             {version && <span aria-hidden className="text-sand-400">◆</span>}
-            <span>{t.updated.replace("{date}", formatDate(page.updatedAt))}</span>
+            <span>{t.updated.replace("{date}", formatDate(page.updatedAt, dict.locale))}</span>
           </p>
           {dict.pages.frOnly && (
             <p className="mx-auto mt-5 inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-2 text-sm text-foreground/80 ring-1 ring-inset ring-sand-300/70">

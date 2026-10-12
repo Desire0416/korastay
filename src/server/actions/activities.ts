@@ -6,6 +6,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
 import { slugify } from "@/lib/utils";
+import { tr } from "@/lib/action-i18n";
 
 export type ActivityResult = { ok: boolean; error?: string; message?: string };
 
@@ -68,7 +69,7 @@ export async function saveActivity(id: string | null, _prev: ActivityResult, for
     await prisma.activity.update({ where: { id }, data });
     revalidatePath("/admin/activities");
     revalidatePath("/activites");
-    return { ok: true, message: "Activité mise a jour." };
+    return { ok: true, message: await tr("Activité mise à jour.") };
   }
 
   const slug = await uniqueSlug(d.name);
@@ -94,7 +95,7 @@ export async function saveActivity(id: string | null, _prev: ActivityResult, for
 export async function toggleActivityPublish(id: string): Promise<ActivityResult> {
   await requireRole(["ADMIN", "SUPER_ADMIN"]);
   const a = await prisma.activity.findUnique({ where: { id }, select: { status: true } });
-  if (!a) return { ok: false, error: "Introuvable." };
+  if (!a) return { ok: false, error: await tr("Introuvable.") };
   const next = a.status === "PUBLISHED" ? "DRAFT" : "PUBLISHED";
   await prisma.activity.update({ where: { id }, data: { status: next } });
   revalidatePath("/admin/activities");
@@ -107,7 +108,7 @@ export async function deleteActivity(id: string): Promise<ActivityResult> {
   await prisma.activity.delete({ where: { id } });
   revalidatePath("/admin/activities");
   revalidatePath("/activites");
-  return { ok: true, message: "Activité supprimée." };
+  return { ok: true, message: await tr("Activité supprimée.") };
 }
 
 // --- Images (reutilise PhotosManager) ---
@@ -122,7 +123,7 @@ export async function addActivityImage(activityId: string, url: string): Promise
 export async function deleteActivityImage(imageId: string): Promise<ActivityResult> {
   await requireRole(["ADMIN", "SUPER_ADMIN"]);
   const img = await prisma.activityImage.findUnique({ where: { id: imageId } });
-  if (!img) return { ok: false, error: "Introuvable." };
+  if (!img) return { ok: false, error: await tr("Introuvable.") };
   await prisma.activityImage.delete({ where: { id: imageId } });
   if (img.isCover) {
     const next = await prisma.activityImage.findFirst({ where: { activityId: img.activityId }, orderBy: { sortOrder: "asc" } });
@@ -135,7 +136,7 @@ export async function deleteActivityImage(imageId: string): Promise<ActivityResu
 export async function setActivityCoverImage(imageId: string): Promise<ActivityResult> {
   await requireRole(["ADMIN", "SUPER_ADMIN"]);
   const img = await prisma.activityImage.findUnique({ where: { id: imageId } });
-  if (!img) return { ok: false, error: "Introuvable." };
+  if (!img) return { ok: false, error: await tr("Introuvable.") };
   await prisma.$transaction([
     prisma.activityImage.updateMany({ where: { activityId: img.activityId }, data: { isCover: false } }),
     prisma.activityImage.update({ where: { id: imageId }, data: { isCover: true } }),

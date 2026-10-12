@@ -136,7 +136,7 @@ export default async function ResidencesPage({
               {filters.checkin && filters.checkout && (
                 <span className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-sm font-medium text-brand-700">
                   <CalendarDays className="h-3.5 w-3.5" />
-                  {dict.residences.availableFromTo.replace("{from}", formatDate(filters.checkin)).replace("{to}", formatDate(filters.checkout))}
+                  {dict.residences.availableFromTo.replace("{from}", formatDate(filters.checkin, locale)).replace("{to}", formatDate(filters.checkout, locale))}
                   <Link href={withoutDatesHref} className="-mr-1 rounded-full p-0.5 text-brand-600 hover:bg-brand-100" aria-label={dict.residences.removeDates}>
                     <X className="h-3.5 w-3.5" />
                   </Link>

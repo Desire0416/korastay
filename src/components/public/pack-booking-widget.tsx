@@ -52,7 +52,7 @@ export function PackBookingWidget(props: PackBookingWidgetProps) {
             <span>
               <span className="eyebrow block text-[9.5px] text-muted">{dict.packs.departureDate}</span>
               <span className={cn("font-semibold", range.start ? "text-foreground" : "text-muted")}>
-                {range.start ? formatDate(range.start) : dict.packs.chooseDate}
+                {range.start ? formatDate(range.start, dict.locale) : dict.packs.chooseDate}
               </span>
             </span>
             <CalendarDays className="h-4 w-4 text-muted" />

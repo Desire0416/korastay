@@ -17,6 +17,7 @@ import {
 } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLocale } from "@/components/i18n/provider";
 
 export interface DateRange {
   start: Date | null;
@@ -32,11 +33,15 @@ interface CalendarProps {
   className?: string;
 }
 
-const WEEKDAYS = ["L", "M", "M", "J", "V", "S", "D"];
-const MONTHS = [
-  "Janvier", "Fevrier", "Mars", "Avril", "Mai", "Juin",
-  "Juillet", "Aout", "Septembre", "Octobre", "Novembre", "Decembre",
-];
+// Semaine du lundi au dimanche, libelles par langue.
+const WEEKDAYS = {
+  fr: ["L", "M", "M", "J", "V", "S", "D"],
+  en: ["M", "T", "W", "T", "F", "S", "S"],
+};
+const MONTHS = {
+  fr: ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"],
+  en: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+};
 
 export function Calendar({
   value,
@@ -46,6 +51,7 @@ export function Calendar({
   disabledRanges = [],
   className,
 }: CalendarProps) {
+  const locale = useLocale();
   const today = startOfToday();
   const floor = minDate ?? today;
   const [cursor, setCursor] = React.useState(() =>
@@ -105,11 +111,11 @@ export function Calendar({
 
     return (
       <div key={offset} className="w-full">
-        <div className="mb-3 text-center text-sm font-bold text-foreground">
-          {MONTHS[monthDate.getMonth()]} {monthDate.getFullYear()}
+        <div className="mb-3 text-center font-display text-[17px] text-foreground">
+          {MONTHS[locale][monthDate.getMonth()]} {monthDate.getFullYear()}
         </div>
         <div className="mb-1 grid grid-cols-7">
-          {WEEKDAYS.map((d, i) => (
+          {WEEKDAYS[locale].map((d, i) => (
             <div key={i} className="py-1 text-center text-2xs font-semibold text-muted">
               {d}
             </div>

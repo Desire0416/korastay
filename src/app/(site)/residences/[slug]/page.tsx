@@ -359,7 +359,7 @@ export default async function ResidenceDetailPage({
                           <p className="truncate text-sm font-bold text-foreground">
                             {review.author.firstName} {review.author.lastName.charAt(0)}.
                           </p>
-                          <p className="text-xs text-muted">{formatDate(review.createdAt)}</p>
+                          <p className="text-xs text-muted">{formatDate(review.createdAt, locale)}</p>
                         </div>
                         <span className="ml-auto"><RatingStars value={review.rating} showValue={false} size="sm" /></span>
                       </figcaption>

@@ -10,6 +10,8 @@ import {
   ROLE_HOME,
 } from "./constants";
 import type { UserRole } from "./enums";
+import { localePath } from "./i18n";
+import { getLocale } from "./i18n.server";
 
 // ------------------------------------------------------------
 // Mots de passe
@@ -143,11 +145,24 @@ export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
 // ------------------------------------------------------------
 // Gardes
 // ------------------------------------------------------------
+// Localise une cible de redirection (et son eventuel ?redirectTo=) selon la
+// langue de la requete : "/login?redirectTo=/account" -> "/en/login?redirectTo=/en/account".
+async function localized(target: string): Promise<string> {
+  const locale = await getLocale();
+  if (locale === "fr") return target;
+  const [path, qs] = target.split("?");
+  const params = new URLSearchParams(qs ?? "");
+  const back = params.get("redirectTo");
+  if (back && back.startsWith("/")) params.set("redirectTo", localePath(back, locale));
+  const query = params.toString();
+  return localePath(path, locale) + (query ? `?${query}` : "");
+}
+
 export async function requireUser(
   redirectTo = "/login"
 ): Promise<SessionUser> {
   const user = await getCurrentUser();
-  if (!user) redirect(redirectTo);
+  if (!user) redirect(await localized(redirectTo));
   return user;
 }
 
@@ -156,13 +171,13 @@ export async function requireRole(
   redirectTo = "/login"
 ): Promise<SessionUser> {
   const user = await getCurrentUser();
-  if (!user) redirect(redirectTo);
+  if (!user) redirect(await localized(redirectTo));
   const allowed = Array.isArray(roles) ? roles : [roles];
   // SUPER_ADMIN a acces a tout ce qui est ADMIN
   const effective = new Set<string>(allowed);
   if (effective.has("ADMIN")) effective.add("SUPER_ADMIN");
   if (!effective.has(user.role)) {
-    redirect("/unauthorized");
+    redirect(await localized("/unauthorized"));
   }
   return user;
 }

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { sendEmail, emailLayout } from "@/lib/email";
 import { CONTACT_EMAIL } from "@/lib/constants";
+import { tr } from "@/lib/action-i18n";
 
 export type LeadResult = { ok: boolean; error?: string; message?: string };
 
@@ -39,7 +40,7 @@ export async function submitContact(_prev: LeadResult, formData: FormData): Prom
     html: emailLayout("Nouveau message", `<p><strong>${d.name}</strong> (${d.email})</p><p>${d.message}</p>`),
     text: d.message,
   });
-  return { ok: true, message: "Merci ! Votre message a bien ete envoyé. Nous vous repondrons rapidement." };
+  return { ok: true, message: await tr("Merci ! Votre message a bien été envoyé. Nous vous répondrons rapidement.") };
 }
 
 // ------------------------------------------------------------
@@ -64,7 +65,7 @@ export async function submitOwnerApplication(_prev: LeadResult, formData: FormDa
     subject: `[Propriétaire] ${d.name} - ${d.city}`,
     html: emailLayout("Demande propriétaire", `<p><strong>${d.name}</strong> - ${d.email} - ${d.phone}</p><p>Ville : ${d.city}</p><p>Residences : ${d.residenceCount ?? "-"}</p><p>${d.message ?? ""}</p>`),
   });
-  return { ok: true, message: "Demande envoyée ! Notre équipe vous contactera sous 48h pour finaliser votre inscription." };
+  return { ok: true, message: await tr("Demande envoyée ! Notre équipe vous contactera sous 48 h pour finaliser votre inscription.") };
 }
 
 // ------------------------------------------------------------
@@ -89,7 +90,7 @@ export async function submitPartnerApplication(_prev: LeadResult, formData: Form
     subject: `[Partenaire] ${d.businessName} - ${d.type}`,
     html: emailLayout("Demande partenaire", `<p><strong>${d.businessName}</strong> (${d.type})</p><p>${d.email} - ${d.phone} - ${d.city}</p><p>${d.message ?? ""}</p>`),
   });
-  return { ok: true, message: "Candidature reçue ! Nous etudions votre profil et revenons vers vous rapidement." };
+  return { ok: true, message: await tr("Candidature reçue ! Nous étudions votre profil et revenons vers vous rapidement.") };
 }
 
 // ------------------------------------------------------------
@@ -133,7 +134,7 @@ export async function submitBusinessRequest(_prev: LeadResult, formData: FormDat
     subject: `[Business] ${d.organizationName}`,
     html: emailLayout("Demande Business", `<p><strong>${d.organizationName}</strong></p><p>${d.contactName} - ${d.email}</p><p>${d.notes ?? ""}</p>`),
   });
-  return { ok: true, message: "Demande envoyée ! Un conseiller KoraStay Business vous contactera pour etablir un devis." };
+  return { ok: true, message: await tr("Demande envoyée ! Un conseiller KoraStay Business vous contactera pour établir un devis.") };
 }
 
 // ------------------------------------------------------------
@@ -171,5 +172,5 @@ export async function submitCustomPack(_prev: LeadResult, formData: FormData): P
     },
   });
   await notifyAdmins("Demande de pack personnalisé", `${d.name} - ${d.destination}`, "/admin/business");
-  return { ok: true, message: "Votre demande de pack personnalisé est envoyée ! Nous composons votre séjour et revenons avec une proposition." };
+  return { ok: true, message: await tr("Votre demande de pack personnalisé est envoyée ! Nous composons votre séjour et revenons avec une proposition.") };
 }

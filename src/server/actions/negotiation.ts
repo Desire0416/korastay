@@ -10,6 +10,7 @@ import {
 } from "@/lib/enums";
 import { computeNegotiatedPrice } from "@/lib/pricing";
 import { getPaymentSettings } from "@/lib/payment-rules";
+import { tr } from "@/lib/action-i18n";
 
 export type NegotiationResult = {
   ok: boolean;
@@ -38,13 +39,13 @@ export async function submitPriceOffer(input: {
   cleaningFeeAmount?: number;
 }): Promise<NegotiationResult> {
   const user = await getCurrentUser();
-  if (!user) return { ok: false, error: "Connectez-vous pour faire une offre." };
+  if (!user) return { ok: false, error: await tr("Connectez-vous pour faire une offre.") };
 
   if (input.nights < 2) {
-    return { ok: false, error: "La négociation est disponible pour 2 nuits ou plus." };
+    return { ok: false, error: await tr("La négociation est disponible pour 2 nuits ou plus.") };
   }
   if (input.proposedAmount < 1) {
-    return { ok: false, error: "Le montant proposé est invalide." };
+    return { ok: false, error: await tr("Le montant proposé est invalide.") };
   }
 
   const [residence, settings] = await Promise.all([
@@ -54,7 +55,7 @@ export async function submitPriceOffer(input: {
     }),
     getPaymentSettings(),
   ]);
-  if (!residence) return { ok: false, error: "Résidence introuvable." };
+  if (!residence) return { ok: false, error: await tr("Résidence introuvable.") };
 
   const cleaningFee = input.cleaningFeeAmount ?? residence.cleaningFee ?? 0;
   const price = computeNegotiatedPrice({
@@ -183,7 +184,7 @@ export async function ownerRespondToOffer(input: {
   message?: string;
 }): Promise<NegotiationResult> {
   const user = await getCurrentUser();
-  if (!user) return { ok: false, error: "Non autorisé." };
+  if (!user) return { ok: false, error: await tr("Non autorisé.") };
 
   const offer = await prisma.priceOffer.findUnique({
     where: { id: input.offerId },
@@ -197,10 +198,10 @@ export async function ownerRespondToOffer(input: {
     },
   });
 
-  if (!offer) return { ok: false, error: "Offre introuvable." };
-  if (offer.reservation.residence?.ownerId !== user.id) return { ok: false, error: "Non autorisé." };
-  if (offer.status !== OfferStatus.PENDING) return { ok: false, error: "Cette offre n'est plus en attente." };
-  if (new Date() > offer.expiresAt) return { ok: false, error: "Cette offre a expiré." };
+  if (!offer) return { ok: false, error: await tr("Offre introuvable.") };
+  if (offer.reservation.residence?.ownerId !== user.id) return { ok: false, error: await tr("Non autorisé.") };
+  if (offer.status !== OfferStatus.PENDING) return { ok: false, error: await tr("Cette offre n'est plus en attente.") };
+  if (new Date() > offer.expiresAt) return { ok: false, error: await tr("Cette offre a expiré.") };
 
   const now = new Date();
   const traveler = offer.reservation.traveler;
@@ -299,7 +300,7 @@ export async function ownerRespondToOffer(input: {
 
   if (input.action === "COUNTER") {
     if (!input.counterAmount || input.counterAmount < 1) {
-      return { ok: false, error: "Indiquez un montant pour la contre-offre." };
+      return { ok: false, error: await tr("Indiquez un montant pour la contre-offre.") };
     }
 
     const expiresAt = new Date(Date.now() + OFFER_TTL);
@@ -356,7 +357,7 @@ export async function ownerRespondToOffer(input: {
     return { ok: true, reservationId, offerId: newOfferId! };
   }
 
-  return { ok: false, error: "Action inconnue." };
+  return { ok: false, error: await tr("Action inconnue.") };
 }
 
 // ------------------------------------------------------------------
@@ -369,7 +370,7 @@ export async function travelerRespondToOffer(input: {
   message?: string;
 }): Promise<NegotiationResult> {
   const user = await getCurrentUser();
-  if (!user) return { ok: false, error: "Non autorisé." };
+  if (!user) return { ok: false, error: await tr("Non autorisé.") };
 
   const offer = await prisma.priceOffer.findUnique({
     where: { id: input.offerId },
@@ -383,13 +384,13 @@ export async function travelerRespondToOffer(input: {
     },
   });
 
-  if (!offer) return { ok: false, error: "Offre introuvable." };
-  if (offer.reservation.travelerId !== user.id) return { ok: false, error: "Non autorisé." };
-  if (offer.status !== OfferStatus.PENDING) return { ok: false, error: "Cette offre n'est plus en attente." };
+  if (!offer) return { ok: false, error: await tr("Offre introuvable.") };
+  if (offer.reservation.travelerId !== user.id) return { ok: false, error: await tr("Non autorisé.") };
+  if (offer.status !== OfferStatus.PENDING) return { ok: false, error: await tr("Cette offre n'est plus en attente.") };
   if (offer.proposedBy !== OfferParty.OWNER) {
-    return { ok: false, error: "Cette offre attend une réponse du propriétaire." };
+    return { ok: false, error: await tr("Cette offre attend une réponse du propriétaire.") };
   }
-  if (new Date() > offer.expiresAt) return { ok: false, error: "Cette offre a expiré." };
+  if (new Date() > offer.expiresAt) return { ok: false, error: await tr("Cette offre a expiré.") };
 
   const now = new Date();
   const ownerId = offer.reservation.residence?.ownerId;
@@ -462,7 +463,7 @@ export async function travelerRespondToOffer(input: {
 
   if (input.action === "COUNTER") {
     if (!input.counterAmount || input.counterAmount < 1) {
-      return { ok: false, error: "Indiquez un montant pour la contre-offre." };
+      return { ok: false, error: await tr("Indiquez un montant pour la contre-offre.") };
     }
 
     const expiresAt = new Date(Date.now() + OFFER_TTL);
@@ -505,7 +506,7 @@ export async function travelerRespondToOffer(input: {
     return { ok: true, reservationId, offerId: newOfferId! };
   }
 
-  return { ok: false, error: "Action inconnue." };
+  return { ok: false, error: await tr("Action inconnue.") };
 }
 
 // ------------------------------------------------------------------

@@ -6,6 +6,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
 import { slugify } from "@/lib/utils";
+import { tr } from "@/lib/action-i18n";
 
 export type DestResult = { ok: boolean; error?: string; message?: string };
 
@@ -55,7 +56,7 @@ export async function saveDestination(id: string | null, _prev: DestResult, form
     await prisma.destination.update({ where: { id }, data });
     revalidatePath("/admin/destinations");
     revalidatePath("/destinations");
-    return { ok: true, message: "Destination mise a jour." };
+    return { ok: true, message: await tr("Destination mise à jour.") };
   }
 
   const slug = await uniqueSlug(d.name);
@@ -68,7 +69,7 @@ export async function saveDestination(id: string | null, _prev: DestResult, form
 export async function toggleDestinationActive(id: string): Promise<DestResult> {
   await requireRole(["ADMIN", "SUPER_ADMIN"]);
   const dest = await prisma.destination.findUnique({ where: { id }, select: { isActive: true } });
-  if (!dest) return { ok: false, error: "Introuvable." };
+  if (!dest) return { ok: false, error: await tr("Introuvable.") };
   await prisma.destination.update({ where: { id }, data: { isActive: !dest.isActive } });
   revalidatePath("/admin/destinations");
   revalidatePath("/destinations");
@@ -81,11 +82,11 @@ export async function deleteDestination(id: string): Promise<DestResult> {
     where: { id },
     select: { _count: { select: { residences: true, packs: true } } },
   });
-  if (!counts) return { ok: false, error: "Introuvable." };
+  if (!counts) return { ok: false, error: await tr("Introuvable.") };
   if (counts._count.residences > 0 || counts._count.packs > 0) {
-    return { ok: false, error: "Impossible : des résidences ou packs sont lies. Desactivez-la plutôt." };
+    return { ok: false, error: await tr("Impossible : des résidences ou packs sont liés. Désactivez-la plutôt.") };
   }
   await prisma.destination.delete({ where: { id } });
   revalidatePath("/admin/destinations");
-  return { ok: true, message: "Destination supprimée." };
+  return { ok: true, message: await tr("Destination supprimée.") };
 }

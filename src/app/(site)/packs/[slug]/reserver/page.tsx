@@ -109,7 +109,7 @@ export default async function PackReserverPage({
             </div>
             <div className="mt-5 space-y-3 border-t border-border pt-5 text-sm">
               <div className="flex items-center gap-2.5 text-foreground">
-                <CalendarDays className="h-4 w-4 text-terracotta" /> {t.departure.replace("{date}", formatDate(startDate!))}
+                <CalendarDays className="h-4 w-4 text-terracotta" /> {t.departure.replace("{date}", formatDate(startDate!, locale))}
               </div>
               <div className="flex items-center gap-2.5 text-foreground">
                 <Clock className="h-4 w-4 text-terracotta" /> {pack.durationDays}{dict.card.dayShort} / {pack.durationNights}{dict.card.nightShort}

@@ -162,7 +162,7 @@ export const paymentMethodMeta: Record<
   MOOV_MONEY: { label: "Moov Money", hint: "Mobile Money" },
   CARD: { label: "Carte bancaire", hint: "Visa / Mastercard" },
   BANK_TRANSFER: { label: "Virement bancaire", hint: "Validation manuelle" },
-  CASH: { label: "Especes", hint: "A l'agence" },
+  CASH: { label: "Espèces", hint: "À l'agence" },
   MANUAL: { label: "Validation manuelle (admin)", hint: "Hors ligne" },
   MOCK: { label: "Démo", hint: "Simulation" },
 };
@@ -225,8 +225,8 @@ export const reservationStatusMeta: LabelMap = {
   DRAFT: { label: "Brouillon", tone: "neutral" },
   NEGOTIATING: { label: "Négociation en cours", tone: "info" },
   PENDING_APPROVAL: { label: "En attente de validation", tone: "warning" },
-  PENDING_PAYMENT: { label: "A payer (acompte)", tone: "warning" },
-  PARTIALLY_PAID: { label: "Acompte regle", tone: "info" },
+  PENDING_PAYMENT: { label: "À payer (acompte)", tone: "warning" },
+  PARTIALLY_PAID: { label: "Acompte réglé", tone: "info" },
   PAID: { label: "Intégralement payée", tone: "success" },
   CONFIRMED: { label: "Confirmée", tone: "success" },
   CHECKED_IN: { label: "Séjour en cours", tone: "info" },
@@ -235,12 +235,12 @@ export const reservationStatusMeta: LabelMap = {
   CANCELLED: { label: "Annulée", tone: "danger" },
   NO_SHOW: { label: "No-show", tone: "danger" },
   DISPUTED: { label: "Litige", tone: "danger" },
-  REFUNDED: { label: "Remboursee", tone: "info" },
+  REFUNDED: { label: "Remboursée", tone: "info" },
 };
 
 export const payoutStatusMeta: LabelMap = {
   SCHEDULED: { label: "Planifié", tone: "warning" },
-  RELEASED: { label: "Verse", tone: "success" },
+  RELEASED: { label: "Versé", tone: "success" },
   BLOCKED: { label: "Bloqué (litige)", tone: "danger" },
   CANCELLED: { label: "Annulé", tone: "neutral" },
 };
@@ -272,10 +272,10 @@ export const paymentStatusMeta: LabelMap = {
   PROCESSING: { label: "En cours", tone: "info" },
   PAID: { label: "Payé", tone: "success" },
   FAILED: { label: "Échoué", tone: "danger" },
-  EXPIRED: { label: "Expire", tone: "neutral" },
+  EXPIRED: { label: "Expiré", tone: "neutral" },
   CANCELLED: { label: "Annulé", tone: "neutral" },
-  REFUNDED: { label: "Rembourse", tone: "info" },
-  PARTIALLY_REFUNDED: { label: "Rembourse partiel", tone: "info" },
+  REFUNDED: { label: "Remboursé", tone: "info" },
+  PARTIALLY_REFUNDED: { label: "Remboursé partiel", tone: "info" },
 };
 
 export const residenceStatusMeta: LabelMap = {
@@ -292,7 +292,7 @@ export const verificationStatusMeta: LabelMap = {
   PENDING_REVIEW: { label: "En attente", tone: "warning" },
   NEEDS_CHANGES: { label: "Corrections demandées", tone: "warning" },
   VERIFIED: { label: "Vérifié", tone: "success" },
-  REJECTED: { label: "Refuse", tone: "danger" },
+  REJECTED: { label: "Refusé", tone: "danger" },
   SUSPENDED: { label: "Suspendu", tone: "danger" },
 };
 
@@ -310,7 +310,7 @@ export const businessRequestStatusMeta: LabelMap = {
   IN_REVIEW: { label: "En traitement", tone: "info" },
   QUOTED: { label: "Devis envoyé", tone: "brand" },
   CONFIRMED: { label: "Confirmée", tone: "success" },
-  CLOSED: { label: "Cloturee", tone: "neutral" },
+  CLOSED: { label: "Clôturée", tone: "neutral" },
   CANCELLED: { label: "Annulée", tone: "danger" },
 };
 

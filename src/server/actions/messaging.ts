@@ -6,6 +6,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { isStaff, roleLabelFor } from "@/lib/messaging";
+import { tr } from "@/lib/action-i18n";
 
 export type MsgResult = { ok: boolean; error?: string; id?: string };
 
@@ -48,20 +49,20 @@ export async function sendMessage(
   attachment?: MessageAttachment | null
 ): Promise<MsgResult> {
   const user = await getCurrentUser();
-  if (!user) return { ok: false, error: "Non autorise." };
+  if (!user) return { ok: false, error: await tr("Non autorisé.") };
   const text = body.trim();
-  if (!text && !attachment) return { ok: false, error: "Message vide." };
+  if (!text && !attachment) return { ok: false, error: await tr("Message vide.") };
 
   const convo = await prisma.conversation.findUnique({
     where: { id: conversationId },
     include: { participants: true },
   });
-  if (!convo) return { ok: false, error: "Conversation introuvable." };
+  if (!convo) return { ok: false, error: await tr("Conversation introuvable.") };
 
   const staff = isStaff(user.role);
   const isParticipant = convo.participants.some((p) => p.userId === user.id);
-  if (!isParticipant && !staff) return { ok: false, error: "Accès refuse." };
-  if (isInternal && !staff) return { ok: false, error: "Reserve a l'équipe." };
+  if (!isParticipant && !staff) return { ok: false, error: await tr("Accès refusé.") };
+  if (isInternal && !staff) return { ok: false, error: await tr("Réservé à l'équipe.") };
 
   // Le staff qui repond rejoint la conversation
   if (!isParticipant && staff) {
@@ -112,7 +113,7 @@ export async function startSupportConversation(
   formData: FormData
 ): Promise<MsgResult> {
   const user = await getCurrentUser();
-  if (!user) return { ok: false, error: "Non autorise." };
+  if (!user) return { ok: false, error: await tr("Non autorisé.") };
 
   const schema = z.object({
     subject: z.string().min(2, "Sujet requis"),
@@ -156,11 +157,11 @@ export async function getOrCreateDirectConversation(opts: {
   subject?: string;
 }): Promise<MsgResult> {
   const user = await getCurrentUser();
-  if (!user) return { ok: false, error: "Non autorise." };
-  if (opts.otherUserId === user.id) return { ok: false, error: "Destinataire invalide." };
+  if (!user) return { ok: false, error: await tr("Non autorisé.") };
+  if (opts.otherUserId === user.id) return { ok: false, error: await tr("Destinataire invalide.") };
 
   const other = await prisma.user.findUnique({ where: { id: opts.otherUserId }, select: { id: true, role: true } });
-  if (!other) return { ok: false, error: "Destinataire introuvable." };
+  if (!other) return { ok: false, error: await tr("Destinataire introuvable.") };
 
   // Cherche une conversation existante entre ces deux utilisateurs (meme reservation si fournie)
   const existing = await prisma.conversation.findFirst({
@@ -194,7 +195,7 @@ export async function getOrCreateDirectConversation(opts: {
 
 export async function markConversationRead(conversationId: string): Promise<MsgResult> {
   const user = await getCurrentUser();
-  if (!user) return { ok: false, error: "Non autorise." };
+  if (!user) return { ok: false, error: await tr("Non autorisé.") };
   await prisma.conversationParticipant.updateMany({
     where: { conversationId, userId: user.id },
     data: { lastReadAt: new Date() },

@@ -6,6 +6,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireRole, type SessionUser } from "@/lib/auth";
 import { slugify } from "@/lib/utils";
+import { tr } from "@/lib/action-i18n";
 
 export type OwnerResult = { ok: boolean; error?: string; message?: string; id?: string; values?: Record<string, string> };
 
@@ -67,7 +68,7 @@ export async function createResidence(_prev: OwnerResult, formData: FormData): P
   let effectiveOwnerId = user.id;
   if (admin && requestedOwnerId) {
     const targetOwner = await prisma.user.findUnique({ where: { id: requestedOwnerId }, select: { id: true } });
-    if (!targetOwner) return { ok: false, error: "Propriétaire selectionne introuvable." };
+    if (!targetOwner) return { ok: false, error: await tr("Propriétaire sélectionné introuvable.") };
     effectiveOwnerId = targetOwner.id;
   }
 
@@ -147,7 +148,7 @@ export async function createResidence(_prev: OwnerResult, formData: FormData): P
 export async function updateResidence(id: string, _prev: OwnerResult, formData: FormData): Promise<OwnerResult> {
   const user = await requireRole(["OWNER", "ADMIN", "SUPER_ADMIN"]);
   const existing = await prisma.residence.findFirst({ where: residenceScope(user, id) });
-  if (!existing) return { ok: false, error: "Résidence introuvable." };
+  if (!existing) return { ok: false, error: await tr("Résidence introuvable.") };
 
   const parsed = residenceSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message };
@@ -199,15 +200,15 @@ export async function updateResidence(id: string, _prev: OwnerResult, formData: 
   revalidatePath(`/owner/residences/${id}`);
   revalidatePath(`/admin/residences/${id}`);
   revalidatePath("/residences");
-  return { ok: true, message: "Résidence mise a jour." };
+  return { ok: true, message: await tr("Résidence mise à jour.") };
 }
 
 export async function toggleResidencePublish(id: string): Promise<OwnerResult> {
   const user = await requireRole(["OWNER", "ADMIN", "SUPER_ADMIN"]);
   const residence = await prisma.residence.findFirst({ where: residenceScope(user, id) });
-  if (!residence) return { ok: false, error: "Introuvable." };
+  if (!residence) return { ok: false, error: await tr("Introuvable.") };
   if (!["PUBLISHED", "UNPUBLISHED"].includes(residence.status)) {
-    return { ok: false, error: "La résidence doit être validée avant publication." };
+    return { ok: false, error: await tr("La résidence doit être validée avant publication.") };
   }
   const next = residence.status === "PUBLISHED" ? "UNPUBLISHED" : "PUBLISHED";
   await prisma.residence.update({ where: { id }, data: { status: next, publishedAt: next === "PUBLISHED" ? new Date() : residence.publishedAt } });
@@ -225,14 +226,14 @@ export async function addAvailabilityBlock(formData: FormData): Promise<OwnerRes
   const reason = String(formData.get("reason") ?? "Indisponible");
 
   const residence = await prisma.residence.findFirst({ where: residenceScope(user, residenceId) });
-  if (!residence) return { ok: false, error: "Introuvable." };
-  if (end <= start) return { ok: false, error: "La date de fin doit être après le debut." };
+  if (!residence) return { ok: false, error: await tr("Introuvable.") };
+  if (end <= start) return { ok: false, error: await tr("La date de fin doit être après le début.") };
 
   await prisma.residenceAvailabilityBlock.create({
     data: { residenceId, startDate: start, endDate: end, reason, createdById: user.id },
   });
   revalidatePath("/owner/calendar");
-  return { ok: true, message: "Periode bloquée." };
+  return { ok: true, message: await tr("Période bloquée.") };
 }
 
 export async function removeAvailabilityBlock(blockId: string): Promise<OwnerResult> {
@@ -241,7 +242,7 @@ export async function removeAvailabilityBlock(blockId: string): Promise<OwnerRes
     where: { id: blockId }, include: { residence: { select: { ownerId: true } } },
   });
   if (!block || (!isAdminUser(user) && block.residence.ownerId !== user.id)) {
-    return { ok: false, error: "Introuvable." };
+    return { ok: false, error: await tr("Introuvable.") };
   }
   await prisma.residenceAvailabilityBlock.delete({ where: { id: blockId } });
   revalidatePath("/owner/calendar");
@@ -252,7 +253,7 @@ export async function removeAvailabilityBlock(blockId: string): Promise<OwnerRes
 export async function addResidenceImage(residenceId: string, url: string): Promise<OwnerResult> {
   const user = await requireRole(["OWNER", "ADMIN", "SUPER_ADMIN"]);
   const residence = await prisma.residence.findFirst({ where: residenceScope(user, residenceId), include: { images: true } });
-  if (!residence) return { ok: false, error: "Introuvable." };
+  if (!residence) return { ok: false, error: await tr("Introuvable.") };
   await prisma.residenceImage.create({
     data: { residenceId, url, sortOrder: residence.images.length, isCover: residence.images.length === 0 },
   });
@@ -264,7 +265,7 @@ export async function addResidenceImage(residenceId: string, url: string): Promi
 export async function deleteResidenceImage(imageId: string): Promise<OwnerResult> {
   const user = await requireRole(["OWNER", "ADMIN", "SUPER_ADMIN"]);
   const image = await prisma.residenceImage.findUnique({ where: { id: imageId }, include: { residence: { select: { ownerId: true, id: true } } } });
-  if (!image || (!isAdminUser(user) && image.residence.ownerId !== user.id)) return { ok: false, error: "Introuvable." };
+  if (!image || (!isAdminUser(user) && image.residence.ownerId !== user.id)) return { ok: false, error: await tr("Introuvable.") };
   await prisma.residenceImage.delete({ where: { id: imageId } });
   revalidatePath(`/owner/residences/${image.residence.id}/photos`);
   revalidatePath(`/admin/residences/${image.residence.id}/photos`);
@@ -275,15 +276,15 @@ export async function deleteResidenceImage(imageId: string): Promise<OwnerResult
 export async function replyToReview(reviewId: string, reply: string): Promise<OwnerResult> {
   const user = await requireRole(["OWNER", "ADMIN", "SUPER_ADMIN"]);
   const text = reply.trim();
-  if (!text) return { ok: false, error: "Réponse vide." };
+  if (!text) return { ok: false, error: await tr("Réponse vide.") };
 
   const review = await prisma.review.findUnique({
     where: { id: reviewId },
     include: { residence: { select: { ownerId: true } }, author: { select: { id: true } } },
   });
-  if (!review) return { ok: false, error: "Avis introuvable." };
+  if (!review) return { ok: false, error: await tr("Avis introuvable.") };
   if (!isAdminUser(user) && review.residence?.ownerId !== user.id) {
-    return { ok: false, error: "Cet avis ne concerne pas vos résidences." };
+    return { ok: false, error: await tr("Cet avis ne concerne pas vos résidences.") };
   }
 
   await prisma.review.update({ where: { id: reviewId }, data: { ownerReply: text } });
@@ -303,13 +304,13 @@ export async function replyToReview(reviewId: string, reply: string): Promise<Ow
 
   revalidatePath("/owner/reviews");
   revalidatePath("/admin/reviews");
-  return { ok: true, message: "Réponse publiée." };
+  return { ok: true, message: await tr("Réponse publiée.") };
 }
 
 export async function setCoverImage(imageId: string): Promise<OwnerResult> {
   const user = await requireRole(["OWNER", "ADMIN", "SUPER_ADMIN"]);
   const image = await prisma.residenceImage.findUnique({ where: { id: imageId }, include: { residence: { select: { ownerId: true, id: true } } } });
-  if (!image || (!isAdminUser(user) && image.residence.ownerId !== user.id)) return { ok: false, error: "Introuvable." };
+  if (!image || (!isAdminUser(user) && image.residence.ownerId !== user.id)) return { ok: false, error: await tr("Introuvable.") };
   await prisma.$transaction([
     prisma.residenceImage.updateMany({ where: { residenceId: image.residence.id }, data: { isCover: false } }),
     prisma.residenceImage.update({ where: { id: imageId }, data: { isCover: true, sortOrder: -1 } }),

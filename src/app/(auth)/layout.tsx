@@ -4,7 +4,7 @@ import { Logo } from "@/components/brand/logo";
 import { Motif, MotifBand, Ornament } from "@/components/brand/motif";
 import { I18nProvider } from "@/components/i18n/provider";
 import { getI18n } from "@/lib/i18n.server";
-import { localePath } from "@/lib/i18n";
+import { localePath, publicClientDict } from "@/lib/i18n";
 
 const TRUST_ICONS = [ShieldCheck, Star, MapPinned];
 
@@ -13,7 +13,7 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
   const p = dict.auth.panel;
 
   return (
-    <I18nProvider dict={dict}>
+    <I18nProvider dict={publicClientDict(dict)}>
       <div className="flex min-h-dvh">
         {/* Panneau de marque (desktop) */}
         <aside className="grain relative hidden w-[46%] flex-col justify-between overflow-hidden bg-ink-800 text-white lg:flex">

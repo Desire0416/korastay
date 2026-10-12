@@ -6,6 +6,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
 import { slugify } from "@/lib/utils";
+import { tr } from "@/lib/action-i18n";
 
 export type BlogResult = { ok: boolean; error?: string; message?: string };
 
@@ -52,7 +53,7 @@ export async function saveBlogPost(id: string | null, _prev: BlogResult, formDat
     });
     revalidatePath("/admin/content/blog");
     revalidatePath("/blog");
-    return { ok: true, message: "Article mis a jour." };
+    return { ok: true, message: await tr("Article mis à jour.") };
   }
 
   const slug = await uniqueSlug(d.title);
@@ -67,7 +68,7 @@ export async function saveBlogPost(id: string | null, _prev: BlogResult, formDat
 export async function toggleBlogPublish(id: string): Promise<BlogResult> {
   await requireRole(["ADMIN", "SUPER_ADMIN"]);
   const post = await prisma.blogPost.findUnique({ where: { id }, select: { isPublished: true, publishedAt: true } });
-  if (!post) return { ok: false, error: "Introuvable." };
+  if (!post) return { ok: false, error: await tr("Introuvable.") };
   const next = !post.isPublished;
   await prisma.blogPost.update({ where: { id }, data: { isPublished: next, publishedAt: next ? post.publishedAt ?? new Date() : post.publishedAt } });
   revalidatePath("/admin/content/blog");
@@ -80,5 +81,5 @@ export async function deleteBlogPost(id: string): Promise<BlogResult> {
   await prisma.blogPost.delete({ where: { id } });
   revalidatePath("/admin/content/blog");
   revalidatePath("/blog");
-  return { ok: true, message: "Article supprimé." };
+  return { ok: true, message: await tr("Article supprimé.") };
 }

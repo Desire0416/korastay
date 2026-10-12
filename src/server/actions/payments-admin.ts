@@ -12,6 +12,7 @@ import {
 } from "@/lib/payment-rules";
 import { finalizeReservationPayment } from "@/lib/reservation-finalize";
 import { PaymentMethod } from "@/lib/enums";
+import { tr } from "@/lib/action-i18n";
 
 export type PayAdminResult = { ok: boolean; error?: string; message?: string };
 
@@ -85,7 +86,7 @@ export async function savePaymentSettings(
   });
   revalidatePath("/admin/settings/payments");
   revalidatePath("/admin/settings");
-  return { ok: true, message: "Regles de paiement enregistrées." };
+  return { ok: true, message: await tr("Règles de paiement enregistrées.") };
 }
 
 // ============================================================
@@ -104,16 +105,16 @@ export async function recordManualPayment(
   const paidAtRaw = String(formData.get("paidAt") ?? "").trim();
   const comment = String(formData.get("comment") ?? "").trim();
 
-  if (!reservationId) return { ok: false, error: "Réservation manquante." };
-  if (amount <= 0) return { ok: false, error: "Montant invalide." };
+  if (!reservationId) return { ok: false, error: await tr("Réservation manquante.") };
+  if (amount <= 0) return { ok: false, error: await tr("Montant invalide.") };
 
   const reservation = await prisma.reservation.findUnique({
     where: { id: reservationId },
     select: { id: true, status: true, reference: true, totalAmount: true, amountPaid: true },
   });
-  if (!reservation) return { ok: false, error: "Réservation introuvable." };
+  if (!reservation) return { ok: false, error: await tr("Réservation introuvable.") };
   if (!["PENDING_PAYMENT", "PARTIALLY_PAID"].includes(reservation.status)) {
-    return { ok: false, error: "Cette réservation n'attend pas de paiement." };
+    return { ok: false, error: await tr("Cette réservation n'attend pas de paiement.") };
   }
 
   const paidAt = paidAtRaw ? new Date(paidAtRaw) : new Date();
@@ -146,7 +147,7 @@ export async function recordManualPayment(
 
   revalidatePath(`/admin/reservations/${reservationId}`);
   revalidatePath("/admin/payments");
-  return { ok: true, message: `Paiement de ${formatPrice(amount)} valide.` };
+  return { ok: true, message: await tr("Paiement de {amount} validé.", { amount: formatPrice(amount) }) };
 }
 
 // Validation d'un paiement deja enregistre (virement declare par le client).
@@ -156,8 +157,8 @@ export async function validatePendingPayment(paymentId: string): Promise<PayAdmi
     where: { id: paymentId },
     select: { id: true, status: true, amount: true, reservationId: true },
   });
-  if (!payment) return { ok: false, error: "Paiement introuvable." };
-  if (payment.status === "PAID") return { ok: false, error: "Paiement déjà valide." };
+  if (!payment) return { ok: false, error: await tr("Paiement introuvable.") };
+  if (payment.status === "PAID") return { ok: false, error: await tr("Paiement déjà validé.") };
 
   await prisma.payment.update({ where: { id: paymentId }, data: { status: "PAID", paidAt: new Date() } });
   await finalizeReservationPayment(payment.reservationId, payment.amount);
@@ -167,7 +168,7 @@ export async function validatePendingPayment(paymentId: string): Promise<PayAdmi
 
   revalidatePath(`/admin/reservations/${payment.reservationId}`);
   revalidatePath("/admin/payments");
-  return { ok: true, message: "Paiement valide." };
+  return { ok: true, message: await tr("Paiement validé.") };
 }
 
 // ============================================================
@@ -176,9 +177,9 @@ export async function validatePendingPayment(paymentId: string): Promise<PayAdmi
 export async function releasePayout(payoutId: string): Promise<PayAdminResult> {
   const admin = await requireRole(["ADMIN", "SUPER_ADMIN"]);
   const payout = await prisma.payout.findUnique({ where: { id: payoutId }, include: { reservation: { select: { status: true, reference: true } } } });
-  if (!payout) return { ok: false, error: "Reversement introuvable." };
-  if (payout.status === "RELEASED") return { ok: false, error: "Déjà verse." };
-  if (payout.reservation.status === "DISPUTED") return { ok: false, error: "Litige en cours : reversement bloqué." };
+  if (!payout) return { ok: false, error: await tr("Reversement introuvable.") };
+  if (payout.status === "RELEASED") return { ok: false, error: await tr("Déjà versé.") };
+  if (payout.reservation.status === "DISPUTED") return { ok: false, error: await tr("Litige en cours : reversement bloqué.") };
 
   await prisma.payout.update({ where: { id: payoutId }, data: { status: "RELEASED", releasedAt: new Date(), releasedById: admin.id } });
   await prisma.notification.create({
@@ -192,17 +193,17 @@ export async function releasePayout(payoutId: string): Promise<PayAdminResult> {
   });
   await prisma.auditLog.create({ data: { actorId: admin.id, action: "PAYOUT_RELEASED", entityType: "Payout", entityId: payoutId, metadata: JSON.stringify({ amount: payout.amount }) } });
   revalidatePath("/admin/payouts");
-  return { ok: true, message: `Reversement de ${formatPrice(payout.amount)} libéré.` };
+  return { ok: true, message: await tr("Reversement de {amount} libéré.", { amount: formatPrice(payout.amount) }) };
 }
 
 export async function blockPayout(payoutId: string): Promise<PayAdminResult> {
   const admin = await requireRole(["ADMIN", "SUPER_ADMIN"]);
   const payout = await prisma.payout.findUnique({ where: { id: payoutId } });
-  if (!payout) return { ok: false, error: "Reversement introuvable." };
+  if (!payout) return { ok: false, error: await tr("Reversement introuvable.") };
   await prisma.payout.update({ where: { id: payoutId }, data: { status: "BLOCKED" } });
   await prisma.auditLog.create({ data: { actorId: admin.id, action: "PAYOUT_BLOCKED", entityType: "Payout", entityId: payoutId } });
   revalidatePath("/admin/payouts");
-  return { ok: true, message: "Reversement bloqué." };
+  return { ok: true, message: await tr("Reversement bloqué.") };
 }
 
 // Fiabilite de l'hote (NEW = 70/30, RELIABLE = 100% au check-in).
@@ -213,7 +214,7 @@ export async function setOwnerPayoutTier(userId: string, tier: string): Promise<
   await prisma.auditLog.create({ data: { actorId: admin.id, action: "PAYOUT_TIER_SET", entityType: "User", entityId: userId, metadata: JSON.stringify({ tier: value }) } });
   revalidatePath("/admin/users");
   revalidatePath(`/admin/users/${userId}`);
-  return { ok: true, message: `Fiabilité mise a jour (${value === "RELIABLE" ? "fiable" : "nouveau"}).` };
+  return { ok: true, message: await tr("Fiabilité mise à jour ({level}).", { level: await tr(value === "RELIABLE" ? "fiable" : "nouveau") }) };
 }
 
 // ============================================================
@@ -226,13 +227,13 @@ export async function setCautionStatus(
 ): Promise<PayAdminResult> {
   const admin = await requireRole(["ADMIN", "SUPER_ADMIN"]);
   const allowed = ["REQUIRED", "HELD", "RELEASED", "RETAINED"];
-  if (!allowed.includes(status)) return { ok: false, error: "Statut de caution invalide." };
+  if (!allowed.includes(status)) return { ok: false, error: await tr("Statut de caution invalide.") };
   if (status === "RETAINED" && !justification?.trim()) {
-    return { ok: false, error: "Une justification est obligatoire pour retenir la caution." };
+    return { ok: false, error: await tr("Une justification est obligatoire pour retenir la caution.") };
   }
 
   const reservation = await prisma.reservation.findUnique({ where: { id: reservationId }, select: { travelerId: true, reference: true, notes: true } });
-  if (!reservation) return { ok: false, error: "Réservation introuvable." };
+  if (!reservation) return { ok: false, error: await tr("Réservation introuvable.") };
 
   await prisma.reservation.update({
     where: { id: reservationId },
@@ -252,5 +253,5 @@ export async function setCautionStatus(
   });
   await prisma.auditLog.create({ data: { actorId: admin.id, action: "CAUTION_STATUS", entityType: "Reservation", entityId: reservationId, metadata: JSON.stringify({ status }) } });
   revalidatePath(`/admin/reservations/${reservationId}`);
-  return { ok: true, message: "Caution mise a jour." };
+  return { ok: true, message: await tr("Caution mise à jour.") };
 }

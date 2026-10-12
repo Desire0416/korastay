@@ -39,9 +39,9 @@ export function HeroSearch({ destinations, variant = "hero", pill = false, chips
   const guestsLabel = `${adults + children} ${adults + children > 1 ? dict.search.travelerPlural : dict.search.travelerSingular}`;
   const datesLabel =
     range.start && range.end
-      ? `${formatDateShort(range.start)} - ${formatDateShort(range.end)}`
+      ? `${formatDateShort(range.start, dict.locale)} - ${formatDateShort(range.end, dict.locale)}`
       : range.start
-        ? `${formatDateShort(range.start)} - ...`
+        ? `${formatDateShort(range.start, dict.locale)} - ...`
         : dict.search.when;
 
   function submit() {

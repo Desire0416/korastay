@@ -45,7 +45,7 @@ export default async function BlogPage() {
                 <SmartImage src={lead.coverImageUrl} alt={lead.title} seed={`blog-${lead.slug}`} priority sizes="(max-width: 768px) 100vw, 55vw" imgClassName="transition-transform duration-700 group-hover:scale-105" />
               </div>
               <div>
-                <p className="eyebrow text-[10.5px] text-terracotta">{formatDate(lead.publishedAt ?? lead.createdAt)}</p>
+                <p className="eyebrow text-[10.5px] text-terracotta">{formatDate(lead.publishedAt ?? lead.createdAt, locale)}</p>
                 <h2 className="mt-3 text-balance font-display text-[2rem] leading-[1.1] text-foreground transition-colors group-hover:text-terracotta md:text-[2.5rem]">
                   {lead.title}
                 </h2>
@@ -64,7 +64,7 @@ export default async function BlogPage() {
                     <div className={cn("relative aspect-[4/3] overflow-hidden", i % 3 === 1 ? "rounded-arch" : "rounded-[1.5rem]")}>
                       <SmartImage src={p.coverImageUrl} alt={p.title} seed={`blog-${p.slug}`} sizes="(max-width: 768px) 100vw, 33vw" imgClassName="transition-transform duration-700 group-hover:scale-105" />
                     </div>
-                    <p className="eyebrow mt-4 text-[10px] text-terracotta">{formatDate(p.publishedAt ?? p.createdAt)}</p>
+                    <p className="eyebrow mt-4 text-[10px] text-terracotta">{formatDate(p.publishedAt ?? p.createdAt, locale)}</p>
                     <h3 className="mt-2 font-display text-[1.35rem] leading-snug text-foreground transition-colors group-hover:text-terracotta">{p.title}</h3>
                     {p.excerpt && <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted">{p.excerpt}</p>}
                   </Link>

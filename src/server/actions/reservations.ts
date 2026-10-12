@@ -20,6 +20,7 @@ import { sendEmail, emailLayout } from "@/lib/email";
 import { paymentMethodMeta } from "@/lib/enums";
 import { referralDiscountRateFor } from "@/lib/referral";
 import { RESIDENCE_VALIDATION_HOURS, PACK_VALIDATION_DAYS, PAYMENT_DEADLINE_HOURS } from "@/lib/constants";
+import { tr } from "@/lib/action-i18n";
 
 export type ReservationResult = {
   ok: boolean;
@@ -63,7 +64,7 @@ export async function createResidenceReservation(
   formData: FormData
 ): Promise<ReservationResult> {
   const user = await getCurrentUser();
-  if (!user) return { ok: false, error: "Veuillez vous connecter pour réserver." };
+  if (!user) return { ok: false, error: await tr("Veuillez vous connecter pour réserver.") };
 
   const parsed = residenceSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) {
@@ -71,20 +72,20 @@ export async function createResidenceReservation(
   }
   const data = parsed.data;
   if (!data.acceptTerms) {
-    return { ok: false, error: "Vous devez accepter les conditions de réservation." };
+    return { ok: false, error: await tr("Vous devez accepter les conditions de réservation.") };
   }
 
   const startDate = new Date(data.checkin);
   const endDate = new Date(data.checkout);
   const nights = nightsBetween(startDate, endDate);
-  if (nights < 1) return { ok: false, error: "Sélectionnez au moins une nuit." };
+  if (nights < 1) return { ok: false, error: await tr("Sélectionnez au moins une nuit.") };
   if (startDate < new Date(new Date().toDateString())) {
-    return { ok: false, error: "Les dates passées ne sont pas réservables." };
+    return { ok: false, error: await tr("Les dates passées ne sont pas réservables.") };
   }
 
   const residence = await prisma.residence.findUnique({ where: { id: data.residenceId } });
   if (!residence || residence.status !== "PUBLISHED") {
-    return { ok: false, error: "Résidence indisponible." };
+    return { ok: false, error: await tr("Résidence indisponible.") };
   }
 
   const settings = await getPaymentSettings();
@@ -217,7 +218,7 @@ export async function createPackReservation(
   formData: FormData
 ): Promise<ReservationResult> {
   const user = await getCurrentUser();
-  if (!user) return { ok: false, error: "Veuillez vous connecter pour réserver." };
+  if (!user) return { ok: false, error: await tr("Veuillez vous connecter pour réserver.") };
 
   const parsed = packSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) {
@@ -225,13 +226,13 @@ export async function createPackReservation(
   }
   const data = parsed.data;
   if (!data.acceptTerms) {
-    return { ok: false, error: "Vous devez accepter les conditions." };
+    return { ok: false, error: await tr("Vous devez accepter les conditions.") };
   }
 
   const pack = await prisma.pack.findUnique({ where: { id: data.packId } });
-  if (!pack || pack.status !== "PUBLISHED") return { ok: false, error: "Pack indisponible." };
+  if (!pack || pack.status !== "PUBLISHED") return { ok: false, error: await tr("Pack indisponible.") };
   if (data.persons > pack.maxPersons) {
-    return { ok: false, error: `Ce pack accueille au maximum ${pack.maxPersons} personnes.` };
+    return { ok: false, error: await tr("Ce pack accueille au maximum {n} personnes.", { n: pack.maxPersons }) };
   }
 
   const startDate = new Date(data.startDate);
@@ -311,24 +312,24 @@ export async function createActivityReservation(
   formData: FormData
 ): Promise<ReservationResult> {
   const user = await getCurrentUser();
-  if (!user) return { ok: false, error: "Veuillez vous connecter pour réserver." };
+  if (!user) return { ok: false, error: await tr("Veuillez vous connecter pour réserver.") };
 
   const parsed = activitySchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Formulaire invalide." };
   const data = parsed.data;
-  if (!data.acceptTerms) return { ok: false, error: "Vous devez accepter les conditions." };
+  if (!data.acceptTerms) return { ok: false, error: await tr("Vous devez accepter les conditions.") };
 
   const activity = await prisma.activity.findUnique({ where: { id: data.activityId } });
-  if (!activity || activity.status !== "PUBLISHED") return { ok: false, error: "Activité indisponible." };
+  if (!activity || activity.status !== "PUBLISHED") return { ok: false, error: await tr("Activité indisponible.") };
   if (data.persons > activity.maxPersons) {
-    return { ok: false, error: `Cette activité accueille au maximum ${activity.maxPersons} personnes.` };
+    return { ok: false, error: await tr("Cette activité accueille au maximum {n} personnes.", { n: activity.maxPersons }) };
   }
 
   const guide = await prisma.partnerProfile.findFirst({
     where: { id: data.guideProfileId, type: "GUIDE", verificationStatus: "VERIFIED" },
     select: { id: true, userId: true, businessName: true },
   });
-  if (!guide) return { ok: false, error: "Guide invalide. Veuillez en choisir un autre." };
+  if (!guide) return { ok: false, error: await tr("Guide invalide. Veuillez en choisir un autre.") };
 
   const settings = await getPaymentSettings();
   const subtotal = activity.pricePerPerson * data.persons;
@@ -391,18 +392,18 @@ export async function createActivityReservation(
 // ============================================================
 export async function approveReservation(reservationId: string): Promise<ReservationResult> {
   const user = await getCurrentUser();
-  if (!user) return { ok: false, error: "Non autorise." };
+  if (!user) return { ok: false, error: await tr("Non autorisé.") };
 
   const reservation = await prisma.reservation.findUnique({
     where: { id: reservationId },
     include: { residence: { select: { ownerId: true, name: true } }, pack: { select: { name: true } } },
   });
-  if (!reservation) return { ok: false, error: "Réservation introuvable." };
+  if (!reservation) return { ok: false, error: await tr("Réservation introuvable.") };
 
   const isOwner = reservation.residence?.ownerId === user.id;
-  if (!isOwner && !isStaff(user.role)) return { ok: false, error: "Accès refuse." };
+  if (!isOwner && !isStaff(user.role)) return { ok: false, error: await tr("Accès refusé.") };
   if (reservation.status !== "PENDING_APPROVAL") {
-    return { ok: false, error: "Cette demande n'est plus en attente de validation." };
+    return { ok: false, error: await tr("Cette demande n'est plus en attente de validation.") };
   }
 
   await prisma.$transaction([
@@ -444,18 +445,18 @@ export async function approveReservation(reservationId: string): Promise<Reserva
 
 export async function rejectReservation(reservationId: string): Promise<ReservationResult> {
   const user = await getCurrentUser();
-  if (!user) return { ok: false, error: "Non autorise." };
+  if (!user) return { ok: false, error: await tr("Non autorisé.") };
 
   const reservation = await prisma.reservation.findUnique({
     where: { id: reservationId },
     include: { residence: { select: { ownerId: true } } },
   });
-  if (!reservation) return { ok: false, error: "Réservation introuvable." };
+  if (!reservation) return { ok: false, error: await tr("Réservation introuvable.") };
 
   const isOwner = reservation.residence?.ownerId === user.id;
-  if (!isOwner && !isStaff(user.role)) return { ok: false, error: "Accès refuse." };
+  if (!isOwner && !isStaff(user.role)) return { ok: false, error: await tr("Accès refusé.") };
   if (reservation.status !== "PENDING_APPROVAL") {
-    return { ok: false, error: "Cette demande n'est plus en attente." };
+    return { ok: false, error: await tr("Cette demande n'est plus en attente.") };
   }
 
   await prisma.$transaction([
@@ -489,7 +490,7 @@ export async function payReservationDeposit(
   method: string
 ): Promise<ReservationResult> {
   const user = await getCurrentUser();
-  if (!user) return { ok: false, error: "Non autorise." };
+  if (!user) return { ok: false, error: await tr("Non autorisé.") };
 
   const reservation = await prisma.reservation.findUnique({
     where: { id: reservationId },
@@ -500,10 +501,10 @@ export async function payReservationDeposit(
     },
   });
   if (!reservation || reservation.travelerId !== user.id) {
-    return { ok: false, error: "Réservation introuvable." };
+    return { ok: false, error: await tr("Réservation introuvable.") };
   }
   if (reservation.status !== "PENDING_PAYMENT") {
-    return { ok: false, error: "Cette réservation n'est pas en attente de paiement." };
+    return { ok: false, error: await tr("Cette réservation n'est pas en attente de paiement.") };
   }
 
   const amount = reservation.depositAmount > 0 ? reservation.depositAmount : reservation.totalAmount;
@@ -572,7 +573,7 @@ export async function declareReservationPayment(
   formData: FormData
 ): Promise<ReservationResult> {
   const user = await getCurrentUser();
-  if (!user) return { ok: false, error: "Non autorise." };
+  if (!user) return { ok: false, error: await tr("Non autorisé.") };
 
   const reservationId = String(formData.get("reservationId") ?? "");
   const method = String(formData.get("method") ?? "").trim();
@@ -587,13 +588,13 @@ export async function declareReservationPayment(
     },
   });
   if (!reservation || reservation.travelerId !== user.id) {
-    return { ok: false, error: "Réservation introuvable." };
+    return { ok: false, error: await tr("Réservation introuvable.") };
   }
   if (reservation.status !== "PENDING_PAYMENT") {
-    return { ok: false, error: "Cette réservation n'attend pas de paiement." };
+    return { ok: false, error: await tr("Cette réservation n'attend pas de paiement.") };
   }
-  if (!method) return { ok: false, error: "Choisissez le moyen utilisé." };
-  if (!reference) return { ok: false, error: "Indiquez la référence de votre transaction." };
+  if (!method) return { ok: false, error: await tr("Choisissez le moyen utilisé.") };
+  if (!reference) return { ok: false, error: await tr("Indiquez la référence de votre transaction.") };
 
   const amount = reservation.depositAmount > 0 ? reservation.depositAmount : reservation.totalAmount;
   const metadata = JSON.stringify({ proofUrl: proofUrl || null, declaredBy: user.id, source: "traveler_declaration" });
@@ -669,17 +670,17 @@ export async function expireStaleReservations(): Promise<number> {
 // ------------------------------------------------------------
 export async function cancelReservation(reservationId: string): Promise<ReservationResult> {
   const user = await getCurrentUser();
-  if (!user) return { ok: false, error: "Non autorise." };
+  if (!user) return { ok: false, error: await tr("Non autorisé.") };
 
   const reservation = await prisma.reservation.findUnique({
     where: { id: reservationId },
     include: { payments: { where: { status: "PAID" }, take: 1 } },
   });
   if (!reservation || reservation.travelerId !== user.id) {
-    return { ok: false, error: "Réservation introuvable." };
+    return { ok: false, error: await tr("Réservation introuvable.") };
   }
   if (!["CONFIRMED", "PENDING_PAYMENT", "PENDING_APPROVAL"].includes(reservation.status)) {
-    return { ok: false, error: "Cette réservation ne peut pas être annulée." };
+    return { ok: false, error: await tr("Cette réservation ne peut pas être annulée.") };
   }
 
   const estimate =

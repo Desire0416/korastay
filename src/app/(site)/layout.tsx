@@ -4,6 +4,7 @@ import { MobileBottomNav } from "@/components/public/mobile-bottom-nav";
 import { VisitBeacon } from "@/components/public/visit-beacon";
 import { I18nProvider } from "@/components/i18n/provider";
 import { getI18n } from "@/lib/i18n.server";
+import { publicClientDict } from "@/lib/i18n";
 
 export default async function SiteLayout({
   children,
@@ -13,7 +14,7 @@ export default async function SiteLayout({
   const { dict } = await getI18n();
 
   return (
-    <I18nProvider dict={dict}>
+    <I18nProvider dict={publicClientDict(dict)}>
       <div className="flex min-h-dvh flex-col">
         <VisitBeacon />
         <PublicHeader />

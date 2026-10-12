@@ -3,6 +3,7 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
+import { tr } from "@/lib/action-i18n";
 
 export type SettingsResult = { ok: boolean; error?: string; message?: string };
 
@@ -28,5 +29,5 @@ export async function saveSettings(_prev: SettingsResult, formData: FormData): P
   revalidateTag("community-stats");
   revalidateTag("site-settings");
   revalidatePath("/");
-  return { ok: true, message: "Paramètres enregistrés." };
+  return { ok: true, message: await tr("Paramètres enregistrés.") };
 }

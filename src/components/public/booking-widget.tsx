@@ -93,7 +93,7 @@ export function BookingWidget(props: BookingWidgetProps) {
 
   const guestsLabel = `${adults + children} ${adults + children > 1 ? dict.search.travelerPlural : dict.search.travelerSingular}`;
   const datesLabel = hasRange
-    ? `${formatDateShort(range.start!)} - ${formatDateShort(range.end!)}`
+    ? `${formatDateShort(range.start!, dict.locale)} - ${formatDateShort(range.end!, dict.locale)}`
     : dict.booking.addDates;
 
   // Section prix fixe (1 nuit)

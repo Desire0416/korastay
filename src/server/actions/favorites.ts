@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { tr } from "@/lib/action-i18n";
 
 export async function toggleFavorite(input: {
   residenceId?: string;
@@ -10,7 +11,7 @@ export async function toggleFavorite(input: {
 }): Promise<{ ok: boolean; favorited?: boolean; error?: string }> {
   const user = await getCurrentUser();
   if (!user) {
-    return { ok: false, error: "Connectez-vous pour ajouter aux favoris." };
+    return { ok: false, error: await tr("Connectez-vous pour ajouter aux favoris.") };
   }
 
   const where = input.residenceId
@@ -19,7 +20,7 @@ export async function toggleFavorite(input: {
       ? { userId_packId: { userId: user.id, packId: input.packId } }
       : null;
 
-  if (!where) return { ok: false, error: "Element invalide." };
+  if (!where) return { ok: false, error: await tr("Élément invalide.") };
 
   const existing = await prisma.favorite.findUnique({ where: where as never });
 

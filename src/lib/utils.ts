@@ -64,48 +64,54 @@ export function isPastDate(date: Date): boolean {
   return startOfDay(date) < startOfDay(new Date());
 }
 
-const MONTHS_FR = [
-  "janvier", "fevrier", "mars", "avril", "mai", "juin",
-  "juillet", "aout", "septembre", "octobre", "novembre", "decembre",
-];
-const MONTHS_FR_SHORT = [
-  "janv.", "fevr.", "mars", "avr.", "mai", "juin",
-  "juil.", "aout", "sept.", "oct.", "nov.", "dec.",
-];
+// Langue d'affichage des dates (FR par defaut ; les appels des pages
+// bilingues passent la locale courante).
+type DateLocale = "fr" | "en";
 
-export function formatDate(value: Date | string): string {
+const MONTHS: Record<DateLocale, string[]> = {
+  fr: ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"],
+  en: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+};
+const MONTHS_SHORT: Record<DateLocale, string[]> = {
+  fr: ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."],
+  en: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+};
+
+export function formatDate(value: Date | string, locale: DateLocale = "fr"): string {
   const d = toDate(value);
-  return `${d.getDate()} ${MONTHS_FR[d.getMonth()]} ${d.getFullYear()}`;
+  return `${d.getDate()} ${MONTHS[locale][d.getMonth()]} ${d.getFullYear()}`;
 }
 
-export function formatDateShort(value: Date | string): string {
+export function formatDateShort(value: Date | string, locale: DateLocale = "fr"): string {
   const d = toDate(value);
-  return `${d.getDate()} ${MONTHS_FR_SHORT[d.getMonth()]}`;
+  return `${d.getDate()} ${MONTHS_SHORT[locale][d.getMonth()]}`;
 }
 
 export function formatDateRange(
   start: Date | string,
-  end: Date | string
+  end: Date | string,
+  locale: DateLocale = "fr"
 ): string {
   const s = toDate(start);
   const e = toDate(end);
   if (s.getMonth() === e.getMonth() && s.getFullYear() === e.getFullYear()) {
-    return `${s.getDate()} - ${e.getDate()} ${MONTHS_FR_SHORT[e.getMonth()]} ${e.getFullYear()}`;
+    return `${s.getDate()} - ${e.getDate()} ${MONTHS_SHORT[locale][e.getMonth()]} ${e.getFullYear()}`;
   }
-  return `${formatDateShort(s)} - ${formatDateShort(e)} ${e.getFullYear()}`;
+  return `${formatDateShort(s, locale)} - ${formatDateShort(e, locale)} ${e.getFullYear()}`;
 }
 
-export function relativeTime(value: Date | string): string {
+export function relativeTime(value: Date | string, locale: DateLocale = "fr"): string {
   const d = toDate(value);
   const diff = Date.now() - d.getTime();
   const mins = Math.round(diff / 60000);
-  if (mins < 1) return "a l'instant";
-  if (mins < 60) return `il y a ${mins} min`;
+  const en = locale === "en";
+  if (mins < 1) return en ? "just now" : "à l'instant";
+  if (mins < 60) return en ? `${mins} min ago` : `il y a ${mins} min`;
   const hours = Math.round(mins / 60);
-  if (hours < 24) return `il y a ${hours} h`;
+  if (hours < 24) return en ? `${hours} h ago` : `il y a ${hours} h`;
   const days = Math.round(hours / 24);
-  if (days < 7) return `il y a ${days} j`;
-  return formatDate(d);
+  if (days < 7) return en ? `${days} d ago` : `il y a ${days} j`;
+  return formatDate(d, locale);
 }
 
 // ------------------------------------------------------------

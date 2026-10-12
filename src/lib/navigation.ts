@@ -51,7 +51,7 @@ export const FOOTER_NAV: { title: string; links: NavItem[] }[] = [
     links: [
       { label: "Conditions générales", href: "/conditions-generales" },
       { label: "Politique d'annulation", href: "/politique-annulation" },
-      { label: "Confidentialite", href: "/confidentialite" },
+      { label: "Confidentialité", href: "/confidentialite" },
       { label: "Mentions légales", href: "/mentions-legales" },
     ],
   },

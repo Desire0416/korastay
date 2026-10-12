@@ -4,12 +4,13 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser, hashPassword, verifyPassword } from "@/lib/auth";
+import { tr } from "@/lib/action-i18n";
 
 export type FormResult = { ok: boolean; error?: string; message?: string };
 
 export async function updateProfile(_prev: FormResult, formData: FormData): Promise<FormResult> {
   const user = await getCurrentUser();
-  if (!user) return { ok: false, error: "Non autorise." };
+  if (!user) return { ok: false, error: await tr("Non autorisé.") };
 
   const schema = z.object({
     firstName: z.string().min(2, "Prenom requis"),
@@ -42,41 +43,41 @@ export async function updateProfile(_prev: FormResult, formData: FormData): Prom
     },
   });
   ["/account/profile", "/owner/profile", "/partner/profile", "/business/profile"].forEach((p) => revalidatePath(p));
-  return { ok: true, message: "Profil mis a jour avec succès." };
+  return { ok: true, message: await tr("Profil mis à jour avec succès.") };
 }
 
 export async function changePassword(_prev: FormResult, formData: FormData): Promise<FormResult> {
   const user = await getCurrentUser();
-  if (!user) return { ok: false, error: "Non autorise." };
+  if (!user) return { ok: false, error: await tr("Non autorisé.") };
 
   const current = String(formData.get("currentPassword") ?? "");
   const next = String(formData.get("newPassword") ?? "");
-  if (next.length < 8) return { ok: false, error: "Le nouveau mot de passe doit faire 8 caractères minimum." };
+  if (next.length < 8) return { ok: false, error: await tr("Le nouveau mot de passe doit faire 8 caractères minimum.") };
 
   const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
   if (!dbUser || !(await verifyPassword(current, dbUser.passwordHash))) {
-    return { ok: false, error: "Mot de passe actuel incorrect." };
+    return { ok: false, error: await tr("Mot de passe actuel incorrect.") };
   }
   await prisma.user.update({ where: { id: user.id }, data: { passwordHash: await hashPassword(next) } });
-  return { ok: true, message: "Mot de passe modifié avec succès." };
+  return { ok: true, message: await tr("Mot de passe modifié avec succès.") };
 }
 
 export async function createReview(_prev: FormResult, formData: FormData): Promise<FormResult> {
   const user = await getCurrentUser();
-  if (!user) return { ok: false, error: "Non autorise." };
+  if (!user) return { ok: false, error: await tr("Non autorisé.") };
 
   const reservationId = String(formData.get("reservationId") ?? "");
   const rating = Number(formData.get("rating") ?? 0);
   const comment = String(formData.get("comment") ?? "");
 
-  if (rating < 1 || rating > 5) return { ok: false, error: "Note invalide." };
+  if (rating < 1 || rating > 5) return { ok: false, error: await tr("Note invalide.") };
 
   const reservation = await prisma.reservation.findFirst({
     where: { id: reservationId, travelerId: user.id, status: "COMPLETED" },
     include: { review: true },
   });
-  if (!reservation) return { ok: false, error: "Réservation introuvable ou non eligible." };
-  if (reservation.review) return { ok: false, error: "Vous avez déjà laisse un avis." };
+  if (!reservation) return { ok: false, error: await tr("Réservation introuvable ou non éligible.") };
+  if (reservation.review) return { ok: false, error: await tr("Vous avez déjà laissé un avis.") };
 
   await prisma.$transaction(async (tx) => {
     await tx.review.create({
@@ -108,12 +109,12 @@ export async function createReview(_prev: FormResult, formData: FormData): Promi
   });
 
   revalidatePath("/account/reviews");
-  return { ok: true, message: "Merci pour votre avis !" };
+  return { ok: true, message: await tr("Merci pour votre avis !") };
 }
 
 export async function markAllNotificationsRead(): Promise<FormResult> {
   const user = await getCurrentUser();
-  if (!user) return { ok: false, error: "Non autorise." };
+  if (!user) return { ok: false, error: await tr("Non autorisé.") };
   await prisma.notification.updateMany({
     where: { userId: user.id, readAt: null },
     data: { readAt: new Date() },

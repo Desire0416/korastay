@@ -187,7 +187,7 @@ export default async function ReserverPage({
             <div className="mt-5 space-y-3 border-t border-border pt-5 text-sm">
               <div className="flex items-center gap-2 text-foreground">
                 <CalendarDays className="h-4 w-4 text-muted" />
-                {formatDate(checkin!)} &rarr; {formatDate(checkout!)}
+                {formatDate(checkin!, locale)} &rarr; {formatDate(checkout!, locale)}
               </div>
               <div className="flex items-center gap-2 text-foreground">
                 <Users className="h-4 w-4 text-muted" />

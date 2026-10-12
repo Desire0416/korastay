@@ -197,7 +197,7 @@ export const homeFr: HomeDict = {
       },
       {
         q: "Puis-je annuler ma réservation ?",
-        a: "Oui. Pour les logements : remboursement intégral à plus de 72 h de l'arrivée, 50 % entre 24 et 72 h, aucun remboursement à moins de 24 h. Des conditions particulières peuvent s'appliquer ; elles sont indiquées sur chaque fiche.",
+        a: "Oui. Logements : remboursement intégral à plus de 72 h de l'arrivée, 50 % entre 24 et 72 h, rien à moins de 24 h. Packs : intégral à plus de 7 jours du départ, 50 % entre 3 et 7 jours, rien à moins de 3 jours. Les frais de service ne sont pas remboursés ; des conditions particulières peuvent figurer sur une fiche.",
       },
       {
         q: "Puis-je proposer mon prix ?",
@@ -361,7 +361,7 @@ export const homeEn: HomeDict = {
       },
       {
         q: "Can I cancel my booking?",
-        a: "Yes. For homes: full refund more than 72 h before arrival, 50% between 24 and 72 h, no refund within 24 h. Specific conditions may apply; they are shown on each listing.",
+        a: "Yes. Homes: full refund more than 72 h before arrival, 50% between 24 and 72 h, nothing within 24 h. Packs: full refund more than 7 days before departure, 50% between 3 and 7 days, nothing within 3 days. Service fees are not refunded; specific conditions may be shown on a listing.",
       },
       {
         q: "Can I suggest my own price?",

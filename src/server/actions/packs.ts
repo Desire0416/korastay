@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
 import { slugify } from "@/lib/utils";
+import { tr } from "@/lib/action-i18n";
 
 export type PackItemInput = { label: string; details?: string; included: boolean };
 export type PackActivityInput = { timeLabel?: string; title: string; description?: string };
@@ -50,10 +51,10 @@ async function uniquePackSlug(base: string, excludeId?: string): Promise<string>
 export async function savePack(input: PackInput): Promise<PackResult> {
   const admin = await requireRole(["ADMIN", "SUPER_ADMIN"]);
 
-  if (!input.name || input.name.trim().length < 3) return { ok: false, error: "Le nom du pack est requis (3 caractères min)." };
-  if (!input.description || input.description.trim().length < 20) return { ok: false, error: "La description doit faire au moins 20 caractères." };
-  if (!input.price || input.price < 1000) return { ok: false, error: "Le prix doit être d'au moins 1000 F CFA." };
-  if (input.maxPersons < input.basePersons) return { ok: false, error: "Le nombre max de personnes doit être >= au nombre de base." };
+  if (!input.name || input.name.trim().length < 3) return { ok: false, error: await tr("Le nom du pack est requis (3 caractères min).") };
+  if (!input.description || input.description.trim().length < 20) return { ok: false, error: await tr("La description doit faire au moins 20 caractères.") };
+  if (!input.price || input.price < 1000) return { ok: false, error: await tr("Le prix doit être d'au moins 1000 F CFA.") };
+  if (input.maxPersons < input.basePersons) return { ok: false, error: await tr("Le nombre max de personnes doit être >= au nombre de base.") };
 
   const includedItems = (input.includedItems ?? []).filter((i) => i.label?.trim());
   const programDays = (input.programDays ?? []).filter((d) => d.title?.trim());
@@ -83,7 +84,7 @@ export async function savePack(input: PackInput): Promise<PackResult> {
   // ---- Edition ----
   if (input.id) {
     const existing = await prisma.pack.findUnique({ where: { id: input.id }, select: { id: true } });
-    if (!existing) return { ok: false, error: "Pack introuvable." };
+    if (!existing) return { ok: false, error: await tr("Pack introuvable.") };
 
     await prisma.$transaction(async (tx) => {
       await tx.pack.update({ where: { id: input.id! }, data });
@@ -107,7 +108,7 @@ export async function savePack(input: PackInput): Promise<PackResult> {
     revalidatePath("/admin/packs");
     revalidatePath(`/admin/packs/${input.id}/edit`);
     revalidatePath("/packs");
-    return { ok: true, id: input.id, message: "Pack mis a jour avec succès." };
+    return { ok: true, id: input.id, message: await tr("Pack mis à jour avec succès.") };
   }
 
   // ---- Creation ----
@@ -142,14 +143,14 @@ export async function deletePack(id: string): Promise<PackResult> {
   const admin = await requireRole(["ADMIN", "SUPER_ADMIN"]);
   const reservations = await prisma.reservation.count({ where: { packId: id } });
   if (reservations > 0) {
-    return { ok: false, error: "Impossible de supprimer : des réservations existent pour ce pack. Depubliez-le plutôt." };
+    return { ok: false, error: await tr("Impossible de supprimer : des réservations existent pour ce pack. Dépubliez-le plutôt.") };
   }
   try {
     await prisma.pack.delete({ where: { id } });
   } catch {
-    return { ok: false, error: "Suppression impossible (le pack est référence ailleurs). Depubliez-le plutôt." };
+    return { ok: false, error: await tr("Suppression impossible (le pack est référencé ailleurs). Dépubliez-le plutôt.") };
   }
   await prisma.auditLog.create({ data: { actorId: admin.id, action: "PACK_DELETED", entityType: "Pack", entityId: id } });
   revalidatePath("/admin/packs");
-  return { ok: true, message: "Pack supprimé." };
+  return { ok: true, message: await tr("Pack supprimé.") };
 }

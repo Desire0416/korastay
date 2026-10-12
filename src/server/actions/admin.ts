@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
+import { tr } from "@/lib/action-i18n";
 
 export type AdminResult = { ok: boolean; error?: string; message?: string };
 
@@ -22,10 +23,10 @@ async function notify(userId: string, title: string, body: string, url?: string,
 export async function validateResidence(id: string, qualityLevel: string): Promise<AdminResult> {
   const admin = await requireRole(["ADMIN", "SUPER_ADMIN"]);
   if (!["ESSENTIAL", "COMFORT", "PREMIUM"].includes(qualityLevel)) {
-    return { ok: false, error: "Niveau de qualité invalide." };
+    return { ok: false, error: await tr("Niveau de qualité invalide.") };
   }
   const residence = await prisma.residence.findUnique({ where: { id } });
-  if (!residence) return { ok: false, error: "Introuvable." };
+  if (!residence) return { ok: false, error: await tr("Introuvable.") };
 
   await prisma.residence.update({
     where: { id },
@@ -38,18 +39,18 @@ export async function validateResidence(id: string, qualityLevel: string): Promi
   await audit(admin.id, "RESIDENCE_VALIDATED", "Residence", id, { qualityLevel });
   revalidatePath("/admin/residences");
   revalidatePath(`/admin/residences/${id}`);
-  return { ok: true, message: "Résidence validée et publiée." };
+  return { ok: true, message: await tr("Résidence validée et publiée.") };
 }
 
 export async function requestResidenceChanges(id: string, note: string): Promise<AdminResult> {
   const admin = await requireRole(["ADMIN", "SUPER_ADMIN"]);
   const residence = await prisma.residence.findUnique({ where: { id } });
-  if (!residence) return { ok: false, error: "Introuvable." };
+  if (!residence) return { ok: false, error: await tr("Introuvable.") };
   await prisma.residence.update({ where: { id }, data: { verificationStatus: "NEEDS_CHANGES" } });
   await notify(residence.ownerId, "Corrections demandées", `${residence.name} : ${note || "Des modifications sont requises."}`, "/owner/residences");
   await audit(admin.id, "RESIDENCE_CHANGES_REQUESTED", "Residence", id, { note });
   revalidatePath(`/admin/residences/${id}`);
-  return { ok: true, message: "Demande de corrections envoyée." };
+  return { ok: true, message: await tr("Demande de corrections envoyée.") };
 }
 
 export async function setResidenceStatus(id: string, status: string): Promise<AdminResult> {
@@ -58,7 +59,7 @@ export async function setResidenceStatus(id: string, status: string): Promise<Ad
   await audit(admin.id, "RESIDENCE_STATUS", "Residence", id, { status });
   revalidatePath("/admin/residences");
   revalidatePath(`/admin/residences/${id}`);
-  return { ok: true, message: "Statut mis a jour." };
+  return { ok: true, message: await tr("Statut mis à jour.") };
 }
 
 // ------------------------------------------------------------
@@ -66,7 +67,7 @@ export async function setResidenceStatus(id: string, status: string): Promise<Ad
 // ------------------------------------------------------------
 export async function setUserStatus(id: string, status: string): Promise<AdminResult> {
   const admin = await requireRole(["ADMIN", "SUPER_ADMIN"]);
-  if (id === admin.id) return { ok: false, error: "Vous ne pouvez pas modifier votre propre statut." };
+  if (id === admin.id) return { ok: false, error: await tr("Vous ne pouvez pas modifier votre propre statut.") };
   await prisma.user.update({ where: { id }, data: { status } });
   if (status === "SUSPENDED" || status === "DISABLED") {
     await prisma.session.deleteMany({ where: { userId: id } });
@@ -74,7 +75,7 @@ export async function setUserStatus(id: string, status: string): Promise<AdminRe
   await audit(admin.id, "USER_STATUS", "User", id, { status });
   revalidatePath("/admin/users");
   revalidatePath(`/admin/users/${id}`);
-  return { ok: true, message: "Statut utilisateur mis a jour." };
+  return { ok: true, message: await tr("Statut utilisateur mis à jour.") };
 }
 
 export async function setUserRole(id: string, role: string): Promise<AdminResult> {
@@ -82,7 +83,7 @@ export async function setUserRole(id: string, role: string): Promise<AdminResult
   await prisma.user.update({ where: { id }, data: { role } });
   await audit(admin.id, "USER_ROLE_CHANGED", "User", id, { role });
   revalidatePath(`/admin/users/${id}`);
-  return { ok: true, message: "Role mis a jour." };
+  return { ok: true, message: await tr("Rôle mis à jour.") };
 }
 
 // ------------------------------------------------------------
@@ -91,14 +92,14 @@ export async function setUserRole(id: string, role: string): Promise<AdminResult
 export async function setPartnerStatus(id: string, status: string): Promise<AdminResult> {
   const admin = await requireRole(["ADMIN", "SUPER_ADMIN"]);
   const partner = await prisma.partnerProfile.findUnique({ where: { id }, select: { userId: true, businessName: true } });
-  if (!partner) return { ok: false, error: "Introuvable." };
+  if (!partner) return { ok: false, error: await tr("Introuvable.") };
   await prisma.partnerProfile.update({ where: { id }, data: { verificationStatus: status } });
   const label = status === "VERIFIED" ? "valide" : status === "REJECTED" ? "refuse" : "mis a jour";
   await notify(partner.userId, "Statut partenaire", `Votre profil ${partner.businessName} a ete ${label}.`, "/partner");
   await audit(admin.id, "PARTNER_STATUS", "PartnerProfile", id, { status });
   revalidatePath("/admin/partners");
   revalidatePath(`/admin/partners/${id}`);
-  return { ok: true, message: "Statut partenaire mis a jour." };
+  return { ok: true, message: await tr("Statut partenaire mis à jour.") };
 }
 
 // ------------------------------------------------------------
@@ -110,17 +111,17 @@ export async function setBusinessRequestStatus(id: string, status: string): Prom
   await audit(admin.id, "BUSINESS_REQUEST_STATUS", "BusinessRequest", id, { status });
   revalidatePath("/admin/business");
   revalidatePath(`/admin/business/${id}`);
-  return { ok: true, message: "Demande mise a jour." };
+  return { ok: true, message: await tr("Demande mise à jour.") };
 }
 
 export async function sendBusinessQuote(id: string, _prev: AdminResult, formData: FormData): Promise<AdminResult> {
   const admin = await requireRole(["ADMIN", "SUPER_ADMIN"]);
   const amount = Number(formData.get("quoteAmount"));
   const message = String(formData.get("quoteMessage") ?? "");
-  if (!amount || amount < 1000) return { ok: false, error: "Montant du devis invalide (min 1000 F CFA)." };
+  if (!amount || amount < 1000) return { ok: false, error: await tr("Montant du devis invalide (min 1000 F CFA).") };
 
   const req = await prisma.businessRequest.findUnique({ where: { id } });
-  if (!req) return { ok: false, error: "Demande introuvable." };
+  if (!req) return { ok: false, error: await tr("Demande introuvable.") };
 
   await prisma.businessRequest.update({
     where: { id },
@@ -135,7 +136,7 @@ export async function sendBusinessQuote(id: string, _prev: AdminResult, formData
   await audit(admin.id, "BUSINESS_QUOTE_SENT", "BusinessRequest", id, { amount });
   revalidatePath("/admin/business");
   revalidatePath(`/admin/business/${id}`);
-  return { ok: true, message: "Devis envoyé au client." };
+  return { ok: true, message: await tr("Devis envoyé au client.") };
 }
 
 // ------------------------------------------------------------
@@ -146,7 +147,7 @@ export async function moderateReview(id: string, status: string): Promise<AdminR
   await prisma.review.update({ where: { id }, data: { status } });
   await audit(admin.id, "REVIEW_MODERATED", "Review", id, { status });
   revalidatePath("/admin/reviews");
-  return { ok: true, message: "Avis modéré." };
+  return { ok: true, message: await tr("Avis modéré.") };
 }
 
 // ------------------------------------------------------------
@@ -158,7 +159,7 @@ export async function adminSetReservationStatus(id: string, status: string): Pro
     where: { id },
     include: { payments: { where: { status: "PAID" }, select: { id: true }, take: 1 } },
   });
-  if (!reservation) return { ok: false, error: "Introuvable." };
+  if (!reservation) return { ok: false, error: await tr("Introuvable.") };
 
   // Regle : une reservation ne passe a CONFIRMED que si un paiement est valide.
   if (status === "CONFIRMED" && reservation.payments.length === 0) {
@@ -198,13 +199,13 @@ export async function adminSetReservationStatus(id: string, status: string): Pro
   revalidatePath("/admin/reservations");
   revalidatePath(`/admin/reservations/${id}`);
   revalidatePath("/admin/payouts");
-  return { ok: true, message: "Réservation mise a jour." };
+  return { ok: true, message: await tr("Réservation mise à jour.") };
 }
 
 export async function processRefund(refundId: string): Promise<AdminResult> {
   const admin = await requireRole(["ADMIN", "SUPER_ADMIN"]);
   const refund = await prisma.refund.findUnique({ where: { id: refundId }, include: { reservation: true, payment: true } });
-  if (!refund) return { ok: false, error: "Introuvable." };
+  if (!refund) return { ok: false, error: await tr("Introuvable.") };
 
   const fullyRefunded = refund.amount >= refund.payment.amount;
   await prisma.$transaction([
@@ -215,7 +216,7 @@ export async function processRefund(refundId: string): Promise<AdminResult> {
   await notify(refund.reservation.travelerId, "Remboursement traite", `Votre remboursement pour ${refund.reservation.reference} a ete traite.`, `/account/bookings/${refund.reservationId}`);
   await audit(admin.id, "REFUND_PROCESSED", "Refund", refundId, { amount: refund.amount });
   revalidatePath("/admin/refunds");
-  return { ok: true, message: "Remboursement traite." };
+  return { ok: true, message: await tr("Remboursement traité.") };
 }
 
 // ------------------------------------------------------------
@@ -226,7 +227,7 @@ export async function setPackStatus(id: string, status: string): Promise<AdminRe
   await prisma.pack.update({ where: { id }, data: { status } });
   await audit(admin.id, "PACK_STATUS", "Pack", id, { status });
   revalidatePath("/admin/packs");
-  return { ok: true, message: "Pack mis a jour." };
+  return { ok: true, message: await tr("Pack mis à jour.") };
 }
 
 // ------------------------------------------------------------
@@ -236,11 +237,11 @@ export async function updateContentPage(id: string, _prev: AdminResult, formData
   const admin = await requireRole(["ADMIN", "SUPER_ADMIN"]);
   const title = String(formData.get("title") ?? "");
   const body = String(formData.get("body") ?? "");
-  if (title.length < 2 || body.length < 10) return { ok: false, error: "Titre et contenu requis." };
+  if (title.length < 2 || body.length < 10) return { ok: false, error: await tr("Titre et contenu requis.") };
   await prisma.contentPage.update({ where: { id }, data: { title, body } });
   await audit(admin.id, "CONTENT_UPDATED", "ContentPage", id);
   revalidatePath("/admin/content/pages");
-  return { ok: true, message: "Page mise a jour." };
+  return { ok: true, message: await tr("Page mise à jour.") };
 }
 
 // ------------------------------------------------------------
@@ -257,7 +258,7 @@ export async function addPackImage(packId: string, url: string): Promise<AdminRe
 export async function deletePackImage(imageId: string): Promise<AdminResult> {
   await requireRole(["ADMIN", "SUPER_ADMIN"]);
   const img = await prisma.packImage.findUnique({ where: { id: imageId } });
-  if (!img) return { ok: false, error: "Image introuvable." };
+  if (!img) return { ok: false, error: await tr("Image introuvable.") };
   await prisma.packImage.delete({ where: { id: imageId } });
   if (img.isCover) {
     const next = await prisma.packImage.findFirst({ where: { packId: img.packId }, orderBy: { sortOrder: "asc" } });
@@ -270,7 +271,7 @@ export async function deletePackImage(imageId: string): Promise<AdminResult> {
 export async function setPackCoverImage(imageId: string): Promise<AdminResult> {
   await requireRole(["ADMIN", "SUPER_ADMIN"]);
   const img = await prisma.packImage.findUnique({ where: { id: imageId } });
-  if (!img) return { ok: false, error: "Image introuvable." };
+  if (!img) return { ok: false, error: await tr("Image introuvable.") };
   await prisma.$transaction([
     prisma.packImage.updateMany({ where: { packId: img.packId }, data: { isCover: false } }),
     prisma.packImage.update({ where: { id: imageId }, data: { isCover: true } }),

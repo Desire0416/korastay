@@ -4,6 +4,8 @@ import * as React from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Search, X, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/components/i18n/provider";
+import { statusText } from "@/lib/dictionaries/enums";
 
 export type FilterField =
   | { type: "search"; name: string; placeholder?: string }
@@ -20,6 +22,7 @@ export function FilterBar({ fields, className }: FilterBarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const sp = useSearchParams();
+  const dict = useI18n();
 
   const searchField = fields.find((f) => f.type === "search") as Extract<FilterField, { type: "search" }> | undefined;
   const selects = fields.filter((f) => f.type === "select") as Extract<FilterField, { type: "select" }>[];
@@ -70,8 +73,8 @@ export function FilterBar({ fields, className }: FilterBarProps) {
             type="search"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder={searchField.placeholder ?? "Rechercher..."}
-            className="h-11 w-full rounded-2xl border border-border bg-surface pl-10 pr-3 text-sm text-foreground placeholder:text-muted focus-visible:border-brand-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-100"
+            placeholder={searchField.placeholder ?? dict.dash.common.search}
+            className="h-11 w-full rounded-full border border-ink/15 bg-white pl-10 pr-4 text-sm text-foreground placeholder:text-muted transition-colors hover:border-ink/30 focus-visible:border-terracotta focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-terracotta/10"
           />
         </div>
       )}
@@ -84,14 +87,14 @@ export function FilterBar({ fields, className }: FilterBarProps) {
               value={value}
               onChange={(e) => router.push(buildUrl({ [f.name]: e.target.value || null }), { scroll: false })}
               className={cn(
-                "h-11 appearance-none rounded-2xl border bg-surface pl-3.5 pr-9 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-100",
-                value ? "border-brand-300 text-foreground" : "border-border text-muted"
+                "h-11 appearance-none rounded-full border bg-white pl-4 pr-9 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-terracotta/10",
+                value ? "border-ink text-ink" : "border-ink/15 text-muted hover:border-ink/30"
               )}
             >
-              <option value="">{f.label}</option>
+              <option value="">{statusText(dict, f.label)}</option>
               {f.options.map((o) => (
                 <option key={o.value} value={o.value}>
-                  {o.label}
+                  {statusText(dict, o.label)}
                 </option>
               ))}
             </select>
@@ -107,9 +110,9 @@ export function FilterBar({ fields, className }: FilterBarProps) {
             setText("");
             router.push(pathname, { scroll: false });
           }}
-          className="inline-flex h-11 items-center gap-1.5 rounded-2xl px-3 text-sm font-semibold text-muted transition-colors hover:bg-surface-soft hover:text-foreground"
+          className="inline-flex h-11 items-center gap-1.5 rounded-full px-4 text-sm font-semibold text-terracotta transition-colors hover:bg-terracotta-50"
         >
-          <X className="h-4 w-4" /> Reinitialiser
+          <X className="h-4 w-4" /> {dict.dash.common.reset}
         </button>
       )}
     </div>

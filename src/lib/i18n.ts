@@ -16,6 +16,7 @@ import { type ActivitiesDict, activitiesFr, activitiesEn } from "./dictionaries/
 import { type DestinationsDict, destinationsFr, destinationsEn } from "./dictionaries/destinations";
 import { type PagesDict, pagesFr, pagesEn } from "./dictionaries/pages";
 import { type AuthDict, authFr, authEn } from "./dictionaries/auth";
+import { type DashDict, dashFr, dashEn } from "./dictionaries/dashboard";
 
 export type Locale = "fr" | "en";
 export const LOCALES: Locale[] = ["fr", "en"];
@@ -34,6 +35,8 @@ export interface Dictionary {
   destinations: DestinationsDict;
   pages: PagesDict;
   auth: AuthDict;
+  // Espaces connectes : toutes les cles prefixees "dash" (cf. publicClientDict).
+  dash: DashDict;
   header: {
     becomeHost: string;
     login: string;
@@ -326,6 +329,7 @@ const FR: Dictionary = {
   destinations: destinationsFr,
   pages: pagesFr,
   auth: authFr,
+  dash: dashFr,
   header: {
     becomeHost: "Devenir propriétaire",
     login: "Connexion",
@@ -592,6 +596,7 @@ const EN: Dictionary = {
   destinations: destinationsEn,
   pages: pagesEn,
   auth: authEn,
+  dash: dashEn,
   header: {
     becomeHost: "Become a host",
     login: "Log in",
@@ -856,6 +861,18 @@ export function isLocale(value: unknown): value is Locale {
 
 export function getDictionary(locale: Locale): Dictionary {
   return DICTIONARIES[locale] ?? FR;
+}
+
+/**
+ * Dictionnaire envoye au client sur les pages publiques / auth : sans les
+ * espaces de noms des tableaux de bord (cles "dash*"), qui ne servent qu'au
+ * groupe (app). Evite d'alourdir le payload RSC de chaque page publique.
+ * Aucun composant client public ne doit lire une cle "dash*".
+ */
+export function publicClientDict(dict: Dictionary): Dictionary {
+  return Object.fromEntries(
+    Object.entries(dict).filter(([key]) => !key.startsWith("dash"))
+  ) as unknown as Dictionary;
 }
 
 /** Traduit un libelle de navigation par href, avec repli sur le libelle francais. */

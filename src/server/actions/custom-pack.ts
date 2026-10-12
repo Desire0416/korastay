@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser, requireRole } from "@/lib/auth";
 import { getServiceFeeRate } from "@/lib/settings";
 import { generateReference } from "@/lib/utils";
+import { tr } from "@/lib/action-i18n";
 
 export type CustomPackResult = { ok: boolean; error?: string; message?: string; id?: string; reference?: string };
 
@@ -23,16 +24,16 @@ export interface CustomPackInput {
 export async function submitCustomPack(input: CustomPackInput): Promise<CustomPackResult> {
   const user = await getCurrentUser();
 
-  if (!input.cityName) return { ok: false, error: "Choisissez une ville." };
-  if (!input.serviceIds || input.serviceIds.length === 0) return { ok: false, error: "Sélectionnez au moins une activité ou un service." };
-  if (!input.contactName?.trim() || !input.email?.includes("@")) return { ok: false, error: "Nom et email valides requis." };
+  if (!input.cityName) return { ok: false, error: await tr("Choisissez une ville.") };
+  if (!input.serviceIds || input.serviceIds.length === 0) return { ok: false, error: await tr("Sélectionnez au moins une activité ou un service.") };
+  if (!input.contactName?.trim() || !input.email?.includes("@")) return { ok: false, error: await tr("Nom et e-mail valides requis.") };
 
   // Re-charge les services (prix faisant foi cote serveur)
   const services = await prisma.partnerService.findMany({
     where: { id: { in: input.serviceIds }, isActive: true, partnerProfile: { verificationStatus: "VERIFIED" } },
     include: { partnerProfile: { select: { id: true, type: true, businessName: true, userId: true } } },
   });
-  if (services.length === 0) return { ok: false, error: "Services indisponibles." };
+  if (services.length === 0) return { ok: false, error: await tr("Services indisponibles.") };
 
   const subtotal = services.reduce((sum, s) => sum + (s.priceFrom ?? 0), 0);
   const rate = await getServiceFeeRate();
@@ -99,9 +100,9 @@ export async function sendCustomPackQuote(id: string, _prev: CustomPackResult, f
   const admin = await requireRole(["ADMIN", "SUPER_ADMIN"]);
   const amount = Number(formData.get("quoteAmount"));
   const message = String(formData.get("quoteMessage") ?? "");
-  if (!amount || amount < 1000) return { ok: false, error: "Montant du devis invalide (min 1000 F CFA)." };
+  if (!amount || amount < 1000) return { ok: false, error: await tr("Montant du devis invalide (min 1000 F CFA).") };
   const req = await prisma.customPackRequest.findUnique({ where: { id } });
-  if (!req) return { ok: false, error: "Introuvable." };
+  if (!req) return { ok: false, error: await tr("Introuvable.") };
 
   await prisma.customPackRequest.update({ where: { id }, data: { quoteAmount: amount, quoteMessage: message || null, status: "QUOTED" } });
   if (req.userId) {
@@ -111,18 +112,18 @@ export async function sendCustomPackQuote(id: string, _prev: CustomPackResult, f
   revalidatePath("/admin/custom-packs");
   revalidatePath(`/admin/custom-packs/${id}`);
   revalidatePath("/account/custom-packs");
-  return { ok: true, message: "Devis envoyé au client." };
+  return { ok: true, message: await tr("Devis envoyé au client.") };
 }
 
 // ---- Acceptation du devis (voyageur) ----
 export async function acceptCustomPackQuote(id: string): Promise<CustomPackResult> {
   const user = await getCurrentUser();
-  if (!user) return { ok: false, error: "Non autorise." };
+  if (!user) return { ok: false, error: await tr("Non autorisé.") };
   const req = await prisma.customPackRequest.findUnique({ where: { id } });
-  if (!req) return { ok: false, error: "Introuvable." };
+  if (!req) return { ok: false, error: await tr("Introuvable.") };
   const staff = user.role === "ADMIN" || user.role === "SUPER_ADMIN";
-  if (req.userId !== user.id && !staff) return { ok: false, error: "Accès refuse." };
-  if (req.status !== "QUOTED") return { ok: false, error: "Aucun devis a accepter." };
+  if (req.userId !== user.id && !staff) return { ok: false, error: await tr("Accès refusé.") };
+  if (req.status !== "QUOTED") return { ok: false, error: await tr("Aucun devis à accepter.") };
 
   await prisma.customPackRequest.update({ where: { id }, data: { status: "CONFIRMED" } });
   const admins = await prisma.user.findMany({ where: { role: { in: ["ADMIN", "SUPER_ADMIN"] } }, select: { id: true } });
@@ -131,18 +132,18 @@ export async function acceptCustomPackQuote(id: string): Promise<CustomPackResul
   }
   revalidatePath("/account/custom-packs");
   revalidatePath(`/admin/custom-packs/${id}`);
-  return { ok: true, message: "Devis accepte ! Notre équipe finalisé votre pack." };
+  return { ok: true, message: await tr("Devis accepté ! Notre équipe finalise votre pack.") };
 }
 
 // ---- Conversion en reservation + missions partenaires (admin) ----
 export async function convertCustomPackToReservation(id: string): Promise<CustomPackResult> {
   const admin = await requireRole(["ADMIN", "SUPER_ADMIN"]);
   const req = await prisma.customPackRequest.findUnique({ where: { id }, include: { items: true } });
-  if (!req) return { ok: false, error: "Introuvable." };
-  if (req.reservationId) return { ok: false, error: "Ce pack est déjà converti en réservation." };
-  if (!req.userId) return { ok: false, error: "Le voyageur doit avoir un compte KoraStay pour générer une réservation." };
+  if (!req) return { ok: false, error: await tr("Introuvable.") };
+  if (req.reservationId) return { ok: false, error: await tr("Ce pack est déjà converti en réservation.") };
+  if (!req.userId) return { ok: false, error: await tr("Le voyageur doit avoir un compte KoraStay pour générer une réservation.") };
   const traveler = await prisma.user.findUnique({ where: { id: req.userId } });
-  if (!traveler) return { ok: false, error: "Voyageur introuvable." };
+  if (!traveler) return { ok: false, error: await tr("Voyageur introuvable.") };
 
   const start = req.startDate ?? new Date();
   const end = new Date(new Date(start).getTime() + 24 * 60 * 60 * 1000);
@@ -185,14 +186,14 @@ export async function convertCustomPackToReservation(id: string): Promise<Custom
 
   revalidatePath("/admin/custom-packs");
   revalidatePath(`/admin/custom-packs/${id}`);
-  return { ok: true, id: reservation.id, message: "Pack converti en réservation et missions partenaires créées." };
+  return { ok: true, id: reservation.id, message: await tr("Pack converti en réservation et missions partenaires créées.") };
 }
 
 // ---- Actions admin ----
 export async function setCustomPackStatus(id: string, status: string): Promise<CustomPackResult> {
   const admin = await requireRole(["ADMIN", "SUPER_ADMIN"]);
   const req = await prisma.customPackRequest.findUnique({ where: { id } });
-  if (!req) return { ok: false, error: "Introuvable." };
+  if (!req) return { ok: false, error: await tr("Introuvable.") };
   await prisma.customPackRequest.update({ where: { id }, data: { status } });
   if (req.userId) {
     await prisma.notification.create({

@@ -35,7 +35,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         </Link>
         <p className="eyebrow mt-8 flex items-center justify-center gap-3 text-[11px] text-terracotta">
           <Ornament side="left" />
-          {formatDate(post.publishedAt ?? post.createdAt)}
+          {formatDate(post.publishedAt ?? post.createdAt, locale)}
           {post.author && <span className="text-muted">· {post.author.firstName} {post.author.lastName}</span>}
           <Ornament side="right" />
         </p>
