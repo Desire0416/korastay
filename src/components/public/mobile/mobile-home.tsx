@@ -4,20 +4,19 @@ import * as React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
-  ArrowRight, ArrowUpRight, Home as HomeIcon, Compass, Sparkles, Clock, MapPin,
-  ShieldCheck, Smartphone, Headset, Star, Quote,
-  Eye, Users, KeyRound, Handshake, BedDouble, type LucideIcon,
+  ArrowRight, Home as HomeIcon, Compass, Sparkles, Check, Quote, Star,
+  ShieldCheck, Smartphone, Headset, Handshake, KeyRound, type LucideIcon,
 } from "lucide-react";
 import { HeroSearch } from "../hero-search";
 import { DestinationCard } from "../destination-card";
+import { ActivityCard } from "../activity-card";
 import { MobileResidenceCard, MobilePackCard } from "./mobile-cards";
 import { CountUp } from "../count-up";
-import { SmartImage } from "@/components/ui/smart-image";
+import { Motif, Ornament } from "@/components/brand/motif";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { activityCategoryMeta } from "@/lib/enums";
 import { useI18n } from "@/components/i18n/provider";
 import { localePath } from "@/lib/i18n";
-import { cn, initials, formatPrice } from "@/lib/utils";
+import { cn, initials } from "@/lib/utils";
 import type { ResidenceCardData, CommunityStats } from "@/lib/queries";
 import type { ActivityCardData } from "@/lib/activity-queries";
 
@@ -42,25 +41,46 @@ interface MobileHomeProps {
   favorites: { residences: Set<string>; packs: Set<string> };
 }
 
-type TabKey = "residences" | "packs" | "activites";
-const TABS: { key: TabKey; icon: LucideIcon; color: string; badge?: boolean }[] = [
-  { key: "residences", icon: HomeIcon, color: "text-brand-600" },
-  { key: "packs", icon: Compass, color: "text-gold-600", badge: true },
-  { key: "activites", icon: Sparkles, color: "text-success" },
+type TabKey = "residences" | "packs" | "activities";
+const TABS: { key: TabKey; icon: LucideIcon; badge?: boolean }[] = [
+  { key: "residences", icon: HomeIcon },
+  { key: "packs", icon: Compass, badge: true },
+  { key: "activities", icon: Sparkles },
 ];
 
-const TRUST_ICONS = [ShieldCheck, Smartphone, Headset];
+const WHY_ICONS = [ShieldCheck, Smartphone, Headset, Handshake];
 
-function SectionHead({ title, subtitle, href }: { title: string; subtitle?: string; href?: string }) {
+function SectionHead({
+  eyebrow,
+  title,
+  accent,
+  href,
+}: {
+  eyebrow?: string;
+  title: string;
+  accent?: string;
+  href?: string;
+}) {
   const dict = useI18n();
   return (
-    <div className="mb-3 flex items-end justify-between gap-3 px-5">
+    <div className="mb-4 flex items-end justify-between gap-3 px-5">
       <div className="min-w-0">
-        <h2 className="text-[19px] font-bold leading-tight tracking-tight text-foreground">{title}</h2>
-        {subtitle && <p className="truncate text-[13px] text-muted">{subtitle}</p>}
+        {eyebrow && (
+          <p className="eyebrow mb-1.5 flex items-center gap-2 text-[10px] text-terracotta">
+            <Ornament side="left" />
+            {eyebrow}
+          </p>
+        )}
+        <h2 className="font-display text-[1.6rem] leading-[1.1] text-foreground">
+          {title} {accent && <em className="italic text-terracotta">{accent}</em>}
+        </h2>
       </div>
       {href && (
-        <Link href={href} aria-label={dict.mobileHome.viewAria.replace("{title}", title)} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border text-foreground active:scale-95">
+        <Link
+          href={href}
+          aria-label={dict.home.mobile.viewAria.replace("{title}", `${title} ${accent ?? ""}`.trim())}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-ink/15 text-ink active:scale-95"
+        >
           <ArrowRight className="h-4 w-4" />
         </Link>
       )}
@@ -68,31 +88,60 @@ function SectionHead({ title, subtitle, href }: { title: string; subtitle?: stri
   );
 }
 
+function Rail({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="no-scrollbar flex snap-x snap-mandatory gap-3.5 overflow-x-auto scroll-px-5 px-5 pb-1">
+      {children}
+    </div>
+  );
+}
+
 export function MobileHome({ residences, destinations, packs, activities, reviews, stats, community, favorites }: MobileHomeProps) {
   const dict = useI18n();
+  const h = dict.home;
   const [tab, setTab] = React.useState<TabKey>("residences");
 
-  // Tuiles de stats (affichees seulement si l'admin a active la section).
   const communityTiles = community
     ? [
-        { value: community.visits, icon: Eye, label: dict.mobileHome.tiles.visits },
-        { value: community.travelers, icon: Users, label: dict.mobileHome.tiles.travelers },
-        { value: community.owners, icon: KeyRound, label: dict.mobileHome.tiles.owners },
-        { value: community.guides, icon: Compass, label: dict.mobileHome.tiles.guides },
-        { value: community.partners, icon: Handshake, label: dict.mobileHome.tiles.partners },
-        { value: stats.residences, icon: BedDouble, label: dict.mobileHome.tiles.stays },
+        { value: community.visits, label: h.stats.visits },
+        { value: community.travelers, label: h.stats.travelers },
+        { value: community.owners, label: h.stats.owners },
+        { value: community.guides, label: h.stats.guides },
+        { value: community.partners, label: h.stats.partners },
+        { value: stats.residences, label: h.stats.residences },
       ]
     : [];
 
   return (
     <div className="md:hidden">
-      {/* Recherche collante facon application */}
-      <div className="sticky top-[var(--header-h)] z-20 border-b border-border/70 bg-background/90 px-4 py-3 backdrop-blur-lg">
-        <HeroSearch destinations={destinations.map((d) => ({ name: d.name, slug: d.slug }))} variant="compact" pill />
-      </div>
+      {/* ===== Hero ===== */}
+      <section className="grain relative overflow-hidden px-5 pb-6 pt-7">
+        <Motif variant="bogolan" fade="bottom" className="text-sand-500/[0.16]" />
+        <div aria-hidden="true" className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-gold-400/80" />
+        <div className="relative">
+          <p className="eyebrow flex items-center gap-2 text-[10px] text-terracotta">
+            <Ornament side="left" />
+            {h.hero.eyebrow}
+          </p>
+          <h1 className="mt-4 text-balance font-display text-[2.4rem] font-normal leading-[1.02] tracking-[-0.02em] text-foreground">
+            {h.hero.title} <em className="italic text-terracotta">{h.hero.accent}</em>
+          </h1>
+          <div className="mt-6">
+            <HeroSearch destinations={destinations.map((d) => ({ name: d.name, slug: d.slug }))} variant="compact" pill />
+          </div>
+          <ul className="no-scrollbar -mx-5 mt-4 flex gap-2 overflow-x-auto px-5">
+            {h.hero.trust.map((t) => (
+              <li key={t} className="flex shrink-0 items-center gap-1.5 rounded-full border border-ink/10 bg-white/70 px-3 py-1.5 text-[12px] font-semibold text-foreground/80">
+                <Check className="h-3 w-3 text-brand-500" strokeWidth={3} />
+                {t}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
 
-      {/* Onglets categories (bascule de contenu sur place) */}
-      <div className="flex border-b border-border px-2">
+      {/* ===== Onglets ===== */}
+      <div className="sticky top-[var(--header-h)] z-20 flex border-b border-border bg-background/95 px-2 backdrop-blur-lg">
         {TABS.map((t) => {
           const active = tab === t.key;
           return (
@@ -100,156 +149,199 @@ export function MobileHome({ residences, destinations, packs, activities, review
               key={t.key}
               type="button"
               onClick={() => setTab(t.key)}
+              aria-pressed={active}
               className={cn(
-                "relative flex flex-1 flex-col items-center gap-1 py-2.5 text-[11.5px] font-semibold transition-colors",
-                active ? "text-foreground" : "text-muted"
+                "relative flex flex-1 items-center justify-center gap-2 py-3.5 text-[13px] font-semibold transition-colors",
+                active ? "text-ink" : "text-muted"
               )}
             >
               <motion.span
                 className="relative inline-flex"
-                whileTap={{ scale: 0.7 }}
-                animate={active ? { scale: [1, 1.25, 0.95, 1] } : { scale: 1 }}
-                transition={{ duration: 0.35, ease: "easeOut" }}
+                whileTap={{ scale: 0.8 }}
+                animate={active ? { scale: [1, 1.18, 1] } : { scale: 1 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
               >
-                <t.icon className={cn("h-[26px] w-[26px]", t.color)} strokeWidth={1.7} />
-                {t.badge && (
-                  <span className="absolute -right-5 -top-1.5 rounded-md bg-brand-600 px-1 py-px text-[8px] font-bold uppercase tracking-wide text-white shadow-soft">
-                    {dict.mobileHome.badgePopular}
-                  </span>
-                )}
+                <t.icon className={cn("h-[18px] w-[18px]", active ? "text-terracotta" : "text-muted")} strokeWidth={1.8} />
               </motion.span>
-              <span className="whitespace-nowrap">
-                {t.key === "residences" ? dict.mobileHome.tabResidences : t.key === "packs" ? dict.mobileHome.tabPacks : dict.mobileHome.tabActivities}
-              </span>
-              {active && <motion.span layoutId="mh-tab-underline" className="absolute inset-x-3 -bottom-px h-[2.5px] rounded-full bg-foreground" />}
+              {h.mobile.tabs[t.key]}
+              {t.badge && (
+                <span className="rounded bg-terracotta px-1 py-px text-[8.5px] font-bold uppercase tracking-wide text-white">
+                  {h.mobile.popular}
+                </span>
+              )}
+              {active && <motion.span layoutId="mh-tab-underline" className="absolute inset-x-4 -bottom-px h-[2px] rounded-full bg-ink" />}
             </button>
           );
         })}
       </div>
 
-      {/* ===== Onglet RESIDENCES ===== */}
+      {/* ===== Onglet LOGEMENTS ===== */}
       {tab === "residences" && (
         <div>
           {residences.length > 0 && (
-            <section className="pt-5">
-              <SectionHead title={dict.mobileHome.residencesTitle} subtitle={dict.mobileHome.residencesSubtitle} href={localePath("/residences", dict.locale)} />
-              <div className="no-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1">
+            <section className="pt-7">
+              <SectionHead
+                eyebrow={h.residences.eyebrow}
+                title={h.residences.title}
+                accent={h.residences.accent}
+                href={localePath("/residences", dict.locale)}
+              />
+              <Rail>
                 {residences.map((r, i) => (
-                  <div key={r.id} className="w-[52vw] max-w-[195px] shrink-0 snap-start">
+                  <div key={r.id} className="w-[58vw] max-w-[230px] shrink-0 snap-start">
                     <MobileResidenceCard residence={r} favorited={favorites.residences.has(r.id)} priority={i < 2} />
                   </div>
                 ))}
-              </div>
+              </Rail>
             </section>
           )}
 
           {destinations.length > 0 && (
-            <section className="pt-7">
-              <SectionHead title={dict.mobileHome.destinationsTitle} subtitle={dict.mobileHome.destinationsSubtitle} href={localePath("/destinations", dict.locale)} />
-              <div className="no-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1">
+            <section className="pt-10">
+              <SectionHead
+                eyebrow={h.destinations.eyebrow}
+                title={h.destinations.title}
+                href={localePath("/destinations", dict.locale)}
+              />
+              <Rail>
                 {destinations.map((d) => (
-                  <div key={d.slug} className="w-28 shrink-0 snap-start">
-                    <DestinationCard destination={d} />
+                  <div key={d.slug} className="w-[34vw] max-w-[150px] shrink-0 snap-start">
+                    <DestinationCard destination={d} shape="arch" />
                   </div>
                 ))}
-              </div>
+              </Rail>
             </section>
           )}
 
           {packs.length > 0 && (
-            <section className="pt-7">
-              <SectionHead title={dict.mobileHome.packsTitle} subtitle={dict.mobileHome.packsSubtitle} href={localePath("/packs", dict.locale)} />
-              <div className="no-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1">
+            <section className="pt-10">
+              <SectionHead
+                eyebrow={h.experiences.eyebrow}
+                title={h.experiences.title}
+                accent={h.experiences.accent}
+                href={localePath("/packs", dict.locale)}
+              />
+              <Rail>
                 {packs.slice(0, 6).map((p) => (
-                  <div key={p.id} className="w-[46vw] max-w-[170px] shrink-0 snap-start">
+                  <div key={p.id} className="w-[46vw] max-w-[190px] shrink-0 snap-start">
                     <MobilePackCard pack={p} favorited={favorites.packs.has(p.id)} />
                   </div>
                 ))}
-              </div>
+              </Rail>
             </section>
           )}
 
-          {/* Confiance */}
-          <section className="px-5 pt-8">
-            <div className="rounded-3xl border border-border bg-surface p-4 shadow-soft">
-              <h2 className="mb-3 text-[16px] font-bold text-foreground">{dict.home.sections.whyTitle}</h2>
-              <div className="space-y-3">
-                {dict.mobileHome.trust.map((t, i) => {
-                  const TrustIcon = TRUST_ICONS[i] ?? ShieldCheck;
-                  return (
-                  <div key={t.title} className="flex items-center gap-3">
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
-                      <TrustIcon className="h-[18px] w-[18px]" />
-                    </span>
-                    <div className="min-w-0">
-                      <p className="text-[13px] font-bold text-foreground">{t.title}</p>
-                      <p className="text-[12px] text-muted">{t.text}</p>
-                    </div>
+          {/* Comment ca marche */}
+          <section className="px-5 pt-12">
+            <p className="eyebrow mb-1.5 flex items-center gap-2 text-[10px] text-terracotta">
+              <Ornament side="left" />
+              {h.how.eyebrow}
+            </p>
+            <h2 className="font-display text-[1.6rem] leading-[1.1] text-foreground">
+              {h.how.title} <em className="italic text-terracotta">{h.how.accent}</em>
+            </h2>
+            <ol className="mt-5 space-y-3">
+              {h.how.steps.map((step, i) => (
+                <li key={step.title} className="flex gap-4 rounded-[1.25rem] border border-border bg-surface p-4">
+                  <span className="flex h-12 w-10 shrink-0 items-center justify-center rounded-arch-sm border border-terracotta/30 font-display text-lg italic text-terracotta">
+                    0{i + 1}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="font-display text-[17px] text-foreground">{step.title}</p>
+                    <p className="mt-0.5 text-[13px] leading-relaxed text-muted">{step.text}</p>
                   </div>
+                </li>
+              ))}
+            </ol>
+          </section>
+
+          {/* Pourquoi KoraStay */}
+          <section className="relative mt-12 overflow-hidden bg-sand-100 px-5 py-10">
+            <Motif variant="bogolan" fade="bottom" className="text-sand-500/20" />
+            <div className="relative">
+              <h2 className="font-display text-[1.6rem] leading-[1.1] text-foreground">
+                {h.why.title} <em className="italic text-terracotta">{h.why.accent}</em>
+              </h2>
+              <div className="mt-5 grid grid-cols-2 gap-3">
+                {h.why.items.map((item, i) => {
+                  const WhyIcon = WHY_ICONS[i] ?? ShieldCheck;
+                  return (
+                    <div key={item.title} className="rounded-[1.25rem] bg-surface p-4 shadow-soft">
+                      <span className="flex h-10 w-9 items-center justify-center rounded-arch-sm bg-brand-500 text-white">
+                        <WhyIcon className="h-4 w-4" strokeWidth={1.8} />
+                      </span>
+                      <p className="mt-3 text-[13.5px] font-bold leading-snug text-foreground">{item.title}</p>
+                    </div>
                   );
                 })}
               </div>
             </div>
           </section>
 
-          {/* CTA proprietaire */}
-          <section className="px-5 pt-7">
-            <Link href={localePath("/devenir-proprietaire", dict.locale)} className="relative flex items-center justify-between gap-3 overflow-hidden rounded-3xl border border-border bg-brand-50 p-4 active:scale-[0.99]">
-              <div className="min-w-0">
-                <HomeIcon className="h-6 w-6 text-brand-600" />
-                <h3 className="mt-2 font-display text-[16px] font-semibold text-brand-900">{dict.home.ownerCard.title}</h3>
-                <p className="text-[12px] text-brand-800/80">{dict.mobileHome.ownerCtaText}</p>
+          {/* Proprietaire */}
+          <section className="px-5 pt-10">
+            <Link
+              href={localePath("/devenir-proprietaire", dict.locale)}
+              className="grain relative block overflow-hidden rounded-[1.5rem] bg-terracotta p-6 text-white active:scale-[0.99]"
+            >
+              <Motif variant="bogolan" fade="bottom" className="text-white/[0.08]" />
+              <div className="relative">
+                <KeyRound className="h-6 w-6 text-gold-300" strokeWidth={1.7} />
+                <p className="mt-4 font-display text-[1.45rem] leading-tight">
+                  {h.owner.title} <em className="italic text-gold-200">{h.owner.accent}</em>
+                </p>
+                <span className="mt-5 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[13px] font-bold text-ink">
+                  {h.owner.cta} <ArrowRight className="h-3.5 w-3.5" />
+                </span>
               </div>
-              <ArrowUpRight className="h-5 w-5 shrink-0 text-brand-600" />
             </Link>
           </section>
 
           {/* Temoignages */}
           {reviews.length > 0 && (
-            <section className="pt-8">
-              <SectionHead title={dict.home.sections.testimonialsTitle} />
-              <div className="no-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1">
+            <section className="pt-12">
+              <SectionHead eyebrow={h.testimonials.eyebrow} title={h.testimonials.title} accent={h.testimonials.accent} />
+              <Rail>
                 {reviews.map((r) => (
-                  <div key={r.id} className="w-[76vw] max-w-[290px] shrink-0 snap-start rounded-3xl border border-border bg-surface p-4 shadow-soft">
-                    <Quote className="h-5 w-5 text-brand-200" />
-                    <p className="mt-2 line-clamp-4 text-[13px] leading-relaxed text-foreground">{r.comment}</p>
-                    <div className="mt-3 flex items-center gap-2">
+                  <figure key={r.id} className="w-[78vw] max-w-[300px] shrink-0 snap-start rounded-[1.25rem] border border-border bg-surface p-5 shadow-soft">
+                    <Quote className="h-6 w-6 fill-terracotta/15 text-terracotta" strokeWidth={1.3} />
+                    <blockquote className="mt-3 line-clamp-5 font-display text-[15px] leading-relaxed text-foreground">« {r.comment} »</blockquote>
+                    <figcaption className="mt-4 flex items-center gap-2.5">
                       <Avatar className="h-8 w-8"><AvatarFallback className="text-2xs">{initials(r.author.firstName, r.author.lastName)}</AvatarFallback></Avatar>
                       <div className="min-w-0">
-                        <p className="truncate text-[12px] font-bold text-foreground">{r.author.firstName} {r.author.lastName}</p>
+                        <p className="truncate text-[12.5px] font-bold text-foreground">{r.author.firstName} {r.author.lastName.charAt(0)}.</p>
                         <p className="flex items-center gap-1 text-[11px] text-muted">
                           <Star className="h-3 w-3 fill-gold-500 text-gold-500" /> {r.rating}/5{r.residence ? ` · ${r.residence.city}` : ""}
                         </p>
                       </div>
-                    </div>
-                  </div>
+                    </figcaption>
+                  </figure>
                 ))}
-              </div>
+              </Rail>
             </section>
           )}
 
-          {/* KoraStay en chiffres (masquable par l'admin) + FAQ */}
-          <section className="px-5 pb-4 pt-8">
+          {/* Chiffres (masquables par l'admin) + FAQ */}
+          <section className="px-5 pb-6 pt-12">
             {community && (
-              <>
-                <h2 className="mb-3 px-1 text-[16px] font-bold text-foreground">{dict.mobileHome.statsTitle}</h2>
-                <div className="mb-4 grid grid-cols-3 gap-2.5 text-center">
-                  {communityTiles.map((s) => (
-                    <div key={s.label} className="rounded-2xl border border-border bg-surface py-3">
-                      <s.icon className="mx-auto h-4 w-4 text-brand-600" />
-                      <CountUp
-                        value={s.value}
-                        className="mt-1 block font-display text-lg font-semibold tabular-nums text-foreground"
-                      />
-                      <p className="text-[10.5px] leading-tight text-muted">{s.label}</p>
-                    </div>
-                  ))}
-                </div>
-              </>
+              <div className="mb-5 grid grid-cols-3 gap-px overflow-hidden rounded-[1.25rem] border border-border bg-border text-center">
+                {communityTiles.map((s, i) => (
+                  <div key={s.label} className={cn("py-4", i === 0 ? "bg-terracotta text-white" : "bg-surface")}>
+                    <CountUp value={s.value} className="block font-display text-xl tabular-nums" />
+                    <p className={cn("eyebrow mt-1 text-[8.5px]", i === 0 ? "text-white/85" : "text-muted")}>{s.label}</p>
+                  </div>
+                ))}
+              </div>
             )}
-            <Link href={localePath("/faq", dict.locale)} className="flex items-center justify-between rounded-2xl border border-border bg-surface px-4 py-3 text-[14px] font-semibold text-foreground active:bg-surface-soft">
-              {dict.home.sections.faqTitle}
-              <ArrowRight className="h-4 w-4 text-muted" />
+            <Link
+              href={localePath("/faq", dict.locale)}
+              className="flex items-center justify-between rounded-[1.25rem] bg-ink px-5 py-4 text-white active:scale-[0.99]"
+            >
+              <span>
+                <span className="eyebrow block text-[9.5px] text-gold-300">{h.faq.eyebrow}</span>
+                <span className="mt-0.5 block font-display text-[17px]">{h.faq.title} {h.faq.accent}</span>
+              </span>
+              <ArrowRight className="h-4 w-4 text-gold-300" />
             </Link>
           </section>
         </div>
@@ -257,74 +349,64 @@ export function MobileHome({ residences, destinations, packs, activities, review
 
       {/* ===== Onglet PACKS ===== */}
       {tab === "packs" && (
-        <section className="px-5 pb-4 pt-5">
-          <div className="mb-3">
-            <h2 className="text-[19px] font-bold tracking-tight text-foreground">{dict.mobileHome.packsTitle}</h2>
-            <p className="text-[13px] text-muted">{dict.mobileHome.packsTabSubtitle}</p>
-          </div>
+        <section className="px-5 pb-6 pt-7">
+          <h2 className="font-display text-[1.6rem] leading-[1.1] text-foreground">
+            {h.experiences.title} <em className="italic text-terracotta">{h.experiences.accent}</em>
+          </h2>
+          <p className="mt-2 text-[13.5px] leading-relaxed text-muted">{h.experiences.desc}</p>
           {packs.length === 0 ? (
-            <p className="py-10 text-center text-sm text-muted">{dict.mobileHome.noPacks}</p>
+            <p className="py-10 text-center text-sm text-muted">{h.mobile.noPacks}</p>
           ) : (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="mt-5 grid grid-cols-2 gap-3">
               {packs.map((p) => (
                 <MobilePackCard key={p.id} pack={p} favorited={favorites.packs.has(p.id)} />
               ))}
             </div>
           )}
-          <Link href={localePath("/packs", dict.locale)} className="mt-4 flex items-center justify-between rounded-2xl border border-border bg-surface px-4 py-3 text-[14px] font-semibold text-foreground active:bg-surface-soft">
-            {dict.mobileHome.seeAllPacks}
+          <Link
+            href={localePath("/packs/custom", dict.locale)}
+            className="relative mt-5 block overflow-hidden rounded-[1.25rem] bg-gold-500 p-5 text-ink-900 active:scale-[0.99]"
+          >
+            <Motif variant="bogolan" className="text-ink-900/[0.08]" />
+            <p className="relative font-display text-lg">{h.experiences.custom.title}</p>
+            <p className="relative mt-1 text-[13px] text-ink-900/75">{h.experiences.custom.text}</p>
+            <span className="relative mt-3 inline-flex items-center gap-1.5 text-[13px] font-bold">
+              {h.experiences.custom.cta} <ArrowRight className="h-3.5 w-3.5" />
+            </span>
+          </Link>
+          <Link
+            href={localePath("/packs", dict.locale)}
+            className="mt-3 flex items-center justify-between rounded-[1.25rem] border border-border bg-surface px-5 py-4 text-[14px] font-semibold text-foreground active:bg-sand-50"
+          >
+            {h.experiences.seePacks}
             <ArrowRight className="h-4 w-4 text-muted" />
           </Link>
         </section>
       )}
 
       {/* ===== Onglet ACTIVITES ===== */}
-      {tab === "activites" && (
-        <section className="px-5 pb-4 pt-5">
-          <div className="mb-3">
-            <h2 className="text-[19px] font-bold tracking-tight text-foreground">{dict.mobileHome.activitiesTitle}</h2>
-            <p className="text-[13px] text-muted">{dict.mobileHome.activitiesSubtitle}</p>
-          </div>
+      {tab === "activities" && (
+        <section className="px-5 pb-6 pt-7">
+          <h2 className="font-display text-[1.6rem] leading-[1.1] text-foreground">{h.experiences.activitiesLabel}</h2>
           {activities.length === 0 ? (
-            <p className="py-10 text-center text-sm text-muted">{dict.mobileHome.noActivities}</p>
+            <p className="py-10 text-center text-sm text-muted">{h.mobile.noActivities}</p>
           ) : (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="mt-5 grid grid-cols-2 gap-x-3 gap-y-6">
               {activities.map((a) => (
-                <Link
-                  key={a.id}
-                  href={localePath(`/activites/${a.slug}`, dict.locale)}
-                  className="group block overflow-hidden rounded-3xl border border-border bg-surface shadow-soft active:scale-[0.99]"
-                >
-                  <div className="relative aspect-[4/3] overflow-hidden">
-                    <SmartImage src={a.images[0]?.url} alt={a.name} seed={`act-${a.slug}`} />
-                    <span className="absolute left-2 top-2 rounded-full bg-white/95 px-2 py-0.5 text-[10px] font-bold text-ink shadow-soft">
-                      {activityCategoryMeta[a.category]?.label ?? a.category}
-                    </span>
-                  </div>
-                  <div className="p-3">
-                    <h3 className="line-clamp-1 text-[13.5px] font-bold text-foreground">{a.name}</h3>
-                    <p className="mt-0.5 flex items-center gap-1 text-[11.5px] text-muted"><MapPin className="h-3 w-3" /> {a.city}</p>
-                    <div className="mt-1 flex items-center gap-2 text-[11px] text-muted">
-                      <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {a.durationHours}h</span>
-                      {a.ratingCount > 0 && (
-                        <span className="flex items-center gap-0.5"><Star className="h-3 w-3 fill-gold-500 text-gold-500" /> {a.ratingAverage.toFixed(1)}</span>
-                      )}
-                    </div>
-                    <p className="mt-1.5 text-[13.5px]">
-                      <span className="font-extrabold text-foreground">{formatPrice(a.pricePerPerson)}</span>
-                      <span className="text-muted"> {dict.card.perPerson}</span>
-                    </p>
-                  </div>
-                </Link>
+                <ActivityCard key={a.id} activity={a} />
               ))}
             </div>
           )}
-          <Link href={localePath("/activites", dict.locale)} className="mt-4 flex items-center justify-between rounded-2xl border border-border bg-surface px-4 py-3 text-[14px] font-semibold text-foreground active:bg-surface-soft">
-            {dict.mobileHome.seeAllActivities}
+          <Link
+            href={localePath("/activites", dict.locale)}
+            className="mt-6 flex items-center justify-between rounded-[1.25rem] border border-border bg-surface px-5 py-4 text-[14px] font-semibold text-foreground active:bg-sand-50"
+          >
+            {h.experiences.seeActivities}
             <ArrowRight className="h-4 w-4 text-muted" />
           </Link>
         </section>
       )}
+
     </div>
   );
 }

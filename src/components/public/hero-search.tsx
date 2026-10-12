@@ -12,15 +12,20 @@ import { cn, formatDateShort } from "@/lib/utils";
 import { STAY_TYPES } from "@/lib/constants";
 import { useI18n } from "@/components/i18n/provider";
 import { localePath } from "@/lib/i18n";
+import { enumLabel } from "@/lib/dictionaries/enums";
 
 interface HeroSearchProps {
   destinations: { name: string; slug: string }[];
   variant?: "hero" | "compact";
   /** Declencheur mobile en pilule centree facon "Commencer ma recherche". */
   pill?: boolean;
+  /** Teinte des puces de type de logement (fond sombre ou clair). */
+  chips?: "dark" | "light";
+  /** Alignement de la barre et des puces en variante hero. */
+  align?: "center" | "left";
 }
 
-export function HeroSearch({ destinations, variant = "hero", pill = false }: HeroSearchProps) {
+export function HeroSearch({ destinations, variant = "hero", pill = false, chips = "dark", align = "center" }: HeroSearchProps) {
   const router = useRouter();
   const dict = useI18n();
   const [city, setCity] = React.useState<string>("");
@@ -53,7 +58,7 @@ export function HeroSearch({ destinations, variant = "hero", pill = false }: Her
 
   // ---- Desktop -------------------------------------------------------------
   const desktop = (
-    <div className="hidden w-full max-w-3xl items-stretch rounded-full border border-border bg-surface p-1.5 shadow-card md:flex">
+    <div className="hidden w-full max-w-3xl items-stretch rounded-full border border-ink/10 bg-white p-2 shadow-card md:flex">
       <Popover>
         <PopoverTrigger asChild>
           <button className="flex flex-1 flex-col items-start rounded-full px-5 py-2 text-left transition-colors hover:bg-surface-soft">
@@ -120,7 +125,7 @@ export function HeroSearch({ destinations, variant = "hero", pill = false }: Her
         onClick={submit}
         disabled={pending}
         aria-label={dict.search.search}
-        className="ml-1 flex shrink-0 items-center gap-2 rounded-full bg-brand-500 px-6 font-semibold text-white shadow-soft transition-colors hover:bg-brand-600 disabled:opacity-70"
+        className="ml-1 flex shrink-0 items-center gap-2 rounded-full bg-brand-500 px-6 font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] transition-colors hover:bg-brand-600 disabled:opacity-70"
       >
         {pending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Search className="h-5 w-5" />}
         <span className="hidden lg:inline">{dict.search.search}</span>
@@ -207,23 +212,27 @@ export function HeroSearch({ destinations, variant = "hero", pill = false }: Her
   );
 
   return (
-    <div className={cn("w-full", variant === "hero" && "flex flex-col items-center")}>
+    <div className={cn("w-full", variant === "hero" && cn("flex flex-col", align === "center" ? "items-center" : "items-start"))}>
       {desktop}
       {mobile}
       {variant === "hero" && (
-        <div className="mt-4 hidden flex-wrap items-center justify-center gap-2 md:flex">
+        <div className={cn("mt-4 hidden flex-wrap items-center gap-2 md:flex", align === "center" && "justify-center")}>
           {STAY_TYPES.filter((t) => t.value !== "any").map((t) => (
             <button
               key={t.value}
               onClick={() => setType(type === t.value ? "any" : t.value)}
               className={cn(
                 "rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
-                type === t.value
-                  ? "border-white bg-white text-brand-700"
-                  : "border-white/40 bg-white/10 text-white backdrop-blur hover:bg-white/20"
+                chips === "light"
+                  ? type === t.value
+                    ? "border-ink bg-ink text-white"
+                    : "border-ink/15 bg-white/60 text-foreground hover:border-ink/40 hover:bg-white"
+                  : type === t.value
+                    ? "border-white bg-white text-brand-700"
+                    : "border-white/40 bg-white/10 text-white backdrop-blur hover:bg-white/20"
               )}
             >
-              {t.label}
+              {enumLabel(dict.enums.stayType, t.value)}
             </button>
           ))}
         </div>

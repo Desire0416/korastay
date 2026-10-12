@@ -41,7 +41,7 @@ export default async function PacksPage({ searchParams }: { searchParams: Promis
       <section className="gradient-hero">
         <div className="container-page py-9 text-center md:py-16">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-gold-200 bg-gold-50 px-3 py-1 text-sm font-semibold text-gold-700">
-            <Sparkles className="h-3.5 w-3.5" /> {dict.home.sections.packsEyebrow}
+            <Sparkles className="h-3.5 w-3.5" /> {dict.home.experiences.eyebrow}
           </span>
           <h1 className="mx-auto mt-4 max-w-2xl font-display text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">
             {dict.packs.heroTitle}

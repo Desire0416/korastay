@@ -4,6 +4,7 @@ import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SmartImage } from "@/components/ui/smart-image";
+import { useI18n } from "@/components/i18n/provider";
 
 interface CardImageCarouselProps {
   images: { url: string; altText?: string | null }[];
@@ -18,6 +19,7 @@ export function CardImageCarousel({
   aspectClass = "aspect-[4/3]",
   priority,
 }: CardImageCarouselProps) {
+  const dict = useI18n();
   const scrollerRef = React.useRef<HTMLDivElement>(null);
   const [active, setActive] = React.useState(0);
   const list = images.length ? images : [{ url: "", altText: "" }];
@@ -38,7 +40,7 @@ export function CardImageCarousel({
   }
 
   return (
-    <div className={cn("group/carousel relative overflow-hidden rounded-3xl", aspectClass)}>
+    <div className={cn("group/carousel relative overflow-hidden rounded-[1.5rem]", aspectClass)}>
       <div
         ref={scrollerRef}
         onScroll={onScroll}
@@ -62,7 +64,7 @@ export function CardImageCarousel({
           <button
             type="button"
             onClick={(e) => { e.preventDefault(); scrollTo(active - 1); }}
-            aria-label="Image précédente"
+            aria-label={dict.common.previousImage}
             className={cn(
               "absolute left-2 top-1/2 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-ink shadow-soft transition-opacity md:flex",
               active === 0 ? "pointer-events-none opacity-0" : "opacity-0 group-hover/carousel:opacity-100"
@@ -73,7 +75,7 @@ export function CardImageCarousel({
           <button
             type="button"
             onClick={(e) => { e.preventDefault(); scrollTo(active + 1); }}
-            aria-label="Image suivante"
+            aria-label={dict.common.nextImage}
             className={cn(
               "absolute right-2 top-1/2 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-ink shadow-soft transition-opacity md:flex",
               active === list.length - 1 ? "pointer-events-none opacity-0" : "opacity-0 group-hover/carousel:opacity-100"

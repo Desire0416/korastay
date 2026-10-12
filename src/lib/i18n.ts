@@ -5,6 +5,9 @@
 // via cookie se trouve dans i18n.server.ts.
 // ============================================================
 
+import { type HomeDict, homeFr, homeEn } from "./dictionaries/home";
+import { type EnumsDict, enumsFr, enumsEn } from "./dictionaries/enums";
+
 export type Locale = "fr" | "en";
 export const LOCALES: Locale[] = ["fr", "en"];
 export const DEFAULT_LOCALE: Locale = "fr";
@@ -13,6 +16,8 @@ export const LOCALE_LABELS: Record<Locale, string> = { fr: "Français", en: "Eng
 
 export interface Dictionary {
   locale: Locale;
+  home: HomeDict;
+  enums: EnumsDict;
   header: {
     becomeHost: string;
     login: string;
@@ -33,31 +38,15 @@ export interface Dictionary {
     ctaHost: string;
     contact: string;
   };
-  home: {
-    heroBadge: string;
-    heroTitleLine1: string;
-    heroTitleHighlight: string;
-    heroSubtitle: string;
-    searchCta: string;
-    heroStats: { stays: string; destinations: string; packs: string };
-    categories: Record<"residences" | "packs" | "business" | "partners", { label: string; desc: string }>;
-    sections: {
-      destinationsEyebrow: string; destinationsTitle: string; destinationsDesc: string;
-      residencesEyebrow: string; residencesTitle: string; residencesDesc: string;
-      packsEyebrow: string; packsTitle: string; packsDesc: string;
-      whyEyebrow: string; whyTitle: string; whyDesc: string;
-      testimonialsEyebrow: string; testimonialsTitle: string;
-      faqEyebrow: string; faqTitle: string;
-    };
-    why: { title: string; text: string }[];
-    faq: { q: string; a: string }[];
-    businessCard: { title: string; text: string; cta: string };
-    ownerCard: { title: string; text: string; cta: string };
-    faqMore: string; faqMoreLink: string;
-  };
   common: {
     discover: string;
     seeAll: string;
+    previousImage: string;
+    nextImage: string;
+    addFavorite: string;
+    removeFavorite: string;
+    login: string;
+    genericError: string;
   };
   card: {
     perNight: string;
@@ -70,6 +59,10 @@ export interface Dictionary {
     homePlural: string;
     perPerson: string;
     travelerFavorite: string;
+    verified: string;
+    reviews: string; // gabarit avec {n}
+    hours: string; // gabarit avec {n}
+    from: string;
   };
   search: {
     destination: string;
@@ -94,43 +87,6 @@ export interface Dictionary {
     favorites: string;
     stays: string;
     profile: string;
-  };
-  mobileHome: {
-    tabResidences: string;
-    tabPacks: string;
-    tabActivities: string;
-    badgePopular: string;
-    trust: { title: string; text: string }[];
-    tiles: { visits: string; travelers: string; owners: string; guides: string; partners: string; stays: string };
-    residencesTitle: string;
-    residencesSubtitle: string;
-    destinationsTitle: string;
-    destinationsSubtitle: string;
-    packsTitle: string;
-    packsSubtitle: string;
-    ownerCtaText: string;
-    statsTitle: string;
-    packsTabSubtitle: string;
-    noPacks: string;
-    seeAllPacks: string;
-    activitiesTitle: string;
-    activitiesSubtitle: string;
-    noActivities: string;
-    seeAllActivities: string;
-    viewAria: string; // gabarit avec {title}
-  };
-  platformStats: {
-    eyebrow: string;
-    title: string;
-    description: string;
-    visits: string;
-    travelers: string;
-    owners: string;
-    guides: string;
-    partners: string;
-    residences: string;
-    destinations: string;
-    packs: string;
   };
   residences: {
     metaTitle: string;
@@ -325,6 +281,8 @@ const FOOTER_COLUMNS_EN: Record<string, string> = {
 
 const FR: Dictionary = {
   locale: "fr",
+  home: homeFr,
+  enums: enumsFr,
   header: {
     becomeHost: "Devenir propriétaire",
     login: "Connexion",
@@ -350,64 +308,16 @@ const FR: Dictionary = {
     ctaHost: "Devenir propriétaire",
     contact: "Nous écrire",
   },
-  home: {
-    heroBadge: "La plateforme ouest-africaine du séjour vérifié",
-    heroTitleLine1: "Réservez des résidences vérifiées,",
-    heroTitleHighlight: "vivez des séjours d'exception.",
-    heroSubtitle:
-      "KoraStay reunit hébergements meublés, packs touristiques et partenaires locaux pour voyager sans incertitude en Afrique de l'Ouest.",
-    searchCta: "Rechercher",
-    heroStats: { stays: "Locations", destinations: "Destinations", packs: "Packs" },
-    categories: {
-      residences: { label: "Location meublée", desc: "Logements meublés contrôlés" },
-      packs: { label: "Packs Découverte", desc: "Séjours clé en main" },
-      business: { label: "KoraStay Business", desc: "Missions & entreprises" },
-      partners: { label: "Devenir partenaire", desc: "Guides, transport, resto" },
-    },
-    sections: {
-      destinationsEyebrow: "Explorer",
-      destinationsTitle: "Destinations populaires",
-      destinationsDesc: "De Daloa à Assinie, découvrez les villes où KoraStay vous accueille.",
-      residencesEyebrow: "Sélection",
-      residencesTitle: "Locations meublées vedettes",
-      residencesDesc: "Les logements les mieux notés, vérifiés par KoraStay.",
-      packsEyebrow: "KoraStay Découverte",
-      packsTitle: "Packs touristiques accompagnés",
-      packsDesc: "Des séjours clé en main avec hébergement, transport et guide local.",
-      whyEyebrow: "Pourquoi KoraStay",
-      whyTitle: "Voyagez l'esprit tranquille",
-      whyDesc: "Une plateforme pensée pour la confiance, du premier clic au retour de séjour.",
-      testimonialsEyebrow: "Témoignages",
-      testimonialsTitle: "Ils ont voyagé avec KoraStay",
-      faqEyebrow: "FAQ",
-      faqTitle: "Questions fréquentes",
-    },
-    why: [
-      { title: "Locations meublées vérifiées", text: "Chaque logement est contrôlé selon des standards stricts de propreté, sécurité et équipement avant publication." },
-      { title: "Paiement mobile", text: "Réservez et payez en toute simplicité via Orange Money, Wave ou carte bancaire." },
-      { title: "Assistance locale", text: "Une équipe disponible avant, pendant et après votre séjour, partout en Côte d'Ivoire." },
-      { title: "Partenaires locaux", text: "Guides, transporteurs et restaurants sélectionnés pour une expérience authentique." },
-    ],
-    faq: [
-      { q: "Comment savoir si une résidence est fiable ?", a: "Chaque résidence affichant le badge « Résidence vérifiée KoraStay » a été contrôlée par notre équipe selon des critères de propreté, sécurité, équipement et conformité." },
-      { q: "Quels moyens de paiement sont acceptés ?", a: "Orange Money, Wave, carte bancaire Visa/Mastercard et bientôt MTN MoMo. Le paiement est sécurisé et la réservation confirmée immédiatement." },
-      { q: "Puis-je annuler ma réservation ?", a: "Oui. Pour les résidences : remboursement intégral à plus de 72h du check-in, 50% entre 24 et 72h. Les conditions détaillées sont sur chaque fiche." },
-      { q: "Qu'est-ce qu'un Pack Découverte ?", a: "Un séjour clé en main incluant hébergement vérifié, petit déjeuner, transport en ville et guide local certifié, pour découvrir une destination sans rien organiser." },
-    ],
-    businessCard: {
-      title: "KoraStay Business",
-      text: "Hébergements fiables et facturables pour vos équipes en mission. Contrats cadres, assistance dédiée et rapports mensuels.",
-      cta: "Demander un devis",
-    },
-    ownerCard: {
-      title: "Vous êtes propriétaire ?",
-      text: "Publiez votre résidence, gérez votre calendrier et vos revenus, et recevez des réservations vérifiées partout en Côte d'Ivoire.",
-      cta: "Rejoindre le réseau",
-    },
-    faqMore: "Une autre question ?",
-    faqMoreLink: "Contactez-nous",
+  common: {
+    discover: "Découvrir",
+    seeAll: "Voir tout",
+    previousImage: "Image précédente",
+    nextImage: "Image suivante",
+    addFavorite: "Ajouter aux favoris",
+    removeFavorite: "Retirer des favoris",
+    login: "Connexion",
+    genericError: "Une erreur est survenue.",
   },
-  common: { discover: "Découvrir", seeAll: "Voir tout" },
   card: {
     perNight: "/ nuit",
     guestsUnit: "pers.",
@@ -419,6 +329,10 @@ const FR: Dictionary = {
     homePlural: "résidences",
     perPerson: "/ pers.",
     travelerFavorite: "Coup de cœur voyageurs",
+    verified: "Vérifié",
+    reviews: "{n} avis",
+    hours: "{n} h",
+    from: "Dès",
   },
   search: {
     destination: "Destination",
@@ -443,54 +357,6 @@ const FR: Dictionary = {
     favorites: "Favoris",
     stays: "Séjours",
     profile: "Profil",
-  },
-  mobileHome: {
-    tabResidences: "Location meublée",
-    tabPacks: "Packs",
-    tabActivities: "Activités",
-    badgePopular: "Populaire",
-    trust: [
-      { title: "Locations meublées vérifiées", text: "Contrôlées par KoraStay." },
-      { title: "Paiement mobile", text: "Orange Money, Wave, carte." },
-      { title: "Assistance locale", text: "Avant, pendant, après." },
-    ],
-    tiles: {
-      visits: "Visites",
-      travelers: "Voyageurs",
-      owners: "Propriétaires",
-      guides: "Guides",
-      partners: "Partenaires",
-      stays: "Locations",
-    },
-    residencesTitle: "Locations meublées populaires",
-    residencesSubtitle: "Les mieux notées, vérifiées KoraStay",
-    destinationsTitle: "Destinations",
-    destinationsSubtitle: "Où KoraStay vous accueille",
-    packsTitle: "Packs Découverte",
-    packsSubtitle: "Séjours clé en main, guide inclus",
-    ownerCtaText: "Publiez votre résidence et recevez des réservations.",
-    statsTitle: "KoraStay en chiffres",
-    packsTabSubtitle: "Séjours clé en main : hébergement, transport et guide local.",
-    noPacks: "Aucun pack disponible pour le moment.",
-    seeAllPacks: "Voir tous les packs",
-    activitiesTitle: "Activités & expériences",
-    activitiesSubtitle: "Excursions, visites et sorties nature, avec guide certifié.",
-    noActivities: "Aucune activité disponible pour le moment.",
-    seeAllActivities: "Voir toutes les activités",
-    viewAria: "Voir : {title}",
-  },
-  platformStats: {
-    eyebrow: "La communauté grandit",
-    title: "KoraStay en chiffres",
-    description: "La confiance se construit chaque jour : visiteurs, hôtes et partenaires qui font vivre la plateforme.",
-    visits: "Visites de la plateforme",
-    travelers: "Voyageurs inscrits",
-    owners: "Propriétaires",
-    guides: "Guides touristiques",
-    partners: "Partenaires locaux",
-    residences: "Locations meublées",
-    destinations: "Destinations",
-    packs: "Packs Découverte",
   },
   residences: {
     metaTitle: "Locations meublées vérifiées",
@@ -654,6 +520,8 @@ const FR: Dictionary = {
 
 const EN: Dictionary = {
   locale: "en",
+  home: homeEn,
+  enums: enumsEn,
   header: {
     becomeHost: "Become a host",
     login: "Log in",
@@ -679,64 +547,16 @@ const EN: Dictionary = {
     ctaHost: "Become a host",
     contact: "Write to us",
   },
-  home: {
-    heroBadge: "West Africa's verified-stay platform",
-    heroTitleLine1: "Book verified homes,",
-    heroTitleHighlight: "live exceptional stays.",
-    heroSubtitle:
-      "KoraStay brings together furnished homes, curated tour packs and trusted local partners so you can travel with confidence across West Africa.",
-    searchCta: "Search",
-    heroStats: { stays: "Stays", destinations: "Destinations", packs: "Packs" },
-    categories: {
-      residences: { label: "Furnished rentals", desc: "Vetted furnished homes" },
-      packs: { label: "Discovery packs", desc: "All-inclusive getaways" },
-      business: { label: "KoraStay Business", desc: "Corporate stays & missions" },
-      partners: { label: "Become a partner", desc: "Guides, transport, dining" },
-    },
-    sections: {
-      destinationsEyebrow: "Explore",
-      destinationsTitle: "Popular destinations",
-      destinationsDesc: "From Daloa to Assinie, discover the cities where KoraStay welcomes you.",
-      residencesEyebrow: "Selection",
-      residencesTitle: "Featured furnished rentals",
-      residencesDesc: "The top-rated homes, vetted by KoraStay.",
-      packsEyebrow: "KoraStay Discovery",
-      packsTitle: "Guided tour packs",
-      packsDesc: "All-inclusive getaways with accommodation, transport and a local guide.",
-      whyEyebrow: "Why KoraStay",
-      whyTitle: "Travel with peace of mind",
-      whyDesc: "A platform built on trust, from the first click to the end of your stay.",
-      testimonialsEyebrow: "Testimonials",
-      testimonialsTitle: "They travelled with KoraStay",
-      faqEyebrow: "FAQ",
-      faqTitle: "Frequently asked questions",
-    },
-    why: [
-      { title: "Verified furnished rentals", text: "Every home is inspected against strict cleanliness, safety and amenity standards before going live." },
-      { title: "Mobile payment", text: "Book and pay with ease via Orange Money, Wave or bank card." },
-      { title: "Local support", text: "A team available before, during and after your stay, everywhere in Côte d'Ivoire." },
-      { title: "Local partners", text: "Hand-picked guides, drivers and restaurants for an authentic experience." },
-    ],
-    faq: [
-      { q: "How do I know a home is trustworthy?", a: "Every home showing the « KoraStay verified home » badge has been inspected by our team against cleanliness, safety, amenity and compliance criteria." },
-      { q: "Which payment methods are accepted?", a: "Orange Money, Wave, Visa/Mastercard bank cards and soon MTN MoMo. Payment is secure and your booking is confirmed instantly." },
-      { q: "Can I cancel my booking?", a: "Yes. For homes: full refund more than 72h before check-in, 50% between 24 and 72h. Detailed terms are on each listing." },
-      { q: "What is a Discovery Pack?", a: "An all-inclusive stay with a verified home, breakfast, in-town transport and a certified local guide, so you can discover a destination with nothing to organise." },
-    ],
-    businessCard: {
-      title: "KoraStay Business",
-      text: "Reliable, invoiceable accommodation for your teams on assignment. Framework contracts, dedicated support and monthly reports.",
-      cta: "Request a quote",
-    },
-    ownerCard: {
-      title: "Are you a host?",
-      text: "List your home, manage your calendar and revenue, and receive verified bookings everywhere in Côte d'Ivoire.",
-      cta: "Join the network",
-    },
-    faqMore: "Another question?",
-    faqMoreLink: "Contact us",
+  common: {
+    discover: "Discover",
+    seeAll: "See all",
+    previousImage: "Previous image",
+    nextImage: "Next image",
+    addFavorite: "Add to favourites",
+    removeFavorite: "Remove from favourites",
+    login: "Log in",
+    genericError: "Something went wrong.",
   },
-  common: { discover: "Discover", seeAll: "See all" },
   card: {
     perNight: "/ night",
     guestsUnit: "guests",
@@ -748,6 +568,11 @@ const EN: Dictionary = {
     homePlural: "homes",
     perPerson: "/ person",
     travelerFavorite: "Travelers' favorite",
+
+    verified: "Verified",
+    reviews: "{n} reviews",
+    hours: "{n} h",
+    from: "From",
   },
   search: {
     destination: "Destination",
@@ -772,54 +597,6 @@ const EN: Dictionary = {
     favorites: "Favorites",
     stays: "Stays",
     profile: "Profile",
-  },
-  mobileHome: {
-    tabResidences: "Rentals",
-    tabPacks: "Packs",
-    tabActivities: "Activities",
-    badgePopular: "Popular",
-    trust: [
-      { title: "Verified furnished rentals", text: "Vetted by KoraStay." },
-      { title: "Mobile payment", text: "Orange Money, Wave, card." },
-      { title: "Local support", text: "Before, during, after." },
-    ],
-    tiles: {
-      visits: "Visits",
-      travelers: "Travelers",
-      owners: "Hosts",
-      guides: "Guides",
-      partners: "Partners",
-      stays: "Rentals",
-    },
-    residencesTitle: "Popular furnished rentals",
-    residencesSubtitle: "Top-rated, vetted by KoraStay",
-    destinationsTitle: "Destinations",
-    destinationsSubtitle: "Where KoraStay welcomes you",
-    packsTitle: "Discovery packs",
-    packsSubtitle: "All-inclusive getaways, guide included",
-    ownerCtaText: "List your home and receive bookings.",
-    statsTitle: "KoraStay in numbers",
-    packsTabSubtitle: "All-inclusive getaways: accommodation, transport and a local guide.",
-    noPacks: "No packs available right now.",
-    seeAllPacks: "See all packs",
-    activitiesTitle: "Activities & experiences",
-    activitiesSubtitle: "Excursions, tours and nature outings with a certified guide.",
-    noActivities: "No activities available right now.",
-    seeAllActivities: "See all activities",
-    viewAria: "View: {title}",
-  },
-  platformStats: {
-    eyebrow: "Our community is growing",
-    title: "KoraStay in numbers",
-    description: "Trust is built every day: visitors, hosts and partners who bring the platform to life.",
-    visits: "Platform visits",
-    travelers: "Registered travelers",
-    owners: "Hosts",
-    guides: "Tour guides",
-    partners: "Local partners",
-    residences: "Furnished rentals",
-    destinations: "Destinations",
-    packs: "Discovery packs",
   },
   residences: {
     metaTitle: "Verified furnished rentals",

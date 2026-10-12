@@ -39,7 +39,7 @@ export const FOOTER_NAV: { title: string; links: NavItem[] }[] = [
   {
     title: "KoraStay",
     links: [
-      { label: "A propos", href: "/about" },
+      { label: "À propos", href: "/about" },
       { label: "Blog", href: "/blog" },
       { label: "Charte qualité", href: "/quality" },
       { label: "Contact", href: "/contact" },

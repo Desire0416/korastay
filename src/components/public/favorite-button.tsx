@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 import { toggleFavorite } from "@/server/actions/favorites";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useI18n } from "@/components/i18n/provider";
+import { localePath } from "@/lib/i18n";
 
 interface FavoriteButtonProps {
   residenceId?: string;
@@ -25,6 +27,7 @@ export function FavoriteButton({
   const [favorited, setFavorited] = React.useState(initialFavorited);
   const [isPending, startTransition] = React.useTransition();
   const router = useRouter();
+  const dict = useI18n();
 
   React.useEffect(() => setFavorited(initialFavorited), [initialFavorited]);
 
@@ -41,10 +44,10 @@ export function FavoriteButton({
         setFavorited(!next); // rollback
         if (res.error?.includes("Connectez")) {
           toast.error(res.error, {
-            action: { label: "Connexion", onClick: () => router.push("/login") },
+            action: { label: dict.common.login, onClick: () => router.push(localePath("/login", dict.locale)) },
           });
         } else {
-          toast.error(res.error ?? "Une erreur est survenue.");
+          toast.error(res.error ?? dict.common.genericError);
         }
       } else {
         setFavorited(!!res.favorited);
@@ -56,12 +59,12 @@ export function FavoriteButton({
     <button
       type="button"
       onClick={onClick}
-      aria-label={favorited ? "Retirer des favoris" : "Ajouter aux favoris"}
+      aria-label={favorited ? dict.common.removeFavorite : dict.common.addFavorite}
       aria-pressed={favorited}
       className={cn(
         "group/fav inline-flex items-center justify-center transition-transform active:scale-90",
         variant === "floating" &&
-          "h-9 w-9 rounded-full bg-white/85 text-ink shadow-soft backdrop-blur hover:bg-white",
+          "h-9 w-9 rounded-full bg-white/90 text-ink shadow-soft ring-1 ring-black/5 backdrop-blur hover:bg-white",
         variant === "inline" &&
           "h-10 w-10 rounded-full border border-border bg-surface hover:border-brand-300",
         className
