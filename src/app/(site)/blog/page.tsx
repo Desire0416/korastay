@@ -1,57 +1,79 @@
 import Link from "next/link";
-import { Newspaper, ArrowRight, Calendar } from "lucide-react";
+import { Newspaper, ArrowUpRight } from "lucide-react";
 import { getPublishedPosts } from "@/lib/blog-queries";
 import { SmartImage } from "@/components/ui/smart-image";
 import { EmptyState } from "@/components/ui/empty-state";
-import { formatDate } from "@/lib/utils";
+import { PageHero } from "@/components/public/page-hero";
+import { formatDate, cn } from "@/lib/utils";
+import { getI18n } from "@/lib/i18n.server";
+import { localePath } from "@/lib/i18n";
+import { alternatesFor } from "@/lib/seo";
+import type { Metadata } from "next";
 
-export const metadata = {
-  title: "Blog",
-  description: "Conseils de voyage, découvertes et inspirations pour vos séjours en Afrique de l'Ouest avec KoraStay.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { dict } = await getI18n();
+  return { title: dict.pages.blog.metaTitle, description: dict.pages.blog.metaDescription, alternates: alternatesFor("/blog") };
+}
 
 export default async function BlogPage() {
-  const posts = await getPublishedPosts();
+  const [posts, { locale, dict }] = await Promise.all([getPublishedPosts(), getI18n()]);
+  const t = dict.pages.blog;
+  const [lead, ...rest] = posts;
 
   return (
-    <div>
-      <section className="gradient-hero">
-        <div className="container-page py-9 text-center md:py-16">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-sm font-semibold text-brand-700">
-            <Newspaper className="h-3.5 w-3.5" /> Le blog KoraStay
-          </span>
-          <h1 className="mx-auto mt-5 max-w-2xl font-display text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">
-            Inspirations & conseils de voyage
-          </h1>
-          <p className="mx-auto mt-4 max-w-xl text-muted">
-            Découvertes, bons plans et recits pour explorer l'Afrique de l'Ouest autrement.
-          </p>
-        </div>
-      </section>
+    <>
+      <PageHero
+        eyebrow={t.eyebrow}
+        title={t.title}
+        accent={t.accent}
+        description={
+          <>
+            <p>{t.subtitle}</p>
+            {dict.pages.frOnly && <p className="mt-2 text-sm italic">{dict.pages.frOnly}</p>}
+          </>
+        }
+      />
 
-      <div className="container-page py-10">
-        {posts.length === 0 ? (
-          <EmptyState icon={Newspaper} title="Aucun article" description="Les premiers articles arrivent bientôt." />
+      <div className="container-page py-12 md:py-16">
+        {!lead ? (
+          <EmptyState icon={Newspaper} title={t.emptyTitle} description={t.emptyText} />
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {posts.map((p) => (
-              <Link key={p.id} href={`/blog/${p.slug}`} className="group overflow-hidden rounded-3xl border border-border bg-surface shadow-soft transition-shadow hover:shadow-card-hover">
-                <div className="relative aspect-[16/10] overflow-hidden">
-                  <SmartImage src={p.coverImageUrl} alt={p.title} seed={`blog-${p.slug}`} imgClassName="transition-transform duration-500 group-hover:scale-105" />
-                </div>
-                <div className="p-5">
-                  <p className="flex items-center gap-1 text-xs text-muted"><Calendar className="h-3.5 w-3.5" /> {formatDate(p.publishedAt ?? p.createdAt)}</p>
-                  <h2 className="mt-1 text-lg font-bold leading-tight text-foreground">{p.title}</h2>
-                  {p.excerpt && <p className="mt-2 line-clamp-2 text-sm text-muted">{p.excerpt}</p>}
-                  <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-brand-600">
-                    Lire l'article <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </span>
-                </div>
-              </Link>
-            ))}
-          </div>
+          <>
+            {/* Article a la une */}
+            <Link href={localePath(`/blog/${lead.slug}`, locale)} className="group grid grid-cols-1 items-center gap-8 md:grid-cols-[1.2fr_1fr]">
+              <div className="relative aspect-[16/10] overflow-hidden rounded-[2rem]">
+                <SmartImage src={lead.coverImageUrl} alt={lead.title} seed={`blog-${lead.slug}`} priority sizes="(max-width: 768px) 100vw, 55vw" imgClassName="transition-transform duration-700 group-hover:scale-105" />
+              </div>
+              <div>
+                <p className="eyebrow text-[10.5px] text-terracotta">{formatDate(lead.publishedAt ?? lead.createdAt)}</p>
+                <h2 className="mt-3 text-balance font-display text-[2rem] leading-[1.1] text-foreground transition-colors group-hover:text-terracotta md:text-[2.5rem]">
+                  {lead.title}
+                </h2>
+                {lead.excerpt && <p className="mt-4 line-clamp-3 text-[15.5px] leading-relaxed text-muted">{lead.excerpt}</p>}
+                <span className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-ink">
+                  <span className="border-b border-ink/25 pb-0.5 group-hover:border-ink">{t.read}</span>
+                  <ArrowUpRight className="h-4 w-4" />
+                </span>
+              </div>
+            </Link>
+
+            {rest.length > 0 && (
+              <div className="mt-16 grid grid-cols-1 gap-x-6 gap-y-12 border-t border-border pt-14 sm:grid-cols-2 lg:grid-cols-3">
+                {rest.map((p, i) => (
+                  <Link key={p.id} href={localePath(`/blog/${p.slug}`, locale)} className="group block">
+                    <div className={cn("relative aspect-[4/3] overflow-hidden", i % 3 === 1 ? "rounded-arch" : "rounded-[1.5rem]")}>
+                      <SmartImage src={p.coverImageUrl} alt={p.title} seed={`blog-${p.slug}`} sizes="(max-width: 768px) 100vw, 33vw" imgClassName="transition-transform duration-700 group-hover:scale-105" />
+                    </div>
+                    <p className="eyebrow mt-4 text-[10px] text-terracotta">{formatDate(p.publishedAt ?? p.createdAt)}</p>
+                    <h3 className="mt-2 font-display text-[1.35rem] leading-snug text-foreground transition-colors group-hover:text-terracotta">{p.title}</h3>
+                    {p.excerpt && <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted">{p.excerpt}</p>}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
-    </div>
+    </>
   );
 }

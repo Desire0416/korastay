@@ -1,88 +1,88 @@
-import {
-  Briefcase, Receipt, Wifi, Headset, FileSignature, Users, ArrowRight, Building2,
-} from "lucide-react";
+import { Receipt, Wifi, Headset, FileSignature, Users, ListChecks } from "lucide-react";
 import { LeadForm } from "@/components/public/lead-form";
+import { SectionHeading } from "@/components/public/section-heading";
+import { Motif, Ornament } from "@/components/brand/motif";
 import { submitBusinessRequest } from "@/server/actions/leads";
+import { getI18n } from "@/lib/i18n.server";
+import { alternatesFor } from "@/lib/seo";
+import type { Metadata } from "next";
 
-export const metadata = {
-  title: "KoraStay Business",
-  description: "Hébergements professionnels fiables et facturables pour vos équipes en mission en Afrique de l'Ouest.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { dict } = await getI18n();
+  return { title: dict.pages.business.metaTitle, description: dict.pages.business.metaDescription, alternates: alternatesFor("/business") };
+}
 
-const BENEFITS = [
-  { icon: Receipt, title: "Facturation dediee", text: "Factures entreprise, TVA si applicable, bon de commande." },
-  { icon: Wifi, title: "Logements équipes", text: "WiFi fiable, espace bureau, calme et proximité des services." },
-  { icon: FileSignature, title: "Contrat cadre", text: "Tarifs negocies pour vos réservations recurrentes." },
-  { icon: Headset, title: "Assistance dediee", text: "Un interlocuteur KoraStay Business pour vos missions." },
-  { icon: Users, title: "Gestion d'équipe", text: "Centralisez les réservations de vos collaborateurs." },
-  { icon: Building2, title: "Rapport mensuel", text: "Récapitulatif des séjours et depenses par mission." },
-];
+const BENEFIT_ICONS = [FileSignature, Receipt, Wifi, Users, ListChecks, Headset];
 
-const CASES = ["ONG en mission terrain", "Entreprise en deplacement", "Delegation officielle", "Équipe projet"];
+export default async function BusinessPage() {
+  const { dict } = await getI18n();
+  const t = dict.pages.business;
+  const f = t.fields;
 
-export default function BusinessPage() {
   return (
-    <div>
-      <section className="gradient-hero">
-        <div className="container-page grid grid-cols-1 items-center gap-10 py-14 lg:grid-cols-2">
-          <div>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-sm font-semibold text-brand-700">
-              <Briefcase className="h-3.5 w-3.5" /> KoraStay Business
-            </span>
-            <h1 className="mt-5 font-display text-4xl font-semibold leading-tight tracking-tight text-foreground sm:text-5xl">
-              Des séjours professionnels fiables, facturables et assistes.
-            </h1>
-            <p className="mt-4 max-w-lg text-muted">
-              KoraStay accompagné entreprises, ONG, administrations et institutions
-              pour loger leurs équipes en mission partout en Côte d'Ivoire.
+    <>
+      {/* Hero indigo + formulaire de devis */}
+      <section className="grain relative overflow-hidden bg-ink-800 text-white">
+        <Motif variant="kente" fade="bottom" className="text-white/[0.05]" />
+        <div aria-hidden="true" className="absolute -left-40 -top-40 h-[30rem] w-[30rem] rounded-full bg-terracotta/20 blur-3xl" />
+        <div className="container-page relative grid grid-cols-1 items-start gap-12 py-14 md:py-20 lg:grid-cols-[1fr_1.05fr]">
+          <div className="lg:pt-8">
+            <p className="eyebrow flex items-center gap-3 text-gold-300">
+              <Ornament side="left" />
+              {t.eyebrow}
             </p>
-            <div className="mt-6 flex flex-wrap gap-2">
-              {CASES.map((c) => (
-                <span key={c} className="rounded-full bg-surface px-3 py-1.5 text-sm font-medium text-foreground shadow-soft">{c}</span>
+            <h1 className="mt-5 text-balance font-display text-[2.6rem] font-normal leading-[1.04] tracking-[-0.02em] md:text-display-md lg:text-display-lg">
+              {t.title} <em className="italic text-gold-300">{t.accent}</em>
+            </h1>
+            <p className="mt-6 max-w-lg text-[16.5px] leading-relaxed text-white/70">{t.subtitle}</p>
+            <ul className="mt-8 flex flex-wrap gap-2">
+              {t.cases.map((c) => (
+                <li key={c} className="rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-white/90">{c}</li>
               ))}
-            </div>
+            </ul>
           </div>
 
-          <div className="rounded-4xl border border-border bg-surface p-6 shadow-card sm:p-8" id="devis">
-            <h2 className="text-xl font-bold text-foreground">Demander un devis</h2>
-            <p className="mb-5 mt-1 text-sm text-muted">Réponse sous 48h ouvrees.</p>
+          <div id="devis" className="relative scroll-mt-[calc(var(--header-h)+1rem)] overflow-hidden rounded-[2rem] bg-surface p-7 pt-9 text-foreground shadow-float sm:p-9 sm:pt-11">
+            <div aria-hidden="true" className="absolute inset-x-0 top-0 h-2 overflow-hidden">
+              <div className="motif motif-kente text-terracotta/70" />
+            </div>
+            <h2 className="font-display text-[1.75rem]">{t.quoteTitle}</h2>
+            <p className="mb-6 mt-1 text-sm text-muted">{t.quoteDelay}</p>
             <LeadForm
               action={submitBusinessRequest}
-              submitLabel="Envoyer la demande"
+              submitLabel={t.submit}
               fields={[
-                { name: "organizationName", label: "Organisation", required: true, placeholder: "Nom de l'entreprise" },
-                { name: "organizationType", label: "Type", type: "select", options: [
-                  { value: "Entreprise", label: "Entreprise" }, { value: "ONG", label: "ONG" },
-                  { value: "Administration", label: "Administration" }, { value: "Institution", label: "Institution" },
-                ], placeholder: "Type d'organisation" },
-                { name: "contactName", label: "Contact", required: true, placeholder: "Votre nom" },
-                { name: "email", label: "Email", type: "email", required: true, placeholder: "vous@entreprise.com" },
-                { name: "phone", label: "Téléphone", type: "tel", placeholder: "+225 ..." },
-                { name: "city", label: "Ville de mission", placeholder: "Daloa, Man..." },
-                { name: "teamSize", label: "Taille équipe", type: "number", placeholder: "5" },
-                { name: "notes", label: "Vos besoins", type: "textarea", placeholder: "Dates, exigences, budget..." },
+                { name: "organizationName", label: f.organization, required: true, placeholder: f.organizationPlaceholder },
+                { name: "organizationType", label: f.type, type: "select", options: f.types, placeholder: f.typePlaceholder },
+                { name: "contactName", label: f.contact, required: true, placeholder: f.contactPlaceholder },
+                { name: "email", label: f.email, type: "email", required: true, placeholder: f.emailPlaceholder },
+                { name: "phone", label: f.phone, type: "tel", placeholder: "+225 ..." },
+                { name: "city", label: f.city, placeholder: f.cityPlaceholder },
+                { name: "teamSize", label: f.teamSize, type: "number", placeholder: "5" },
+                { name: "notes", label: f.needs, type: "textarea", placeholder: f.needsPlaceholder },
               ]}
             />
           </div>
         </div>
       </section>
 
-      <section className="container-page py-14">
-        <h2 className="mb-8 text-center font-display text-3xl font-semibold text-foreground">
-          Pourquoi choisir KoraStay Business
-        </h2>
+      <section className="container-page py-20 md:py-24">
+        <SectionHeading align="center" title={t.benefitsTitle} accent={t.benefitsAccent} />
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {BENEFITS.map((b) => (
-            <div key={b.title} className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
-              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-600">
-                <b.icon className="h-6 w-6" />
-              </span>
-              <h3 className="mt-4 font-bold text-foreground">{b.title}</h3>
-              <p className="mt-1.5 text-sm text-muted">{b.text}</p>
-            </div>
-          ))}
+          {t.benefits.map((b, i) => {
+            const BenefitIcon = BENEFIT_ICONS[i] ?? Receipt;
+            return (
+              <div key={b.title} className="rounded-[1.75rem] border border-border bg-surface p-7 shadow-soft">
+                <span className="flex h-14 w-12 items-center justify-center rounded-arch-sm bg-ink text-gold-300">
+                  <BenefitIcon className="h-5 w-5" strokeWidth={1.7} />
+                </span>
+                <h3 className="mt-5 font-display text-xl text-foreground">{b.title}</h3>
+                <p className="mt-2 text-[15px] leading-relaxed text-muted">{b.text}</p>
+              </div>
+            );
+          })}
         </div>
       </section>
-    </div>
+    </>
   );
 }

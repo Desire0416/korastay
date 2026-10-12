@@ -14,6 +14,7 @@ import {
 } from "./dictionaries/pack-flows";
 import { type ActivitiesDict, activitiesFr, activitiesEn } from "./dictionaries/activities";
 import { type DestinationsDict, destinationsFr, destinationsEn } from "./dictionaries/destinations";
+import { type PagesDict, pagesFr, pagesEn } from "./dictionaries/pages";
 
 export type Locale = "fr" | "en";
 export const LOCALES: Locale[] = ["fr", "en"];
@@ -30,6 +31,7 @@ export interface Dictionary {
   customPack: CustomPackDict;
   activities: ActivitiesDict;
   destinations: DestinationsDict;
+  pages: PagesDict;
   header: {
     becomeHost: string;
     login: string;
@@ -316,6 +318,7 @@ const FR: Dictionary = {
   customPack: customPackFr,
   activities: activitiesFr,
   destinations: destinationsFr,
+  pages: pagesFr,
   header: {
     becomeHost: "Devenir propriétaire",
     login: "Connexion",
@@ -576,6 +579,7 @@ const EN: Dictionary = {
   customPack: customPackEn,
   activities: activitiesEn,
   destinations: destinationsEn,
+  pages: pagesEn,
   header: {
     becomeHost: "Become a host",
     login: "Log in",

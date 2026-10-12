@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Field } from "@/components/ui/field";
+import { Motif } from "@/components/brand/motif";
+import { useI18n } from "@/components/i18n/provider";
 import type { LeadResult } from "@/server/actions/leads";
 
 export interface LeadField {
@@ -27,16 +29,18 @@ interface LeadFormProps {
 }
 
 export function LeadForm({ action, fields, submitLabel }: LeadFormProps) {
+  const dict = useI18n();
   const [state, formAction, pending] = useActionState<LeadResult, FormData>(action, { ok: false });
 
   if (state.ok) {
     return (
-      <div className="flex flex-col items-center rounded-3xl border border-success/30 bg-emerald-50 p-8 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-success text-white">
+      <div className="relative flex flex-col items-center overflow-hidden rounded-[1.5rem] bg-brand-500 p-9 text-center text-white">
+        <Motif variant="dots" className="text-white/10" />
+        <div className="relative flex h-16 w-14 items-center justify-center rounded-arch-sm bg-white/15">
           <CheckCircle2 className="h-7 w-7" />
         </div>
-        <h3 className="mt-4 text-lg font-bold text-success">Demande envoyée !</h3>
-        <p className="mt-1.5 max-w-md text-sm text-emerald-800/80">{state.message}</p>
+        <h3 className="relative mt-5 font-display text-2xl">{dict.pages.leadForm.sent}</h3>
+        <p className="relative mt-2 max-w-md text-sm leading-relaxed text-white/80">{state.message}</p>
       </div>
     );
   }
@@ -61,9 +65,9 @@ export function LeadForm({ action, fields, submitLabel }: LeadFormProps) {
                 name={f.name}
                 required={f.required}
                 defaultValue={f.defaultValue ?? ""}
-                className="h-12 w-full rounded-2xl border border-border bg-surface px-4 text-[15px] text-foreground focus-visible:border-brand-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-100"
+                className="h-12 w-full rounded-xl border border-ink/15 bg-white px-4 text-[15px] text-foreground transition-colors hover:border-ink/30 focus-visible:border-terracotta focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-terracotta/10"
               >
-                <option value="" disabled>{f.placeholder ?? "Sélectionner..."}</option>
+                <option value="" disabled>{f.placeholder ?? dict.pages.leadForm.select}</option>
                 {f.options?.map((o) => (
                   <option key={o.value} value={o.value}>{o.label}</option>
                 ))}
@@ -76,12 +80,12 @@ export function LeadForm({ action, fields, submitLabel }: LeadFormProps) {
       </div>
 
       {state.error && (
-        <div className="flex items-center gap-2 rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-danger">
+        <div role="alert" className="flex items-center gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-danger ring-1 ring-inset ring-red-200/70">
           <AlertCircle className="h-4 w-4" /> {state.error}
         </div>
       )}
 
-      <Button type="submit" size="lg" loading={pending}>{submitLabel}</Button>
+      <Button type="submit" size="lg" loading={pending} className="w-full sm:w-auto">{submitLabel}</Button>
     </form>
   );
 }
