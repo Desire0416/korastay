@@ -38,6 +38,10 @@ export interface Dictionary {
     register: string;
     logout: string;
     language: string;
+    openMenu: string;
+    menuTitle: string;
+    admin: string;
+    mySpace: string;
   };
   footer: {
     tagline: string;
@@ -325,6 +329,10 @@ const FR: Dictionary = {
     register: "S'inscrire",
     logout: "Se déconnecter",
     language: "Langue",
+    openMenu: "Ouvrir le menu",
+    menuTitle: "Menu de navigation",
+    admin: "Administration",
+    mySpace: "Mon espace",
   },
   footer: {
     tagline:
@@ -586,6 +594,10 @@ const EN: Dictionary = {
     register: "Sign up",
     logout: "Log out",
     language: "Language",
+    openMenu: "Open menu",
+    menuTitle: "Navigation menu",
+    admin: "Admin",
+    mySpace: "My space",
   },
   footer: {
     tagline:

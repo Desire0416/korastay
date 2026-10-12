@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 function CardSkeleton() {
   return (
     <div>
-      <Skeleton className="aspect-[4/3] w-full rounded-3xl" />
+      <Skeleton className="aspect-[5/4] w-full rounded-[1.5rem]" />
       <div className="mt-3 space-y-2 px-0.5">
         <Skeleton className="h-4 w-3/4 rounded-lg" />
         <Skeleton className="h-3 w-1/2 rounded-lg" />
@@ -22,7 +22,7 @@ function CardSkeleton() {
 /** Grille de cartes — miroir de la liste des residences/packs/activites. */
 export function CardGridSkeleton({ count = 8 }: { count?: number }) {
   return (
-    <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {Array.from({ length: count }).map((_, i) => (
         <CardSkeleton key={i} />
       ))}
@@ -53,7 +53,7 @@ export function ResidenceDetailSkeleton() {
             <Skeleton className="h-4 w-4/6 rounded-lg" />
           </div>
         </div>
-        <Skeleton className="hidden h-96 w-full rounded-3xl lg:block" />
+        <Skeleton className="hidden h-96 w-full rounded-[1.75rem] lg:block" />
       </div>
     </div>
   );

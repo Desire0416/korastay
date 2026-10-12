@@ -22,28 +22,31 @@ import {
   ADMIN_NAV,
 } from "@/lib/navigation";
 import { ChevronDown, LogOut, Shield } from "lucide-react";
+import { useI18n } from "@/components/i18n/provider";
+import { localePath } from "@/lib/i18n";
 import type { SessionUser } from "@/lib/auth";
 
 const ADMIN_ITEMS = ADMIN_NAV.flatMap((g) => g.items);
 
-const ROLE_MENUS: Record<string, { label: string; items: typeof ACCOUNT_NAV }> = {
-  TRAVELER: { label: "Espace voyageur", items: ACCOUNT_NAV.slice(0, 5) },
-  OWNER: { label: "Espace propriétaire", items: OWNER_NAV.slice(0, 5) },
-  PARTNER: { label: "Espace partenaire", items: PARTNER_NAV.slice(0, 5) },
-  BUSINESS: { label: "Espace business", items: BUSINESS_NAV },
-  ADMIN: { label: "Administration", items: ADMIN_ITEMS.slice(1, 6) },
-  SUPER_ADMIN: { label: "Administration", items: ADMIN_ITEMS.slice(1, 6) },
+const ROLE_MENUS: Record<string, typeof ACCOUNT_NAV> = {
+  TRAVELER: ACCOUNT_NAV.slice(0, 5),
+  OWNER: OWNER_NAV.slice(0, 5),
+  PARTNER: PARTNER_NAV.slice(0, 5),
+  BUSINESS: BUSINESS_NAV,
+  ADMIN: ADMIN_ITEMS.slice(1, 6),
+  SUPER_ADMIN: ADMIN_ITEMS.slice(1, 6),
 };
 
 export function UserMenu({ user }: { user: SessionUser }) {
   const isAdmin = user.role === "ADMIN" || user.role === "SUPER_ADMIN";
-  const menu = ROLE_MENUS[user.role] ?? ROLE_MENUS.TRAVELER;
+  const items = ROLE_MENUS[user.role] ?? ROLE_MENUS.TRAVELER;
+  const dict = useI18n();
   const [, startLogout] = useTransition();
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="flex items-center gap-2 rounded-full border border-border bg-surface py-1 pl-1 pr-3 shadow-soft transition-shadow hover:shadow-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400">
+        <button className="flex items-center gap-2 rounded-full border border-ink/15 bg-surface py-1 pl-1 pr-3 shadow-soft transition-shadow hover:shadow-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400">
           <Avatar className="h-8 w-8">
             {user.avatarUrl && <AvatarImage src={user.avatarUrl} alt="" />}
             <AvatarFallback>{initials(user.firstName, user.lastName)}</AvatarFallback>
@@ -65,17 +68,17 @@ export function UserMenu({ user }: { user: SessionUser }) {
         {isAdmin && (
           <>
             <DropdownMenuItem asChild>
-              <Link href="/admin">
-                <Shield className="h-4 w-4 text-danger" />
-                Administration
+              <Link href={localePath("/admin", dict.locale)}>
+                <Shield className="h-4 w-4 text-terracotta" />
+                {dict.header.admin}
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
           </>
         )}
-        {menu.items.map((item) => (
+        {items.map((item) => (
           <DropdownMenuItem key={item.href} asChild>
-            <Link href={item.href}>
+            <Link href={localePath(item.href, dict.locale)}>
               <Icon name={item.icon} className="h-4 w-4 text-muted" />
               {item.label}
             </Link>
@@ -92,7 +95,7 @@ export function UserMenu({ user }: { user: SessionUser }) {
           className="text-danger focus:bg-red-50 focus:text-danger"
         >
           <LogOut className="h-4 w-4" />
-          Se deconnecter
+          {dict.header.logout}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
