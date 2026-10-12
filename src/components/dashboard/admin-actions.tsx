@@ -4,6 +4,8 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
+import { useI18n } from "@/components/i18n/provider";
+import { localePath } from "@/lib/i18n";
 import { toast } from "sonner";
 
 type Result = { ok: boolean; error?: string; message?: string };
@@ -19,6 +21,7 @@ export interface AdminAction {
 
 export function AdminActions({ actions, size = "sm" }: { actions: AdminAction[]; size?: ButtonProps["size"] }) {
   const router = useRouter();
+  const dict = useI18n();
   const [pending, start] = React.useTransition();
 
   function run(a: AdminAction) {
@@ -26,10 +29,10 @@ export function AdminActions({ actions, size = "sm" }: { actions: AdminAction[];
     start(async () => {
       const res = await a.fn();
       if (res.ok) {
-        toast.success(res.message ?? "Action effectuée.");
-        if (a.redirectTo) router.push(a.redirectTo);
+        toast.success(res.message ?? dict.dash.common.done);
+        if (a.redirectTo) router.push(localePath(a.redirectTo, dict.locale));
         else router.refresh();
-      } else toast.error(res.error ?? "Erreur.");
+      } else toast.error(res.error ?? dict.dash.common.error);
     });
   }
 

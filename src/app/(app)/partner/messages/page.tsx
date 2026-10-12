@@ -5,20 +5,31 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { ConversationList } from "@/components/messaging/conversation-list";
 import { StartSupportButton } from "@/components/messaging/start-support-button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { card } from "@/components/dashboard/styles";
+import { getI18n } from "@/lib/i18n.server";
+import type { Metadata } from "next";
 
-export const metadata = { title: "Messages" };
+export async function generateMetadata(): Promise<Metadata> {
+  const { dict } = await getI18n();
+  return { title: dict.dash.messaging.title };
+}
 
 export default async function PartnerMessagesPage() {
   const user = await requireRole(["PARTNER", "ADMIN", "SUPER_ADMIN"]);
-  const conversations = await getUserConversations(user);
+  const [conversations, { dict }] = await Promise.all([getUserConversations(user), getI18n()]);
+  const t = dict.dashPartner.messages;
 
   return (
     <div className="mx-auto max-w-3xl">
-      <PageHeader title="Messages" description="Echangez avec l'équipe KoraStay." actions={<StartSupportButton label="Contacter KoraStay" />} />
+      <PageHeader
+        title={dict.dash.messaging.title}
+        description={t.subtitle}
+        actions={<StartSupportButton label={dict.dashPartner.home.contact} />}
+      />
       {conversations.length === 0 ? (
-        <EmptyState icon={MessageCircle} title="Aucune conversation" description="Contactez l'équipe KoraStay pour toute question sur vos missions ou votre profil." />
+        <EmptyState icon={MessageCircle} title={t.emptyTitle} description={t.emptyText} />
       ) : (
-        <div className="overflow-hidden rounded-3xl border border-border bg-surface shadow-soft">
+        <div className={`${card} overflow-hidden`}>
           <ConversationList conversations={conversations} basePath="/partner/messages" />
         </div>
       )}

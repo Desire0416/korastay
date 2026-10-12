@@ -9,10 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Field } from "@/components/ui/field";
+import { NativeSelect } from "@/components/ui/native-select";
+import { EmptyState } from "@/components/ui/empty-state";
 import { UploadField } from "@/components/dashboard/upload-field";
 import { SmartImage } from "@/components/ui/smart-image";
 import { saveMenuItem, deleteMenuItem, toggleMenuItem, type PartnerResult } from "@/server/actions/partner";
-import { formatPrice } from "@/lib/utils";
+import { useI18n } from "@/components/i18n/provider";
+import { formatPrice, cn } from "@/lib/utils";
 
 export interface MenuItem {
   id: string;
@@ -24,10 +27,14 @@ export interface MenuItem {
   isAvailable: boolean;
 }
 
+// Valeurs stockees en base (FR) ; le libelle affiche vient du dictionnaire.
 const CATEGORIES = ["Entrées", "Plats", "Desserts", "Boissons", "Formules"];
 
 export function MenuManager({ items }: { items: MenuItem[] }) {
   const router = useRouter();
+  const dict = useI18n();
+  const t = dict.dashPartner.menu;
+  const catLabel = (c: string) => t.categories[c] ?? c;
   const [editing, setEditing] = React.useState<MenuItem | null>(null);
   const [showForm, setShowForm] = React.useState(false);
   const [busyId, setBusyId] = React.useState<string | null>(null);
@@ -44,91 +51,152 @@ export function MenuManager({ items }: { items: MenuItem[] }) {
     if (state.error) toast.error(state.error);
   }, [state, router]);
 
-  function openAdd() { setEditing(null); setShowForm(true); }
-  function openEdit(item: MenuItem) { setEditing(item); setShowForm(true); }
+  function openAdd() {
+    setEditing(null);
+    setShowForm(true);
+  }
+  function openEdit(item: MenuItem) {
+    setEditing(item);
+    setShowForm(true);
+  }
+  function close() {
+    setShowForm(false);
+    setEditing(null);
+  }
 
   function runToggle(id: string) {
     setBusyId(id);
-    start(async () => { await toggleMenuItem(id); router.refresh(); setBusyId(null); });
+    start(async () => {
+      await toggleMenuItem(id);
+      router.refresh();
+      setBusyId(null);
+    });
   }
   function runDelete(id: string) {
-    if (!window.confirm("Supprimer ce plat ?")) return;
+    if (!window.confirm(t.confirmDelete)) return;
     setBusyId(id);
-    start(async () => { const r = await deleteMenuItem(id); if (r.ok) toast.success("Plat supprimé."); router.refresh(); setBusyId(null); });
+    start(async () => {
+      const r = await deleteMenuItem(id);
+      if (r.ok) toast.success(t.deleted);
+      router.refresh();
+      setBusyId(null);
+    });
   }
 
-  const grouped = CATEGORIES.map((c) => ({ category: c, items: items.filter((i) => (i.category ?? "Plats") === c) }))
-    .filter((g) => g.items.length > 0);
+  const grouped = CATEGORIES.map((c) => ({ category: catLabel(c), key: c, items: items.filter((i) => (i.category ?? "Plats") === c) })).filter(
+    (g) => g.items.length > 0
+  );
   const uncategorized = items.filter((i) => !CATEGORIES.includes(i.category ?? "Plats"));
+  const groups = [...grouped, ...(uncategorized.length ? [{ category: t.other, key: "other", items: uncategorized }] : [])];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {!showForm && (
-        <Button onClick={openAdd}><Plus className="h-4 w-4" /> Ajouter un plat</Button>
+        <Button onClick={openAdd} variant="terracotta">
+          <Plus className="h-4 w-4" /> {t.add}
+        </Button>
       )}
 
       {showForm && (
-        <form key={editing?.id ?? "new"} action={action} className="rounded-3xl border border-border bg-surface p-5 shadow-soft">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="font-bold text-foreground">{editing ? "Modifier le plat" : "Nouveau plat"}</h3>
-            <button type="button" onClick={() => { setShowForm(false); setEditing(null); }} className="rounded-lg p-1.5 text-muted hover:bg-surface-soft"><X className="h-4 w-4" /></button>
+        <form key={editing?.id ?? "new"} action={action} className="rounded-[1.5rem] border border-border/80 bg-surface p-6 shadow-card sm:p-7">
+          <div className="mb-5 flex items-center justify-between">
+            <h3 className="font-display text-xl text-foreground">{editing ? t.editTitle : t.newTitle}</h3>
+            <button type="button" onClick={close} className="rounded-full p-2 text-muted transition-colors hover:bg-sand-50 hover:text-ink" aria-label={t.close}>
+              <X className="h-4 w-4" />
+            </button>
           </div>
           {editing && <input type="hidden" name="id" value={editing.id} />}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field label="Nom du plat" htmlFor="name" required>
-              <Input id="name" name="name" defaultValue={editing?.name ?? ""} placeholder="Attieke poisson" required />
+            <Field label={t.name} htmlFor="name" required>
+              <Input id="name" name="name" defaultValue={editing?.name ?? ""} placeholder={t.namePh} required />
             </Field>
-            <Field label="Prix (F CFA)" htmlFor="price" required>
+            <Field label={t.price} htmlFor="price" required>
               <Input id="price" name="price" type="number" min={0} step={100} defaultValue={editing?.price ?? ""} placeholder="3500" required />
             </Field>
-            <Field label="Catégorie" htmlFor="category">
-              <select id="category" name="category" defaultValue={editing?.category ?? "Plats"} className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm font-medium text-foreground focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100">
-                {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-              </select>
+            <Field label={t.category} htmlFor="category">
+              <NativeSelect id="category" name="category" defaultValue={editing?.category ?? "Plats"}>
+                {CATEGORIES.map((c) => (
+                  <option key={c} value={c}>{catLabel(c)}</option>
+                ))}
+              </NativeSelect>
             </Field>
             <div className="sm:row-span-2">
-              <UploadField name="imageUrl" label="Photo du plat" defaultUrl={editing?.imageUrl ?? ""} />
+              <UploadField name="imageUrl" label={t.photo} defaultUrl={editing?.imageUrl ?? ""} />
             </div>
-            <Field label="Description" htmlFor="description" className="sm:col-span-1">
-              <Textarea id="description" name="description" rows={2} defaultValue={editing?.description ?? ""} placeholder="Ingredients, accompagnement..." />
+            <Field label={t.description} htmlFor="description">
+              <Textarea id="description" name="description" rows={2} defaultValue={editing?.description ?? ""} placeholder={t.descriptionPh} />
             </Field>
           </div>
-          <div className="mt-4 flex gap-2">
-            <Button type="submit" loading={saving}>{editing ? "Enregistrer" : "Ajouter au menu"}</Button>
-            <Button type="button" variant="ghost" onClick={() => { setShowForm(false); setEditing(null); }}>Annuler</Button>
+          <div className="mt-6 flex gap-2 border-t border-border pt-5">
+            <Button type="submit" loading={saving}>{editing ? t.save : t.addToMenu}</Button>
+            <Button type="button" variant="ghost" onClick={close}>{dict.dash.common.cancel}</Button>
           </div>
         </form>
       )}
 
       {items.length === 0 && !showForm ? (
-        <div className="rounded-3xl border border-dashed border-border p-10 text-center">
-          <CookingPot className="mx-auto h-9 w-9 text-muted" />
-          <p className="mt-3 font-semibold text-foreground">Votre menu est vide</p>
-          <p className="text-sm text-muted">Ajoutez vos plats avec photo et prix pour les présenter aux voyageurs.</p>
-        </div>
+        <EmptyState icon={CookingPot} title={t.emptyTitle} description={t.emptyText} />
       ) : (
-        [...grouped, ...(uncategorized.length ? [{ category: "Autres", items: uncategorized }] : [])].map((g) => (
-          <div key={g.category}>
-            <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-muted">{g.category}</h3>
+        groups.map((g) => (
+          <div key={g.key}>
+            <h3 className="mb-3 flex items-center gap-3 font-display text-xl text-foreground">
+              {g.category}
+              <span aria-hidden="true" className="h-px flex-1 bg-gradient-to-r from-sand-300 to-transparent" />
+            </h3>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {g.items.map((item) => (
-                <div key={item.id} className={`flex gap-3 rounded-2xl border border-border bg-surface p-3 shadow-soft ${!item.isAvailable ? "opacity-60" : ""}`}>
-                  <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-surface-soft">
-                    {item.imageUrl ? <SmartImage src={item.imageUrl} alt={item.name} seed={item.id} /> : <span className="flex h-full items-center justify-center text-muted"><CookingPot className="h-6 w-6" /></span>}
+                <div
+                  key={item.id}
+                  className={cn(
+                    "flex gap-3.5 rounded-[1.25rem] border border-border/80 bg-surface p-3 shadow-soft transition-opacity",
+                    !item.isAvailable && "opacity-60"
+                  )}
+                >
+                  <div className="h-24 w-20 shrink-0 overflow-hidden rounded-arch-sm bg-sand-100">
+                    {item.imageUrl ? (
+                      <SmartImage src={item.imageUrl} alt={item.name} seed={item.id} sizes="80px" />
+                    ) : (
+                      <span className="flex h-full items-center justify-center text-terracotta/60">
+                        <CookingPot className="h-6 w-6" />
+                      </span>
+                    )}
                   </div>
-                  <div className="min-w-0 flex-1">
+                  <div className="min-w-0 flex-1 py-0.5">
                     <div className="flex items-start justify-between gap-2">
-                      <p className="font-semibold text-foreground">{item.name}</p>
-                      <span className="shrink-0 font-bold text-brand-600">{formatPrice(item.price)}</span>
+                      <p className="font-semibold leading-snug text-foreground">{item.name}</p>
+                      <span className="shrink-0 font-display text-lg leading-none text-terracotta">{formatPrice(item.price)}</span>
                     </div>
-                    {item.description && <p className="line-clamp-2 text-xs text-muted">{item.description}</p>}
-                    <div className="mt-2 flex items-center gap-1.5">
-                      <button onClick={() => runToggle(item.id)} disabled={busyId === item.id || pending} className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-muted hover:bg-surface-soft" title={item.isAvailable ? "Rendre indisponible" : "Rendre disponible"}>
-                        {busyId === item.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : item.isAvailable ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
-                        {item.isAvailable ? "Visible" : "Masque"}
+                    {item.description && <p className="mt-1 line-clamp-2 text-xs text-muted">{item.description}</p>}
+                    <div className="mt-2.5 flex items-center gap-1">
+                      <button
+                        onClick={() => runToggle(item.id)}
+                        disabled={busyId === item.id || pending}
+                        className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold text-muted transition-colors hover:bg-sand-50 hover:text-ink"
+                        title={item.isAvailable ? t.makeUnavailable : t.makeAvailable}
+                      >
+                        {busyId === item.id ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : item.isAvailable ? (
+                          <Eye className="h-3.5 w-3.5" />
+                        ) : (
+                          <EyeOff className="h-3.5 w-3.5" />
+                        )}
+                        {item.isAvailable ? t.visible : t.hidden}
                       </button>
-                      <button onClick={() => openEdit(item)} className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-muted hover:bg-surface-soft"><Pencil className="h-3.5 w-3.5" /> Modifier</button>
-                      <button onClick={() => runDelete(item.id)} disabled={busyId === item.id || pending} className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-danger hover:bg-red-50"><Trash2 className="h-3.5 w-3.5" /></button>
+                      <button
+                        onClick={() => openEdit(item)}
+                        className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold text-muted transition-colors hover:bg-sand-50 hover:text-ink"
+                      >
+                        <Pencil className="h-3.5 w-3.5" /> {t.edit}
+                      </button>
+                      <button
+                        onClick={() => runDelete(item.id)}
+                        disabled={busyId === item.id || pending}
+                        className="ml-auto inline-flex h-7 w-7 items-center justify-center rounded-full text-danger transition-colors hover:bg-danger-50"
+                        aria-label={t.delete}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
                     </div>
                   </div>
                 </div>

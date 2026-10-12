@@ -75,6 +75,7 @@ export interface DashDict {
     loading: string;
     saved: string;
     error: string;
+    done: string;
     unauthorized: string;
     notFound: string;
     previous: string;
@@ -183,6 +184,7 @@ export const dashFr: DashDict = {
     loading: "Chargement…",
     saved: "Modifications enregistrées.",
     error: "Une erreur est survenue.",
+    done: "Action effectuée.",
     unauthorized: "Non autorisé.",
     notFound: "Introuvable.",
     previous: "Précédent",
@@ -349,6 +351,7 @@ export const dashEn: DashDict = {
     loading: "Loading…",
     saved: "Changes saved.",
     error: "Something went wrong.",
+    done: "Done.",
     unauthorized: "Not allowed.",
     notFound: "Not found.",
     previous: "Previous",

@@ -4,26 +4,34 @@ import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { VehicleForm } from "@/components/dashboard/vehicle-form";
+import { card } from "@/components/dashboard/styles";
+import { getI18n } from "@/lib/i18n.server";
+import { localePath } from "@/lib/i18n";
+import type { Metadata } from "next";
 
-export const metadata = { title: "Mon véhicule - Partenaire" };
+export async function generateMetadata(): Promise<Metadata> {
+  const { dict } = await getI18n();
+  return { title: dict.dashPartner.vehicle.metaTitle };
+}
 
 export default async function PartnerVehiclePage() {
   const user = await requireRole(["PARTNER", "ADMIN", "SUPER_ADMIN"]);
-  const profile = await prisma.partnerProfile.findUnique({ where: { userId: user.id } });
+  const [profile, { locale, dict }] = await Promise.all([prisma.partnerProfile.findUnique({ where: { userId: user.id } }), getI18n()]);
 
-  if (!profile) redirect("/partner");
-  if (profile.type !== "TRANSPORT") redirect("/partner/services");
+  if (!profile) redirect(localePath("/partner", locale));
+  if (profile.type !== "TRANSPORT") redirect(localePath("/partner/services", locale));
+  const t = dict.dashPartner.vehicle;
 
   return (
     <div className="mx-auto max-w-2xl">
-      <PageHeader title="Mon véhicule" description="Les informations affichees aux voyageurs lors de vos missions de transport." />
+      <PageHeader title={t.title} description={t.subtitle} />
 
-      <div className="mb-5 flex items-center gap-3 rounded-2xl border border-brand-200 bg-brand-50/60 p-4 text-sm text-brand-800">
-        <Car className="h-5 w-5 shrink-0 text-brand-600" />
-        Un véhicule a jour rassure les voyageurs et facilité l&apos;attribution des missions de transfert.
+      <div className="mb-5 flex items-center gap-3 rounded-[1.25rem] bg-sand-50 p-4 text-sm text-foreground/85 ring-1 ring-inset ring-sand-200">
+        <Car className="h-5 w-5 shrink-0 text-terracotta" strokeWidth={1.7} />
+        {t.note}
       </div>
 
-      <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
+      <div className={`${card} p-6 sm:p-8`}>
         <VehicleForm
           defaults={{
             vehicleType: profile.vehicleType ?? "",
