@@ -8,13 +8,15 @@ const badgeVariants = cva(
   {
     variants: {
       tone: {
-        neutral: "bg-surface-soft text-muted",
-        brand: "bg-brand-50 text-brand-700",
-        gold: "bg-gold-50 text-gold-700",
-        success: "bg-emerald-50 text-success",
-        danger: "bg-red-50 text-danger",
-        info: "bg-sky-50 text-info",
-        warning: "bg-gold-50 text-gold-700",
+        neutral: "bg-sand-100 text-sand-800 ring-1 ring-inset ring-sand-300/50",
+        brand: "bg-brand-50 text-brand-700 ring-1 ring-inset ring-brand-200/60",
+        gold: "bg-gold-50 text-gold-800 ring-1 ring-inset ring-gold-200/70",
+        success: "bg-emerald-50 text-success ring-1 ring-inset ring-emerald-200/60",
+        danger: "bg-red-50 text-danger ring-1 ring-inset ring-red-200/60",
+        info: "bg-sky-50 text-info ring-1 ring-inset ring-sky-200/60",
+        warning: "bg-gold-50 text-gold-800 ring-1 ring-inset ring-gold-200/70",
+        terracotta: "bg-terracotta-50 text-terracotta-700 ring-1 ring-inset ring-terracotta-200/60",
+        ink: "bg-ink text-white",
       },
       size: {
         sm: "px-2 py-0.5 text-2xs",

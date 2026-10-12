@@ -17,12 +17,14 @@ function isAllowlistedRemote(url: string): boolean {
   }
 }
 
-const PALETTES: { from: string; to: string; accent: string }[] = [
-  { from: "#0F6B4F", to: "#0A4836", accent: "#F2A23A" },
-  { from: "#12343B", to: "#0F6B4F", accent: "#F4AE45" },
-  { from: "#0C5A42", to: "#12343B", accent: "#F2A23A" },
-  { from: "#1d5b54", to: "#0F6B4F", accent: "#FBD897" },
-  { from: "#0F6B4F", to: "#155049", accent: "#F2A23A" },
+// Fonds de repli v2 (chargement / photo absente) : degrades terre et
+// indigo de la charte + trame bogolan, choisis de maniere deterministe.
+const PALETTES: { from: string; to: string; motif: string }[] = [
+  { from: "#0C5A42", to: "#0A4836", motif: "rgba(242, 162, 58, 0.22)" },
+  { from: "#B9562F", to: "#7E3820", motif: "rgba(253, 234, 203, 0.20)" },
+  { from: "#1C434B", to: "#091C20", motif: "rgba(242, 162, 58, 0.20)" },
+  { from: "#D3BA8C", to: "#9F8254", motif: "rgba(63, 52, 38, 0.18)" },
+  { from: "#DC8419", to: "#9C4626", motif: "rgba(253, 234, 203, 0.22)" },
 ];
 
 function hash(str: string): number {
@@ -32,57 +34,6 @@ function hash(str: string): number {
     h |= 0;
   }
   return Math.abs(h);
-}
-
-// 4 scenes illustrees evocatrices, choisies de maniere deterministe.
-function Scene({ variant, p }: { variant: number; p: (typeof PALETTES)[number] }) {
-  const sun = (
-    <circle cx="78" cy="24" r="11" fill={p.accent} opacity="0.92" />
-  );
-  switch (variant) {
-    case 0: // collines + soleil
-      return (
-        <>
-          {sun}
-          <path d="M0 78 Q25 60 50 72 T100 66 V100 H0 Z" fill="#ffffff" opacity="0.10" />
-          <path d="M0 86 Q30 70 55 82 T100 78 V100 H0 Z" fill="#ffffff" opacity="0.14" />
-          <path d="M0 94 Q35 84 60 92 T100 90 V100 H0 Z" fill="#ffffff" opacity="0.18" />
-        </>
-      );
-    case 1: // ville / skyline
-      return (
-        <>
-          {sun}
-          <g fill="#ffffff" opacity="0.14">
-            <rect x="10" y="58" width="12" height="42" rx="2" />
-            <rect x="26" y="48" width="14" height="52" rx="2" />
-            <rect x="44" y="64" width="11" height="36" rx="2" />
-            <rect x="59" y="42" width="15" height="58" rx="2" />
-            <rect x="78" y="56" width="13" height="44" rx="2" />
-          </g>
-          <rect x="0" y="92" width="100" height="8" fill="#ffffff" opacity="0.16" />
-        </>
-      );
-    case 2: // cote / vagues
-      return (
-        <>
-          {sun}
-          <path d="M0 70 Q25 64 50 70 T100 70 V100 H0 Z" fill="#ffffff" opacity="0.10" />
-          <path d="M0 80 Q20 74 40 80 T80 80 T120 80 V100 H0 Z" fill="#ffffff" opacity="0.16" />
-          <path d="M0 90 Q15 85 30 90 T60 90 T90 90 T120 90 V100 H0 Z" fill="#ffffff" opacity="0.22" />
-        </>
-      );
-    default: // interieur / fenetre
-      return (
-        <>
-          <rect x="20" y="22" width="40" height="34" rx="3" fill="#ffffff" opacity="0.16" />
-          <line x1="40" y1="22" x2="40" y2="56" stroke={p.from} strokeWidth="2" opacity="0.5" />
-          <line x1="20" y1="39" x2="60" y2="39" stroke={p.from} strokeWidth="2" opacity="0.5" />
-          <circle cx="78" cy="40" r="6" fill={p.accent} opacity="0.85" />
-          <rect x="0" y="78" width="100" height="22" fill="#ffffff" opacity="0.12" />
-        </>
-      );
-  }
 }
 
 interface SmartImageProps {
@@ -109,10 +60,7 @@ export function SmartImage({
   sizes = DEFAULT_SIZES,
 }: SmartImageProps) {
   const key = seed ?? src ?? alt;
-  const h = hash(key);
-  const p = PALETTES[h % PALETTES.length];
-  const variant = Math.floor(h / 7) % 4;
-  const gradId = `g${h % 100000}`;
+  const p = PALETTES[hash(key) % PALETTES.length];
   // Les uploads (chemin local /uploads ou Vercel Blob) s'affichent toujours ;
   // les autres images distantes (http) seulement si NEXT_PUBLIC_USE_REMOTE_IMAGES=true.
   const isLocal = !!src && src.startsWith("/");
@@ -122,22 +70,16 @@ export function SmartImage({
   const canOptimize = !!src && (isLocal || isBlob || isAllowlistedRemote(src));
 
   return (
-    <div className={cn("relative h-full w-full overflow-hidden bg-surface-soft", className)}>
-      <svg
-        viewBox="0 0 100 100"
-        preserveAspectRatio="xMidYMid slice"
-        className="absolute inset-0 h-full w-full"
+    <div className={cn("relative h-full w-full overflow-hidden bg-sand-200", className)}>
+      <div
         aria-hidden="true"
+        className="absolute inset-0"
+        style={{ backgroundImage: `linear-gradient(140deg, ${p.from}, ${p.to})` }}
       >
-        <defs>
-          <linearGradient id={gradId} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor={p.from} />
-            <stop offset="100%" stopColor={p.to} />
-          </linearGradient>
-        </defs>
-        <rect width="100" height="100" fill={`url(#${gradId})`} />
-        <Scene variant={variant} p={p} />
-      </svg>
+        <div className="motif motif-bogolan" style={{ color: p.motif }} />
+        {/* Arche en filigrane, au centre */}
+        <div className="absolute left-1/2 top-1/2 h-[46%] w-[30%] -translate-x-1/2 -translate-y-1/2 rounded-arch-sm border border-white/25" />
+      </div>
 
       {showImg && canOptimize && (
         <Image

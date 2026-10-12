@@ -27,6 +27,17 @@
     @apply tracking-tight;
   }
 
+  /* Fraunces v2 : axe SOFT pousse au maximum -> serif chaleureux, arrondi,
+     "fait main". L'axe opsz suit la taille automatiquement. */
+  .font-display {
+    font-optical-sizing: auto;
+    font-variation-settings: "SOFT" 100, "WONK" 0;
+  }
+  .font-display em,
+  .font-display i {
+    font-variation-settings: "SOFT" 100, "WONK" 1;
+  }
+
   /* Selection */
   ::selection {
     background-color: rgba(15, 107, 79, 0.16);
@@ -60,6 +71,100 @@
 @layer components {
   .container-page {
     @apply mx-auto w-full max-w-8xl px-5 sm:px-6 lg:px-8;
+  }
+
+  /* ============================================================
+     Motifs afro-contemporains (v2).
+     Tuiles SVG monochromes appliquees en MASQUE : la couleur vient de
+     currentColor, donc on regle teinte + opacite avec text-* (ex.
+     "text-brand-900/10"). Dessins geometriques originaux inspires du
+     bogolan (points, zigzags, croix, losanges) et du tissage kente.
+     ============================================================ */
+  .motif {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-color: currentColor;
+    -webkit-mask-image: var(--motif-img);
+    mask-image: var(--motif-img);
+    -webkit-mask-size: var(--motif-size);
+    mask-size: var(--motif-size);
+    -webkit-mask-repeat: repeat;
+    mask-repeat: repeat;
+  }
+  .motif-bogolan {
+    --motif-size: 72px 72px;
+    --motif-img: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><g fill='black' stroke='none'><circle cx='6' cy='6' r='1.8'/><circle cx='18' cy='6' r='1.8'/><circle cx='30' cy='6' r='1.8'/><circle cx='42' cy='6' r='1.8'/><circle cx='54' cy='6' r='1.8'/><circle cx='66' cy='6' r='1.8'/><circle cx='52' cy='42' r='2'/></g><path d='M0 22 6 15 12 22 18 15 24 22 30 15 36 22 42 15 48 22 54 15 60 22 66 15 72 22'/><path d='M18 34v16M10 42h16'/><path d='M52 33 61 42 52 51 43 42Z'/><path d='M4 62h10M22 62h10M40 62h10M58 62h10'/></svg>");
+  }
+  .motif-kente {
+    --motif-size: 40px 40px;
+    --motif-img: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40' fill='black'><rect y='3' width='19' height='2'/><rect y='9' width='19' height='2'/><rect y='15' width='19' height='2'/><rect x='23' width='2' height='19'/><rect x='29' width='2' height='19'/><rect x='35' width='2' height='19'/><rect x='3' y='21' width='2' height='19'/><rect x='9' y='21' width='2' height='19'/><rect x='15' y='21' width='2' height='19'/><rect x='21' y='23' width='19' height='2'/><rect x='21' y='29' width='19' height='2'/><rect x='21' y='35' width='19' height='2'/></svg>");
+  }
+  .motif-chevron {
+    --motif-size: 24px 14px;
+    --motif-img: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='14' viewBox='0 0 24 14' fill='none' stroke='black' stroke-width='1.6' stroke-linejoin='round'><path d='M0 11 6 3 12 11 18 3 24 11'/></svg>");
+  }
+  .motif-dots {
+    --motif-size: 14px 14px;
+    --motif-img: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'><circle cx='7' cy='7' r='1.2' fill='black'/></svg>");
+  }
+  /* Bande "dents de scie" : frise de triangles (textiles, facades banco). */
+  .motif-band {
+    background-color: currentColor;
+    -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='10' viewBox='0 0 16 10'><path d='M0 10 8 0 16 10Z' fill='black'/></svg>");
+    mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='10' viewBox='0 0 16 10'><path d='M0 10 8 0 16 10Z' fill='black'/></svg>");
+    -webkit-mask-size: 16px 100%;
+    mask-size: 16px 100%;
+    -webkit-mask-repeat: repeat-x;
+    mask-repeat: repeat-x;
+  }
+  /* Frise de losanges pleins / vides alternes. */
+  .motif-diamonds {
+    background-color: currentColor;
+    -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='12' viewBox='0 0 28 12'><path d='M7 0 13 6 7 12 1 6Z' fill='black'/><path d='M21 2.2 24.8 6 21 9.8 17.2 6Z' fill='none' stroke='black' stroke-width='1.3'/></svg>");
+    mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='12' viewBox='0 0 28 12'><path d='M7 0 13 6 7 12 1 6Z' fill='black'/><path d='M21 2.2 24.8 6 21 9.8 17.2 6Z' fill='none' stroke='black' stroke-width='1.3'/></svg>");
+    -webkit-mask-size: 28px 100%;
+    mask-size: 28px 100%;
+    -webkit-mask-repeat: repeat-x;
+    mask-repeat: repeat-x;
+  }
+
+  /* Fondus pour motifs (a poser sur le PARENT du .motif). */
+  .mask-fade-b {
+    -webkit-mask-image: linear-gradient(to bottom, black 30%, transparent);
+    mask-image: linear-gradient(to bottom, black 30%, transparent);
+  }
+  .mask-fade-t {
+    -webkit-mask-image: linear-gradient(to top, black 30%, transparent);
+    mask-image: linear-gradient(to top, black 30%, transparent);
+  }
+  .mask-fade-x {
+    -webkit-mask-image: linear-gradient(to right, transparent, black 25%, black 75%, transparent);
+    mask-image: linear-gradient(to right, transparent, black 25%, black 75%, transparent);
+  }
+  .mask-radial {
+    -webkit-mask-image: radial-gradient(closest-side, black 40%, transparent);
+    mask-image: radial-gradient(closest-side, black 40%, transparent);
+  }
+
+  /* Grain "lin brut" tres leger, pour les aplats (hero, sections sombres). */
+  .grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.4;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.24 0 0 0 0 0.16 0 0 0 0 0.09 0 0 0 0.22 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+  .grain-light::after {
+    mix-blend-mode: screen;
+    opacity: 0.25;
+  }
+
+  /* Sur-titre editorial (eyebrow). */
+  .eyebrow {
+    @apply text-xs font-bold uppercase tracking-eyebrow;
   }
 
   /* Masque le scrollbar pour les carrousels horizontaux */

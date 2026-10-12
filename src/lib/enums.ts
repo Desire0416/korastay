@@ -215,7 +215,9 @@ export type BadgeTone =
   | "success"
   | "danger"
   | "info"
-  | "warning";
+  | "warning"
+  | "terracotta"
+  | "ink";
 
 type LabelMap = Record<string, { label: string; tone: BadgeTone }>;
 

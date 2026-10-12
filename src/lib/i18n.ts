@@ -26,6 +26,12 @@ export interface Dictionary {
     rights: string;
     madeInPrefix: string;
     madeIn: string;
+    ctaEyebrow: string;
+    ctaTitle: string;
+    ctaAccent: string;
+    ctaExplore: string;
+    ctaHost: string;
+    contact: string;
   };
   home: {
     heroBadge: string;
@@ -306,14 +312,15 @@ const NAV_EN: Record<string, string> = {
   "/conditions-generales": "Terms & conditions",
   "/politique-annulation": "Cancellation policy",
   "/confidentialite": "Privacy policy",
-  "/mentions-legales": "Légal notice",
+  "/mentions-legales": "Legal notice",
 };
 
 const FOOTER_COLUMNS_EN: Record<string, string> = {
   Explorer: "Explore",
   Rejoindre: "Join us",
   KoraStay: "KoraStay",
-  Legal: "Légal",
+  Légal: "Legal",
+  Legal: "Legal",
 };
 
 const FR: Dictionary = {
@@ -322,20 +329,26 @@ const FR: Dictionary = {
     becomeHost: "Devenir propriétaire",
     login: "Connexion",
     register: "S'inscrire",
-    logout: "Se deconnecter",
+    logout: "Se déconnecter",
     language: "Langue",
   },
   footer: {
     tagline:
-      "La plateforme ouest-africaine qui simplifie la réservation de résidences vérifiées et l'organisation de séjours authentiques.",
+      "La plateforme ouest-africaine qui simplifie la réservation de logements vérifiés et l'organisation de séjours authentiques.",
     reassurance: [
-      { title: "Résidences vérifiées", text: "Chaque logement contrôle par KoraStay." },
-      { title: "Paiement mobile", text: "Orange Money, Wave et carte bancaire." },
+      { title: "Logements vérifiés", text: "Chaque adresse est contrôlée par KoraStay." },
+      { title: "Paiement Mobile Money", text: "Wave, Orange Money, MTN MoMo, Moov Money ou virement." },
       { title: "Assistance locale", text: "Avant, pendant et après le séjour." },
     ],
-    rights: "Tous droits reserves.",
-    madeInPrefix: "Concu en Côte d'Ivoire",
+    rights: "Tous droits réservés.",
+    madeInPrefix: "Conçu en Côte d'Ivoire",
     madeIn: "pour l'Afrique de l'Ouest.",
+    ctaEyebrow: "Akwaba",
+    ctaTitle: "Réservez votre séjour,",
+    ctaAccent: "vivez l'Afrique de l'Ouest.",
+    ctaExplore: "Explorer les logements",
+    ctaHost: "Devenir propriétaire",
+    contact: "Nous écrire",
   },
   home: {
     heroBadge: "La plateforme ouest-africaine du séjour vérifié",
@@ -652,13 +665,19 @@ const EN: Dictionary = {
     tagline:
       "The West-African platform that makes booking verified homes and organising authentic stays effortless.",
     reassurance: [
-      { title: "Verified homes", text: "Every property is vetted by KoraStay." },
-      { title: "Mobile payment", text: "Orange Money, Wave and bank cards." },
+      { title: "Verified homes", text: "Every address is vetted by KoraStay." },
+      { title: "Mobile Money payment", text: "Wave, Orange Money, MTN MoMo, Moov Money or bank transfer." },
       { title: "Local support", text: "Before, during and after your stay." },
     ],
     rights: "All rights reserved.",
     madeInPrefix: "Made in Côte d'Ivoire",
     madeIn: "for West Africa.",
+    ctaEyebrow: "Akwaba",
+    ctaTitle: "Book your stay,",
+    ctaAccent: "live West Africa.",
+    ctaExplore: "Explore stays",
+    ctaHost: "Become a host",
+    contact: "Write to us",
   },
   home: {
     heroBadge: "West Africa's verified-stay platform",

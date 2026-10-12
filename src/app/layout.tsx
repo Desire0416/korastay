@@ -13,11 +13,13 @@ const jakarta = Plus_Jakarta_Sans({
   weight: ["400", "500", "600", "700", "800"],
 });
 
+// Fraunces variable : graisse continue + axes SOFT/WONK/opsz (cf. .font-display
+// dans globals.css) pour un serif chaleureux et arrondi, signature de la v2.
 const fraunces = Fraunces({
   subsets: ["latin"],
   variable: "--font-fraunces",
   display: "swap",
-  weight: ["400", "500", "600", "700"],
+  axes: ["SOFT", "WONK", "opsz"],
   style: ["normal", "italic"],
 });
 

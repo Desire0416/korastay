@@ -9,12 +9,13 @@ interface NavLink {
   label: string;
 }
 
-// Navigation desktop avec etat actif (pilule surlignee).
+// Navigation desktop v2 : liens texte, l'etat actif est marque par un
+// petit losange terracotta sous le libelle (rappel des motifs).
 export function HeaderNav({ items }: { items: NavLink[] }) {
   const pathname = usePathname();
 
   return (
-    <nav className="hidden items-center gap-0.5 lg:flex">
+    <nav className="hidden items-center gap-1 lg:flex">
       {items.map((item) => {
         const active =
           item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
@@ -22,14 +23,23 @@ export function HeaderNav({ items }: { items: NavLink[] }) {
           <Link
             key={item.href}
             href={item.href}
+            aria-current={active ? "page" : undefined}
             className={cn(
-              "rounded-full px-3.5 py-2 text-sm font-semibold transition-all duration-200",
-              active
-                ? "bg-brand-50 text-brand-700"
-                : "text-foreground/70 hover:bg-surface-soft hover:text-foreground"
+              "group relative px-3 py-2 text-[14px] font-semibold transition-colors duration-200",
+              active ? "text-ink" : "text-foreground/65 hover:text-ink"
             )}
           >
             {item.label}
+            <svg
+              viewBox="0 0 10 10"
+              aria-hidden="true"
+              className={cn(
+                "absolute -bottom-0.5 left-1/2 h-[7px] w-[7px] -translate-x-1/2 text-terracotta transition-all duration-300",
+                active ? "scale-100 opacity-100" : "scale-0 opacity-0 group-hover:scale-75 group-hover:opacity-60"
+              )}
+            >
+              <path d="M5 0 10 5 5 10 0 5Z" fill="currentColor" />
+            </svg>
           </Link>
         );
       })}
