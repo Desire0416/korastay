@@ -42,7 +42,7 @@ export function Logo({
 
   if (href) {
     return (
-      <Link href={localePath(href, locale)} aria-label="KoraStay - accueil" className="inline-flex items-center">
+      <Link href={localePath(href, locale)} aria-label={locale === "en" ? "KoraStay - home" : "KoraStay - accueil"} className="inline-flex items-center">
         {content}
       </Link>
     );

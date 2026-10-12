@@ -2,46 +2,45 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
-import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { resetPasswordAction, type ActionState } from "@/server/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field } from "@/components/ui/field";
+import { AuthHeading, AuthStatusIcon, AuthError } from "./auth-heading";
+import { useI18n } from "@/components/i18n/provider";
+import { localePath } from "@/lib/i18n";
 
 export function ResetPasswordForm({ token }: { token: string }) {
-  const [state, action, pending] = useActionState<ActionState, FormData>(
-    resetPasswordAction,
-    { ok: false }
-  );
+  const dict = useI18n();
+  const t = dict.auth.reset;
+  const [state, action, pending] = useActionState<ActionState, FormData>(resetPasswordAction, { ok: false });
 
   if (state.ok) {
     return (
       <div className="text-center">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-emerald-50 text-success">
-          <CheckCircle2 className="h-8 w-8" />
-        </div>
-        <h1 className="mt-5 text-2xl font-bold text-foreground">Mot de passe reinitialise</h1>
-        <p className="mt-2 text-muted">{state.message}</p>
-        <Button asChild size="lg" className="mt-7"><Link href="/login">Se connecter</Link></Button>
+        <AuthStatusIcon>
+          <CheckCircle2 className="h-7 w-7" />
+        </AuthStatusIcon>
+        <h1 className="mt-7 font-display text-[2rem] font-normal leading-tight text-foreground">{t.doneTitle}</h1>
+        <p className="mt-3 leading-relaxed text-muted">{state.message}</p>
+        <Button asChild size="lg" className="mt-8">
+          <Link href={localePath("/login", dict.locale)}>{t.login}</Link>
+        </Button>
       </div>
     );
   }
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-foreground">Nouveau mot de passe</h1>
-      <p className="mt-1.5 text-muted">Choisissez un nouveau mot de passe sécurisé.</p>
-      <form action={action} className="mt-7 space-y-4">
+      <AuthHeading title={t.title} subtitle={t.subtitle} />
+      <form action={action} className="mt-9 space-y-4">
         <input type="hidden" name="token" value={token} />
-        <Field label="Nouveau mot de passe" htmlFor="password" required hint="8 caractères minimum">
+        <Field label={t.password} htmlFor="password" required hint={dict.auth.register.passwordHint}>
           <Input id="password" name="password" type="password" placeholder="********" required autoComplete="new-password" />
         </Field>
-        {state.error && (
-          <div className="flex items-center gap-2 rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-danger">
-            <AlertCircle className="h-4 w-4" /> {state.error}
-          </div>
-        )}
-        <Button type="submit" size="lg" loading={pending} className="w-full">Reinitialiser</Button>
+        {state.error && <AuthError message={state.error} />}
+        <Button type="submit" size="lg" loading={pending} className="w-full">{t.submit}</Button>
       </form>
     </div>
   );

@@ -49,19 +49,24 @@ export async function sendEmail(input: SendEmailInput): Promise<void> {
 // ------------------------------------------------------------
 // Gabarit HTML minimal de marque
 // ------------------------------------------------------------
-export function emailLayout(title: string, body: string): string {
+export function emailLayout(
+  title: string,
+  body: string,
+  footer = "KoraStay &middot; Réservez votre séjour, vivez l'Afrique de l'Ouest."
+): string {
   return `
   <div style="background:#F8F5EF;padding:32px 0;font-family:Helvetica,Arial,sans-serif;">
-    <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:20px;overflow:hidden;border:1px solid #E8E1D4;">
-      <div style="background:#0F6B4F;padding:24px 28px;">
+    <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:20px;overflow:hidden;border:1px solid #E6DCCB;">
+      <div style="background:#12343B;padding:24px 28px;">
         <span style="color:#fff;font-size:22px;font-weight:800;letter-spacing:-0.5px;">Kora<span style="color:#F2A23A;">Stay</span></span>
       </div>
+      <div style="height:6px;background:#B9562F;"></div>
       <div style="padding:28px;">
-        <h1 style="font-size:20px;color:#12343B;margin:0 0 16px;">${title}</h1>
+        <h1 style="font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:24px;color:#1A1D1A;margin:0 0 16px;">${title}</h1>
         <div style="font-size:15px;line-height:1.6;color:#3a4744;">${body}</div>
       </div>
-      <div style="padding:18px 28px;background:#F2ECE1;font-size:12px;color:#5F6B66;">
-        KoraStay &middot; Reservez votre sejour, vivez l'Afrique de l'Ouest.
+      <div style="padding:18px 28px;background:#F3EDE2;font-size:12px;color:#6A6259;">
+        ${footer}
       </div>
     </div>
   </div>`;

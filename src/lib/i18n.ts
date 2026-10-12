@@ -15,6 +15,7 @@ import {
 import { type ActivitiesDict, activitiesFr, activitiesEn } from "./dictionaries/activities";
 import { type DestinationsDict, destinationsFr, destinationsEn } from "./dictionaries/destinations";
 import { type PagesDict, pagesFr, pagesEn } from "./dictionaries/pages";
+import { type AuthDict, authFr, authEn } from "./dictionaries/auth";
 
 export type Locale = "fr" | "en";
 export const LOCALES: Locale[] = ["fr", "en"];
@@ -32,6 +33,7 @@ export interface Dictionary {
   activities: ActivitiesDict;
   destinations: DestinationsDict;
   pages: PagesDict;
+  auth: AuthDict;
   header: {
     becomeHost: string;
     login: string;
@@ -323,6 +325,7 @@ const FR: Dictionary = {
   activities: activitiesFr,
   destinations: destinationsFr,
   pages: pagesFr,
+  auth: authFr,
   header: {
     becomeHost: "Devenir propriétaire",
     login: "Connexion",
@@ -588,6 +591,7 @@ const EN: Dictionary = {
   activities: activitiesEn,
   destinations: destinationsEn,
   pages: pagesEn,
+  auth: authEn,
   header: {
     becomeHost: "Become a host",
     login: "Log in",
