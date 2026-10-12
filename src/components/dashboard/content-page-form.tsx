@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Field } from "@/components/ui/field";
+import { useI18n } from "@/components/i18n/provider";
 
 export function ContentPageForm({ id, title, body }: { id: string; title: string; body: string }) {
+  const t = useI18n().dashAdmin.system.pageForm;
   const action = updateContentPage.bind(null, id);
   const [state, formAction, pending] = useActionState<AdminResult, FormData>(action, { ok: false });
 
@@ -18,14 +20,16 @@ export function ContentPageForm({ id, title, body }: { id: string; title: string
   }, [state]);
 
   return (
-    <form action={formAction} className="space-y-4">
-      <Field label="Titre" htmlFor="title" required>
+    <form action={formAction} className="space-y-5">
+      <Field label={t.title} htmlFor="title" required>
         <Input id="title" name="title" defaultValue={title} required />
       </Field>
-      <Field label="Contenu" htmlFor="body" required hint="HTML (titres <h2>, listes <ul>, tableaux <table>...) — rendu avec la mise en forme KoraStay. Ancien format texte encore accepté.">
-        <Textarea id="body" name="body" defaultValue={body} rows={20} required className="font-mono text-xs" />
+      <Field label={t.body} htmlFor="body" required hint={t.bodyHint}>
+        <Textarea id="body" name="body" defaultValue={body} rows={22} required className="font-mono text-xs leading-relaxed" />
       </Field>
-      <Button type="submit" loading={pending}>Enregistrer</Button>
+      <div className="border-t border-border pt-5">
+        <Button type="submit" loading={pending}>{t.save}</Button>
+      </div>
     </form>
   );
 }

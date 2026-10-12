@@ -4,22 +4,31 @@ import { isMockPayments } from "@/lib/payments";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { SettingsForm } from "@/components/dashboard/settings-form";
 import { Badge } from "@/components/ui/badge";
+import { getI18n } from "@/lib/i18n.server";
+import type { Metadata } from "next";
 
-export const metadata = { title: "Paramètres - Admin" };
+export async function generateMetadata(): Promise<Metadata> {
+  const { dict } = await getI18n();
+  return { title: dict.dashAdmin.system.settings.metaTitle };
+}
 
 export default async function AdminSettingsPage() {
   await requireRole(["ADMIN", "SUPER_ADMIN"]);
-  const settings = await getSettingsMap();
+  const [settings, { dict }] = await Promise.all([getSettingsMap(), getI18n()]);
+  const t = dict.dashAdmin.system.settings;
+  const mock = isMockPayments();
 
   return (
     <div className="mx-auto max-w-3xl">
-      <PageHeader title="Paramètres" description="Configuration de la plateforme." />
+      <PageHeader title={t.title} description={t.subtitle} />
 
-      <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-surface-soft/50 p-4 text-sm">
-        <span className="font-semibold text-foreground">État technique :</span>
-        <Badge tone={isMockPayments() ? "warning" : "success"}>Paiement : {isMockPayments() ? "mode démo (mock)" : process.env.PAYMENT_PROVIDER}</Badge>
-        <Badge tone={process.env.RESEND_API_KEY ? "success" : "warning"}>Email : {process.env.RESEND_API_KEY ? "actif" : "console (dev)"}</Badge>
-        <Badge tone="neutral">Upload : {process.env.UPLOAD_PROVIDER ?? "local"}</Badge>
+      <div className="mb-6 flex flex-wrap items-center gap-2.5 rounded-[1.25rem] bg-sand-50 p-4 text-sm ring-1 ring-inset ring-sand-200">
+        <span className="font-semibold text-foreground">{t.techStatus}</span>
+        <Badge tone={mock ? "warning" : "success"} size="sm">{t.payment.replace("{value}", mock ? t.paymentMock : String(process.env.PAYMENT_PROVIDER))}</Badge>
+        <Badge tone={process.env.RESEND_API_KEY ? "success" : "warning"} size="sm">
+          {t.email.replace("{value}", process.env.RESEND_API_KEY ? t.emailActive : t.emailConsole)}
+        </Badge>
+        <Badge tone="neutral" size="sm">{t.upload.replace("{value}", process.env.UPLOAD_PROVIDER ?? "local")}</Badge>
       </div>
 
       <SettingsForm

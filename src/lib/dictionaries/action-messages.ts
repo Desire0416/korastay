@@ -10,6 +10,7 @@ export const ACTION_MESSAGES_EN: Record<string, string> = {
   // Generique
   "Non autorisé.": "Not allowed.",
   "Accès refusé.": "Access denied.",
+  "Aucun paiement validé. Utilisez « Valider un paiement » pour confirmer.": "No validated payment. Use “Validate a payment” to confirm.",
   "Introuvable.": "Not found.",
   "Action inconnue.": "Unknown action.",
   "Réservé à l'équipe.": "Restricted to the team.",

@@ -9,8 +9,8 @@ export function alternatesFor(path: string): NonNullable<Metadata["alternates"]>
   return {
     canonical: path,
     languages: {
-      "fr-FR": path,
-      "en-US": `/en${clean}`,
+      fr: path,
+      en: `/en${clean}`,
       "x-default": path,
     },
   };

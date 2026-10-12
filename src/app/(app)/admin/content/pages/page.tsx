@@ -5,30 +5,42 @@ import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { card } from "@/components/dashboard/styles";
 import { formatDate } from "@/lib/utils";
+import { getI18n } from "@/lib/i18n.server";
+import { localePath } from "@/lib/i18n";
+import type { Metadata } from "next";
 
-export const metadata = { title: "Contenu - Admin" };
+export async function generateMetadata(): Promise<Metadata> {
+  const { dict } = await getI18n();
+  return { title: dict.dashAdmin.system.pages.metaTitle };
+}
 
 export default async function AdminContentPagesPage() {
   await requireRole(["ADMIN", "SUPER_ADMIN"]);
-  const pages = await prisma.contentPage.findMany({ orderBy: { title: "asc" } });
+  const [pages, { locale, dict }] = await Promise.all([prisma.contentPage.findMany({ orderBy: { title: "asc" } }), getI18n()]);
+  const t = dict.dashAdmin.system.pages;
 
   return (
     <div className="mx-auto max-w-4xl">
-      <PageHeader title="Pages de contenu" description="Editez les pages légales et institutionnelles." />
+      <PageHeader title={t.title} description={t.subtitle} />
       <div className="space-y-3">
         {pages.map((p) => (
-          <div key={p.id} className="flex items-center justify-between gap-4 rounded-3xl border border-border bg-surface p-5 shadow-soft">
-            <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-brand-50 text-brand-600"><FileText className="h-5 w-5" /></span>
-              <div>
-                <p className="font-bold text-foreground">{p.title}</p>
-                <p className="text-xs text-muted">/{p.slug} - maj {formatDate(p.updatedAt)}</p>
+          <div key={p.id} className={`${card} flex flex-wrap items-center justify-between gap-4 p-4 sm:p-5`}>
+            <div className="flex min-w-0 items-center gap-4">
+              <span className="flex h-12 w-11 shrink-0 items-center justify-center rounded-arch-sm bg-sand-100 text-terracotta">
+                <FileText className="h-5 w-5" strokeWidth={1.7} />
+              </span>
+              <div className="min-w-0">
+                <p className="font-display text-lg leading-tight text-foreground">{p.title}</p>
+                <p className="truncate text-xs text-muted">/{p.slug} · {t.updated.replace("{date}", formatDate(p.updatedAt, locale))}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Badge tone={p.isPublished ? "success" : "neutral"}>{p.isPublished ? "Publiée" : "Brouillon"}</Badge>
-              <Button asChild variant="outline" size="sm"><Link href={`/admin/content/pages/${p.id}`}><Pencil className="h-3.5 w-3.5" /> Editer</Link></Button>
+              <Badge tone={p.isPublished ? "success" : "neutral"} size="sm">{p.isPublished ? t.published : t.draft}</Badge>
+              <Button asChild variant="outline" size="sm">
+                <Link href={localePath(`/admin/content/pages/${p.id}`, locale)}><Pencil className="h-3.5 w-3.5" /> {t.edit}</Link>
+              </Button>
             </div>
           </div>
         ))}

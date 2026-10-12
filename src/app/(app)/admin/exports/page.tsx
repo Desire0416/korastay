@@ -1,41 +1,49 @@
 import { Download, CalendarCheck, CreditCard, Users, Home, Briefcase } from "lucide-react";
 import { requireRole } from "@/lib/auth";
 import { PageHeader } from "@/components/dashboard/page-header";
+import { card } from "@/components/dashboard/styles";
+import { getI18n } from "@/lib/i18n.server";
+import type { Metadata } from "next";
 
-export const metadata = { title: "Exports - Admin" };
+export async function generateMetadata(): Promise<Metadata> {
+  const { dict } = await getI18n();
+  return { title: dict.dashAdmin.system.exports.metaTitle };
+}
 
 const EXPORTS = [
-  { type: "reservations", label: "Réservations", desc: "Toutes les réservations (CSV)", icon: CalendarCheck },
-  { type: "payments", label: "Paiements", desc: "Toutes les transactions (CSV)", icon: CreditCard },
-  { type: "users", label: "Utilisateurs", desc: "Tous les comptes (CSV)", icon: Users },
-  { type: "residences", label: "Résidences", desc: "Catalogue complet (CSV)", icon: Home },
-  { type: "business", label: "Demandes Business", desc: "Demandes & devis (CSV)", icon: Briefcase },
+  { type: "reservations", icon: CalendarCheck },
+  { type: "payments", icon: CreditCard },
+  { type: "users", icon: Users },
+  { type: "residences", icon: Home },
+  { type: "business", icon: Briefcase },
 ];
 
 export default async function AdminExportsPage() {
   await requireRole(["ADMIN", "SUPER_ADMIN"]);
+  const { dict } = await getI18n();
+  const t = dict.dashAdmin.system.exports;
   return (
     <div className="mx-auto max-w-3xl">
-      <PageHeader title="Exports" description="Telechargez vos données au format CSV (compatible Excel)." />
+      <PageHeader title={t.title} description={t.subtitle} />
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {EXPORTS.map((e) => (
           <a
             key={e.type}
             href={`/api/admin/export/${e.type}`}
-            className="group flex items-center gap-4 rounded-3xl border border-border bg-surface p-5 shadow-soft transition-shadow hover:shadow-card"
+            className={`${card} group flex items-center gap-4 p-5 transition-all hover:-translate-y-0.5 hover:shadow-card`}
           >
-            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-50 text-brand-600">
-              <e.icon className="h-5 w-5" />
+            <span className="flex h-12 w-11 shrink-0 items-center justify-center rounded-arch-sm bg-sand-100 text-terracotta">
+              <e.icon className="h-5 w-5" strokeWidth={1.7} />
             </span>
-            <div className="flex-1">
-              <p className="font-bold text-foreground">{e.label}</p>
-              <p className="text-sm text-muted">{e.desc}</p>
+            <div className="min-w-0 flex-1">
+              <p className="font-display text-lg leading-tight text-foreground">{t.items[e.type]?.label}</p>
+              <p className="text-sm text-muted">{t.items[e.type]?.desc}</p>
             </div>
-            <Download className="h-5 w-5 text-muted transition-colors group-hover:text-brand-600" />
+            <Download className="h-5 w-5 text-muted transition-colors group-hover:text-terracotta" />
           </a>
         ))}
       </div>
-      <p className="mt-4 text-xs text-muted">Les fichiers sont générés a la demande avec les données actuelles.</p>
+      <p className="mt-4 text-xs text-muted">{t.note}</p>
     </div>
   );
 }

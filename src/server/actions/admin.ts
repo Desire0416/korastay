@@ -163,7 +163,7 @@ export async function adminSetReservationStatus(id: string, status: string): Pro
 
   // Regle : une reservation ne passe a CONFIRMED que si un paiement est valide.
   if (status === "CONFIRMED" && reservation.payments.length === 0) {
-    return { ok: false, error: "Aucun paiement valide. Utilisez \"Valider un paiement\" pour confirmer." };
+    return { ok: false, error: await tr("Aucun paiement validé. Utilisez « Valider un paiement » pour confirmer.") };
   }
 
   await prisma.reservation.update({

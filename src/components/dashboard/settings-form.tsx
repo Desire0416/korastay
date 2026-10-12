@@ -3,12 +3,14 @@
 import { useActionState, useEffect } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { CreditCard, ChevronRight, BarChart3 } from "lucide-react";
+import { CreditCard, ChevronRight, BarChart3, Contact, Megaphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Field } from "@/components/ui/field";
 import { saveSettings, type SettingsResult } from "@/server/actions/settings";
+import { useI18n } from "@/components/i18n/provider";
+import { localePath } from "@/lib/i18n";
 
 interface Props {
   contactEmail: string;
@@ -17,7 +19,12 @@ interface Props {
   statsVisible: boolean;
 }
 
+const panel = "rounded-[1.5rem] border border-border/80 bg-surface p-6 shadow-soft";
+const title = "flex items-center gap-2.5 font-display text-xl text-foreground";
+
 export function SettingsForm({ contactEmail, contactPhone, announcement, statsVisible }: Props) {
+  const dict = useI18n();
+  const t = dict.dashAdmin.system.settingsForm;
   const [state, action, pending] = useActionState<SettingsResult, FormData>(saveSettings, { ok: false });
 
   useEffect(() => {
@@ -27,61 +34,64 @@ export function SettingsForm({ contactEmail, contactPhone, announcement, statsVi
 
   return (
     <form action={action} className="space-y-6">
-      <Link href="/admin/settings/payments" className="flex items-center justify-between rounded-3xl border border-border bg-surface p-5 shadow-soft transition-colors hover:border-brand-300">
-        <span className="flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-50 text-brand-600"><CreditCard className="h-5 w-5" /></span>
+      <Link
+        href={localePath("/admin/settings/payments", dict.locale)}
+        className="group flex items-center justify-between gap-3 rounded-[1.5rem] bg-ink p-5 text-white shadow-card transition-transform hover:-translate-y-0.5"
+      >
+        <span className="flex items-center gap-4">
+          <span className="flex h-12 w-11 shrink-0 items-center justify-center rounded-arch-sm bg-gold-400 text-ink-900">
+            <CreditCard className="h-5 w-5" />
+          </span>
           <span>
-            <span className="block font-bold text-foreground">Regles de paiement</span>
-            <span className="block text-sm text-muted">Moyens actives, frais de service, acomptes, caution, reversements.</span>
+            <span className="block font-display text-lg">{t.paymentRules}</span>
+            <span className="block text-sm text-white/70">{t.paymentRulesText}</span>
           </span>
         </span>
-        <ChevronRight className="h-5 w-5 text-muted" />
+        <ChevronRight className="h-5 w-5 text-white/60 transition-transform group-hover:translate-x-1" />
       </Link>
 
-      <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
+      <section className={panel}>
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="flex items-center gap-2 font-bold text-foreground">
-              <BarChart3 className="h-4 w-4 text-brand-600" /> Statistiques publiques
+            <h2 className={title}>
+              <BarChart3 className="h-5 w-5 text-terracotta" strokeWidth={1.7} /> {t.statsTitle}
             </h2>
-            <p className="mt-1 max-w-md text-sm text-muted">
-              Affiche la section « KoraStay en chiffres » (visites, comptes, offre) sur la page d&apos;accueil.
-              Laissez masqué tant que les chiffres sont faibles, puis activez-la au moment opportun.
-            </p>
+            <p className="mt-1.5 max-w-md text-sm text-muted">{t.statsText}</p>
             <p className="mt-2 text-xs font-semibold">
-              Actuellement :{" "}
-              <span className={statsVisible ? "text-success" : "text-muted"}>
-                {statsVisible ? "affichée sur l'accueil" : "masquée"}
-              </span>
+              {t.current} <span className={statsVisible ? "text-success" : "text-muted"}>{statsVisible ? t.statsShown : t.statsHidden}</span>
             </p>
           </div>
-          <label className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center" title="Afficher la section sur l'accueil">
-            <input type="checkbox" name="community_stats_visible" value="1" defaultChecked={statsVisible} className="peer sr-only" />
-            <span className="h-6 w-11 rounded-full bg-border transition-colors peer-checked:bg-brand-500" />
+          <label className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center" title={t.statsToggle}>
+            <input type="checkbox" name="community_stats_visible" value="1" defaultChecked={statsVisible} className="peer sr-only" aria-label={t.statsToggle} />
+            <span className="h-6 w-11 rounded-full bg-sand-300 transition-colors peer-checked:bg-brand-500" />
             <span className="pointer-events-none absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform peer-checked:translate-x-5" />
           </label>
         </div>
-      </div>
+      </section>
 
-      <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
-        <h2 className="mb-4 font-bold text-foreground">Contact affiche</h2>
+      <section className={panel}>
+        <h2 className={`${title} mb-4`}>
+          <Contact className="h-5 w-5 text-terracotta" strokeWidth={1.7} /> {t.contactTitle}
+        </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="Email de contact" htmlFor="contact_email">
+          <Field label={t.contactEmail} htmlFor="contact_email">
             <Input id="contact_email" name="contact_email" type="email" defaultValue={contactEmail} />
           </Field>
-          <Field label="Téléphone de contact" htmlFor="contact_phone">
+          <Field label={t.contactPhone} htmlFor="contact_phone">
             <Input id="contact_phone" name="contact_phone" defaultValue={contactPhone} />
           </Field>
         </div>
-      </div>
+      </section>
 
-      <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
-        <h2 className="mb-1 font-bold text-foreground">Annonce</h2>
-        <p className="mb-4 text-sm text-muted">Message affiche en banniere sur le tableau de bord admin (laisser vide pour masquer).</p>
-        <Textarea name="announcement" defaultValue={announcement} rows={2} placeholder="Ex: Maintenance prévue dimanche soir." />
-      </div>
+      <section className={panel}>
+        <h2 className={title}>
+          <Megaphone className="h-5 w-5 text-terracotta" strokeWidth={1.7} /> {t.announcementTitle}
+        </h2>
+        <p className="mb-4 mt-1 text-sm text-muted">{t.announcementText}</p>
+        <Textarea name="announcement" defaultValue={announcement} rows={2} placeholder={t.announcementPh} />
+      </section>
 
-      <Button type="submit" size="lg" loading={pending}>Enregistrer les paramètres</Button>
+      <Button type="submit" size="lg" loading={pending}>{t.save}</Button>
     </form>
   );
 }

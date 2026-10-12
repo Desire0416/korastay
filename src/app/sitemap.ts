@@ -7,7 +7,7 @@ const enUrl = (path: string) => `${SITE_URL}/en${path}`;
 
 // Alternates hreflang FR/EN pour une entree de sitemap.
 const langs = (path: string) => ({
-  languages: { "fr-FR": `${SITE_URL}${path}`, "en-US": enUrl(path) },
+  languages: { fr: `${SITE_URL}${path}`, en: enUrl(path) },
 });
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

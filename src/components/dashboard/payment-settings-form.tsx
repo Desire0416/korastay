@@ -6,27 +6,33 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Field } from "@/components/ui/field";
+import { NativeSelect } from "@/components/ui/native-select";
 import { savePaymentSettings, type PayAdminResult } from "@/server/actions/payments-admin";
 import { paymentMethodMeta } from "@/lib/enums";
+import { useI18n } from "@/components/i18n/provider";
 import type { PaymentSettings } from "@/lib/payment-rules";
 
 const METHODS = ["WAVE", "ORANGE_MONEY", "MTN_MOMO", "MOOV_MONEY", "CARD", "BANK_TRANSFER", "MANUAL"] as const;
 const MOBILE_METHODS = ["WAVE", "ORANGE_MONEY", "MTN_MOMO", "MOOV_MONEY"] as const;
 
-function PolicySelect({ name, defaultValue }: { name: string; defaultValue: string }) {
+const panel = "rounded-[1.5rem] border border-border/80 bg-surface p-6 shadow-soft";
+const titleCls = "font-display text-xl text-foreground";
+
+// Defini au niveau module : un composant recree a chaque rendu remonterait
+// le select (non controle) et perdrait le choix de l'utilisateur.
+function PolicySelect({ name, defaultValue, half, full }: { name: string; defaultValue: string; half: string; full: string }) {
   return (
-    <select
-      name={name}
-      defaultValue={defaultValue}
-      className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm font-medium text-foreground focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
-    >
-      <option value="HALF">50 % a la réservation</option>
-      <option value="FULL">100 % a la réservation</option>
-    </select>
+    <NativeSelect name={name} id={name} defaultValue={defaultValue}>
+      <option value="HALF">{half}</option>
+      <option value="FULL">{full}</option>
+    </NativeSelect>
   );
 }
 
 export function PaymentSettingsForm({ settings }: { settings: PaymentSettings }) {
+  const dict = useI18n();
+  const t = dict.dashAdmin.system.paymentForm;
+  const method = (m: string) => dict.enums.paymentMethod[m] ?? paymentMethodMeta[m] ?? { label: m };
   const [state, action, pending] = useActionState<PayAdminResult, FormData>(savePaymentSettings, { ok: false });
 
   useEffect(() => {
@@ -37,16 +43,19 @@ export function PaymentSettingsForm({ settings }: { settings: PaymentSettings })
   return (
     <form action={action} className="space-y-6">
       {/* 1. Moyens de paiement */}
-      <section className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
-        <h2 className="font-bold text-foreground">1. Moyens de paiement actives</h2>
-        <p className="mb-4 text-sm text-muted">Seuls les moyens coches sont proposés au voyageur.</p>
+      <section className={panel}>
+        <h2 className={titleCls}>{t.methodsTitle}</h2>
+        <p className="mb-4 mt-1 text-sm text-muted">{t.methodsText}</p>
         <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
           {METHODS.map((m) => (
-            <label key={m} className="flex cursor-pointer items-center gap-3 rounded-2xl border border-border px-4 py-3 hover:border-brand-300 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50/60">
-              <input type="checkbox" name={`method_${m}`} value="1" defaultChecked={settings.methods[m]} className="h-5 w-5 rounded border-border text-brand-500 focus:ring-brand-400" />
+            <label
+              key={m}
+              className="flex cursor-pointer items-center gap-3 rounded-xl border border-ink/15 bg-white px-4 py-3 transition-colors hover:border-ink/30 has-[:checked]:border-brand-400 has-[:checked]:bg-brand-50/60"
+            >
+              <input type="checkbox" name={`method_${m}`} value="1" defaultChecked={settings.methods[m]} className="h-5 w-5 rounded border-ink/25 text-brand-500 focus:ring-brand-400" />
               <span>
-                <span className="block text-sm font-semibold text-foreground">{paymentMethodMeta[m]?.label ?? m}</span>
-                <span className="block text-xs text-muted">{paymentMethodMeta[m]?.hint}</span>
+                <span className="block text-sm font-semibold text-foreground">{method(m).label}</span>
+                <span className="block text-xs text-muted">{method(m).hint}</span>
               </span>
             </label>
           ))}
@@ -54,92 +63,92 @@ export function PaymentSettingsForm({ settings }: { settings: PaymentSettings })
       </section>
 
       {/* 1 bis. Reception des paiements hors ligne (sans agregateur) */}
-      <section className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
-        <h2 className="font-bold text-foreground">Réception des paiements (sans API)</h2>
-        <p className="mb-4 text-sm text-muted">
-          Numéros et coordonnées affichés au voyageur pour régler l&apos;acompte. Il déclare ensuite sa transaction (référence + capture), que vous validez dans « Paiements ».
-        </p>
+      <section className={panel}>
+        <h2 className={titleCls}>{t.receivingTitle}</h2>
+        <p className="mb-4 mt-1 text-sm text-muted">{t.receivingText}</p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {MOBILE_METHODS.map((m) => (
-            <Field key={m} label={`Numéro ${paymentMethodMeta[m]?.label ?? m}`} htmlFor={`recv_${m}`}>
+            <Field key={m} label={t.number.replace("{method}", method(m).label)} htmlFor={`recv_${m}`}>
               <Input id={`recv_${m}`} name={`recv_${m}`} placeholder="+225 07 00 00 00 00" defaultValue={settings.receivingNumbers?.[m] ?? ""} />
             </Field>
           ))}
         </div>
         <div className="mt-4 grid grid-cols-1 gap-4">
-          <Field label="Coordonnées bancaires (virement)" htmlFor="bankDetails" hint="Titulaire, banque, IBAN / RIB">
-            <Textarea id="bankDetails" name="bankDetails" rows={3} defaultValue={settings.bankDetails ?? ""} placeholder="KoraStay SARL — Banque ... — IBAN CI..." />
+          <Field label={t.bankDetails} htmlFor="bankDetails" hint={t.bankDetailsHint}>
+            <Textarea id="bankDetails" name="bankDetails" rows={3} defaultValue={settings.bankDetails ?? ""} placeholder={t.bankDetailsPh} />
           </Field>
-          <Field label="Instructions complémentaires" htmlFor="manualInstructions" hint="Affichées sous les coordonnées">
-            <Textarea id="manualInstructions" name="manualInstructions" rows={2} defaultValue={settings.manualInstructions ?? ""} placeholder="Ex : indiquez la référence de la réservation dans le motif du paiement." />
+          <Field label={t.instructions} htmlFor="manualInstructions" hint={t.instructionsHint}>
+            <Textarea id="manualInstructions" name="manualInstructions" rows={2} defaultValue={settings.manualInstructions ?? ""} placeholder={t.instructionsPh} />
           </Field>
         </div>
       </section>
 
       {/* 2. Frais de service */}
-      <section className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
-        <h2 className="font-bold text-foreground">2. Frais de service voyageur</h2>
-        <p className="mb-4 text-sm text-muted">Pourcentage du sous-total, borne entre un plancher et un plafond.</p>
+      <section className={panel}>
+        <h2 className={titleCls}>{t.feeTitle}</h2>
+        <p className="mb-4 mt-1 text-sm text-muted">{t.feeText}</p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <Field label="Pourcentage (%)" htmlFor="serviceFeePercent">
+          <Field label={t.feePercent} htmlFor="serviceFeePercent">
             <Input id="serviceFeePercent" name="serviceFeePercent" type="number" min={0} max={30} step="0.5" defaultValue={settings.serviceFeePercent} />
           </Field>
-          <Field label="Minimum (F CFA)" htmlFor="serviceFeeMin">
+          <Field label={t.feeMin} htmlFor="serviceFeeMin">
             <Input id="serviceFeeMin" name="serviceFeeMin" type="number" min={0} step="100" defaultValue={settings.serviceFeeMin} />
           </Field>
-          <Field label="Plafond (F CFA)" htmlFor="serviceFeeMax">
+          <Field label={t.feeMax} htmlFor="serviceFeeMax">
             <Input id="serviceFeeMax" name="serviceFeeMax" type="number" min={0} step="100" defaultValue={settings.serviceFeeMax} />
           </Field>
         </div>
       </section>
 
       {/* 3. Regles residences */}
-      <section className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
-        <h2 className="font-bold text-foreground">3. Acompte résidences</h2>
-        <p className="mb-4 text-sm text-muted">Politique appliquee selon le type de résidence (un reglage par résidence peut forcer la valeur).</p>
+      <section className={panel}>
+        <h2 className={titleCls}>{t.depositTitle}</h2>
+        <p className="mb-4 mt-1 text-sm text-muted">{t.depositText}</p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="Résidence standard" htmlFor="residenceStandardPolicy"><PolicySelect name="residenceStandardPolicy" defaultValue={settings.residenceStandardPolicy} /></Field>
-          <Field label="Résidence premium" htmlFor="residencePremiumPolicy"><PolicySelect name="residencePremiumPolicy" defaultValue={settings.residencePremiumPolicy} /></Field>
-          <Field label="Forte demande" htmlFor="residenceHighDemandPolicy"><PolicySelect name="residenceHighDemandPolicy" defaultValue={settings.residenceHighDemandPolicy} /></Field>
-          <Field label="Séjour d'une nuit" htmlFor="residenceOneNightPolicy"><PolicySelect name="residenceOneNightPolicy" defaultValue={settings.residenceOneNightPolicy} /></Field>
-          <Field label="Client entreprise (acompte %)" htmlFor="businessDepositPercent" hint="Defaut : 50 %">
+          <Field label={t.standard} htmlFor="residenceStandardPolicy"><PolicySelect half={t.half} full={t.full} name="residenceStandardPolicy" defaultValue={settings.residenceStandardPolicy} /></Field>
+          <Field label={t.premium} htmlFor="residencePremiumPolicy"><PolicySelect half={t.half} full={t.full} name="residencePremiumPolicy" defaultValue={settings.residencePremiumPolicy} /></Field>
+          <Field label={t.highDemand} htmlFor="residenceHighDemandPolicy"><PolicySelect half={t.half} full={t.full} name="residenceHighDemandPolicy" defaultValue={settings.residenceHighDemandPolicy} /></Field>
+          <Field label={t.oneNight} htmlFor="residenceOneNightPolicy"><PolicySelect half={t.half} full={t.full} name="residenceOneNightPolicy" defaultValue={settings.residenceOneNightPolicy} /></Field>
+          <Field label={t.businessDeposit} htmlFor="businessDepositPercent" hint={t.businessDepositHint}>
             <Input id="businessDepositPercent" name="businessDepositPercent" type="number" min={0} max={100} step="5" defaultValue={settings.businessDepositPercent} />
           </Field>
         </div>
       </section>
 
       {/* 4. Packs & activites */}
-      <section className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
-        <h2 className="font-bold text-foreground">4. Packs &amp; activités</h2>
-        <p className="mb-4 text-sm text-muted">Les packs touristiques exigent en principe 100 % avant confirmation.</p>
+      <section className={panel}>
+        <h2 className={titleCls}>{t.packsTitle}</h2>
+        <p className="mb-4 mt-1 text-sm text-muted">{t.packsText}</p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="Packs touristiques" htmlFor="packPolicy"><PolicySelect name="packPolicy" defaultValue={settings.packPolicy} /></Field>
-          <Field label="Activités" htmlFor="activityPolicy"><PolicySelect name="activityPolicy" defaultValue={settings.activityPolicy} /></Field>
+          <Field label={t.packs} htmlFor="packPolicy"><PolicySelect half={t.half} full={t.full} name="packPolicy" defaultValue={settings.packPolicy} /></Field>
+          <Field label={t.activities} htmlFor="activityPolicy"><PolicySelect half={t.half} full={t.full} name="activityPolicy" defaultValue={settings.activityPolicy} /></Field>
         </div>
       </section>
 
-      {/* 8. Reversements hote */}
-      <section className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
-        <h2 className="font-bold text-foreground">5. Reversements propriétaire</h2>
-        <p className="mb-4 text-sm text-muted">Part versee a l'arrivée du voyageur ; le reste est verse au départ. Un litige bloqué tout reversement.</p>
+      {/* 5. Reversements hote */}
+      <section className={panel}>
+        <h2 className={titleCls}>{t.payoutsTitle}</h2>
+        <p className="mb-4 mt-1 text-sm text-muted">{t.payoutsText}</p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="Nouveau propriétaire : % au check-in" htmlFor="payoutNewCheckInPercent" hint="Reste verse au check-out (defaut 70/30)">
+          <Field label={t.payoutNew} htmlFor="payoutNewCheckInPercent" hint={t.payoutNewHint}>
             <Input id="payoutNewCheckInPercent" name="payoutNewCheckInPercent" type="number" min={0} max={100} step="5" defaultValue={settings.payoutNewCheckInPercent} />
           </Field>
-          <Field label="Propriétaire fiable : % au check-in" htmlFor="payoutReliableCheckInPercent" hint="Defaut 100 %">
+          <Field label={t.payoutReliable} htmlFor="payoutReliableCheckInPercent" hint={t.payoutReliableHint}>
             <Input id="payoutReliableCheckInPercent" name="payoutReliableCheckInPercent" type="number" min={0} max={100} step="5" defaultValue={settings.payoutReliableCheckInPercent} />
           </Field>
         </div>
       </section>
 
-      {/* 9. Message client */}
-      <section className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
-        <h2 className="mb-1 font-bold text-foreground">6. Message de reassurance client</h2>
-        <p className="mb-4 text-sm text-muted">Affiche sur la page de réservation : tout paiement passe par KoraStay.</p>
+      {/* 6. Message client */}
+      <section className={panel}>
+        <h2 className={titleCls}>{t.noteTitle}</h2>
+        <p className="mb-4 mt-1 text-sm text-muted">{t.noteText}</p>
         <Textarea name="payViaKoraStayNote" defaultValue={settings.payViaKoraStayNote} rows={3} />
       </section>
 
-      <Button type="submit" size="lg" loading={pending}>Enregistrer les regles de paiement</Button>
+      <div className="sticky bottom-[calc(var(--bottom-nav-h)+0.5rem)] z-10 rounded-[1.25rem] border border-border/80 bg-surface/95 p-3 shadow-card backdrop-blur lg:bottom-4">
+        <Button type="submit" size="lg" loading={pending}>{t.save}</Button>
+      </div>
     </form>
   );
 }

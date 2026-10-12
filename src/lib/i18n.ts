@@ -666,7 +666,7 @@ const EN: Dictionary = {
     homeSingular: "home",
     homePlural: "homes",
     perPerson: "/ person",
-    travelerFavorite: "Travelers' favorite",
+    travelerFavorite: "Travellers' favourite",
 
     verified: "Verified",
     reviews: "{n} reviews",
@@ -693,7 +693,7 @@ const EN: Dictionary = {
   },
   mobileTabs: {
     explore: "Explore",
-    favorites: "Favorites",
+    favorites: "Favourites",
     stays: "Stays",
     profile: "Profile",
   },

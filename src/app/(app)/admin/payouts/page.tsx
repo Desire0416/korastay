@@ -101,7 +101,7 @@ export default async function AdminPayoutsPage({ searchParams }: { searchParams:
                 </div>
                 <div className="mt-1.5 flex items-center justify-between gap-2 text-[12.5px] text-muted">
                   <span>
-                    {ownerName(p)} · {triggerLabel(p.trigger)} ({p.percentage} %)
+                    {ownerName(p)} · {triggerLabel(p.trigger)} ({r.percent.replace("{n}", String(p.percentage))})
                   </span>
                   <span className="text-[14px] font-bold text-foreground">{formatPrice(p.amount)}</span>
                 </div>
@@ -130,7 +130,7 @@ export default async function AdminPayoutsPage({ searchParams }: { searchParams:
                         <Link href={localePath(`/admin/reservations/${p.reservation.id}`, locale)} className={table.link}>{p.reservation.reference}</Link>
                       </td>
                       <td className={`${table.td} text-foreground`}>{ownerName(p)}</td>
-                      <td className={`${table.td} text-muted`}>{triggerLabel(p.trigger)} ({p.percentage} %)</td>
+                      <td className={`${table.td} text-muted`}>{triggerLabel(p.trigger)} ({r.percent.replace("{n}", String(p.percentage))})</td>
                       <td className={table.td}><StatusBadge status={p.status} map={payoutStatusMeta} size="sm" /></td>
                       <td className={`${table.td} text-right font-semibold text-foreground`}>{formatPrice(p.amount)}</td>
                       <td className={`${table.td} text-right`}>

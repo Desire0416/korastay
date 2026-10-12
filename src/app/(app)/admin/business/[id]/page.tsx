@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft, Mail, Phone, MapPin, Users, Calendar, Wallet } from "lucide-react";
+import { ChevronLeft, Mail, Phone, MapPin, Users, Calendar, Wallet, Compass, Settings2, UserRound } from "lucide-react";
 import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { setBusinessRequestStatus } from "@/server/actions/admin";
@@ -9,75 +9,93 @@ import { AdminActions } from "@/components/dashboard/admin-actions";
 import { BusinessQuoteForm } from "@/components/dashboard/business-quote-form";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
+import { card, cardTitle } from "@/components/dashboard/styles";
 import { businessRequestStatusMeta } from "@/lib/enums";
-import { formatPrice, formatDate } from "@/lib/utils";
-import { Compass } from "lucide-react";
+import { statusText } from "@/lib/dictionaries/enums";
+import { formatPrice, formatDate, cn } from "@/lib/utils";
+import { getI18n } from "@/lib/i18n.server";
+import { localePath } from "@/lib/i18n";
+import type { Metadata } from "next";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { dict } = await getI18n();
+  return { title: dict.dashAdmin.community.business.metaTitle };
+}
 
 export default async function AdminBusinessDetail({ params }: { params: Promise<{ id: string }> }) {
   await requireRole(["ADMIN", "SUPER_ADMIN", "SUPPORT"]);
   const { id } = await params;
-  const req = await prisma.businessRequest.findUnique({ where: { id } });
+  const [req, { locale, dict }] = await Promise.all([prisma.businessRequest.findUnique({ where: { id } }), getI18n()]);
   if (!req) notFound();
+  const t = dict.dashAdmin.community.businessRequest;
 
+  // Valeurs stockees en base (FR) par le formulaire de pack personnalise.
   const isCustomPack = req.organizationType === "Particulier" || (req.needType ?? "").toLowerCase().includes("pack personnalisé");
 
   const actions = ["IN_REVIEW", "QUOTED", "CONFIRMED", "CLOSED"].map((s) => ({
-    label: businessRequestStatusMeta[s].label,
+    label: statusText(dict, businessRequestStatusMeta[s].label),
     fn: setBusinessRequestStatus.bind(null, id, s),
     variant: (s === "CONFIRMED" ? "primary" : "soft") as "primary" | "soft",
   }));
 
   return (
     <div className="mx-auto max-w-3xl">
-      <Link href="/admin/business" className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-muted hover:text-foreground">
-        <ChevronLeft className="h-4 w-4" /> Demandes Business
+      <Link href={localePath("/admin/business", locale)} className="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-muted hover:text-ink">
+        <ChevronLeft className="h-4 w-4" /> {t.back}
       </Link>
       <PageHeader title={req.organizationName} actions={<StatusBadge status={req.status} map={businessRequestStatusMeta} />} />
 
-      <div className="space-y-5">
-        <div className="rounded-3xl border border-border bg-surface p-5 shadow-soft">
-          <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
-            <Line icon={Users} label="Contact" value={req.contactName} />
-            <Line icon={Mail} label="Email" value={req.email} />
-            {req.phone && <Line icon={Phone} label="Téléphone" value={req.phone} />}
-            {req.city && <Line icon={MapPin} label="Ville" value={req.city} />}
-            {req.teamSize && <Line icon={Users} label="Équipe" value={`${req.teamSize} personnes`} />}
-            {req.budget && <Line icon={Wallet} label="Budget" value={formatPrice(req.budget)} />}
-            {req.startDate && <Line icon={Calendar} label="Du" value={formatDate(req.startDate)} />}
-            {req.endDate && <Line icon={Calendar} label="Au" value={formatDate(req.endDate)} />}
+      <div className="space-y-6">
+        <section className={cn(card, "p-5 sm:p-6")}>
+          <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
+            <Info icon={UserRound} label={t.contact} value={req.contactName} />
+            <Info icon={Mail} label={t.email} value={req.email} />
+            {req.phone && <Info icon={Phone} label={t.phone} value={req.phone} />}
+            {req.city && <Info icon={MapPin} label={t.city} value={req.city} />}
+            {req.teamSize && <Info icon={Users} label={t.team} value={t.teamValue.replace("{n}", String(req.teamSize))} />}
+            {req.budget && <Info icon={Wallet} label={t.budget} value={formatPrice(req.budget)} />}
+            {req.startDate && <Info icon={Calendar} label={t.from} value={formatDate(req.startDate, locale)} />}
+            {req.endDate && <Info icon={Calendar} label={t.to} value={formatDate(req.endDate, locale)} />}
           </div>
-          {req.needType && <p className="mt-4 rounded-xl bg-brand-50 px-4 py-2 text-sm text-brand-700">{req.needType}</p>}
-          {req.notes && <p className="mt-3 text-sm text-foreground/90">{req.notes}</p>}
-        </div>
+          {req.needType && <p className="mt-5 rounded-xl bg-sand-50 px-4 py-2.5 text-sm font-medium text-terracotta-700 ring-1 ring-inset ring-sand-200">{req.needType}</p>}
+          {req.notes && <p className="mt-4 whitespace-pre-line text-[15px] leading-relaxed text-foreground/85">{req.notes}</p>}
+        </section>
 
         {isCustomPack && (
-          <div className="flex items-center justify-between gap-3 rounded-3xl border border-brand-200 bg-brand-50/50 p-5">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-[1.5rem] bg-brand-50/70 p-5 ring-1 ring-inset ring-brand-200/70">
             <div>
-              <p className="font-bold text-foreground">Demande de pack personnalisé</p>
-              <p className="text-sm text-muted">Transformez cette demande en pack réservable.</p>
+              <p className="font-display text-lg text-foreground">{t.customPackTitle}</p>
+              <p className="text-sm text-muted">{t.customPackText}</p>
             </div>
             <Button asChild>
-              <Link href={`/admin/packs/new?from=${req.id}`}><Compass className="h-4 w-4" /> Créer un pack</Link>
+              <Link href={localePath(`/admin/packs/new?from=${req.id}`, locale)}><Compass className="h-4 w-4" /> {t.createPack}</Link>
             </Button>
           </div>
         )}
 
         <BusinessQuoteForm requestId={req.id} currentAmount={req.quoteAmount} currentMessage={req.quoteMessage} />
 
-        <div className="rounded-3xl border border-border bg-surface p-5 shadow-soft">
-          <h3 className="mb-3 font-bold text-foreground">Faire evoluer la demande</h3>
+        <section className={cn(card, "p-5 sm:p-6")}>
+          <h2 className={cn(cardTitle, "mb-4")}>
+            <Settings2 className="h-5 w-5 text-terracotta" strokeWidth={1.7} /> {t.evolve}
+          </h2>
           <AdminActions actions={actions} />
-        </div>
+        </section>
       </div>
     </div>
   );
 }
 
-function Line({ icon: Icon, label, value }: { icon: typeof Mail; label: string; value: string }) {
+function Info({ icon: Icon, label, value }: { icon: typeof Mail; label: string; value: string }) {
   return (
-    <div className="flex items-start gap-2">
-      <Icon className="mt-0.5 h-4 w-4 text-muted" />
-      <div><p className="text-xs text-muted">{label}</p><p className="font-medium text-foreground">{value}</p></div>
+    <div className="flex items-start gap-3">
+      <span className="flex h-9 w-8 shrink-0 items-center justify-center rounded-arch-sm bg-sand-100 text-terracotta">
+        <Icon className="h-4 w-4" strokeWidth={1.8} />
+      </span>
+      <div className="min-w-0">
+        <p className="eyebrow text-[9.5px] text-muted">{label}</p>
+        <p className="mt-0.5 break-words font-medium text-foreground">{value}</p>
+      </div>
     </div>
   );
 }

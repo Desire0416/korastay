@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Field } from "@/components/ui/field";
 import { saveBlogPost, type BlogResult } from "@/server/actions/blog";
+import { useI18n } from "@/components/i18n/provider";
 
 interface Props {
   id?: string;
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export function BlogPostForm({ id, defaults = {} }: Props) {
+  const t = useI18n().dashAdmin.system.blogForm;
   const action = saveBlogPost.bind(null, id ?? null);
   const [state, formAction, pending] = useActionState<BlogResult, FormData>(action, { ok: false });
   const [cover, setCover] = React.useState(defaults.coverImageUrl ?? "");
@@ -34,50 +36,67 @@ export function BlogPostForm({ id, defaults = {} }: Props) {
       fd.append("file", file);
       const res = await fetch("/api/upload", { method: "POST", body: fd });
       const data = await res.json();
-      if (res.ok && data.url) { setCover(data.url); toast.success("Image prête."); }
-      else toast.error(data.error ?? "Échec.");
+      if (res.ok && data.url) {
+        setCover(data.url);
+        toast.success(t.imageReady);
+      } else toast.error(data.error ?? t.uploadFailed);
     } finally {
       setUploading(false);
     }
   }
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form action={formAction} className="space-y-5">
       <input type="hidden" name="coverImageUrl" value={cover} />
 
-      <Field label="Titre" htmlFor="title" required>
-        <Input id="title" name="title" defaultValue={defaults.title} placeholder="Titre de l'article" required />
+      <Field label={t.title} htmlFor="title" required>
+        <Input id="title" name="title" defaultValue={defaults.title} placeholder={t.titlePh} required />
       </Field>
 
-      <Field label="Image de couverture">
-        <div className="flex items-center gap-3">
-          <div className="h-16 w-28 shrink-0 overflow-hidden rounded-xl border border-border bg-surface-soft">
-            {cover ? <img src={cover} alt="" className="h-full w-full object-cover" /> : <span className="flex h-full w-full items-center justify-center text-xs text-muted">Aucune</span>}
+      <Field label={t.cover}>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="h-16 w-28 shrink-0 overflow-hidden rounded-xl border border-border bg-sand-50">
+            {cover ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={cover} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <span className="flex h-full w-full items-center justify-center text-xs text-muted">{t.noImage}</span>
+            )}
           </div>
-          <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-sm font-semibold hover:border-brand-300">
+          <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-ink/15 bg-white px-4 py-2 text-sm font-semibold transition-colors hover:border-ink/35">
             <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => onFile(e.target.files?.[0] ?? null)} disabled={uploading} />
-            {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />} {cover ? "Changer" : "Ajouter"}
+            {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />} {cover ? t.change : t.add}
           </label>
-          {cover && <button type="button" onClick={() => setCover("")} className="text-sm font-medium text-danger">Retirer</button>}
+          {cover && (
+            <button type="button" onClick={() => setCover("")} className="text-sm font-medium text-danger">
+              {t.remove}
+            </button>
+          )}
         </div>
       </Field>
 
-      <Field label="Resume / chapeau" htmlFor="excerpt">
-        <Textarea id="excerpt" name="excerpt" defaultValue={defaults.excerpt} rows={2} placeholder="Court résumé affiche dans la liste..." />
+      <Field label={t.excerpt} htmlFor="excerpt">
+        <Textarea id="excerpt" name="excerpt" defaultValue={defaults.excerpt} rows={2} placeholder={t.excerptPh} />
       </Field>
 
-      <Field label="Contenu" htmlFor="body" required hint="Separez les paragraphes par une ligne vide.">
-        <Textarea id="body" name="body" defaultValue={defaults.body} rows={14} placeholder="Redigez votre article..." required />
+      <Field label={t.body} htmlFor="body" required hint={t.bodyHint}>
+        <Textarea id="body" name="body" defaultValue={defaults.body} rows={16} placeholder={t.bodyPh} required />
       </Field>
 
-      <label className="flex items-center gap-2 text-sm font-medium text-foreground">
-        <input type="checkbox" name="isPublished" defaultChecked={defaults.isPublished} className="h-4 w-4 rounded border-border text-brand-500" />
-        Publier l'article (visible sur le blog)
+      <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-ink/15 bg-white p-4 text-sm font-medium text-foreground transition-colors hover:border-ink/30 has-[:checked]:border-brand-400 has-[:checked]:bg-brand-50/60">
+        <input type="checkbox" name="isPublished" defaultChecked={defaults.isPublished} className="h-5 w-5 rounded border-ink/25 text-brand-500 focus:ring-brand-400" />
+        {t.publish}
       </label>
 
-      {state.error && <div className="flex items-center gap-2 rounded-2xl bg-red-50 px-4 py-3 text-sm text-danger"><AlertCircle className="h-4 w-4" /> {state.error}</div>}
+      {state.error && (
+        <div className="flex items-center gap-2 rounded-xl bg-danger-50 px-4 py-3 text-sm text-danger-700 ring-1 ring-inset ring-danger-200/70">
+          <AlertCircle className="h-4 w-4 shrink-0" /> {state.error}
+        </div>
+      )}
 
-      <Button type="submit" size="lg" loading={pending}>{id ? "Enregistrer" : "Créer l'article"}</Button>
+      <div className="border-t border-border pt-5">
+        <Button type="submit" size="lg" loading={pending}>{id ? t.save : t.create}</Button>
+      </div>
     </form>
   );
 }

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Field } from "@/components/ui/field";
 import { sendBusinessQuote, type AdminResult } from "@/server/actions/admin";
+import { useI18n } from "@/components/i18n/provider";
 import { formatPrice } from "@/lib/utils";
 
 interface Props {
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export function BusinessQuoteForm({ requestId, currentAmount, currentMessage }: Props) {
+  const t = useI18n().dashAdmin.community.businessRequest;
   const action = sendBusinessQuote.bind(null, requestId);
   const [state, formAction, pending] = useActionState<AdminResult, FormData>(action, { ok: false });
 
@@ -25,28 +27,36 @@ export function BusinessQuoteForm({ requestId, currentAmount, currentMessage }: 
     if (state.error) toast.error(state.error);
   }, [state]);
 
+  const [before, after] = t.currentQuote.split("{amount}");
+
   return (
-    <div className="rounded-3xl border border-border bg-surface p-5 shadow-soft">
-      <h3 className="mb-1 flex items-center gap-2 font-bold text-foreground"><FileText className="h-4 w-4 text-brand-600" /> Devis</h3>
+    <section className="rounded-[1.5rem] border border-border/80 bg-surface p-5 shadow-soft sm:p-6">
+      <h2 className="mb-1 flex items-center gap-2.5 font-display text-xl text-foreground">
+        <FileText className="h-5 w-5 text-terracotta" strokeWidth={1.7} /> {t.quoteTitle}
+      </h2>
       {currentAmount ? (
-        <p className="mb-3 text-sm text-muted">Devis actuel : <span className="font-bold text-foreground">{formatPrice(currentAmount)}</span>. Vous pouvez le modifier.</p>
+        <p className="mb-4 text-sm text-muted">
+          {before}
+          <span className="font-bold text-foreground">{formatPrice(currentAmount)}</span>
+          {after}
+        </p>
       ) : (
-        <p className="mb-3 text-sm text-muted">Etablissez un devis chiffre pour ce client.</p>
+        <p className="mb-4 text-sm text-muted">{t.noQuote}</p>
       )}
-      <form action={formAction} className="space-y-3">
-        <Field label="Montant du devis (F CFA)" htmlFor="quoteAmount" required>
+      <form action={formAction} className="space-y-4">
+        <Field label={t.quoteAmount} htmlFor="quoteAmount" required>
           <Input id="quoteAmount" name="quoteAmount" type="number" min={1000} step={1000} defaultValue={currentAmount ?? undefined} placeholder="1500000" required />
         </Field>
-        <Field label="Message au client" htmlFor="quoteMessage">
-          <Textarea id="quoteMessage" name="quoteMessage" defaultValue={currentMessage ?? ""} rows={3} placeholder="Détail de l'offre, conditions..." />
+        <Field label={t.quoteMessage} htmlFor="quoteMessage">
+          <Textarea id="quoteMessage" name="quoteMessage" defaultValue={currentMessage ?? ""} rows={3} placeholder={t.quoteMessagePh} />
         </Field>
         {state.error && (
-          <div className="flex items-center gap-2 rounded-xl bg-red-50 px-3 py-2 text-sm text-danger">
-            <AlertCircle className="h-4 w-4" /> {state.error}
+          <div className="flex items-center gap-2 rounded-xl bg-danger-50 px-3.5 py-2.5 text-sm text-danger-700 ring-1 ring-inset ring-danger-200/70">
+            <AlertCircle className="h-4 w-4 shrink-0" /> {state.error}
           </div>
         )}
-        <Button type="submit" loading={pending}>{currentAmount ? "Mettre a jour le devis" : "Envoyer le devis"}</Button>
+        <Button type="submit" loading={pending}>{currentAmount ? t.updateQuote : t.sendQuote}</Button>
       </form>
-    </div>
+    </section>
   );
 }

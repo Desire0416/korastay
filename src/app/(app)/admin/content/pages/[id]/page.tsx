@@ -5,25 +5,38 @@ import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ContentPageForm } from "@/components/dashboard/content-page-form";
+import { Button } from "@/components/ui/button";
+import { card } from "@/components/dashboard/styles";
+import { getI18n } from "@/lib/i18n.server";
+import { localePath } from "@/lib/i18n";
+import type { Metadata } from "next";
 
-export const metadata = { title: "Editer la page" };
+export async function generateMetadata(): Promise<Metadata> {
+  const { dict } = await getI18n();
+  return { title: dict.dashAdmin.system.pages.editMeta };
+}
 
 export default async function EditContentPage({ params }: { params: Promise<{ id: string }> }) {
   await requireRole(["ADMIN", "SUPER_ADMIN"]);
   const { id } = await params;
-  const page = await prisma.contentPage.findUnique({ where: { id } });
+  const [page, { locale, dict }] = await Promise.all([prisma.contentPage.findUnique({ where: { id } }), getI18n()]);
   if (!page) notFound();
+  const t = dict.dashAdmin.system.pages;
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <Link href="/admin/content/pages" className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-muted hover:text-foreground">
-        <ChevronLeft className="h-4 w-4" /> Pages de contenu
+    <div className="mx-auto max-w-4xl">
+      <Link href={localePath("/admin/content/pages", locale)} className="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-muted hover:text-ink">
+        <ChevronLeft className="h-4 w-4" /> {t.back}
       </Link>
       <PageHeader
         title={page.title}
-        actions={<Link href={`/${page.slug}`} target="_blank" className="inline-flex items-center gap-1 text-sm font-semibold text-brand-600"><ExternalLink className="h-4 w-4" /> Voir</Link>}
+        actions={
+          <Button asChild variant="outline" size="sm">
+            <Link href={localePath(`/${page.slug}`, locale)} target="_blank"><ExternalLink className="h-4 w-4" /> {t.view}</Link>
+          </Button>
+        }
       />
-      <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
+      <div className={`${card} p-6 sm:p-8`}>
         <ContentPageForm id={page.id} title={page.title} body={page.body} />
       </div>
     </div>

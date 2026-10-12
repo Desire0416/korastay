@@ -115,7 +115,7 @@ export default async function AdminReservationDetail({ params }: { params: Promi
                 <span>{t.total}</span>
                 <span className="font-display text-2xl font-normal">{formatPrice(reservation.totalAmount)}</span>
               </div>
-              <Row label={t.deposit.replace("{pct}", reservation.paymentPolicy === "FULL" ? "100 %" : "50 %")} value={formatPrice(reservation.depositAmount)} />
+              <Row label={t.deposit.replace("{pct}", t.percent.replace("{n}", reservation.paymentPolicy === "FULL" ? "100" : "50"))} value={formatPrice(reservation.depositAmount)} />
               <Row label={t.alreadyPaid} value={formatPrice(reservation.amountPaid)} />
               <Row label={t.balance} value={formatPrice(reservation.balanceDueAmount)} />
             </div>
@@ -184,7 +184,7 @@ export default async function AdminReservationDetail({ params }: { params: Promi
                 {reservation.payouts.map((p) => (
                   <div key={p.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-sand-50 px-3.5 py-2.5 ring-1 ring-inset ring-sand-200">
                     <span className="text-muted">
-                      {p.trigger === "CHECK_IN" ? t.afterCheckIn : t.afterCheckOut} ({p.percentage} %)
+                      {p.trigger === "CHECK_IN" ? t.afterCheckIn : t.afterCheckOut} ({t.percent.replace("{n}", String(p.percentage))})
                     </span>
                     <span className="flex items-center gap-2">
                       <span className="font-semibold text-foreground">{formatPrice(p.amount)}</span>
