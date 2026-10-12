@@ -213,7 +213,7 @@ export const dashEn: DashDict = {
     "Messages": "Messages",
     "Profil": "Profile",
     "Calendrier": "Calendar",
-    "Revenus": "Income",
+    "Revenus": "Earnings",
     "Avis": "Reviews",
     // Voyageur
     "Mes réservations": "My bookings",
@@ -225,7 +225,7 @@ export const dashEn: DashDict = {
     // Proprietaire
     "Réservations": "Bookings",
     "Offres reçues": "Offers received",
-    "Mes résidences": "My homes",
+    "Mes résidences": "My properties",
     // Partenaire
     "Mon menu": "My menu",
     "Mon véhicule": "My vehicle",
@@ -244,7 +244,7 @@ export const dashEn: DashDict = {
     "Paiements": "Payments",
     "Reversements": "Payouts",
     "Remboursements": "Refunds",
-    "Résidences": "Homes",
+    "Résidences": "Properties",
     "Packs": "Packs",
     "Activités": "Activities",
     "Packs perso": "Custom packs",
@@ -273,7 +273,7 @@ export const dashEn: DashDict = {
     "Favoris": "Favourites",
     "Mes avis": "Reviews",
     "Calendrier": "Calendar",
-    "Revenus": "Income",
+    "Revenus": "Earnings",
     "Équipe": "Team",
     "Factures": "Invoices",
     "Paiements": "Payments",

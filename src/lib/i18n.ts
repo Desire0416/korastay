@@ -20,6 +20,7 @@ import { type DashDict, dashFr, dashEn } from "./dictionaries/dashboard";
 import { type DashAccountDict, dashAccountFr, dashAccountEn } from "./dictionaries/dash-account";
 import { type DashOwnerDict, dashOwnerFr, dashOwnerEn } from "./dictionaries/dash-owner";
 import { type DashPartnerDict, dashPartnerFr, dashPartnerEn } from "./dictionaries/dash-partner";
+import { type DashBusinessDict, dashBusinessFr, dashBusinessEn } from "./dictionaries/dash-business";
 
 export type Locale = "fr" | "en";
 export const LOCALES: Locale[] = ["fr", "en"];
@@ -43,6 +44,7 @@ export interface Dictionary {
   dashAccount: DashAccountDict;
   dashOwner: DashOwnerDict;
   dashPartner: DashPartnerDict;
+  dashBusiness: DashBusinessDict;
   header: {
     becomeHost: string;
     login: string;
@@ -339,6 +341,7 @@ const FR: Dictionary = {
   dashAccount: dashAccountFr,
   dashOwner: dashOwnerFr,
   dashPartner: dashPartnerFr,
+  dashBusiness: dashBusinessFr,
   header: {
     becomeHost: "Devenir propriétaire",
     login: "Connexion",
@@ -609,6 +612,7 @@ const EN: Dictionary = {
   dashAccount: dashAccountEn,
   dashOwner: dashOwnerEn,
   dashPartner: dashPartnerEn,
+  dashBusiness: dashBusinessEn,
   header: {
     becomeHost: "Become a host",
     login: "Log in",

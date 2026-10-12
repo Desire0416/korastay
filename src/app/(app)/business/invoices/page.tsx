@@ -1,17 +1,24 @@
+import { Receipt, Download } from "lucide-react";
 import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Receipt, Download } from "lucide-react";
+import { card } from "@/components/dashboard/styles";
 import { formatPrice, formatDate } from "@/lib/utils";
+import { getI18n } from "@/lib/i18n.server";
+import type { Metadata } from "next";
 
-export const metadata = { title: "Factures business" };
+export async function generateMetadata(): Promise<Metadata> {
+  const { dict } = await getI18n();
+  return { title: dict.dashBusiness.invoices.metaTitle };
+}
 
 export default async function BusinessInvoicesPage() {
   const user = await requireRole(["BUSINESS", "ADMIN", "SUPER_ADMIN"]);
-  const membership = await prisma.businessMember.findFirst({ where: { userId: user.id } });
+  const [membership, { locale, dict }] = await Promise.all([prisma.businessMember.findFirst({ where: { userId: user.id } }), getI18n()]);
+  const t = dict.dashBusiness.invoices;
   const invoices = await prisma.businessRequest.findMany({
     where: {
       status: "CONFIRMED",
@@ -22,30 +29,37 @@ export default async function BusinessInvoicesPage() {
 
   return (
     <div className="mx-auto max-w-4xl">
-      <PageHeader title="Factures" description="Vos factures pour les séjours confirmés." />
+      <PageHeader title={t.title} description={t.subtitle} />
       {invoices.length === 0 ? (
-        <EmptyState icon={Receipt} title="Aucune facture" description="Vos factures seront disponibles ici une fois vos demandes confirmées." />
+        <EmptyState icon={Receipt} title={t.emptyTitle} description={t.emptyText} />
       ) : (
         <div className="space-y-3">
           {invoices.map((inv) => (
-            <div key={inv.id} className="flex items-center justify-between gap-3 rounded-3xl border border-border bg-surface p-5 shadow-soft">
-              <div className="flex items-center gap-3">
-                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-50 text-brand-600"><Receipt className="h-5 w-5" /></span>
+            <div key={inv.id} className={`${card} flex flex-wrap items-center justify-between gap-3 p-5`}>
+              <div className="flex items-center gap-4">
+                <span className="flex h-12 w-11 shrink-0 items-center justify-center rounded-arch-sm bg-sand-100 text-terracotta">
+                  <Receipt className="h-5 w-5" strokeWidth={1.7} />
+                </span>
                 <div>
-                  <p className="font-bold text-foreground">Facture {inv.id.slice(-6).toUpperCase()}</p>
-                  <p className="text-xs text-muted">{inv.needType} - {formatDate(inv.updatedAt)}</p>
+                  <p className="font-display text-lg leading-tight text-foreground">{t.invoice.replace("{ref}", inv.id.slice(-6).toUpperCase())}</p>
+                  <p className="text-xs text-muted">
+                    {inv.needType ? `${inv.needType} · ` : ""}
+                    {formatDate(inv.updatedAt, locale)}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 {inv.budget && <span className="font-semibold text-foreground">{formatPrice(inv.budget)}</span>}
-                <Badge tone="success">Payée</Badge>
-                <Button variant="outline" size="sm" disabled><Download className="h-3.5 w-3.5" /> PDF</Button>
+                <Badge tone="success">{t.paid}</Badge>
+                <Button variant="outline" size="sm" disabled>
+                  <Download className="h-3.5 w-3.5" /> PDF
+                </Button>
               </div>
             </div>
           ))}
         </div>
       )}
-      <p className="mt-4 text-xs text-muted">La generation PDF des factures sera disponible prochainement.</p>
+      <p className="mt-4 text-xs text-muted">{t.pdfSoon}</p>
     </div>
   );
 }
