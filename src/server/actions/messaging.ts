@@ -6,7 +6,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { isStaff, roleLabelFor } from "@/lib/messaging";
-import { tr } from "@/lib/action-i18n";
+import { tr, localeHref } from "@/lib/action-i18n";
 
 export type MsgResult = { ok: boolean; error?: string; id?: string };
 
@@ -145,7 +145,7 @@ export async function startSupportConversation(
     });
   }
 
-  redirect(`${messagesPathFor(user.role, convo.id)}`);
+  redirect(await localeHref(`${messagesPathFor(user.role, convo.id)}`));
 }
 
 // ------------------------------------------------------------

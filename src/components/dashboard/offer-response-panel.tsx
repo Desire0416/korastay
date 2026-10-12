@@ -6,7 +6,8 @@ import { CheckCircle2, XCircle, ArrowLeftRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ownerRespondToOffer, type NegotiationResult } from "@/server/actions/negotiation";
-import { formatPrice } from "@/lib/utils";
+import { useI18n } from "@/components/i18n/provider";
+import { formatPrice, cn } from "@/lib/utils";
 
 interface OfferResponsePanelProps {
   offerId: string;
@@ -16,8 +17,13 @@ interface OfferResponsePanelProps {
 
 type Mode = "idle" | "rejecting" | "countering";
 
+const textarea =
+  "w-full rounded-xl border border-ink/15 bg-white px-3.5 py-2.5 text-sm text-foreground outline-none transition-colors placeholder:text-muted focus:border-terracotta focus:ring-4 focus:ring-terracotta/10";
+
 export function OfferResponsePanel({ offerId, currentAmount, proposedBy }: OfferResponsePanelProps) {
   const router = useRouter();
+  const dict = useI18n();
+  const t = dict.dashOwner.offerPanel;
   const [mode, setMode] = React.useState<Mode>("idle");
   const [pending, setPending] = React.useState(false);
   const [done, setDone] = React.useState<null | "ACCEPT" | "REJECT" | "COUNTER">(null);
@@ -36,17 +42,17 @@ export function OfferResponsePanel({ offerId, currentAmount, proposedBy }: Offer
         message: message || undefined,
       });
       if (!result.ok) {
-        toast.error(result.error ?? "Erreur lors de l'opération.");
+        toast.error(result.error ?? t.error);
         return;
       }
-      if (action === "ACCEPT") toast.success("Offre acceptée ! La réservation passe en attente de confirmation.");
-      else if (action === "REJECT") toast.success("Offre refusée. Le voyageur a été notifié.");
-      else toast.success("Contre-offre envoyée. Le voyageur a 24h pour répondre.");
+      if (action === "ACCEPT") toast.success(t.accepted);
+      else if (action === "REJECT") toast.success(t.rejected);
+      else toast.success(t.countered);
       // Optimiste : affiche l'issue immediatement ; router.refresh() reconcilie en fond.
       setDone(action);
       router.refresh();
     } catch {
-      toast.error("Une erreur est survenue. Veuillez réessayer.");
+      toast.error(t.failed);
     } finally {
       setPending(false);
     }
@@ -54,31 +60,36 @@ export function OfferResponsePanel({ offerId, currentAmount, proposedBy }: Offer
 
   // Etat resolu optimiste (avant que le refresh serveur ne retire l'offre de la liste).
   if (done) {
-    const label =
-      done === "ACCEPT" ? "Offre acceptée" : done === "REJECT" ? "Offre refusée" : "Contre-offre envoyée";
+    const label = done === "ACCEPT" ? t.acceptedLabel : done === "REJECT" ? t.rejectedLabel : t.counteredLabel;
     const Icon = done === "REJECT" ? XCircle : done === "COUNTER" ? ArrowLeftRight : CheckCircle2;
-    const tone = done === "REJECT" ? "text-danger-700" : "text-success";
     return (
-      <p className={`flex items-center gap-2 rounded-2xl bg-surface-soft px-4 py-3 text-sm font-semibold ${tone}`}>
+      <p
+        className={cn(
+          "flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold ring-1 ring-inset",
+          done === "REJECT" ? "bg-danger-50 text-danger-700 ring-danger-200/70" : "bg-brand-50 text-brand-800 ring-brand-200/70"
+        )}
+      >
         <Icon className="h-4 w-4" /> {label}
       </p>
     );
   }
 
   if (!isAwaitingOwner) {
+    const [before, after] = t.waitingTraveler.split("{amount}");
     return (
-      <p className="rounded-2xl bg-surface-soft px-4 py-3 text-sm text-muted">
-        En attente de la réponse du voyageur — contre-offre de{" "}
-        <strong className="text-foreground">{formatPrice(currentAmount)}</strong> envoyée.
+      <p className="rounded-xl bg-sand-50 px-4 py-3 text-sm text-muted ring-1 ring-inset ring-sand-200">
+        {before}
+        <strong className="text-foreground">{formatPrice(currentAmount)}</strong>
+        {after}
       </p>
     );
   }
 
   if (mode === "countering") {
     return (
-      <div className="space-y-3 rounded-2xl border border-brand-200 bg-brand-50/40 p-4">
-        <p className="text-sm font-semibold text-brand-900">Votre contre-offre</p>
-        <div className="flex items-center gap-2 rounded-xl border border-brand-300 bg-white px-3 py-2.5">
+      <div className="space-y-3 rounded-xl bg-brand-50/70 p-4 ring-1 ring-inset ring-brand-200/70">
+        <p className="text-sm font-semibold text-brand-900">{t.yourCounter}</p>
+        <div className="flex items-center gap-2 rounded-xl border border-brand-300 bg-white px-3.5 py-2.5 focus-within:ring-4 focus-within:ring-brand-100">
           <input
             type="number"
             min={1}
@@ -91,25 +102,14 @@ export function OfferResponsePanel({ offerId, currentAmount, proposedBy }: Offer
           />
           <span className="shrink-0 text-xs text-muted">FCFA</span>
         </div>
-        <textarea
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          rows={2}
-          placeholder="Message au voyageur (optionnel)..."
-          className="w-full rounded-xl border border-border px-3 py-2 text-sm text-foreground outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100"
-        />
+        <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={2} placeholder={t.messagePlaceholder} className={textarea} />
         <div className="flex gap-2">
-          <Button
-            size="sm"
-            disabled={pending || counterAmount < 1}
-            onClick={() => respond("COUNTER")}
-            className="flex-1"
-          >
+          <Button size="sm" disabled={pending || counterAmount < 1} onClick={() => respond("COUNTER")} className="flex-1">
             {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowLeftRight className="h-4 w-4" />}
-            Envoyer la contre-offre
+            {t.sendCounter}
           </Button>
-          <Button size="sm" variant="outline" onClick={() => { setMode("idle"); setMessage(""); }} disabled={pending}>
-            Annuler
+          <Button size="sm" variant="outline" className="bg-white" onClick={() => { setMode("idle"); setMessage(""); }} disabled={pending}>
+            {dict.dash.common.cancel}
           </Button>
         </div>
       </div>
@@ -118,29 +118,16 @@ export function OfferResponsePanel({ offerId, currentAmount, proposedBy }: Offer
 
   if (mode === "rejecting") {
     return (
-      <div className="space-y-3 rounded-2xl border border-danger-200 bg-danger-50/40 p-4">
-        <p className="text-sm font-semibold text-danger-700">Motif du refus (optionnel)</p>
-        <textarea
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          rows={2}
-          placeholder="Indiquez un motif pour aider le voyageur..."
-          className="w-full rounded-xl border border-border px-3 py-2 text-sm text-foreground outline-none focus:border-danger-400 focus:ring-2 focus:ring-danger-100"
-          autoFocus
-        />
+      <div className="space-y-3 rounded-xl bg-danger-50/70 p-4 ring-1 ring-inset ring-danger-200/70">
+        <p className="text-sm font-semibold text-danger-700">{t.rejectReason}</p>
+        <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={2} placeholder={t.rejectPlaceholder} className={textarea} autoFocus />
         <div className="flex gap-2">
-          <Button
-            size="sm"
-            variant="danger"
-            disabled={pending}
-            onClick={() => respond("REJECT")}
-            className="flex-1"
-          >
+          <Button size="sm" variant="danger" disabled={pending} onClick={() => respond("REJECT")} className="flex-1">
             {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
-            Confirmer le refus
+            {t.confirmReject}
           </Button>
-          <Button size="sm" variant="outline" onClick={() => { setMode("idle"); setMessage(""); }} disabled={pending}>
-            Annuler
+          <Button size="sm" variant="outline" className="bg-white" onClick={() => { setMode("idle"); setMessage(""); }} disabled={pending}>
+            {dict.dash.common.cancel}
           </Button>
         </div>
       </div>
@@ -149,14 +136,9 @@ export function OfferResponsePanel({ offerId, currentAmount, proposedBy }: Offer
 
   return (
     <div className="flex flex-wrap gap-2">
-      <Button
-        size="sm"
-        disabled={pending}
-        onClick={() => respond("ACCEPT")}
-        className="flex-1"
-      >
+      <Button size="sm" disabled={pending} onClick={() => respond("ACCEPT")} className="flex-1">
         {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-        Accepter {formatPrice(currentAmount)}
+        {t.accept.replace("{amount}", formatPrice(currentAmount))}
       </Button>
       <Button
         size="sm"
@@ -165,16 +147,16 @@ export function OfferResponsePanel({ offerId, currentAmount, proposedBy }: Offer
         onClick={() => { setCounterAmount(currentAmount); setMode("countering"); }}
         className="flex-1"
       >
-        <ArrowLeftRight className="h-4 w-4" /> Contre-proposer
+        <ArrowLeftRight className="h-4 w-4" /> {t.counter}
       </Button>
       <Button
         size="sm"
         variant="outline"
         disabled={pending}
         onClick={() => setMode("rejecting")}
-        className="border-danger-200 text-danger-600 hover:bg-danger-50"
+        className="border-danger-200 text-danger-600 hover:border-danger-300 hover:bg-danger-50"
       >
-        <XCircle className="h-4 w-4" /> Refuser
+        <XCircle className="h-4 w-4" /> {t.reject}
       </Button>
     </div>
   );

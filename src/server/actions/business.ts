@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
-import { tr } from "@/lib/action-i18n";
+import { tr, localeHref } from "@/lib/action-i18n";
 
 export type BusinessResult = { ok: boolean; error?: string; message?: string };
 
@@ -82,5 +82,5 @@ export async function createMyBusinessRequest(_prev: BusinessResult, formData: F
     });
   }
 
-  redirect("/business/requests?created=1");
+  redirect(await localeHref("/business/requests?created=1"));
 }

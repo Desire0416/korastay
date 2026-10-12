@@ -6,7 +6,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
 import { slugify } from "@/lib/utils";
-import { tr } from "@/lib/action-i18n";
+import { tr, localeHref } from "@/lib/action-i18n";
 
 export type ActivityResult = { ok: boolean; error?: string; message?: string };
 
@@ -89,7 +89,7 @@ export async function saveActivity(id: string | null, _prev: ActivityResult, for
   });
   revalidatePath("/admin/activities");
   revalidatePath("/activites");
-  redirect(`/admin/activities/${created.id}/edit?created=1`);
+  redirect(await localeHref(`/admin/activities/${created.id}/edit?created=1`));
 }
 
 export async function toggleActivityPublish(id: string): Promise<ActivityResult> {

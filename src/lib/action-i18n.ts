@@ -1,4 +1,5 @@
 import { getLocale } from "./i18n.server";
+import { localePath, type Locale } from "./i18n";
 import { ACTION_MESSAGES_EN } from "./dictionaries/action-messages";
 
 /**
@@ -8,6 +9,19 @@ import { ACTION_MESSAGES_EN } from "./dictionaries/action-messages";
  *   tr("Note invalide.")                          -> "Invalid rating." en EN
  *   tr("Paiement de {amount} validé.", { amount }) -> gabarit avec variables
  */
+async function requestLocale(): Promise<Locale> {
+  try {
+    return (await getLocale()) as Locale;
+  } catch {
+    return "fr";
+  }
+}
+
+/** Chemin interne prefixe selon la langue de la requete (redirections d'actions). */
+export async function localeHref(path: string): Promise<string> {
+  return localePath(path, await requestLocale());
+}
+
 export async function tr(fr: string, vars?: Record<string, string | number>): Promise<string> {
   let locale = "fr";
   try {

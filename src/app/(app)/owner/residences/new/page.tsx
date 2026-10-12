@@ -3,30 +3,33 @@ import { prisma } from "@/lib/prisma";
 import { createResidence } from "@/server/actions/owner";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ResidenceForm } from "@/components/dashboard/residence-form";
+import { card } from "@/components/dashboard/styles";
+import { getI18n } from "@/lib/i18n.server";
+import type { Metadata } from "next";
 
-export const metadata = { title: "Nouvelle résidence" };
+export async function generateMetadata(): Promise<Metadata> {
+  const { dict } = await getI18n();
+  return { title: dict.dashOwner.newResidence.metaTitle };
+}
 
 export default async function NewResidencePage() {
   await requireRole(["OWNER", "ADMIN", "SUPER_ADMIN"]);
-  const [amenities, destinations] = await Promise.all([
+  const [amenities, destinations, { dict }] = await Promise.all([
     prisma.amenity.findMany({ where: { isActive: true }, orderBy: { name: "asc" } }),
     prisma.destination.findMany({ where: { isActive: true }, select: { name: true }, orderBy: { name: "asc" } }),
+    getI18n(),
   ]);
+  const t = dict.dashOwner.newResidence;
 
   return (
     <div className="mx-auto max-w-3xl">
       <PageHeader
-        title="Ajouter une résidence"
-        description="Renseignez les informations de votre logement. Il sera soumis a validation."
-        breadcrumbs={[{ label: "Mes résidences", href: "/owner/residences" }, { label: "Nouvelle" }]}
+        title={t.title}
+        description={t.subtitle}
+        breadcrumbs={[{ label: dict.dashOwner.residences.title, href: "/owner/residences" }, { label: t.crumb }]}
       />
-      <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
-        <ResidenceForm
-          action={createResidence}
-          amenities={amenities}
-          destinations={destinations}
-          submitLabel="Créer la résidence"
-        />
+      <div className={`${card} p-6 sm:p-8`}>
+        <ResidenceForm action={createResidence} amenities={amenities} destinations={destinations} submitLabel={t.submit} />
       </div>
     </div>
   );

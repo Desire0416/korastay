@@ -6,10 +6,17 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { FilterBar } from "@/components/dashboard/filter-bar";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import { table, mobileItem } from "@/components/dashboard/styles";
 import { reservationStatusMeta, toFilterOptions } from "@/lib/enums";
 import { formatPrice, formatDateRange } from "@/lib/utils";
+import { getI18n } from "@/lib/i18n.server";
+import { localePath } from "@/lib/i18n";
+import type { Metadata } from "next";
 
-export const metadata = { title: "Réservations reçues" };
+export async function generateMetadata(): Promise<Metadata> {
+  const { dict } = await getI18n();
+  return { title: dict.dashOwner.bookings.metaTitle };
+}
 
 type SP = Record<string, string | string[] | undefined>;
 const str = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
@@ -20,7 +27,9 @@ export default async function OwnerBookingsPage({ searchParams }: { searchParams
   const status = str(sp.status);
   const q = str(sp.q)?.trim().toLowerCase();
 
-  const all = await getOwnerBookings(user.id);
+  const [all, { locale, dict }] = await Promise.all([getOwnerBookings(user.id), getI18n()]);
+  const t = dict.dashOwner.bookings;
+  const th = dict.dashOwner.table;
   const bookings = all.filter(
     (r) =>
       (!status || r.status === status) &&
@@ -32,67 +41,69 @@ export default async function OwnerBookingsPage({ searchParams }: { searchParams
 
   return (
     <div className="mx-auto max-w-5xl">
-      <PageHeader title="Réservations reçues" description="Toutes les réservations de vos résidences." />
+      <PageHeader title={t.title} description={t.subtitle} />
 
       {all.length > 0 && (
         <FilterBar
           fields={[
-            { type: "search", name: "q", placeholder: "Référence, résidence, voyageur..." },
-            { type: "select", name: "status", label: "Tous les statuts", options: toFilterOptions(reservationStatusMeta) },
+            { type: "search", name: "q", placeholder: t.searchPlaceholder },
+            { type: "select", name: "status", label: t.allStatuses, options: toFilterOptions(reservationStatusMeta) },
           ]}
         />
       )}
 
       {bookings.length === 0 ? (
-        <EmptyState icon={CalendarCheck} title="Aucune réservation" description={all.length === 0 ? "Les réservations de vos résidences apparaitront ici." : "Aucun resultat pour ces critères."} />
+        <EmptyState icon={CalendarCheck} title={t.emptyTitle} description={all.length === 0 ? t.emptyText : t.noResultText} />
       ) : (
-      <>
-        {/* Mobile : liste de cartes */}
-        <div className="space-y-2.5 md:hidden">
-          {bookings.map((r) => (
-            <Link key={r.id} href={`/owner/bookings/${r.id}`} className="block rounded-2xl border border-border bg-surface p-3.5 shadow-soft active:bg-surface-soft">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-[13px] font-semibold text-brand-600">{r.reference}</span>
-                <StatusBadge status={r.status} map={reservationStatusMeta} size="sm" />
-              </div>
-              <p className="mt-1 truncate text-[14px] font-medium text-foreground">{r.residence?.name}</p>
-              <div className="mt-1 flex items-center justify-between gap-2 text-[12px] text-muted">
-                <span className="truncate">{r.guestName} · {formatDateRange(r.startDate, r.endDate)}</span>
-                <span className="shrink-0 font-bold text-foreground">{formatPrice(r.totalAmount)}</span>
-              </div>
-            </Link>
-          ))}
-        </div>
-        {/* Desktop : tableau */}
-        <div className="hidden overflow-hidden rounded-3xl border border-border bg-surface shadow-soft md:block">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] text-sm">
-              <thead className="border-b border-border bg-surface-soft/50 text-left text-xs uppercase text-muted">
-                <tr>
-                  <th className="px-5 py-3 font-semibold">Référence</th>
-                  <th className="px-5 py-3 font-semibold">Résidence</th>
-                  <th className="px-5 py-3 font-semibold">Voyageur</th>
-                  <th className="px-5 py-3 font-semibold">Dates</th>
-                  <th className="px-5 py-3 font-semibold">Statut</th>
-                  <th className="px-5 py-3 text-right font-semibold">Montant</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {bookings.map((r) => (
-                  <tr key={r.id} className="hover:bg-surface-soft/40">
-                    <td className="px-5 py-3"><Link href={`/owner/bookings/${r.id}`} className="font-semibold text-brand-600">{r.reference}</Link></td>
-                    <td className="px-5 py-3 text-foreground">{r.residence?.name}</td>
-                    <td className="px-5 py-3 text-muted">{r.guestName}</td>
-                    <td className="px-5 py-3 text-muted">{formatDateRange(r.startDate, r.endDate)}</td>
-                    <td className="px-5 py-3"><StatusBadge status={r.status} map={reservationStatusMeta} size="sm" /></td>
-                    <td className="px-5 py-3 text-right font-semibold text-foreground">{formatPrice(r.totalAmount)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <>
+          {/* Mobile : liste de cartes */}
+          <div className="space-y-2.5 md:hidden">
+            {bookings.map((r) => (
+              <Link key={r.id} href={localePath(`/owner/bookings/${r.id}`, locale)} className={mobileItem}>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[13px] font-semibold text-terracotta">{r.reference}</span>
+                  <StatusBadge status={r.status} map={reservationStatusMeta} size="sm" />
+                </div>
+                <p className="mt-1.5 truncate font-display text-[17px] text-foreground">{r.residence?.name}</p>
+                <div className="mt-1 flex items-center justify-between gap-2 text-[12.5px] text-muted">
+                  <span className="truncate">{r.guestName} · {formatDateRange(r.startDate, r.endDate, locale)}</span>
+                  <span className="shrink-0 font-bold text-foreground">{formatPrice(r.totalAmount)}</span>
+                </div>
+              </Link>
+            ))}
           </div>
-        </div>
-      </>
+          {/* Desktop : tableau */}
+          <div className={`${table.wrap} hidden md:block`}>
+            <div className="overflow-x-auto">
+              <table className={`${table.table} min-w-[640px]`}>
+                <thead className={table.head}>
+                  <tr>
+                    <th className={table.th}>{th.reference}</th>
+                    <th className={table.th}>{th.residence}</th>
+                    <th className={table.th}>{th.traveler}</th>
+                    <th className={table.th}>{th.dates}</th>
+                    <th className={table.th}>{th.status}</th>
+                    <th className={`${table.th} text-right`}>{th.amount}</th>
+                  </tr>
+                </thead>
+                <tbody className={table.body}>
+                  {bookings.map((r) => (
+                    <tr key={r.id} className={table.row}>
+                      <td className={table.td}>
+                        <Link href={localePath(`/owner/bookings/${r.id}`, locale)} className={table.link}>{r.reference}</Link>
+                      </td>
+                      <td className={`${table.td} text-foreground`}>{r.residence?.name}</td>
+                      <td className={`${table.td} text-muted`}>{r.guestName}</td>
+                      <td className={`${table.td} text-muted`}>{formatDateRange(r.startDate, r.endDate, locale)}</td>
+                      <td className={table.td}><StatusBadge status={r.status} map={reservationStatusMeta} size="sm" /></td>
+                      <td className={`${table.td} text-right font-semibold text-foreground`}>{formatPrice(r.totalAmount)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

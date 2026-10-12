@@ -5,28 +5,40 @@ import { getOwnerResidence } from "@/lib/owner-queries";
 import { updateResidence } from "@/server/actions/owner";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ResidenceForm } from "@/components/dashboard/residence-form";
+import { card } from "@/components/dashboard/styles";
+import { getI18n } from "@/lib/i18n.server";
+import type { Metadata } from "next";
 
-export const metadata = { title: "Modifier la résidence" };
+export async function generateMetadata(): Promise<Metadata> {
+  const { dict } = await getI18n();
+  return { title: dict.dashOwner.editResidence.metaTitle };
+}
 
 export default async function EditResidencePage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireRole(["OWNER", "ADMIN", "SUPER_ADMIN"]);
   const { id } = await params;
-  const [residence, amenities, destinations] = await Promise.all([
+  const [residence, amenities, destinations, { dict }] = await Promise.all([
     getOwnerResidence(user.id, id),
     prisma.amenity.findMany({ where: { isActive: true }, orderBy: { name: "asc" } }),
     prisma.destination.findMany({ where: { isActive: true }, select: { name: true }, orderBy: { name: "asc" } }),
+    getI18n(),
   ]);
   if (!residence) notFound();
+  const t = dict.dashOwner.editResidence;
 
   const boundUpdate = updateResidence.bind(null, id);
 
   return (
     <div className="mx-auto max-w-3xl">
       <PageHeader
-        title="Modifier la résidence"
-        breadcrumbs={[{ label: "Mes résidences", href: "/owner/residences" }, { label: residence.name, href: `/owner/residences/${id}` }, { label: "Modifier" }]}
+        title={t.title}
+        breadcrumbs={[
+          { label: dict.dashOwner.residences.title, href: "/owner/residences" },
+          { label: residence.name, href: `/owner/residences/${id}` },
+          { label: t.crumb },
+        ]}
       />
-      <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
+      <div className={`${card} p-6 sm:p-8`}>
         <ResidenceForm
           action={boundUpdate}
           amenities={amenities}
@@ -43,7 +55,7 @@ export default async function EditResidencePage({ params }: { params: Promise<{ 
             isHighDemand: residence.isHighDemand,
             checkOutTime: residence.checkOutTime, houseRules: residence.houseRules ?? "",
           }}
-          submitLabel="Enregistrer les modifications"
+          submitLabel={t.submit}
         />
       </div>
     </div>

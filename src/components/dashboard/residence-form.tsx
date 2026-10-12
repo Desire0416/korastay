@@ -7,11 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Field } from "@/components/ui/field";
+import { NativeSelect } from "@/components/ui/native-select";
 import { Icon } from "@/components/ui/icon";
-import { cn } from "@/lib/utils";
+import { useI18n } from "@/components/i18n/provider";
 import type { OwnerResult } from "@/server/actions/owner";
 
-interface Amenity { id: string; name: string; icon: string | null }
+interface Amenity { id: string; name: string; slug?: string; icon: string | null }
 interface ResidenceDefaults {
   name?: string; type?: string; city?: string; district?: string; address?: string;
   description?: string; capacity?: number; bedrooms?: number; beds?: number;
@@ -34,10 +35,14 @@ interface ResidenceFormProps {
   defaultStatus?: string;
 }
 
+const TYPES = ["STUDIO", "T2", "T3", "VILLA"] as const;
+
 export function ResidenceForm({
   action, amenities, selectedAmenityIds = [], defaults = {}, destinations, submitLabel,
   owners, selectedOwnerId, scope = "owner", defaultStatus,
 }: ResidenceFormProps) {
+  const dict = useI18n();
+  const t = dict.dashOwner.form;
   const [state, formAction, pending] = useActionState<OwnerResult, FormData>(action, { ok: false });
   const isAdmin = scope === "admin";
   // Conserve les valeurs saisies si la validation echoue (React 19 reinitialise
@@ -50,156 +55,166 @@ export function ResidenceForm({
   }, [state]);
 
   return (
-    <form action={formAction} className="space-y-8">
+    <form action={formAction} className="space-y-9">
       <input type="hidden" name="scope" value={scope} />
 
       {/* Section admin : proprietaire & statut */}
       {isAdmin && owners && (
-        <Section title="Attribution (admin)">
-          <Field label="Propriétaire" htmlFor="ownerId" required>
-            <select id="ownerId" name="ownerId" defaultValue={selectedOwnerId ?? ""} required className="h-12 w-full rounded-2xl border border-border bg-surface px-4 text-[15px] focus-visible:border-brand-400 focus-visible:outline-none">
-              <option value="" disabled>Sélectionner un propriétaire</option>
+        <Section title={t.adminSection}>
+          <Field label={t.owner} htmlFor="ownerId" required>
+            <NativeSelect id="ownerId" name="ownerId" defaultValue={selectedOwnerId ?? ""} required>
+              <option value="" disabled>{t.selectOwner}</option>
               {owners.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
-            </select>
+            </NativeSelect>
           </Field>
-          <Field label="Statut" htmlFor="status" hint="Publier rend la résidence visible immédiatement.">
-            <select id="status" name="status" defaultValue={defaultStatus ?? "PUBLISHED"} className="h-12 w-full rounded-2xl border border-border bg-surface px-4 text-[15px] focus-visible:border-brand-400 focus-visible:outline-none">
-              <option value="PUBLISHED">Publiée (vérifiée)</option>
-              <option value="PENDING_VALIDATION">En attente de validation</option>
-              <option value="UNPUBLISHED">Dépubliée</option>
-            </select>
+          <Field label={t.status} htmlFor="status" hint={t.statusHint}>
+            <NativeSelect id="status" name="status" defaultValue={defaultStatus ?? "PUBLISHED"}>
+              <option value="PUBLISHED">{t.statusPublished}</option>
+              <option value="PENDING_VALIDATION">{t.statusPending}</option>
+              <option value="UNPUBLISHED">{t.statusUnpublished}</option>
+            </NativeSelect>
           </Field>
         </Section>
       )}
 
       {/* Informations generales */}
-      <Section title="Informations générales">
-        <Field label="Nom de la résidence" htmlFor="name" required className="sm:col-span-2">
-          <Input id="name" name="name" defaultValue={dv.name} placeholder="Lux Résidence Daloa" required />
+      <Section title={t.general}>
+        <Field label={t.name} htmlFor="name" required className="sm:col-span-2">
+          <Input id="name" name="name" defaultValue={dv.name} placeholder={t.namePh} required />
         </Field>
-        <Field label="Type de logement" htmlFor="type" required>
-          <select id="type" name="type" defaultValue={dv.type ?? "STUDIO"} className="h-12 w-full rounded-2xl border border-border bg-surface px-4 text-[15px] focus-visible:border-brand-400 focus-visible:outline-none">
-            <option value="STUDIO">Studio meublé</option>
-            <option value="T2">Appartement T2</option>
-            <option value="T3">Appartement T3</option>
-            <option value="VILLA">Villa / Maison</option>
-          </select>
+        <Field label={t.type} htmlFor="type" required>
+          <NativeSelect id="type" name="type" defaultValue={dv.type ?? "STUDIO"}>
+            {TYPES.map((type) => (
+              <option key={type} value={type}>{dict.enums.residenceType[type] ?? type}</option>
+            ))}
+          </NativeSelect>
         </Field>
-        <Field label="Ville" htmlFor="city" required>
-          <input list="cities" id="city" name="city" defaultValue={dv.city} placeholder="Daloa" required className="h-12 w-full rounded-2xl border border-border bg-surface px-4 text-[15px] focus-visible:border-brand-400 focus-visible:outline-none" />
+        <Field label={t.city} htmlFor="city" required>
+          <Input list="cities" id="city" name="city" defaultValue={dv.city} placeholder={t.cityPh} required />
           <datalist id="cities">
             {destinations.map((d) => <option key={d.name} value={d.name} />)}
           </datalist>
         </Field>
-        <Field label="Quartier" htmlFor="district">
-          <Input id="district" name="district" defaultValue={dv.district} placeholder="Lobia 2" />
+        <Field label={t.district} htmlFor="district">
+          <Input id="district" name="district" defaultValue={dv.district} placeholder={t.districtPh} />
         </Field>
-        <Field label="Adresse" htmlFor="address">
-          <Input id="address" name="address" defaultValue={dv.address} placeholder="Adresse complète (non publique)" />
+        <Field label={t.address} htmlFor="address">
+          <Input id="address" name="address" defaultValue={dv.address} placeholder={t.addressPh} />
         </Field>
-        <Field label="Description" htmlFor="description" required className="sm:col-span-2">
-          <Textarea id="description" name="description" defaultValue={dv.description} placeholder="Decrivez votre résidence, son ambiance, ses atouts..." rows={5} required />
+        <Field label={t.description} htmlFor="description" required className="sm:col-span-2">
+          <Textarea id="description" name="description" defaultValue={dv.description} placeholder={t.descriptionPh} rows={5} required />
         </Field>
       </Section>
 
       {/* Capacite */}
-      <Section title="Capacité & couchage">
-        <Field label="Voyageurs max" htmlFor="capacity" required>
+      <Section title={t.capacitySection} cols={4}>
+        <Field label={t.capacity} htmlFor="capacity" required>
           <Input id="capacity" name="capacity" type="number" min={1} defaultValue={dv.capacity ?? 2} required />
         </Field>
-        <Field label="Chambres" htmlFor="bedrooms" required>
+        <Field label={t.bedrooms} htmlFor="bedrooms" required>
           <Input id="bedrooms" name="bedrooms" type="number" min={0} defaultValue={dv.bedrooms ?? 1} required />
         </Field>
-        <Field label="Lits" htmlFor="beds" required>
+        <Field label={t.beds} htmlFor="beds" required>
           <Input id="beds" name="beds" type="number" min={1} defaultValue={dv.beds ?? 1} required />
         </Field>
-        <Field label="Salles de bain" htmlFor="bathrooms" required>
+        <Field label={t.bathrooms} htmlFor="bathrooms" required>
           <Input id="bathrooms" name="bathrooms" type="number" min={1} defaultValue={dv.bathrooms ?? 1} required />
         </Field>
       </Section>
 
       {/* Tarifs */}
-      <Section title="Tarifs (F CFA)">
-        <Field label="Prix par nuit" htmlFor="pricePerNight" required>
+      <Section title={t.pricing} cols={3}>
+        <Field label={t.price} htmlFor="pricePerNight" required>
           <Input id="pricePerNight" name="pricePerNight" type="number" min={1000} step={500} defaultValue={dv.pricePerNight} placeholder="25000" required />
         </Field>
-        <Field label="Frais de ménage" htmlFor="cleaningFee">
+        <Field label={t.cleaning} htmlFor="cleaningFee">
           <Input id="cleaningFee" name="cleaningFee" type="number" min={0} step={500} defaultValue={dv.cleaningFee ?? 0} placeholder="5000" />
         </Field>
-        <Field label="Montant de la caution" htmlFor="depositAmount">
+        <Field label={t.deposit} htmlFor="depositAmount">
           <Input id="depositAmount" name="depositAmount" type="number" min={0} step={1000} defaultValue={dv.depositAmount ?? 0} placeholder="30000" />
         </Field>
       </Section>
 
       {/* Caution & demande */}
-      <Section title="Caution & demande">
-        <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border p-3.5 sm:col-span-2">
-          <input type="checkbox" name="cautionEnabled" value="1" defaultChecked={dv.cautionEnabled ?? false} className="mt-0.5 h-5 w-5 rounded border-border text-brand-500 focus:ring-brand-400" />
-          <span>
-            <span className="block text-sm font-semibold text-foreground">Exiger une caution (dépôt de garantie)</span>
-            <span className="block text-xs text-muted">Le montant ci-dessus pourra être bloqué puis restitué au départ.</span>
-          </span>
-        </label>
-        <Field label="Justification de la caution" htmlFor="cautionJustification" className="sm:col-span-2" hint="Affichee au voyageur (ex: objets de valeur, équipements fragiles).">
-          <Input id="cautionJustification" name="cautionJustification" defaultValue={dv.cautionJustification ?? ""} placeholder="Ex: protection des équipements" />
+      <Section title={t.cautionSection}>
+        <Toggle name="cautionEnabled" defaultChecked={dv.cautionEnabled ?? false} title={t.cautionEnabled} hint={t.cautionEnabledHint} />
+        <Field label={t.cautionJustification} htmlFor="cautionJustification" className="sm:col-span-2" hint={t.cautionJustificationHint}>
+          <Input id="cautionJustification" name="cautionJustification" defaultValue={dv.cautionJustification ?? ""} placeholder={t.cautionJustificationPh} />
         </Field>
-        <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border p-3.5 sm:col-span-2">
-          <input type="checkbox" name="isHighDemand" value="1" defaultChecked={dv.isHighDemand ?? false} className="mt-0.5 h-5 w-5 rounded border-border text-brand-500 focus:ring-brand-400" />
-          <span>
-            <span className="block text-sm font-semibold text-foreground">Résidence a forte demande</span>
-            <span className="block text-xs text-muted">Paiement de 100% exige a la réservation (selon les regles de paiement).</span>
-          </span>
-        </label>
+        <Toggle name="isHighDemand" defaultChecked={dv.isHighDemand ?? false} title={t.highDemand} hint={t.highDemandHint} />
       </Section>
 
       {/* Horaires */}
-      <Section title="Arrivée & départ">
-        <Field label="Heure d'arrivée" htmlFor="checkInTime">
+      <Section title={t.schedule}>
+        <Field label={t.checkIn} htmlFor="checkInTime">
           <Input id="checkInTime" name="checkInTime" type="time" defaultValue={dv.checkInTime ?? "14:00"} />
         </Field>
-        <Field label="Heure de départ" htmlFor="checkOutTime">
+        <Field label={t.checkOut} htmlFor="checkOutTime">
           <Input id="checkOutTime" name="checkOutTime" type="time" defaultValue={dv.checkOutTime ?? "11:00"} />
         </Field>
-        <Field label="Règlement intérieur" htmlFor="houseRules" className="sm:col-span-2">
-          <Textarea id="houseRules" name="houseRules" defaultValue={dv.houseRules} placeholder="Non fumeur, pas de fetes, respect du voisinage..." rows={3} />
+        <Field label={t.rules} htmlFor="houseRules" className="sm:col-span-2">
+          <Textarea id="houseRules" name="houseRules" defaultValue={dv.houseRules} placeholder={t.rulesPh} rows={3} />
         </Field>
       </Section>
 
       {/* Equipements */}
       <div>
-        <h3 className="mb-3 font-bold text-foreground">Équipements</h3>
+        <SectionHeading title={t.amenities} />
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
           {amenities.map((a) => (
-            <label key={a.id} className="flex cursor-pointer items-center gap-2 rounded-xl border border-border px-3 py-2.5 text-sm transition-colors has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50">
+            <label
+              key={a.id}
+              className="flex cursor-pointer items-center gap-2 rounded-xl border border-ink/15 bg-white px-3 py-2.5 text-sm transition-colors hover:border-ink/30 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50"
+            >
               <input type="checkbox" name="amenities" value={a.id} defaultChecked={selectedAmenityIds.includes(a.id)} className="peer sr-only" />
               <Icon name={a.icon} className="h-4 w-4 text-muted peer-checked:text-brand-600" />
-              <span className="text-foreground">{a.name}</span>
+              <span className="text-foreground">{(a.slug && dict.enums.amenity[a.slug]) || a.name}</span>
             </label>
           ))}
         </div>
       </div>
 
       {state.error && (
-        <div className="flex items-center gap-2 rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-danger">
-          <AlertCircle className="h-4 w-4" /> {state.error}
+        <div className="flex items-center gap-2 rounded-xl bg-danger-50 px-4 py-3 text-sm font-medium text-danger-700 ring-1 ring-inset ring-danger-200/70">
+          <AlertCircle className="h-4 w-4 shrink-0" /> {state.error}
         </div>
       )}
 
-      <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-3 border-t border-border pt-6 sm:flex-row sm:items-center">
         <Button type="submit" size="lg" loading={pending}>{submitLabel}</Button>
-        <p className="text-sm text-muted">
-          {isAdmin ? "Vous gérez cette résidence en tant qu'administrateur." : "Votre résidence sera soumise a validation KoraStay."}
-        </p>
+        <p className="text-sm text-muted">{isAdmin ? t.adminNote : t.ownerNote}</p>
       </div>
     </form>
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function SectionHeading({ title }: { title: string }) {
+  return (
+    <h3 className="mb-4 flex items-center gap-3 font-display text-xl text-foreground">
+      {title}
+      <span aria-hidden="true" className="h-px flex-1 bg-gradient-to-r from-sand-300 to-transparent" />
+    </h3>
+  );
+}
+
+function Section({ title, children, cols = 2 }: { title: string; children: React.ReactNode; cols?: 2 | 3 | 4 }) {
+  const grid = cols === 4 ? "grid-cols-2 lg:grid-cols-4" : cols === 3 ? "grid-cols-1 sm:grid-cols-3" : "grid-cols-1 sm:grid-cols-2";
   return (
     <div>
-      <h3 className="mb-3 font-bold text-foreground">{title}</h3>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">{children}</div>
+      <SectionHeading title={title} />
+      <div className={`grid gap-4 ${grid}`}>{children}</div>
     </div>
+  );
+}
+
+function Toggle({ name, defaultChecked, title, hint }: { name: string; defaultChecked: boolean; title: string; hint: string }) {
+  return (
+    <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-ink/15 bg-white p-4 transition-colors hover:border-ink/30 has-[:checked]:border-brand-400 has-[:checked]:bg-brand-50/60 sm:col-span-2">
+      <input type="checkbox" name={name} value="1" defaultChecked={defaultChecked} className="mt-0.5 h-5 w-5 rounded border-ink/25 text-brand-500 focus:ring-brand-400" />
+      <span>
+        <span className="block text-sm font-semibold text-foreground">{title}</span>
+        <span className="block text-xs text-muted">{hint}</span>
+      </span>
+    </label>
   );
 }

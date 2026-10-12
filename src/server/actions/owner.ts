@@ -6,7 +6,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireRole, type SessionUser } from "@/lib/auth";
 import { slugify } from "@/lib/utils";
-import { tr } from "@/lib/action-i18n";
+import { tr, localeHref } from "@/lib/action-i18n";
 
 export type OwnerResult = { ok: boolean; error?: string; message?: string; id?: string; values?: Record<string, string> };
 
@@ -142,7 +142,7 @@ export async function createResidence(_prev: OwnerResult, formData: FormData): P
 
   revalidatePath("/admin/residences");
   revalidatePath("/residences");
-  redirect(scope === "admin" ? `/admin/residences/${residence.id}?created=1` : `/owner/residences/${residence.id}?created=1`);
+  redirect(await localeHref(scope === "admin" ? `/admin/residences/${residence.id}?created=1` : `/owner/residences/${residence.id}?created=1`));
 }
 
 export async function updateResidence(id: string, _prev: OwnerResult, formData: FormData): Promise<OwnerResult> {

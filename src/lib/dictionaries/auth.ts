@@ -4,6 +4,7 @@
 // ============================================================
 
 export interface AuthDict {
+  emailPlaceholder: string;
   panel: { eyebrow: string; title: string; accent: string; text: string; trust: string[]; back: string };
   login: {
     metaTitle: string; title: string; accent: string; subtitle: string;
@@ -58,6 +59,7 @@ const PARTNER_OPTIONS_EN = [
 ];
 
 export const authFr: AuthDict = {
+  emailPlaceholder: "vous@email.com",
   panel: {
     eyebrow: "Akwaba",
     title: "Réservez votre séjour,",
@@ -186,6 +188,7 @@ export const authFr: AuthDict = {
 };
 
 export const authEn: AuthDict = {
+  emailPlaceholder: "you@email.com",
   panel: {
     eyebrow: "Akwaba",
     title: "Book your stay,",

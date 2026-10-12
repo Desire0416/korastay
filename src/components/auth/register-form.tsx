@@ -123,7 +123,7 @@ export function RegisterForm({ defaultType = "TRAVELER", lockType = false, title
           </Field>
         </div>
         <Field label={t.email} htmlFor="email" required error={state.fieldErrors?.email}>
-          <Input id="email" name="email" type="email" placeholder="vous@email.com" required autoComplete="email" defaultValue={state.values?.email ?? ""} />
+          <Input id="email" name="email" type="email" placeholder={dict.auth.emailPlaceholder} required autoComplete="email" defaultValue={state.values?.email ?? ""} />
         </Field>
         <Field label={t.phone} htmlFor="phone" hint={t.optional} error={state.fieldErrors?.phone}>
           <Input id="phone" name="phone" placeholder="+225 07 ..." autoComplete="tel" defaultValue={state.values?.phone ?? ""} />

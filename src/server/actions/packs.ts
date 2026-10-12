@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
 import { slugify } from "@/lib/utils";
-import { tr } from "@/lib/action-i18n";
+import { tr, localeHref } from "@/lib/action-i18n";
 
 export type PackItemInput = { label: string; details?: string; included: boolean };
 export type PackActivityInput = { timeLabel?: string; title: string; description?: string };
@@ -136,7 +136,7 @@ export async function savePack(input: PackInput): Promise<PackResult> {
   await prisma.auditLog.create({ data: { actorId: admin.id, action: "PACK_CREATED", entityType: "Pack", entityId: pack.id } });
   revalidatePath("/admin/packs");
   revalidatePath("/packs");
-  redirect("/admin/packs?created=1");
+  redirect(await localeHref("/admin/packs?created=1"));
 }
 
 export async function deletePack(id: string): Promise<PackResult> {

@@ -1,48 +1,56 @@
-import { Wallet, TrendingUp } from "lucide-react";
+import { Wallet, TrendingUp, Receipt } from "lucide-react";
 import { requireRole } from "@/lib/auth";
 import { getOwnerRevenue } from "@/lib/owner-queries";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { table, sectionTitle } from "@/components/dashboard/styles";
 import { formatPrice, formatDate } from "@/lib/utils";
+import { getI18n } from "@/lib/i18n.server";
+import type { Metadata } from "next";
 
-export const metadata = { title: "Revenus" };
+export async function generateMetadata(): Promise<Metadata> {
+  const { dict } = await getI18n();
+  return { title: dict.dashOwner.revenues.metaTitle };
+}
 
 export default async function OwnerRevenuesPage() {
   const user = await requireRole(["OWNER", "ADMIN", "SUPER_ADMIN"]);
-  const { reservations, total } = await getOwnerRevenue(user.id);
+  const [{ reservations, total }, { locale, dict }] = await Promise.all([getOwnerRevenue(user.id), getI18n()]);
+  const t = dict.dashOwner.revenues;
+  const th = dict.dashOwner.table;
   const avg = reservations.length ? Math.round(total / reservations.length) : 0;
 
   return (
     <div className="mx-auto max-w-4xl">
-      <PageHeader title="Revenus" description="Suivez vos gains (hors frais de service KoraStay)." />
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <KpiCard label="Revenu total" value={formatPrice(total)} icon={Wallet} tone="success" />
-        <KpiCard label="Réservations" value={reservations.length} icon={TrendingUp} tone="brand" />
-        <KpiCard label="Panier moyen" value={formatPrice(avg)} icon={Wallet} tone="gold" />
+      <PageHeader title={t.title} description={t.subtitle} />
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
+        <KpiCard label={t.total} value={formatPrice(total)} icon={Wallet} tone="brand" />
+        <KpiCard label={t.bookings} value={reservations.length} icon={TrendingUp} tone="info" />
+        <KpiCard label={t.average} value={formatPrice(avg)} icon={Receipt} tone="gold" />
       </div>
 
-      <h2 className="mb-3 mt-8 text-lg font-bold text-foreground">Détail des revenus</h2>
+      <h2 className={`${sectionTitle} mb-4 mt-10`}>{t.detail}</h2>
       {reservations.length === 0 ? (
-        <EmptyState icon={Wallet} title="Aucun revenu" description="Vos revenus apparaitront ici après vos premières réservations confirmées." />
+        <EmptyState icon={Wallet} title={t.emptyTitle} description={t.emptyText} />
       ) : (
-        <div className="overflow-hidden rounded-3xl border border-border bg-surface shadow-soft">
-          <table className="w-full text-sm">
-            <thead className="border-b border-border bg-surface-soft/50 text-left text-xs uppercase text-muted">
+        <div className={table.wrap}>
+          <table className={table.table}>
+            <thead className={table.head}>
               <tr>
-                <th className="px-5 py-3 font-semibold">Référence</th>
-                <th className="hidden px-5 py-3 font-semibold sm:table-cell">Résidence</th>
-                <th className="hidden px-5 py-3 font-semibold md:table-cell">Date</th>
-                <th className="px-5 py-3 text-right font-semibold">Votre part</th>
+                <th className={table.th}>{th.reference}</th>
+                <th className={`${table.th} hidden sm:table-cell`}>{th.residence}</th>
+                <th className={`${table.th} hidden md:table-cell`}>{th.date}</th>
+                <th className={`${table.th} text-right`}>{th.yourShare}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody className={table.body}>
               {reservations.map((r) => (
-                <tr key={r.id} className="hover:bg-surface-soft/40">
-                  <td className="px-5 py-3 font-semibold text-foreground">{r.reference}</td>
-                  <td className="hidden px-5 py-3 text-muted sm:table-cell">{r.residence?.name}</td>
-                  <td className="hidden px-5 py-3 text-muted md:table-cell">{r.confirmedAt ? formatDate(r.confirmedAt) : "-"}</td>
-                  <td className="px-5 py-3 text-right font-semibold text-success">{formatPrice(r.subtotalAmount)}</td>
+                <tr key={r.id} className={table.row}>
+                  <td className={`${table.td} font-semibold text-foreground`}>{r.reference}</td>
+                  <td className={`${table.td} hidden text-muted sm:table-cell`}>{r.residence?.name}</td>
+                  <td className={`${table.td} hidden text-muted md:table-cell`}>{r.confirmedAt ? formatDate(r.confirmedAt, locale) : "-"}</td>
+                  <td className={`${table.td} text-right font-semibold text-brand-700`}>{formatPrice(r.subtotalAmount)}</td>
                 </tr>
               ))}
             </tbody>

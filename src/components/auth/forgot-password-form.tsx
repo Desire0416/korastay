@@ -36,7 +36,7 @@ export function ForgotPasswordForm() {
       <AuthHeading title={t.title} subtitle={t.subtitle} />
       <form action={action} className="mt-9 space-y-4">
         <Field label={dict.auth.login.email} htmlFor="email" required>
-          <Input id="email" name="email" type="email" placeholder="vous@email.com" required autoComplete="email" />
+          <Input id="email" name="email" type="email" placeholder={dict.auth.emailPlaceholder} required autoComplete="email" />
         </Field>
         {state.error && <AuthError message={state.error} />}
         <Button type="submit" size="lg" loading={pending} className="w-full">{t.submit}</Button>

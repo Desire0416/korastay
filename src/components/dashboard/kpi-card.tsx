@@ -46,7 +46,12 @@ export async function KpiCard({ label, value, icon: Icon, hint, trend, tone = "b
           </span>
         )}
       </div>
-      <p className="mt-3 font-display text-[1.9rem] leading-none tracking-[-0.02em] text-foreground md:mt-4 md:text-[2.25rem]">
+      <p
+        className={cn(
+          "mt-3 font-display leading-none tracking-[-0.02em] text-foreground md:mt-4",
+          String(value).length > 9 ? "text-[1.35rem] sm:text-[1.6rem] lg:text-[1.75rem]" : "text-[1.9rem] md:text-[2.25rem]"
+        )}
+      >
         {value}
       </p>
       <div className="mt-2 flex min-h-[1rem] items-center gap-2">

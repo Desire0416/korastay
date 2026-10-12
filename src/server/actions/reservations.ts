@@ -20,7 +20,7 @@ import { sendEmail, emailLayout } from "@/lib/email";
 import { paymentMethodMeta } from "@/lib/enums";
 import { referralDiscountRateFor } from "@/lib/referral";
 import { RESIDENCE_VALIDATION_HOURS, PACK_VALIDATION_DAYS, PAYMENT_DEADLINE_HOURS } from "@/lib/constants";
-import { tr } from "@/lib/action-i18n";
+import { tr, localeHref } from "@/lib/action-i18n";
 
 export type ReservationResult = {
   ok: boolean;
@@ -196,7 +196,7 @@ export async function createResidenceReservation(
     text: `Demande de réservation reçue pour ${residence.name}.`,
   });
 
-  redirect(`/account/bookings/${reservationId}?requested=1`);
+  redirect(await localeHref(`/account/bookings/${reservationId}?requested=1`));
 }
 
 // ============================================================
@@ -289,7 +289,7 @@ export async function createPackReservation(
     text: `Demande de pack reçue pour ${pack.name}.`,
   });
 
-  redirect(`/account/bookings/${reservation.id}?requested=1`);
+  redirect(await localeHref(`/account/bookings/${reservation.id}?requested=1`));
 }
 
 // ============================================================
@@ -384,7 +384,7 @@ export async function createActivityReservation(
     text: `Demande d'activité reçue pour ${activity.name}.`,
   });
 
-  redirect(`/account/bookings/${reservation.id}?requested=1`);
+  redirect(await localeHref(`/account/bookings/${reservation.id}?requested=1`));
 }
 
 // ============================================================
@@ -548,7 +548,7 @@ export async function payReservationDeposit(
       },
     });
     revalidatePath(`/account/bookings/${reservationId}`);
-    redirect(`/account/bookings/${reservationId}?pending_validation=1`);
+    redirect(await localeHref(`/account/bookings/${reservationId}?pending_validation=1`));
   }
 
   // Paiement immediat confirme.
@@ -559,7 +559,7 @@ export async function payReservationDeposit(
   await finalizeReservationPayment(reservationId, amount);
 
   revalidatePath("/account/bookings");
-  redirect(`/account/bookings/${reservationId}?confirmed=1`);
+  redirect(await localeHref(`/account/bookings/${reservationId}?confirmed=1`));
 }
 
 // ------------------------------------------------------------
@@ -634,7 +634,7 @@ export async function declareReservationPayment(
   });
 
   revalidatePath(`/account/bookings/${reservationId}`);
-  redirect(`/account/bookings/${reservationId}?pending_validation=1`);
+  redirect(await localeHref(`/account/bookings/${reservationId}?pending_validation=1`));
 }
 
 // ============================================================

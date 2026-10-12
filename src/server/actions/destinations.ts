@@ -6,7 +6,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
 import { slugify } from "@/lib/utils";
-import { tr } from "@/lib/action-i18n";
+import { tr, localeHref } from "@/lib/action-i18n";
 
 export type DestResult = { ok: boolean; error?: string; message?: string };
 
@@ -63,7 +63,7 @@ export async function saveDestination(id: string | null, _prev: DestResult, form
   await prisma.destination.create({ data: { ...data, slug } });
   revalidatePath("/admin/destinations");
   revalidatePath("/destinations");
-  redirect("/admin/destinations?created=1");
+  redirect(await localeHref("/admin/destinations?created=1"));
 }
 
 export async function toggleDestinationActive(id: string): Promise<DestResult> {

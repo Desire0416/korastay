@@ -26,7 +26,7 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
             id="email"
             name="email"
             type="email"
-            placeholder="vous@email.com"
+            placeholder={dict.auth.emailPlaceholder}
             required
             autoComplete="email"
             defaultValue={state.values?.email ?? ""}

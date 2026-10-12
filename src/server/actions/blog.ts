@@ -6,7 +6,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
 import { slugify } from "@/lib/utils";
-import { tr } from "@/lib/action-i18n";
+import { tr, localeHref } from "@/lib/action-i18n";
 
 export type BlogResult = { ok: boolean; error?: string; message?: string };
 
@@ -62,7 +62,7 @@ export async function saveBlogPost(id: string | null, _prev: BlogResult, formDat
   });
   revalidatePath("/admin/content/blog");
   revalidatePath("/blog");
-  redirect("/admin/content/blog?created=1");
+  redirect(await localeHref("/admin/content/blog?created=1"));
 }
 
 export async function toggleBlogPublish(id: string): Promise<BlogResult> {

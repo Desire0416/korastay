@@ -4,36 +4,45 @@ import { getOwnerReviews } from "@/lib/owner-queries";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { RatingStars } from "@/components/ui/rating-stars";
 import { EmptyState } from "@/components/ui/empty-state";
-import { formatDate, initials } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ReviewReplyForm } from "@/components/dashboard/review-reply-form";
+import { card } from "@/components/dashboard/styles";
+import { formatDate, initials } from "@/lib/utils";
+import { getI18n } from "@/lib/i18n.server";
+import type { Metadata } from "next";
 
-export const metadata = { title: "Avis reçus" };
+export async function generateMetadata(): Promise<Metadata> {
+  const { dict } = await getI18n();
+  return { title: dict.dashOwner.reviews.metaTitle };
+}
 
 export default async function OwnerReviewsPage() {
   const user = await requireRole(["OWNER", "ADMIN", "SUPER_ADMIN"]);
-  const reviews = await getOwnerReviews(user.id);
+  const [reviews, { locale, dict }] = await Promise.all([getOwnerReviews(user.id), getI18n()]);
+  const t = dict.dashOwner.reviews;
 
   return (
     <div className="mx-auto max-w-3xl">
-      <PageHeader title="Avis reçus" description="Les retours de vos voyageurs." />
+      <PageHeader title={t.title} description={t.subtitle} />
       {reviews.length === 0 ? (
-        <EmptyState icon={Star} title="Aucun avis" description="Les avis de vos voyageurs apparaitront ici après leurs séjours." />
+        <EmptyState icon={Star} title={t.emptyTitle} description={t.emptyText} />
       ) : (
         <div className="space-y-3">
           {reviews.map((r) => (
-            <div key={r.id} className="rounded-3xl border border-border bg-surface p-5 shadow-soft">
-              <div className="flex items-center gap-3">
-                <Avatar><AvatarFallback>{initials(r.author.firstName, r.author.lastName)}</AvatarFallback></Avatar>
-                <div className="flex-1">
-                  <p className="font-bold text-foreground">{r.author.firstName} {r.author.lastName}</p>
-                  <p className="text-xs text-muted">{r.residence?.name} - {formatDate(r.createdAt)}</p>
+            <figure key={r.id} className={`${card} p-5 sm:p-6`}>
+              <figcaption className="flex items-center gap-3">
+                <Avatar>
+                  <AvatarFallback>{initials(r.author.firstName, r.author.lastName)}</AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                  <p className="font-display text-lg leading-tight text-foreground">{r.author.firstName} {r.author.lastName}</p>
+                  <p className="truncate text-xs text-muted">{r.residence?.name} · {formatDate(r.createdAt, locale)}</p>
                 </div>
                 <RatingStars value={r.rating} showValue={false} size="sm" />
-              </div>
-              {r.comment && <p className="mt-3 text-sm text-foreground/90">{r.comment}</p>}
+              </figcaption>
+              {r.comment && <blockquote className="mt-3 text-[15px] leading-relaxed text-foreground/85">{r.comment}</blockquote>}
               <ReviewReplyForm reviewId={r.id} existingReply={r.ownerReply} />
-            </div>
+            </figure>
           ))}
         </div>
       )}

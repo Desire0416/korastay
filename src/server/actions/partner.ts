@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
-import { tr } from "@/lib/action-i18n";
+import { tr, localeHref } from "@/lib/action-i18n";
 
 export type PartnerResult = { ok: boolean; error?: string; message?: string; values?: Record<string, string> };
 
@@ -77,7 +77,7 @@ export async function completePartnerOnboarding(_prev: PartnerResult, formData: 
       url: "/admin/partners",
     })),
   });
-  redirect("/partner?onboarded=1");
+  redirect(await localeHref("/partner?onboarded=1"));
 }
 
 // Mise a jour du vehicule (chauffeur).
@@ -191,7 +191,7 @@ export async function createPartnerService(_prev: PartnerResult, formData: FormD
       duration: parsed.data.duration || null,
     },
   });
-  redirect("/partner/services");
+  redirect(await localeHref("/partner/services"));
 }
 
 export async function toggleService(serviceId: string): Promise<PartnerResult> {

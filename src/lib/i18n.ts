@@ -18,6 +18,7 @@ import { type PagesDict, pagesFr, pagesEn } from "./dictionaries/pages";
 import { type AuthDict, authFr, authEn } from "./dictionaries/auth";
 import { type DashDict, dashFr, dashEn } from "./dictionaries/dashboard";
 import { type DashAccountDict, dashAccountFr, dashAccountEn } from "./dictionaries/dash-account";
+import { type DashOwnerDict, dashOwnerFr, dashOwnerEn } from "./dictionaries/dash-owner";
 
 export type Locale = "fr" | "en";
 export const LOCALES: Locale[] = ["fr", "en"];
@@ -39,6 +40,7 @@ export interface Dictionary {
   // Espaces connectes : toutes les cles prefixees "dash" (cf. publicClientDict).
   dash: DashDict;
   dashAccount: DashAccountDict;
+  dashOwner: DashOwnerDict;
   header: {
     becomeHost: string;
     login: string;
@@ -333,6 +335,7 @@ const FR: Dictionary = {
   auth: authFr,
   dash: dashFr,
   dashAccount: dashAccountFr,
+  dashOwner: dashOwnerFr,
   header: {
     becomeHost: "Devenir propriétaire",
     login: "Connexion",
@@ -601,6 +604,7 @@ const EN: Dictionary = {
   auth: authEn,
   dash: dashEn,
   dashAccount: dashAccountEn,
+  dashOwner: dashOwnerEn,
   header: {
     becomeHost: "Become a host",
     login: "Log in",
