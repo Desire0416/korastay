@@ -8,13 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Field } from "@/components/ui/field";
 import { Stepper } from "@/components/ui/stepper";
+import { Motif } from "@/components/brand/motif";
+import { StepHeading } from "./step-heading";
 import { cn, formatPrice } from "@/lib/utils";
+import { useI18n } from "@/components/i18n/provider";
+import { localePath } from "@/lib/i18n";
 import { submitCustomPack, type CustomPackResult } from "@/server/actions/custom-pack";
 import type { CityService } from "@/lib/custom-pack-queries";
 
-const TYPE_LABELS: Record<string, string> = {
-  GUIDE: "Guides & visites", TRANSPORT: "Transport", RESTAURANT: "Restauration", ACTIVITY: "Activités", OTHER: "Autres prestations",
-};
 const SERVICE_FEE = 0.07; // apercu (le total faisant foi est calcule cote serveur)
 
 interface City { slug: string; name: string }
@@ -28,6 +29,8 @@ interface CustomPackBuilderProps {
 
 export function CustomPackBuilder({ cities, servicesByCity, initialCityName, defaultContact }: CustomPackBuilderProps) {
   const router = useRouter();
+  const dict = useI18n();
+  const t = dict.customPack;
   const [city, setCity] = React.useState<string>(initialCityName && servicesByCity[initialCityName] ? initialCityName : cities[0]?.name ?? "");
   const [selected, setSelected] = React.useState<Record<string, CityService>>({});
   const [persons, setPersons] = React.useState(2);
@@ -69,8 +72,8 @@ export function CustomPackBuilder({ cities, servicesByCity, initialCityName, def
 
   function submit() {
     setError(null);
-    if (cartForCity.length === 0) { setError("Ajoutez au moins une prestation a votre pack."); return; }
-    if (!name.trim() || !email.includes("@")) { setError("Renseignez votre nom et un email valide."); return; }
+    if (cartForCity.length === 0) { setError(t.errorEmpty); return; }
+    if (!name.trim() || !email.includes("@")) { setError(t.errorContact); return; }
     start(async () => {
       const res = await submitCustomPack({
         cityName: city,
@@ -79,77 +82,83 @@ export function CustomPackBuilder({ cities, servicesByCity, initialCityName, def
         contactName: name, email, phone,
       });
       if (res.ok) setDone(res);
-      else setError(res.error ?? "Une erreur est survenue.");
+      else setError(res.error ?? t.errorGeneric);
     });
   }
 
   if (done) {
     return (
-      <div className="mx-auto max-w-xl rounded-4xl border border-success/30 bg-emerald-50 p-8 text-center">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-success text-white">
-          <CheckCircle2 className="h-8 w-8" />
+      <div className="relative mx-auto max-w-xl overflow-hidden rounded-[2rem] bg-brand-500 p-10 text-center text-white">
+        <Motif variant="bogolan" fade="bottom" className="text-white/[0.08]" />
+        <div className="relative mx-auto flex h-16 w-14 items-center justify-center rounded-arch-sm bg-white/15">
+          <CheckCircle2 className="h-7 w-7" />
         </div>
-        <h2 className="mt-4 text-2xl font-bold text-success">Pack envoyé !</h2>
-        <p className="mt-2 text-emerald-800/80">
-          Votre pack personnalisé <span className="font-bold">{done.reference}</span> a ete soumis. Notre équipe et les
-          partenaires concernes ont ete notifiés et reviennent vers vous rapidement.
+        <h2 className="relative mt-5 font-display text-3xl">{t.doneTitle}</h2>
+        <p className="relative mt-3 leading-relaxed text-white/80">
+          {t.doneText.replace("{ref}", done.reference ?? "")}
         </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-3">
-          <Button onClick={() => router.push("/account/custom-packs")}>Suivre ma demande</Button>
-          <Button variant="outline" onClick={() => { setDone(null); setSelected({}); }}>Composer un autre pack</Button>
+        <div className="relative mt-7 flex flex-wrap justify-center gap-3">
+          <Button variant="white" onClick={() => router.push(localePath("/account/custom-packs", dict.locale))}>{t.track}</Button>
+          <Button variant="outline-light" onClick={() => { setDone(null); setSelected({}); }}>{t.another}</Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_380px]">
+    <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_400px]">
       {/* Selection */}
       <div>
-        {/* Villes */}
-        <p className="mb-2 text-sm font-bold text-foreground">1. Choisissez votre destination</p>
-        <div className="no-scrollbar mb-6 flex gap-2 overflow-x-auto pb-1">
+        <StepHeading step={1} title={t.step1} />
+        <div className="no-scrollbar -mx-5 mb-12 flex gap-2 overflow-x-auto px-5 pb-1 md:mx-0 md:flex-wrap md:px-0">
           {cities.map((c) => (
             <button
               key={c.slug}
+              type="button"
               onClick={() => changeCity(c.name)}
-              className={cn("flex shrink-0 items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-medium transition-colors",
-                city === c.name ? "border-brand-500 bg-brand-50 text-brand-700" : "border-border hover:border-brand-300")}
+              className={cn(
+                "flex shrink-0 items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-semibold transition-colors",
+                city === c.name ? "border-ink bg-ink text-white" : "border-ink/15 bg-white text-foreground hover:border-ink/40"
+              )}
             >
               <MapPin className="h-3.5 w-3.5" /> {c.name}
             </button>
           ))}
         </div>
 
-        <p className="mb-3 text-sm font-bold text-foreground">2. Sélectionnez vos activités & partenaires</p>
+        <StepHeading step={2} title={t.step2} />
         {services.length === 0 ? (
-          <div className="rounded-3xl border border-dashed border-border bg-surface-soft/40 p-8 text-center text-muted">
-            Aucun partenaire disponible pour cette ville pour le moment.
+          <div className="rounded-[1.5rem] border border-dashed border-sand-400/70 bg-sand-50/70 p-8 text-center text-muted">
+            {t.noServices}
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-9">
             {Object.entries(grouped).map(([type, items]) => (
               <div key={type}>
-                <h3 className="mb-2 text-sm font-bold uppercase tracking-wide text-brand-600">{TYPE_LABELS[type] ?? type}</h3>
+                <h3 className="eyebrow mb-3 text-[10.5px] text-terracotta">{t.types[type] ?? type}</h3>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {items.map((s) => {
                     const isSel = !!selected[s.id];
                     return (
                       <button
                         key={s.id}
+                        type="button"
                         onClick={() => toggle(s)}
-                        className={cn("flex flex-col rounded-3xl border p-4 text-left transition-all",
-                          isSel ? "border-brand-500 bg-brand-50 ring-1 ring-brand-200" : "border-border bg-surface hover:border-brand-300")}
+                        aria-pressed={isSel}
+                        className={cn(
+                          "flex flex-col rounded-[1.25rem] border p-5 text-left transition-all",
+                          isSel ? "border-ink bg-white shadow-soft ring-1 ring-ink" : "border-ink/15 bg-white hover:border-ink/35"
+                        )}
                       >
                         <div className="flex items-start justify-between gap-2">
-                          <span className="font-bold text-foreground">{s.title}</span>
-                          <span className={cn("flex h-6 w-6 shrink-0 items-center justify-center rounded-full border", isSel ? "border-brand-500 bg-brand-500 text-white" : "border-border text-muted")}>
+                          <span className="font-display text-[17px] leading-snug text-foreground">{s.title}</span>
+                          <span className={cn("flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition-colors", isSel ? "border-ink bg-ink text-white" : "border-ink/20 text-muted")}>
                             {isSel ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
                           </span>
                         </div>
-                        <span className="mt-0.5 text-xs text-muted">{s.partnerName}{s.duration ? ` · ${s.duration}` : ""}</span>
-                        {s.description && <span className="mt-1 line-clamp-2 text-xs text-muted">{s.description}</span>}
-                        <span className="mt-2 text-sm font-extrabold text-foreground">des {formatPrice(s.priceFrom)}</span>
+                        <span className="mt-1 text-xs text-muted">{s.partnerName}{s.duration ? ` · ${s.duration}` : ""}</span>
+                        {s.description && <span className="mt-1.5 line-clamp-2 text-[13px] leading-relaxed text-muted">{s.description}</span>}
+                        <span className="mt-3 text-sm font-bold text-foreground">{t.from.replace("{price}", formatPrice(s.priceFrom))}</span>
                       </button>
                     );
                   })}
@@ -162,57 +171,64 @@ export function CustomPackBuilder({ cities, servicesByCity, initialCityName, def
 
       {/* Panier */}
       <aside>
-        <div className="lg:sticky lg:top-[calc(var(--header-h)+1.5rem)] rounded-3xl border border-border bg-surface p-5 shadow-card">
-          <h2 className="flex items-center gap-2 font-bold text-foreground"><ShoppingBag className="h-5 w-5 text-brand-600" /> Votre pack {city}</h2>
+        <div className="relative overflow-hidden rounded-[1.75rem] border border-border bg-surface p-6 pt-7 shadow-card lg:sticky lg:top-[calc(var(--header-h)+1.5rem)]">
+          <div aria-hidden="true" className="absolute inset-x-0 top-0 h-2 overflow-hidden">
+            <div className="motif motif-kente text-terracotta/70" />
+          </div>
+          <h2 className="flex items-center gap-2.5 font-display text-xl text-foreground">
+            <ShoppingBag className="h-5 w-5 text-terracotta" strokeWidth={1.7} /> {t.cart.replace("{city}", city)}
+          </h2>
 
           {cartForCity.length === 0 ? (
-            <p className="mt-3 text-sm text-muted">Ajoutez des prestations pour composer votre pack.</p>
+            <p className="mt-3 text-sm text-muted">{t.cartEmpty}</p>
           ) : (
-            <ul className="mt-3 space-y-2">
+            <ul className="mt-4 space-y-2.5">
               {cartForCity.map((s) => (
                 <li key={s.id} className="flex items-center justify-between gap-2 text-sm">
                   <span className="min-w-0 flex-1 truncate text-foreground">{s.title}</span>
                   <span className="shrink-0 text-muted">{formatPrice(s.priceFrom)}</span>
-                  <button onClick={() => toggle(s)} className="shrink-0 text-xs font-semibold text-danger">retirer</button>
+                  <button type="button" onClick={() => toggle(s)} className="shrink-0 text-xs font-semibold text-danger hover:underline">{t.remove}</button>
                 </li>
               ))}
             </ul>
           )}
 
-          <div className="mt-4 space-y-3 border-t border-border pt-4">
-            <div className="rounded-2xl border border-border px-4">
-              <Stepper label="Voyageurs" value={persons} onChange={setPersons} min={1} max={20} />
+          <div className="mt-5 space-y-3 border-t border-border pt-5">
+            <div className="rounded-xl border border-ink/15 px-4">
+              <Stepper label={t.travelers} value={persons} onChange={setPersons} min={1} max={20} />
             </div>
-            <Field label="Date souhaitee">
+            <Field label={t.desiredDate}>
               <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} min={new Date().toISOString().slice(0, 10)} />
             </Field>
           </div>
 
           {/* Prix */}
-          <div className="mt-4 space-y-2 border-t border-border pt-4 text-sm">
-            <div className="flex justify-between text-muted"><span>Sous-total</span><span className="text-foreground">{formatPrice(subtotal)}</span></div>
-            <div className="flex justify-between text-muted"><span>Frais de service</span><span className="text-foreground">{formatPrice(fee)}</span></div>
-            <div className="flex justify-between border-t border-border pt-2 text-base font-extrabold text-foreground"><span>Total estime</span><span>{formatPrice(total)}</span></div>
+          <div className="mt-5 space-y-2 rounded-[1.25rem] bg-sand-50 p-4 text-sm ring-1 ring-inset ring-sand-200">
+            <div className="flex justify-between text-muted"><span>{t.subtotal}</span><span className="text-foreground">{formatPrice(subtotal)}</span></div>
+            <div className="flex justify-between text-muted"><span>{t.serviceFee}</span><span className="text-foreground">{formatPrice(fee)}</span></div>
+            <div className="flex items-baseline justify-between border-t border-sand-300 pt-2.5 font-bold text-foreground">
+              <span>{t.estimatedTotal}</span><span className="font-display text-xl font-normal">{formatPrice(total)}</span>
+            </div>
           </div>
 
           {/* Contact */}
-          <div className="mt-4 space-y-3 border-t border-border pt-4">
-            <Field label="Nom" required><Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Votre nom" /></Field>
-            <Field label="Email" required><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="vous@email.com" /></Field>
-            <Field label="Téléphone"><Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+225 ..." /></Field>
-            <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Précisions (facultatif)..." rows={2} />
+          <div className="mt-5 space-y-3 border-t border-border pt-5">
+            <Field label={t.name} required><Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t.namePlaceholder} /></Field>
+            <Field label={t.email} required><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="vous@email.com" /></Field>
+            <Field label={t.phone}><Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+225 ..." /></Field>
+            <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={t.notesPlaceholder} rows={2} />
           </div>
 
           {error && (
-            <div className="mt-3 flex items-center gap-2 rounded-2xl bg-red-50 px-3 py-2 text-sm font-medium text-danger">
-              <AlertCircle className="h-4 w-4" /> {error}
+            <div role="alert" className="mt-4 flex items-center gap-2 rounded-xl bg-red-50 px-3 py-2.5 text-sm font-medium text-danger ring-1 ring-inset ring-red-200/70">
+              <AlertCircle className="h-4 w-4 shrink-0" /> {error}
             </div>
           )}
 
-          <Button onClick={submit} loading={pending} size="lg" className="mt-4 w-full">
-            <Sparkles className="h-4 w-4" /> Soumettre mon pack
+          <Button onClick={submit} loading={pending} size="lg" className="mt-5 w-full">
+            <Sparkles className="h-4 w-4" /> {t.submit}
           </Button>
-          <p className="mt-2 text-center text-xs text-muted">Devis indicatif. Notre équipe confirmé la disponibilité.</p>
+          <p className="mt-2.5 text-center text-xs text-muted">{t.disclaimer}</p>
         </div>
       </aside>
     </div>

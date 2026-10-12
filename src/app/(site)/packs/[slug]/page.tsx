@@ -10,12 +10,13 @@ import { PhotoGallery } from "@/components/public/photo-gallery";
 import { PackBookingWidget } from "@/components/public/pack-booking-widget";
 import { FavoriteButton } from "@/components/public/favorite-button";
 import { JsonLd } from "@/components/seo/json-ld";
-import { Badge } from "@/components/ui/badge";
+import { Ornament, Motif } from "@/components/brand/motif";
+import { SITE_URL } from "@/lib/constants";
 import { getI18n } from "@/lib/i18n.server";
 import { localePath } from "@/lib/i18n";
 import { alternatesFor } from "@/lib/seo";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+const APP_URL = SITE_URL;
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -43,6 +44,11 @@ export default async function PackDetailPage({ params }: { params: Promise<{ slu
     ...(pack.destination ? { itinerary: { "@type": "Place", name: pack.destination.name } } : {}),
   };
 
+  const durationLabel = `${pack.durationDays}${dict.card.dayShort} / ${pack.durationNights}${dict.card.nightShort}`;
+  const personsLabel = dict.packs.personsRange
+    .replace("{base}", String(pack.basePersons))
+    .replace("{max}", String(pack.maxPersons));
+
   return (
     <div className="pb-24 lg:pb-0">
       <JsonLd data={jsonLd} />
@@ -55,19 +61,28 @@ export default async function PackDetailPage({ params }: { params: Promise<{ slu
         </div>
       </div>
 
-      <div className="container-page pt-0 lg:pt-6">
-        <div className="mb-4 hidden items-end justify-between lg:flex">
-          <div>
-            <nav className="mb-2 flex items-center gap-1 text-sm text-muted">
-              <Link href={localePath("/packs", locale)} className="hover:text-foreground">{dict.packs.metaTitle}</Link>
-              <span>/</span><span className="text-foreground">{pack.name}</span>
+      <div className="container-page pt-0 lg:pt-8">
+        {/* En-tete (desktop) */}
+        <div className="mb-7 hidden items-end justify-between gap-6 lg:flex">
+          <div className="min-w-0">
+            <nav className="mb-5 flex items-center gap-2 text-[13px] text-muted">
+              <Link href={localePath("/packs", locale)} className="hover:text-ink">{dict.packs.metaTitle}</Link>
+              <span className="text-sand-400">/</span>
+              <span className="truncate text-foreground">{pack.name}</span>
             </nav>
-            <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground">{pack.name}</h1>
-            <div className="mt-1.5 flex flex-wrap items-center gap-3 text-sm text-muted">
-              {pack.destination && <span className="flex items-center gap-1"><MapPin className="h-4 w-4" /> {pack.destination.name}</span>}
-              <span className="flex items-center gap-1"><Clock className="h-4 w-4" /> {pack.durationDays}{dict.card.dayShort} / {pack.durationNights}{dict.card.nightShort}</span>
-              <span className="flex items-center gap-1"><Users className="h-4 w-4" /> {dict.packs.personsRange.replace("{base}", String(pack.basePersons)).replace("{max}", String(pack.maxPersons))}</span>
-              {pack.ratingCount > 0 && <span className="flex items-center gap-1"><Star className="h-4 w-4 fill-gold-500 text-gold-500" /> {pack.ratingAverage.toFixed(1)}</span>}
+            <p className="eyebrow flex items-center gap-3 text-[11px] text-terracotta">
+              <Ornament side="left" />
+              {pack.destination?.name ?? dict.home.experiences.eyebrow}
+            </p>
+            <h1 className="mt-3 text-balance font-display text-[2.75rem] font-normal leading-[1.05] tracking-[-0.02em] text-foreground">{pack.name}</h1>
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted">
+              <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" /> {durationLabel}</span>
+              <span className="flex items-center gap-1.5"><Users className="h-4 w-4" /> {personsLabel}</span>
+              {pack.ratingCount > 0 && (
+                <span className="flex items-center gap-1.5 font-semibold text-foreground">
+                  <Star className="h-4 w-4 fill-gold-500 text-gold-500" /> {pack.ratingAverage.toFixed(1)}
+                </span>
+              )}
             </div>
           </div>
           <FavoriteButton packId={pack.id} initialFavorited={favorites.packs.has(pack.id)} variant="inline" />
@@ -77,52 +92,46 @@ export default async function PackDetailPage({ params }: { params: Promise<{ slu
           <PhotoGallery images={pack.images} seedPrefix={`pack-${pack.slug}`} name={pack.name} />
         </div>
 
-        <div className="mt-4 lg:hidden">
-          <h1 className="text-2xl font-bold text-foreground">{pack.name}</h1>
-          <div className="mt-1.5 flex flex-wrap items-center gap-2 text-sm text-muted">
-            <Badge tone="gold"><Clock className="h-3 w-3" /> {pack.durationDays}{dict.card.dayShort} / {pack.durationNights}{dict.card.nightShort}</Badge>
-            {pack.destination && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {pack.destination.name}</span>}
+        {/* En-tete (mobile) */}
+        <div className="mt-5 lg:hidden">
+          {pack.destination && <p className="eyebrow text-[10px] text-terracotta">{pack.destination.name}</p>}
+          <h1 className="mt-1.5 font-display text-[1.9rem] font-normal leading-[1.1] text-foreground">{pack.name}</h1>
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm text-muted">
+            <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {durationLabel}</span>
+            <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5" /> {personsLabel}</span>
           </div>
         </div>
 
-        <div className="mt-8 grid grid-cols-1 gap-10 lg:grid-cols-[1fr_380px]">
+        <div className="mt-8 grid grid-cols-1 gap-12 lg:mt-12 lg:grid-cols-[1fr_400px]">
           <div className="min-w-0">
-            <section className="border-b border-border pb-7">
-              <h2 className="mb-3 text-xl font-bold text-foreground">{dict.packs.aboutTitle}</h2>
-              <p className="leading-relaxed text-foreground/90">{pack.description}</p>
-              {pack.destination?.slug && (
-                <div className="mt-5 flex flex-col items-start justify-between gap-3 rounded-3xl border-2 border-dashed border-brand-300 bg-brand-50/40 p-5 sm:flex-row sm:items-center">
-                  <p className="text-sm font-medium text-brand-900">{dict.packs.notSuited.replace("{city}", pack.destination.name)}</p>
-                  <Link href={localePath(`/packs/custom?city=${pack.destination.slug}`, locale)} className="inline-flex shrink-0 items-center gap-2 rounded-full bg-brand-500 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-600">
-                    <Sparkles className="h-4 w-4" /> {dict.residenceDetail.composePack}
-                  </Link>
-                </div>
-              )}
+            <section>
+              <h2 className="mb-5 font-display text-[1.65rem] font-normal leading-tight text-foreground">{dict.packs.aboutTitle}</h2>
+              <p className="whitespace-pre-line text-[15.5px] leading-[1.75] text-foreground/85">{pack.description}</p>
             </section>
 
             {/* Inclus / non inclus */}
-            <section className="grid grid-cols-1 gap-6 border-b border-border py-7 sm:grid-cols-2">
-              <div>
-                <h3 className="mb-3 flex items-center gap-2 font-bold text-foreground">
-                  <CheckCircle2 className="h-5 w-5 text-success" /> {dict.packs.included}
+            <section className="mt-12 grid grid-cols-1 gap-4 border-t border-border pt-10 sm:grid-cols-2">
+              <div className="rounded-[1.25rem] bg-brand-50 p-6 ring-1 ring-inset ring-brand-200/60">
+                <h3 className="mb-4 flex items-center gap-2 font-display text-xl text-brand-800">
+                  <CheckCircle2 className="h-5 w-5 text-brand-500" /> {dict.packs.included}
                 </h3>
-                <ul className="space-y-2">
+                <ul className="space-y-2.5">
                   {included.map((i) => (
-                    <li key={i.id} className="flex items-start gap-2 text-sm text-foreground/90">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" />
-                      <span><span className="font-semibold">{i.label}</span>{i.details ? ` - ${i.details}` : ""}</span>
+                    <li key={i.id} className="flex items-start gap-2.5 text-[15px] text-foreground/90">
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-brand-500" />
+                      <span><span className="font-semibold">{i.label}</span>{i.details ? ` · ${i.details}` : ""}</span>
                     </li>
                   ))}
                 </ul>
               </div>
               {notIncluded.length > 0 && (
-                <div>
-                  <h3 className="mb-3 flex items-center gap-2 font-bold text-foreground">
+                <div className="rounded-[1.25rem] bg-sand-50 p-6 ring-1 ring-inset ring-sand-200">
+                  <h3 className="mb-4 flex items-center gap-2 font-display text-xl text-foreground">
                     <XCircle className="h-5 w-5 text-muted" /> {dict.packs.notIncluded}
                   </h3>
-                  <ul className="space-y-2">
+                  <ul className="space-y-2.5">
                     {notIncluded.map((i) => (
-                      <li key={i.id} className="flex items-start gap-2 text-sm text-muted">
+                      <li key={i.id} className="flex items-start gap-2.5 text-[15px] text-muted">
                         <XCircle className="mt-0.5 h-4 w-4 shrink-0" /> {i.label}
                       </li>
                     ))}
@@ -131,50 +140,73 @@ export default async function PackDetailPage({ params }: { params: Promise<{ slu
               )}
             </section>
 
-            {/* Programme */}
-            <section className="border-b border-border py-7">
-              <h2 className="mb-5 flex items-center gap-2 text-xl font-bold text-foreground">
-                <Calendar className="h-5 w-5 text-brand-600" /> {dict.packs.program}
-              </h2>
-              <div className="space-y-6">
-                {pack.programDays.map((day) => (
-                  <div key={day.id} className="relative pl-8">
-                    <span className="absolute left-0 top-0 flex h-7 w-7 items-center justify-center rounded-full bg-brand-500 text-xs font-bold text-white">{day.dayNumber}</span>
-                    <div className="absolute left-[13px] top-7 h-full w-px bg-border" />
-                    <h3 className="font-bold text-foreground">{day.title}</h3>
-                    {day.description && <p className="text-sm text-muted">{day.description}</p>}
-                    <ul className="mt-2 space-y-1.5">
-                      {day.activities.map((a) => (
-                        <li key={a.id} className="text-sm text-foreground/90">
-                          {a.timeLabel && <span className="font-semibold text-brand-600">{a.timeLabel} : </span>}
-                          {a.title}{a.description ? ` - ${a.description}` : ""}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </section>
+            {/* Programme jour par jour */}
+            {pack.programDays.length > 0 && (
+              <section className="mt-12 border-t border-border pt-10">
+                <h2 className="mb-8 flex items-center gap-3 font-display text-[1.65rem] font-normal leading-tight text-foreground">
+                  <Calendar className="h-5 w-5 text-terracotta" strokeWidth={1.7} /> {dict.packs.program}
+                </h2>
+                <ol>
+                  {pack.programDays.map((day, idx) => (
+                    <li key={day.id} className="relative flex gap-5 pb-9 last:pb-0">
+                      {idx < pack.programDays.length - 1 && (
+                        <span aria-hidden="true" className="absolute bottom-0 left-[19px] top-12 border-l border-dashed border-terracotta/40" />
+                      )}
+                      <span className="relative flex h-12 w-10 shrink-0 items-center justify-center rounded-arch-sm bg-terracotta font-display text-lg italic text-white">
+                        {day.dayNumber}
+                      </span>
+                      <div className="min-w-0 pt-1.5">
+                        <h3 className="font-display text-xl text-foreground">{day.title}</h3>
+                        {day.description && <p className="mt-1 text-[15px] leading-relaxed text-muted">{day.description}</p>}
+                        {day.activities.length > 0 && (
+                          <ul className="mt-3 space-y-2 rounded-xl bg-sand-50 p-4 ring-1 ring-inset ring-sand-200">
+                            {day.activities.map((a) => (
+                              <li key={a.id} className="flex gap-3 text-sm text-foreground/90">
+                                {a.timeLabel && <span className="w-[5.5rem] shrink-0 font-semibold text-terracotta">{a.timeLabel}</span>}
+                                <span>{a.title}{a.description ? ` · ${a.description}` : ""}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            )}
 
             {/* Infos pratiques */}
-            <section className="border-b border-border py-7">
-              <h2 className="mb-4 text-xl font-bold text-foreground">{dict.packs.practicalInfo}</h2>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {pack.physicalLevel && <Practical icon={Backpack} label={dict.packs.physicalLevel} value={pack.physicalLevel} />}
-                {pack.clothingRecommendations && <Practical icon={Shirt} label={dict.packs.clothing} value={pack.clothingRecommendations} />}
-                {pack.documentsToBring && <Practical icon={FileText} label={dict.packs.toBring} value={pack.documentsToBring} />}
-                {pack.meetingPoint && <Practical icon={MapPin} label={dict.packs.meetingPoint} value={pack.meetingPoint} />}
-              </div>
-            </section>
+            {(pack.physicalLevel || pack.clothingRecommendations || pack.documentsToBring || pack.meetingPoint) && (
+              <section className="mt-12 border-t border-border pt-10">
+                <h2 className="mb-5 font-display text-[1.65rem] font-normal leading-tight text-foreground">{dict.packs.practicalInfo}</h2>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {pack.physicalLevel && <Practical icon={Backpack} label={dict.packs.physicalLevel} value={pack.physicalLevel} />}
+                  {pack.clothingRecommendations && <Practical icon={Shirt} label={dict.packs.clothing} value={pack.clothingRecommendations} />}
+                  {pack.documentsToBring && <Practical icon={FileText} label={dict.packs.toBring} value={pack.documentsToBring} />}
+                  {pack.meetingPoint && <Practical icon={MapPin} label={dict.packs.meetingPoint} value={pack.meetingPoint} />}
+                </div>
+              </section>
+            )}
 
             {/* Annulation */}
             {pack.cancellationPolicy && (
-              <section className="py-7">
-                <h2 className="mb-3 flex items-center gap-2 text-xl font-bold text-foreground">
-                  <Info className="h-5 w-5 text-brand-600" /> {dict.packs.cancellation}
+              <section className="mt-12 border-t border-border pt-10">
+                <h2 className="mb-4 flex items-center gap-3 font-display text-[1.65rem] font-normal leading-tight text-foreground">
+                  <Info className="h-5 w-5 text-terracotta" strokeWidth={1.7} /> {dict.packs.cancellation}
                 </h2>
-                <p className="text-sm text-foreground/90">{pack.cancellationPolicy}</p>
+                <p className="text-[15px] leading-relaxed text-foreground/85">{pack.cancellationPolicy}</p>
               </section>
+            )}
+
+            {/* Pack sur mesure */}
+            {pack.destination?.slug && (
+              <div className="relative mt-12 flex flex-col items-start justify-between gap-5 overflow-hidden rounded-[1.5rem] bg-gold-500 p-6 text-ink-900 sm:flex-row sm:items-center">
+                <Motif variant="bogolan" className="text-ink-900/[0.08]" />
+                <p className="relative font-display text-lg leading-snug">{dict.packs.notSuited.replace("{city}", pack.destination.name)}</p>
+                <Link href={localePath(`/packs/custom?city=${pack.destination.slug}`, locale)} className="relative inline-flex shrink-0 items-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-semibold text-white hover:bg-ink-800">
+                  <Sparkles className="h-4 w-4 text-gold-300" /> {dict.residenceDetail.composePack}
+                </Link>
+              </div>
             )}
           </div>
 
@@ -198,11 +230,11 @@ export default async function PackDetailPage({ params }: { params: Promise<{ slu
 
 function Practical({ icon: Icon, label, value }: { icon: typeof Info; label: string; value: string }) {
   return (
-    <div className="flex items-start gap-3 rounded-2xl bg-surface-soft p-4">
-      <Icon className="mt-0.5 h-5 w-5 shrink-0 text-brand-600" />
+    <div className="flex items-start gap-4 rounded-[1.25rem] border border-border bg-surface p-5">
+      <Icon className="mt-0.5 h-5 w-5 shrink-0 text-terracotta" strokeWidth={1.7} />
       <div>
-        <p className="text-sm font-bold text-foreground">{label}</p>
-        <p className="text-sm text-muted">{value}</p>
+        <p className="eyebrow text-[10px] text-muted">{label}</p>
+        <p className="mt-1 text-[15px] leading-relaxed text-foreground">{value}</p>
       </div>
     </div>
   );

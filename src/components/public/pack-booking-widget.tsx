@@ -48,9 +48,9 @@ export function PackBookingWidget(props: PackBookingWidgetProps) {
     <>
       <Popover>
         <PopoverTrigger asChild>
-          <button className="flex w-full items-center justify-between rounded-2xl border border-border px-4 py-3 text-left text-sm">
+          <button className="flex w-full items-center justify-between rounded-xl border border-ink/15 px-4 py-3 text-left text-sm transition-colors hover:border-ink/35">
             <span>
-              <span className="block text-2xs font-bold uppercase text-muted">{dict.packs.departureDate}</span>
+              <span className="eyebrow block text-[9.5px] text-muted">{dict.packs.departureDate}</span>
               <span className={cn("font-semibold", range.start ? "text-foreground" : "text-muted")}>
                 {range.start ? formatDate(range.start) : dict.packs.chooseDate}
               </span>
@@ -63,11 +63,11 @@ export function PackBookingWidget(props: PackBookingWidgetProps) {
         </PopoverContent>
       </Popover>
 
-      <div className="rounded-2xl border border-border px-4">
+      <div className="rounded-xl border border-ink/15 px-4">
         <Stepper label={dict.search.guests} value={persons} onChange={setPersons} min={1} max={props.maxPersons} />
       </div>
 
-      <div className="space-y-2 rounded-2xl bg-surface-soft p-4 text-sm">
+      <div className="space-y-2 rounded-[1.25rem] bg-sand-50 p-4 text-sm ring-1 ring-inset ring-sand-200">
         <div className="flex justify-between text-muted">
           <span>{dict.packs.packLine.replace("{n}", String(props.basePersons))}</span>
           <span className="text-foreground">{formatPrice(props.price)}</span>
@@ -82,8 +82,8 @@ export function PackBookingWidget(props: PackBookingWidgetProps) {
           <span>{dict.booking.serviceFee}</span>
           <span className="text-foreground">{formatPrice(price.serviceFee)}</span>
         </div>
-        <div className="flex justify-between border-t border-border pt-2 text-base font-extrabold text-foreground">
-          <span>{dict.booking.total}</span><span>{formatPrice(price.total)}</span>
+        <div className="flex items-baseline justify-between border-t border-sand-300 pt-2.5 font-bold text-foreground">
+          <span>{dict.booking.total}</span><span className="font-display text-xl font-normal">{formatPrice(price.total)}</span>
         </div>
       </div>
     </>
@@ -92,9 +92,12 @@ export function PackBookingWidget(props: PackBookingWidgetProps) {
   return (
     <>
       {/* Desktop */}
-      <div className="hidden rounded-3xl border border-border bg-surface p-6 shadow-card lg:block">
-        <p className="mb-4">
-          <span className="text-2xl font-extrabold text-foreground">{formatPrice(props.price)}</span>
+      <div className="relative hidden overflow-hidden rounded-[1.75rem] border border-border bg-surface p-7 pt-8 shadow-card lg:block">
+        <div aria-hidden="true" className="absolute inset-x-0 top-0 h-2 overflow-hidden">
+          <div className="motif motif-kente text-terracotta/70" />
+        </div>
+        <p className="mb-6">
+          <span className="font-display text-[2rem] leading-none text-foreground">{formatPrice(props.price)}</span>
           <span className="text-muted"> {dict.packs.perPack}</span>
         </p>
         <div className="space-y-3">{body}</div>
@@ -104,15 +107,15 @@ export function PackBookingWidget(props: PackBookingWidgetProps) {
       </div>
 
       {/* Mobile : barre collante */}
-      <div className="safe-bottom fixed inset-x-0 bottom-[var(--bottom-nav-h)] z-30 border-t border-border bg-surface/95 px-4 py-3 backdrop-blur lg:hidden">
+      <div className="safe-bottom fixed inset-x-0 bottom-[var(--bottom-nav-h)] z-30 border-t border-border bg-background/95 px-4 py-3 backdrop-blur lg:hidden">
         <div className="flex items-center justify-between gap-3">
-          <p className="text-base font-extrabold text-foreground">
+          <p className="font-display text-xl leading-tight text-foreground">
             {formatPrice(props.price)}<span className="text-sm font-normal text-muted"> {dict.packs.perPack}</span>
           </p>
           <Drawer>
             <DrawerTrigger asChild><Button size="lg">{dict.booking.reserve}</Button></DrawerTrigger>
             <DrawerContent className="px-5 pb-6">
-              <DrawerTitle className="px-1 pt-4 text-xl font-bold">{dict.packs.reservePack}</DrawerTitle>
+              <DrawerTitle className="px-1 pt-4 font-display text-2xl font-normal">{dict.packs.reservePack}</DrawerTitle>
               <div className="my-4 space-y-3 px-1">{body}</div>
               <DrawerClose asChild>
                 <Button onClick={reserve} disabled={!range.start} size="lg" className="w-full">

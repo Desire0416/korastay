@@ -1,12 +1,19 @@
-import { Wand2 } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { getCitiesWithServices, getServicesForCity, type CityService } from "@/lib/custom-pack-queries";
 import { CustomPackBuilder } from "@/components/public/custom-pack-builder";
+import { PageHero } from "@/components/public/page-hero";
+import { getI18n } from "@/lib/i18n.server";
+import { alternatesFor } from "@/lib/seo";
+import type { Metadata } from "next";
 
-export const metadata = {
-  title: "Composer mon pack",
-  description: "Composez votre pack sur mesure : activités, guides, transport et restauration locaux. Voyez le prix et soumettez votre demande.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { dict } = await getI18n();
+  return {
+    title: dict.customPack.metaTitle,
+    description: dict.customPack.metaDescription,
+    alternates: alternatesFor("/packs/custom"),
+  };
+}
 
 type SP = Record<string, string | string[] | undefined>;
 const str = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
@@ -15,7 +22,8 @@ export default async function CustomPackPage({ searchParams }: { searchParams: P
   const sp = await searchParams;
   const citySlug = str(sp.city);
 
-  const [user, cities] = await Promise.all([getCurrentUser(), getCitiesWithServices()]);
+  const [user, cities, { dict }] = await Promise.all([getCurrentUser(), getCitiesWithServices(), getI18n()]);
+  const t = dict.customPack;
 
   // Charge les services de chaque ville (echelle MVP)
   const servicesByCity: Record<string, CityService[]> = {};
@@ -28,26 +36,13 @@ export default async function CustomPackPage({ searchParams }: { searchParams: P
   const initialCityName = citySlug ? cities.find((c) => c.slug === citySlug)?.name : undefined;
 
   return (
-    <div>
-      <section className="gradient-hero">
-        <div className="container-page py-12 text-center">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-sm font-semibold text-brand-700">
-            <Wand2 className="h-3.5 w-3.5" /> Sur mesure
-          </span>
-          <h1 className="mx-auto mt-5 max-w-2xl font-display text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">
-            Composez votre pack ideal
-          </h1>
-          <p className="mx-auto mt-4 max-w-xl text-muted">
-            Choisissez votre destination, ajoutez les activités et partenaires locaux qui vous plaisent,
-            visualisez le prix et soumettez votre pack pour validation.
-          </p>
-        </div>
-      </section>
+    <>
+      <PageHero eyebrow={t.eyebrow} title={t.title} accent={t.accent} description={t.subtitle} />
 
-      <div className="container-page py-10">
+      <div className="container-page py-10 md:py-14">
         {cities.length === 0 ? (
-          <div className="mx-auto max-w-xl rounded-3xl border border-dashed border-border bg-surface-soft/40 p-10 text-center text-muted">
-            Aucun partenaire n'est encore disponible. Revenez bientôt !
+          <div className="mx-auto max-w-xl rounded-[1.75rem] border border-dashed border-sand-400/70 bg-sand-50/70 p-10 text-center text-muted">
+            {t.empty}
           </div>
         ) : (
           <CustomPackBuilder
@@ -62,6 +57,6 @@ export default async function CustomPackPage({ searchParams }: { searchParams: P
           />
         )}
       </div>
-    </div>
+    </>
   );
 }

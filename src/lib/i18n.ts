@@ -8,6 +8,12 @@
 import { type HomeDict, homeFr, homeEn } from "./dictionaries/home";
 import { type EnumsDict, enumsFr, enumsEn } from "./dictionaries/enums";
 import { type NegotiationDict, negotiationFr, negotiationEn } from "./dictionaries/negotiation";
+import {
+  type PackCheckoutDict, type CustomPackDict,
+  packCheckoutFr, packCheckoutEn, customPackFr, customPackEn,
+} from "./dictionaries/pack-flows";
+import { type ActivitiesDict, activitiesFr, activitiesEn } from "./dictionaries/activities";
+import { type DestinationsDict, destinationsFr, destinationsEn } from "./dictionaries/destinations";
 
 export type Locale = "fr" | "en";
 export const LOCALES: Locale[] = ["fr", "en"];
@@ -20,6 +26,10 @@ export interface Dictionary {
   home: HomeDict;
   enums: EnumsDict;
   negotiation: NegotiationDict;
+  packCheckout: PackCheckoutDict;
+  customPack: CustomPackDict;
+  activities: ActivitiesDict;
+  destinations: DestinationsDict;
   header: {
     becomeHost: string;
     login: string;
@@ -237,6 +247,7 @@ export interface Dictionary {
     metaTitle: string;
     metaDescription: string;
     heroTitle: string;
+    heroAccent: string;
     heroSubtitle: string;
     allDestinations: string;
     customTitle: string;
@@ -301,6 +312,10 @@ const FR: Dictionary = {
   home: homeFr,
   enums: enumsFr,
   negotiation: negotiationFr,
+  packCheckout: packCheckoutFr,
+  customPack: customPackFr,
+  activities: activitiesFr,
+  destinations: destinationsFr,
   header: {
     becomeHost: "Devenir propriétaire",
     login: "Connexion",
@@ -521,7 +536,8 @@ const FR: Dictionary = {
   packs: {
     metaTitle: "Packs Découverte",
     metaDescription: "Des séjours touristiques accompagnés clé en main : hébergement, transport et guide local certifié KoraStay.",
-    heroTitle: "Des séjours clé en main, sans rien organiser",
+    heroTitle: "Des séjours clé en main,",
+    heroAccent: "sans rien organiser.",
     heroSubtitle: "Hébergement vérifié, transport en ville et guide local certifié : il ne vous reste qu'à profiter.",
     allDestinations: "Toutes les destinations",
     customTitle: "Pack personnalisé",
@@ -556,6 +572,10 @@ const EN: Dictionary = {
   home: homeEn,
   enums: enumsEn,
   negotiation: negotiationEn,
+  packCheckout: packCheckoutEn,
+  customPack: customPackEn,
+  activities: activitiesEn,
+  destinations: destinationsEn,
   header: {
     becomeHost: "Become a host",
     login: "Log in",
@@ -777,7 +797,8 @@ const EN: Dictionary = {
   packs: {
     metaTitle: "Discovery packs",
     metaDescription: "Guided, all-inclusive getaways: accommodation, transport and a certified KoraStay local guide.",
-    heroTitle: "All-inclusive getaways, nothing to organize",
+    heroTitle: "Ready-made stays,",
+    heroAccent: "nothing to organise.",
     heroSubtitle: "Verified accommodation, in-town transport and a certified local guide: all that's left is to enjoy.",
     allDestinations: "All destinations",
     customTitle: "Custom pack",

@@ -1,9 +1,11 @@
 import Link from "next/link";
-import { Sparkles, Wand2, ArrowRight } from "lucide-react";
+import { Wand2, ArrowRight } from "lucide-react";
 import { getPacks, getAllDestinations } from "@/lib/queries";
 import { getUserFavoriteIds } from "@/server/actions/favorites";
 import { PackCard } from "@/components/public/pack-card";
 import { MobilePackCard } from "@/components/public/mobile/mobile-cards";
+import { PageHero } from "@/components/public/page-hero";
+import { Motif } from "@/components/brand/motif";
 import { cn } from "@/lib/utils";
 import { getI18n } from "@/lib/i18n.server";
 import { localePath } from "@/lib/i18n";
@@ -22,6 +24,12 @@ export async function generateMetadata(): Promise<Metadata> {
 type SP = Record<string, string | string[] | undefined>;
 const str = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
+const chip = (active: boolean) =>
+  cn(
+    "shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition-colors",
+    active ? "border-ink bg-ink text-white" : "border-ink/15 bg-white/60 text-foreground hover:border-ink/40"
+  );
+
 export default async function PacksPage({ searchParams }: { searchParams: Promise<SP> }) {
   const sp = await searchParams;
   const destination = str(sp.destination);
@@ -36,77 +44,75 @@ export default async function PacksPage({ searchParams }: { searchParams: Promis
   const destWithPacks = destinations.filter((d) => d._count.packs > 0);
 
   return (
-    <div>
-      {/* Hero */}
-      <section className="gradient-hero">
-        <div className="container-page py-9 text-center md:py-16">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-gold-200 bg-gold-50 px-3 py-1 text-sm font-semibold text-gold-700">
-            <Sparkles className="h-3.5 w-3.5" /> {dict.home.experiences.eyebrow}
-          </span>
-          <h1 className="mx-auto mt-4 max-w-2xl font-display text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">
-            {dict.packs.heroTitle}
-          </h1>
-          <p className="mx-auto mt-3 max-w-xl text-sm text-muted md:text-base">
-            {dict.packs.heroSubtitle}
-          </p>
-        </div>
-      </section>
-
-      <div className="container-page py-10">
-        {/* Filtres destination */}
-        <div className="no-scrollbar mb-7 flex gap-2 overflow-x-auto pb-1">
-          <Link href={localePath("/packs", locale)} className={cn("shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors", !destination ? "border-brand-500 bg-brand-50 text-brand-700" : "border-border")}>
+    <>
+      <PageHero
+        eyebrow={dict.home.experiences.eyebrow}
+        title={dict.packs.heroTitle}
+        accent={dict.packs.heroAccent}
+        description={dict.packs.heroSubtitle}
+      >
+        <div className="no-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5 md:mx-0 md:flex-wrap md:px-0">
+          <Link href={localePath("/packs", locale)} className={chip(!destination)}>
             {dict.packs.allDestinations}
           </Link>
           {destWithPacks.map((d) => (
-            <Link key={d.slug} href={localePath(`/packs?destination=${d.slug}`, locale)} className={cn("shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors", destination === d.slug ? "border-brand-500 bg-brand-50 text-brand-700" : "border-border")}>
+            <Link key={d.slug} href={localePath(`/packs?destination=${d.slug}`, locale)} className={chip(destination === d.slug)}>
               {d.name}
             </Link>
           ))}
         </div>
+      </PageHero>
 
-        {/* Grille packs - mobile (compact 2 colonnes) */}
+      <div className="container-page py-10 md:py-14">
+        {/* Mobile : grille compacte 2 colonnes */}
         <div className="md:hidden">
           <div className="grid grid-cols-2 gap-3">
             {packs.map((p) => (
               <MobilePackCard key={p.id} pack={p} favorited={favorites.packs.has(p.id)} />
             ))}
           </div>
-          <Link href={localePath("/packs/custom", locale)} className="mt-4 flex items-center gap-3 rounded-3xl border-2 border-dashed border-brand-300 bg-brand-50/40 p-4 active:scale-[0.99]">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-500 text-white">
+          <Link
+            href={localePath("/packs/custom", locale)}
+            className="relative mt-5 flex items-center gap-4 overflow-hidden rounded-[1.25rem] bg-gold-500 p-5 text-ink-900 active:scale-[0.99]"
+          >
+            <Motif variant="bogolan" className="text-ink-900/[0.08]" />
+            <span className="relative flex h-12 w-11 shrink-0 items-center justify-center rounded-arch-sm bg-ink-900 text-gold-300">
               <Wand2 className="h-5 w-5" />
             </span>
-            <div className="min-w-0 flex-1">
-              <h3 className="text-[15px] font-bold text-brand-900">{dict.packs.customTitle}</h3>
-              <p className="text-[12px] text-brand-800/80">{dict.packs.customTextShort}</p>
+            <div className="relative min-w-0 flex-1">
+              <h3 className="font-display text-lg">{dict.packs.customTitle}</h3>
+              <p className="text-[13px] text-ink-900/75">{dict.packs.customTextShort}</p>
             </div>
-            <ArrowRight className="h-5 w-5 shrink-0 text-brand-600" />
+            <ArrowRight className="relative h-5 w-5 shrink-0" />
           </Link>
         </div>
 
-        {/* Grille packs - desktop (inchangee) */}
-        <div className="hidden gap-5 md:grid md:grid-cols-2 lg:grid-cols-3">
+        {/* Desktop */}
+        <div className="hidden gap-6 md:grid md:grid-cols-2 lg:grid-cols-3">
           {packs.map((p) => (
             <PackCard key={p.id} pack={p} favorited={favorites.packs.has(p.id)} />
           ))}
 
-          {/* Carte pack personnalise */}
-          <Link href={localePath("/packs/custom", locale)} className="group flex flex-col items-start justify-between rounded-3xl border-2 border-dashed border-brand-300 bg-brand-50/40 p-6 transition-colors hover:bg-brand-50">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-500 text-white">
-              <Wand2 className="h-6 w-6" />
+          {/* Carte pack sur mesure */}
+          <Link
+            href={localePath("/packs/custom", locale)}
+            className="grain group relative flex min-h-[26rem] flex-col justify-between overflow-hidden rounded-[1.75rem] bg-gold-500 p-8 text-ink-900 transition-shadow hover:shadow-card-hover"
+          >
+            <Motif variant="bogolan" fade="bottom" className="text-ink-900/[0.09]" />
+            <span className="relative flex h-16 w-14 items-center justify-center rounded-arch-sm bg-ink-900 text-gold-300">
+              <Wand2 className="h-6 w-6" strokeWidth={1.6} />
             </span>
-            <div className="mt-4">
-              <h3 className="text-lg font-bold text-brand-900">{dict.packs.customTitle}</h3>
-              <p className="mt-1 text-sm text-brand-800/80">
-                {dict.packs.customTextLong}
-              </p>
+            <div className="relative">
+              <h3 className="font-display text-[2rem] leading-[1.1]">{dict.packs.customTitle}</h3>
+              <p className="mt-3 text-[15px] leading-relaxed text-ink-900/75">{dict.packs.customTextLong}</p>
+              <span className="mt-6 inline-flex items-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-semibold text-white">
+                {dict.residenceDetail.composePack}
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </span>
             </div>
-            <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand-600">
-              {dict.residenceDetail.composePack} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </span>
           </Link>
         </div>
       </div>
-    </div>
+    </>
   );
 }
