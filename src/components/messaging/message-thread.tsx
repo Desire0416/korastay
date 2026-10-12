@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn, initials, relativeTime } from "@/lib/utils";
 import { sendMessage, type MessageAttachment } from "@/server/actions/messaging";
 import { toast } from "sonner";
+import { useI18n } from "@/components/i18n/provider";
 
 export interface ThreadMessage {
   id: string;
@@ -29,6 +30,8 @@ interface MessageThreadProps {
 const POLL_MS = 5000;
 
 export function MessageThread({ conversationId, messages: initial, currentUserId, canInternalNote }: MessageThreadProps) {
+  const dict = useI18n();
+  const m = dict.dash.messaging;
   const [messages, setMessages] = React.useState<ThreadMessage[]>(initial);
   const [body, setBody] = React.useState("");
   const [internal, setInternal] = React.useState(false);
@@ -93,9 +96,9 @@ export function MessageThread({ conversationId, messages: initial, currentUserId
       const res = await fetch("/api/upload", { method: "POST", body: fd });
       const data = await res.json();
       if (res.ok && data.url) setAttachment({ url: data.url, name: data.name ?? file.name, type: data.type ?? file.type });
-      else toast.error(data.error ?? "Échec de l'envoi du fichier.");
+      else toast.error(data.error ?? m.uploadFailed);
     } catch {
-      toast.error("Échec de l'envoi du fichier.");
+      toast.error(m.uploadFailed);
     } finally {
       setUploading(false);
       if (fileRef.current) fileRef.current.value = "";
@@ -128,7 +131,7 @@ export function MessageThread({ conversationId, messages: initial, currentUserId
     start(async () => {
       const res = await sendMessage(conversationId, text, isInternal, att);
       if (!res.ok) {
-        toast.error(res.error ?? "Erreur.");
+        toast.error(res.error ?? dict.dash.common.error);
         setMessages((prev) => prev.filter((m) => m.id !== optimistic.id));
         setBody(text);
         setAttachment(att);
@@ -143,42 +146,42 @@ export function MessageThread({ conversationId, messages: initial, currentUserId
       {/* Messages */}
       <div ref={scrollRef} onScroll={onScroll} className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
         {messages.length === 0 && (
-          <p className="py-10 text-center text-sm text-muted">Aucun message. Ecrivez le premier ci-dessous.</p>
+          <p className="py-10 text-center text-sm text-muted">{m.empty}</p>
         )}
-        {messages.map((m) => {
-          const mine = m.sender.id === currentUserId;
+        {messages.map((msg) => {
+          const mine = msg.sender.id === currentUserId;
           return (
-            <div key={m.id} className={cn("flex items-end gap-2", mine ? "flex-row-reverse" : "flex-row")}>
+            <div key={msg.id} className={cn("flex items-end gap-2", mine ? "flex-row-reverse" : "flex-row")}>
               {!mine && (
                 <Avatar className="h-8 w-8 shrink-0">
-                  <AvatarFallback className="text-2xs">{initials(m.sender.firstName, m.sender.lastName)}</AvatarFallback>
+                  <AvatarFallback className="text-2xs">{initials(msg.sender.firstName, msg.sender.lastName)}</AvatarFallback>
                 </Avatar>
               )}
               <div className={cn("max-w-[78%]")}>
                 {!mine && (
-                  <p className="mb-0.5 px-1 text-2xs font-semibold text-muted">{m.sender.firstName} {m.sender.lastName}</p>
+                  <p className="mb-0.5 px-1 text-2xs font-semibold text-muted">{msg.sender.firstName} {msg.sender.lastName}</p>
                 )}
                 <div
                   className={cn(
-                    "rounded-2xl px-3.5 py-2 text-sm leading-relaxed",
-                    m.isInternal
+                    "rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed",
+                    msg.isInternal
                       ? "border border-gold-300 bg-gold-50 text-gold-800"
                       : mine
-                        ? "bg-brand-500 text-white"
-                        : "bg-surface-soft text-foreground",
-                    m.pending && "opacity-70"
+                        ? "rounded-br-md bg-ink text-white"
+                        : "rounded-bl-md bg-sand-100 text-foreground",
+                    msg.pending && "opacity-70"
                   )}
                 >
-                  {m.isInternal && (
+                  {msg.isInternal && (
                     <span className="mb-1 flex items-center gap-1 text-2xs font-bold uppercase tracking-wide">
-                      <Lock className="h-3 w-3" /> Note interne
+                      <Lock className="h-3 w-3" /> {m.internalNote}
                     </span>
                   )}
-                  {m.attachmentUrl && <Attachment url={m.attachmentUrl} name={m.attachmentName} type={m.attachmentType} mine={mine && !m.isInternal} />}
-                  {m.body && <p className={cn("whitespace-pre-wrap", m.attachmentUrl && "mt-2")}>{m.body}</p>}
+                  {msg.attachmentUrl && <Attachment url={msg.attachmentUrl} name={msg.attachmentName} type={msg.attachmentType} mine={mine && !msg.isInternal} labels={{ attachment: m.attachment, document: m.document }} />}
+                  {msg.body && <p className={cn("whitespace-pre-wrap", msg.attachmentUrl && "mt-2")}>{msg.body}</p>}
                 </div>
                 <p className={cn("mt-0.5 px-1 text-2xs text-muted", mine && "text-right")}>
-                  {m.pending ? "Envoi..." : relativeTime(m.createdAt)}
+                  {msg.pending ? m.sending : relativeTime(msg.createdAt, dict.locale)}
                 </p>
               </div>
             </div>
@@ -190,14 +193,14 @@ export function MessageThread({ conversationId, messages: initial, currentUserId
       {/* Composer */}
       <form onSubmit={submit} className="border-t border-border bg-surface p-3">
         {canInternalNote && (
-          <label className="mb-2 flex w-fit items-center gap-2 rounded-full bg-surface-soft px-3 py-1 text-xs font-medium text-foreground">
+          <label className="mb-2 flex w-fit items-center gap-2 rounded-full bg-sand-100 px-3 py-1 text-xs font-medium text-foreground">
             <input type="checkbox" checked={internal} onChange={(e) => setInternal(e.target.checked)} className="h-3.5 w-3.5 rounded border-border text-gold-600" />
-            <Lock className="h-3 w-3 text-gold-600" /> Note interne (invisible pour le client)
+            <Lock className="h-3 w-3 text-gold-600" /> {m.internalToggle}
           </label>
         )}
 
         {attachment && (
-          <div className="mb-2 flex items-center gap-2 rounded-2xl border border-border bg-surface-soft px-3 py-2 text-xs">
+          <div className="mb-2 flex items-center gap-2 rounded-xl border border-border bg-sand-50 px-3 py-2 text-xs">
             {attachment.type.startsWith("image/") ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={attachment.url} alt="" className="h-10 w-10 rounded-lg object-cover" />
@@ -205,7 +208,7 @@ export function MessageThread({ conversationId, messages: initial, currentUserId
               <FileText className="h-5 w-5 text-brand-600" />
             )}
             <span className="max-w-[200px] truncate font-medium text-foreground">{attachment.name}</span>
-            <button type="button" onClick={() => setAttachment(null)} className="ml-auto rounded-full p-1 text-muted hover:bg-surface hover:text-danger" aria-label="Retirer la pièce jointe">
+            <button type="button" onClick={() => setAttachment(null)} className="ml-auto rounded-full p-1 text-muted hover:bg-surface hover:text-danger" aria-label={m.removeAttachment}>
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -223,8 +226,8 @@ export function MessageThread({ conversationId, messages: initial, currentUserId
             type="button"
             onClick={() => fileRef.current?.click()}
             disabled={uploading || pending}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border text-muted transition-colors hover:border-brand-300 hover:text-brand-600 disabled:opacity-40"
-            aria-label="Joindre un fichier"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-ink/15 text-muted transition-colors hover:border-ink/40 hover:text-ink disabled:opacity-40"
+            aria-label={m.attach}
           >
             {uploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Paperclip className="h-5 w-5" />}
           </button>
@@ -232,9 +235,9 @@ export function MessageThread({ conversationId, messages: initial, currentUserId
             value={body}
             onChange={(e) => setBody(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit(); } }}
-            placeholder={internal ? "Note interne pour l'équipe..." : "Ecrire un message..."}
+            placeholder={internal ? m.internalPlaceholder : m.placeholder}
             rows={1}
-            className="max-h-32 min-h-[44px] flex-1 resize-none rounded-2xl border border-border bg-background px-4 py-2.5 text-sm focus-visible:border-brand-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-100"
+            className="max-h-32 min-h-[44px] flex-1 resize-none rounded-2xl border border-ink/15 bg-white px-4 py-2.5 text-sm transition-colors hover:border-ink/30 focus-visible:border-terracotta focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-terracotta/10"
           />
           <button
             type="submit"
@@ -243,14 +246,14 @@ export function MessageThread({ conversationId, messages: initial, currentUserId
               "flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white transition-colors disabled:opacity-40",
               internal ? "bg-gold-600 hover:bg-gold-700" : "bg-brand-500 hover:bg-brand-600"
             )}
-            aria-label="Envoyer"
+            aria-label={m.send}
           >
             {pending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
           </button>
         </div>
         {!live && (
           <p className="mt-2 flex items-center gap-1 px-1 text-2xs text-muted">
-            <Wifi className="h-3 w-3" /> Reconnexion en cours...
+            <Wifi className="h-3 w-3" /> {m.reconnecting}
           </p>
         )}
       </form>
@@ -258,13 +261,13 @@ export function MessageThread({ conversationId, messages: initial, currentUserId
   );
 }
 
-function Attachment({ url, name, type, mine }: { url: string; name?: string | null; type?: string | null; mine?: boolean }) {
+function Attachment({ url, name, type, mine, labels }: { url: string; name?: string | null; type?: string | null; mine?: boolean; labels: { attachment: string; document: string } }) {
   const isImage = (type ?? "").startsWith("image/");
   if (isImage) {
     return (
       <a href={url} target="_blank" rel="noopener noreferrer" className="block overflow-hidden rounded-xl">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={url} alt={name ?? "Pièce jointe"} className="max-h-56 w-auto max-w-full rounded-xl object-cover" />
+        <img src={url} alt={name ?? labels.attachment} className="max-h-56 w-auto max-w-full rounded-xl object-cover" />
       </a>
     );
   }
@@ -275,11 +278,11 @@ function Attachment({ url, name, type, mine }: { url: string; name?: string | nu
       rel="noopener noreferrer"
       className={cn(
         "flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-colors",
-        mine ? "bg-white/15 text-white hover:bg-white/25" : "bg-surface text-foreground hover:bg-surface-soft"
+        mine ? "bg-white/15 text-white hover:bg-white/25" : "bg-white text-foreground hover:bg-sand-50"
       )}
     >
       <FileText className="h-5 w-5 shrink-0" />
-      <span className="max-w-[200px] truncate">{name ?? "Document"}</span>
+      <span className="max-w-[200px] truncate">{name ?? labels.document}</span>
     </a>
   );
 }

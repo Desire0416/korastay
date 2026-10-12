@@ -4,6 +4,7 @@ import * as React from "react";
 import { toast } from "sonner";
 import { Loader2, Upload, FileCheck2, X } from "lucide-react";
 import { SmartImage } from "@/components/ui/smart-image";
+import { useI18n } from "@/components/i18n/provider";
 
 interface UploadFieldProps {
   name: string;
@@ -25,6 +26,8 @@ export function UploadField({
   kind = "image",
   required,
 }: UploadFieldProps) {
+  const dict = useI18n();
+  const u = dict.dash.upload;
   const [url, setUrl] = React.useState(defaultUrl);
   const [uploading, setUploading] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -39,10 +42,10 @@ export function UploadField({
       const data = await res.json();
       if (res.ok && data.url) {
         setUrl(data.url);
-        toast.success("Fichier importe.");
-      } else toast.error(data.error ?? "Échec de l'import.");
+        toast.success(u.done);
+      } else toast.error(data.error ?? u.failed);
     } catch {
-      toast.error("Import indisponible pour le moment.");
+      toast.error(u.unavailable);
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = "";
@@ -59,18 +62,18 @@ export function UploadField({
       <input type="hidden" name={name} value={url} />
 
       {url ? (
-        <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface-soft/50 p-3">
+        <div className="flex items-center gap-3 rounded-xl border border-border bg-sand-50 p-3">
           {kind === "image" ? (
             <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl">
-              <SmartImage src={url} alt={label ?? "Aperçu"} seed={name} />
+              <SmartImage src={url} alt={label ?? u.preview} seed={name} sizes="64px" />
             </div>
           ) : (
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-success">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
               <FileCheck2 className="h-6 w-6" />
             </span>
           )}
-          <span className="flex-1 truncate text-sm text-muted">{kind === "document" ? "Document importe" : "Image importée"}</span>
-          <button type="button" onClick={() => setUrl("")} className="rounded-lg p-1.5 text-muted hover:bg-surface hover:text-danger" aria-label="Retirer">
+          <span className="flex-1 truncate text-sm text-muted">{kind === "document" ? u.docImported : u.imageImported}</span>
+          <button type="button" onClick={() => setUrl("")} className="rounded-lg p-1.5 text-muted hover:bg-white hover:text-danger" aria-label={u.remove}>
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -79,10 +82,10 @@ export function UploadField({
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-surface-soft/40 px-4 py-5 text-sm font-semibold text-muted transition-colors hover:border-brand-300 hover:text-foreground disabled:opacity-60"
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-sand-400/80 bg-sand-50/70 px-4 py-5 text-sm font-semibold text-muted transition-colors hover:border-terracotta hover:text-ink disabled:opacity-60"
         >
           {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-          {uploading ? "Import en cours..." : "Importer un fichier"}
+          {uploading ? u.uploading : u.upload}
         </button>
       )}
       {hint && <p className="mt-1 text-xs text-muted">{hint}</p>}

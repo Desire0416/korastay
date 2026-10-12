@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { relativeTime, cn } from "@/lib/utils";
+import { useI18n } from "@/components/i18n/provider";
+import { localePath } from "@/lib/i18n";
 
 type Notif = {
   id: string;
@@ -35,6 +37,8 @@ const ICONS: Record<string, LucideIcon> = {
 
 export function NotificationBell({ initialUnread, allHref }: { initialUnread: number; allHref: string }) {
   const router = useRouter();
+  const dict = useI18n();
+  const t = dict.dash.notif;
   const [open, setOpen] = React.useState(false);
   const [items, setItems] = React.useState<Notif[]>([]);
   const [unread, setUnread] = React.useState(initialUnread);
@@ -72,19 +76,19 @@ export function NotificationBell({ initialUnread, allHref }: { initialUnread: nu
       await fetch("/api/notifications", { method: "POST", body: JSON.stringify({ id: n.id }) }).catch(() => {});
     }
     // La navigation (router.push) rafraichit deja la cible ; pas de refresh redondant.
-    if (n.url) router.push(n.url);
+    if (n.url) router.push(localePath(n.url, dict.locale));
   }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
-          aria-label="Notifications"
-          className="relative flex h-10 w-10 items-center justify-center rounded-full border border-border bg-surface text-foreground transition-colors hover:bg-surface-soft"
+          aria-label={t.title}
+          className="relative flex h-10 w-10 items-center justify-center rounded-full border border-ink/15 bg-surface text-ink transition-colors hover:bg-sand-100"
         >
           <Bell className="h-5 w-5" />
           {unread > 0 && (
-            <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1 text-2xs font-bold text-white">
+            <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-terracotta px-1 text-2xs font-bold text-white ring-2 ring-background">
               {unread > 9 ? "9+" : unread}
             </span>
           )}
@@ -92,21 +96,21 @@ export function NotificationBell({ initialUnread, allHref }: { initialUnread: nu
       </PopoverTrigger>
       <PopoverContent align="end" className="w-[340px] max-w-[92vw] overflow-hidden p-0">
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
-          <p className="font-bold text-foreground">Notifications</p>
+          <p className="font-display text-lg text-foreground">{t.title}</p>
           {unread > 0 && (
-            <button onClick={markAll} className="text-xs font-semibold text-brand-600 hover:underline">
-              Tout marquer lu
+            <button onClick={markAll} className="text-xs font-semibold text-terracotta hover:underline">
+              {t.markAll}
             </button>
           )}
         </div>
 
         <div className="max-h-[min(60vh,420px)] overflow-y-auto">
           {loading && items.length === 0 ? (
-            <p className="px-4 py-8 text-center text-sm text-muted">Chargement...</p>
+            <p className="px-4 py-8 text-center text-sm text-muted">{dict.dash.common.loading}</p>
           ) : items.length === 0 ? (
             <div className="px-4 py-10 text-center">
-              <Bell className="mx-auto h-8 w-8 text-border" />
-              <p className="mt-2 text-sm text-muted">Aucune notification pour le moment.</p>
+              <Bell className="mx-auto h-8 w-8 text-sand-300" />
+              <p className="mt-2 text-sm text-muted">{t.empty}</p>
             </div>
           ) : (
             items.map((n) => {
@@ -116,19 +120,19 @@ export function NotificationBell({ initialUnread, allHref }: { initialUnread: nu
                   key={n.id}
                   onClick={() => onItem(n)}
                   className={cn(
-                    "flex w-full items-start gap-3 border-b border-border/60 px-4 py-3 text-left transition-colors hover:bg-surface-soft",
-                    !n.read && "bg-brand-50/40"
+                    "flex w-full items-start gap-3 border-b border-border/60 px-4 py-3 text-left transition-colors hover:bg-sand-50",
+                    !n.read && "bg-sand-50"
                   )}
                 >
-                  <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-600">
+                  <span className="mt-0.5 flex h-9 w-8 shrink-0 items-center justify-center rounded-arch-sm bg-sand-100 text-terracotta">
                     <Icon className="h-4 w-4" />
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block text-sm font-semibold leading-snug text-foreground">{n.title}</span>
                     {n.body && <span className="mt-0.5 block line-clamp-2 text-xs text-muted">{n.body}</span>}
-                    <span className="mt-0.5 block text-2xs text-muted">{relativeTime(n.createdAt)}</span>
+                    <span className="mt-0.5 block text-2xs text-muted">{relativeTime(n.createdAt, dict.locale)}</span>
                   </span>
-                  {!n.read && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand-500" />}
+                  {!n.read && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-terracotta" />}
                 </button>
               );
             })
@@ -138,9 +142,9 @@ export function NotificationBell({ initialUnread, allHref }: { initialUnread: nu
         <Link
           href={allHref}
           onClick={() => setOpen(false)}
-          className="block border-t border-border px-4 py-3 text-center text-sm font-semibold text-brand-600 hover:bg-surface-soft"
+          className="block border-t border-border px-4 py-3 text-center text-sm font-semibold text-ink hover:bg-sand-50"
         >
-          Voir toutes les notifications
+          {t.seeAll}
         </Link>
       </PopoverContent>
     </Popover>

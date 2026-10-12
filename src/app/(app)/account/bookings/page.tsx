@@ -7,8 +7,14 @@ import { FilterBar } from "@/components/dashboard/filter-bar";
 import { ReservationCard } from "@/components/dashboard/reservation-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
+import { getI18n } from "@/lib/i18n.server";
+import { localePath } from "@/lib/i18n";
+import type { Metadata } from "next";
 
-export const metadata = { title: "Mes réservations" };
+export async function generateMetadata(): Promise<Metadata> {
+  const { dict } = await getI18n();
+  return { title: dict.dashAccount.bookings.metaTitle };
+}
 
 type SP = Record<string, string | string[] | undefined>;
 const str = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
@@ -18,7 +24,8 @@ export default async function BookingsPage({ searchParams }: { searchParams: Pro
   const sp = await searchParams;
   const when = str(sp.when);
   const q = str(sp.q)?.trim().toLowerCase();
-  const reservations = await getTravelerReservations(user.id);
+  const [reservations, { locale, dict }] = await Promise.all([getTravelerReservations(user.id), getI18n()]);
+  const t = dict.dashAccount.bookings;
 
   const match = (r: (typeof reservations)[number]) =>
     !q ||
@@ -39,7 +46,9 @@ export default async function BookingsPage({ searchParams }: { searchParams: Pro
   const Section = ({ title, items }: { title: string; items: typeof reservations }) =>
     items.length > 0 ? (
       <section className="mb-10">
-        <h2 className="mb-3 text-lg font-bold text-foreground">{title} <span className="text-muted">({items.length})</span></h2>
+        <h2 className="mb-4 flex items-baseline gap-2 font-display text-[1.45rem] font-normal text-foreground">
+          {title} <span className="font-sans text-sm text-muted">({items.length})</span>
+        </h2>
         <div className="space-y-3">
           {items.map((r) => <ReservationCard key={r.id} reservation={r} />)}
         </div>
@@ -48,30 +57,39 @@ export default async function BookingsPage({ searchParams }: { searchParams: Pro
 
   return (
     <div className="mx-auto max-w-5xl">
-      <PageHeader title="Mes réservations" description="Gérez vos séjours a venir, passes et annulés." />
+      <PageHeader title={t.title} description={t.subtitle} />
 
       {reservations.length === 0 ? (
         <EmptyState
           icon={CalendarX}
-          title="Aucune réservation"
-          description="Vous n'avez pas encore de réservation. Trouvez votre prochain séjour des maintenant."
-          action={<Button asChild><Link href="/residences"><Compass className="h-4 w-4" /> Explorer</Link></Button>}
+          title={t.emptyTitle}
+          description={t.emptyText}
+          action={<Button asChild><Link href={localePath("/residences", locale)}><Compass className="h-4 w-4" /> {t.explore}</Link></Button>}
         />
       ) : (
         <>
           <FilterBar
             fields={[
-              { type: "search", name: "q", placeholder: "Référence, résidence, pack..." },
-              { type: "select", name: "when", label: "Tous les séjours", options: [{ value: "upcoming", label: "A venir" }, { value: "past", label: "Passes" }, { value: "cancelled", label: "Annulés" }] },
+              { type: "search", name: "q", placeholder: t.searchPlaceholder },
+              {
+                type: "select",
+                name: "when",
+                label: t.allStays,
+                options: [
+                  { value: "upcoming", label: t.upcoming },
+                  { value: "past", label: t.past },
+                  { value: "cancelled", label: t.cancelled },
+                ],
+              },
             ]}
           />
           {visible === 0 ? (
-            <EmptyState icon={CalendarX} title="Aucun resultat" description="Aucune réservation ne correspond a ces critères." />
+            <EmptyState icon={CalendarX} title={t.noResultTitle} description={t.noResultText} />
           ) : (
             <>
-              {showUpcoming && <Section title="A venir" items={upcoming} />}
-              {showPast && <Section title="Passes" items={past} />}
-              {showCancelled && <Section title="Annulés" items={cancelled} />}
+              {showUpcoming && <Section title={t.upcoming} items={upcoming} />}
+              {showPast && <Section title={t.past} items={past} />}
+              {showCancelled && <Section title={t.cancelled} items={cancelled} />}
             </>
           )}
         </>

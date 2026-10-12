@@ -18,6 +18,38 @@ export interface DashDict {
   navLabels: Record<string, string>;
   /** Libelles courts des onglets mobiles (cle = libelle FR). */
   navShort: Record<string, string>;
+  messaging: {
+    title: string;
+    openError: string;
+    conversation: string;
+    support: string;
+    internalPrefix: string;
+    newConversation: string;
+    back: string;
+    aboutBooking: string;
+    empty: string;
+    internalNote: string;
+    sending: string;
+    internalToggle: string;
+    removeAttachment: string;
+    attach: string;
+    placeholder: string;
+    internalPlaceholder: string;
+    send: string;
+    reconnecting: string;
+    uploadFailed: string;
+    attachment: string;
+    document: string;
+    supportButton: string;
+    supportTitle: string;
+    supportText: string;
+    subject: string;
+    subjectPlaceholder: string;
+    message: string;
+    messagePlaceholder: string;
+  };
+  notif: { title: string; markAll: string; empty: string; seeAll: string };
+  upload: { done: string; failed: string; unavailable: string; preview: string; docImported: string; imageImported: string; remove: string; uploading: string; upload: string };
   common: {
     search: string;
     reset: string;
@@ -78,6 +110,53 @@ export const dashFr: DashDict = {
     "Mon menu": "Menu",
     "Mon véhicule": "Véhicule",
     "Mes demandes": "Demandes",
+  },
+  messaging: {
+    title: "Messages",
+    openError: "Impossible d'ouvrir la conversation.",
+    conversation: "Conversation",
+    support: "Assistance KoraStay",
+    internalPrefix: "[Note interne] ",
+    newConversation: "Nouvelle conversation",
+    back: "Retour",
+    aboutBooking: "À propos de la réservation",
+    empty: "Aucun message. Écrivez le premier ci-dessous.",
+    internalNote: "Note interne",
+    sending: "Envoi…",
+    internalToggle: "Note interne (invisible pour le client)",
+    removeAttachment: "Retirer la pièce jointe",
+    attach: "Joindre un fichier",
+    placeholder: "Écrire un message…",
+    internalPlaceholder: "Note interne pour l'équipe…",
+    send: "Envoyer",
+    reconnecting: "Reconnexion en cours…",
+    uploadFailed: "Échec de l'envoi du fichier.",
+    attachment: "Pièce jointe",
+    document: "Document",
+    supportButton: "Contacter l'assistance",
+    supportTitle: "Contacter l'assistance KoraStay",
+    supportText: "Notre équipe vous répond rapidement.",
+    subject: "Sujet",
+    subjectPlaceholder: "Objet de votre demande",
+    message: "Message",
+    messagePlaceholder: "Décrivez votre demande…",
+  },
+  upload: {
+    done: "Fichier importé.",
+    failed: "Échec de l'import.",
+    unavailable: "Import indisponible pour le moment.",
+    preview: "Aperçu",
+    docImported: "Document importé",
+    imageImported: "Image importée",
+    remove: "Retirer",
+    uploading: "Import en cours…",
+    upload: "Importer un fichier",
+  },
+  notif: {
+    title: "Notifications",
+    markAll: "Tout marquer comme lu",
+    empty: "Aucune notification pour le moment.",
+    seeAll: "Voir toutes les notifications",
   },
   common: {
     search: "Rechercher…",
@@ -197,6 +276,53 @@ export const dashEn: DashDict = {
     "Factures": "Invoices",
     "Paiements": "Payments",
     "Reversements": "Payouts",
+  },
+  messaging: {
+    title: "Messages",
+    openError: "Couldn't open the conversation.",
+    conversation: "Conversation",
+    support: "KoraStay support",
+    internalPrefix: "[Internal note] ",
+    newConversation: "New conversation",
+    back: "Back",
+    aboutBooking: "About booking",
+    empty: "No messages yet. Write the first one below.",
+    internalNote: "Internal note",
+    sending: "Sending…",
+    internalToggle: "Internal note (hidden from the client)",
+    removeAttachment: "Remove attachment",
+    attach: "Attach a file",
+    placeholder: "Write a message…",
+    internalPlaceholder: "Internal note for the team…",
+    send: "Send",
+    reconnecting: "Reconnecting…",
+    uploadFailed: "File upload failed.",
+    attachment: "Attachment",
+    document: "Document",
+    supportButton: "Contact support",
+    supportTitle: "Contact KoraStay support",
+    supportText: "Our team replies quickly.",
+    subject: "Subject",
+    subjectPlaceholder: "What is your request about?",
+    message: "Message",
+    messagePlaceholder: "Describe your request…",
+  },
+  upload: {
+    done: "File uploaded.",
+    failed: "Upload failed.",
+    unavailable: "Upload unavailable right now.",
+    preview: "Preview",
+    docImported: "Document uploaded",
+    imageImported: "Image uploaded",
+    remove: "Remove",
+    uploading: "Uploading…",
+    upload: "Upload a file",
+  },
+  notif: {
+    title: "Notifications",
+    markAll: "Mark all as read",
+    empty: "No notifications yet.",
+    seeAll: "See all notifications",
   },
   common: {
     search: "Search…",

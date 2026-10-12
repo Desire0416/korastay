@@ -6,6 +6,8 @@ import { MessageCircle } from "lucide-react";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import { getOrCreateDirectConversation } from "@/server/actions/messaging";
 import { toast } from "sonner";
+import { useI18n } from "@/components/i18n/provider";
+import { localePath } from "@/lib/i18n";
 
 interface ContactButtonProps {
   otherUserId: string;
@@ -19,6 +21,7 @@ interface ContactButtonProps {
 
 export function ContactButton({ otherUserId, reservationId, subject, basePath, label, variant = "outline", className }: ContactButtonProps) {
   const router = useRouter();
+  const dict = useI18n();
   const [pending, start] = React.useTransition();
   return (
     <Button
@@ -28,8 +31,8 @@ export function ContactButton({ otherUserId, reservationId, subject, basePath, l
       onClick={() =>
         start(async () => {
           const res = await getOrCreateDirectConversation({ otherUserId, reservationId, subject });
-          if (res.ok && res.id) router.push(`${basePath}/${res.id}`);
-          else toast.error(res.error ?? "Impossible d'ouvrir la conversation.");
+          if (res.ok && res.id) router.push(localePath(`${basePath}/${res.id}`, dict.locale));
+          else toast.error(res.error ?? dict.dash.messaging.openError);
         })
       }
     >
